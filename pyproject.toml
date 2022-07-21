@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "pytket-qir"
 version = "0.1.0"
-description = ""
+description = file: README.md
 authors = ["Roland Guichard <roland.guichard@cambridgequantum.com>"]
 
 [tool.poetry.dependencies]

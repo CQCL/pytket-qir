@@ -1,6 +1,8 @@
 # pytket-qir
 
-Public repo for the `pytket-qir` package, aimed at parsing and generating QIR programs to and from pytket circuits.
+`pytket-qir` is a python package, aimed at interafacing QIR programs with `pytket`.
+
+The source code can be found in the corresponding GitHub repository.
 
 ## Installation
 
@@ -11,10 +13,16 @@ The main requirements are:
 - `pytket`
 - `pyqir`
 
-Standard installation using `pip`:
+Standard local installation using `pip`:
 
 ```sh
 pip install -U .
+```
+
+`pytket-qir` has been packaged using `poetry`:
+
+```sh
+poetry install
 ```
 
 _N.B._: `pytket-qir` is tested against x86_64 platforms since `pyqir` is not available for arm64.
