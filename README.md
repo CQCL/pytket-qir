@@ -1,8 +1,6 @@
 # pytket-qir
 
-Public repo for the pytket-qir module.
-
-`pytket-qir` aims at parsing and generating QIR programs to and from pytket circuits.
+Public repo for the `pytket-qir` package, aimed at parsing and generating QIR programs to and from pytket circuits.
 
 ## Installation
 
