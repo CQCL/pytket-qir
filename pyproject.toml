@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pytket-qir"
-version = "0.1.0"
+version = "0.1.2"
 description = "Python module for interfacing QIR with the Quantinuum pytket library."
 readme = "README.md"
 repository = "https://github.com/CQCL/pytket-qir"
@@ -13,7 +13,7 @@ pyqir = "^0.4.2a1"
 requests = "^2.28.0"
 websockets = "^10.3"
 nest-asyncio = "^1.5.5"
-PyJWT = "1.7.1"
+pyjwt = "^2.4"
 keyring = "^23.6.0"
 "keyrings.alt" = "^4.1.0"
 
