@@ -533,8 +533,8 @@ class TestPytketToQirGateTranslation:
         assert call_ry in data
         assert call_rz in data
 
-    @pytest.mark.skip
-    def test_bitwise_ops_for_quantinuum_gateset(
+    @pytest.mark.skip(reason="Waiting for feature releases in pyqir.")
+    def test_bitwise_ops(
         self, circuit_bitwise_ops: Circuit
     ) -> None:
         with open("test_bitwise_ops.ll", "r") as input_file:
