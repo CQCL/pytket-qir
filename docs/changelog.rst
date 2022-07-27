@@ -6,6 +6,7 @@ x.y.z (unreleased)
 
 Updates:
 
+* Add `py.typed` file.
 * Refine release process.
 * Add `LICENSE` file.
 
