@@ -439,7 +439,20 @@ def circuit_to_module(circ: Circuit, module: Module) -> Module:
             optype, params = _get_optype_and_params(op)
             qubits = _to_qis_qubits(command.qubits, module.module)
             results = _to_qis_results(command.bits, module.module)
-            if hasattr(module, "gateset"):
+            if module.gateset.name == "PyQir":
+                pyqir_gate = module.gateset.tk_to_gateset(optype)
+                if not pyqir_gate.opspec == OpSpec.BODY:
+                    opname = pyqir_gate.opname.value + "_" + pyqir_gate.opspec.value
+                    get_gate = getattr(module.qis, opname)
+                else:
+                    get_gate = getattr(module.qis, pyqir_gate.opname.value)
+                if params:
+                    get_gate(*params, *qubits)
+                elif results:
+                    get_gate(*qubits, results)
+                else:
+                    get_gate(*qubits)
+            else:
                 bits: Optional[List[Result]] = None
                 if type(optype) == BitWiseOp:
                     bits = _to_qis_bits(command.args, module.module)
@@ -453,19 +466,6 @@ def circuit_to_module(circ: Circuit, module: Module) -> Module:
                     module.builder.call(get_gate, [*qubits, results])
                 else:
                     module.builder.call(get_gate, qubits)
-            else:
-                pyqir_gate = module.default_gateset.tk_to_gateset(optype)
-                if not pyqir_gate.opspec == OpSpec.BODY:
-                    opname = pyqir_gate.opname.value + "_" + pyqir_gate.opspec.value
-                    get_gate = getattr(module.qis, opname)
-                else:
-                    get_gate = getattr(module.qis, pyqir_gate.opname.value)
-                if params:
-                    get_gate(*params, *qubits)
-                elif results:
-                    get_gate(*qubits, results)
-                else:
-                    get_gate(*qubits)
     return module
 
 
