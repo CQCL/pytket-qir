@@ -12,6 +12,7 @@ PyQirReturnTypes = Union[Integer, Result, Void]
 class OpNat(Enum):
     QIS = "qis"
     CIS = "cis"
+    HYBRID = "hybrid"
 
 
 class OpName(Enum):
