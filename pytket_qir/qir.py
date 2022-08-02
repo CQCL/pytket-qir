@@ -231,7 +231,27 @@ class QirParser:
                 circuit.add_gate(op, unitids)
             elif instr.instr.is_qir_call:  # Setting the conditional bit for branching.
                 c_reg_index = instr.instr.call_func_params[0].constant.result_static_id
+            elif instr.instr.is_call:  # WASM external call.
+                if not self.wasm_handler:
                     raise ValueError("A WASM file handler must be provided.")
+                matched_str = re.search("__quantum__(.+?)__(.+?)__(.+)", instr.func_name)
+                # WASM function call parameters.
+                param_regs = []
+                for c_reg_index in range(len(instr.func_args)):
+                    c_reg_name = "c_reg_wasm" + str(c_reg_index)
+                    param_regs.append(circuit.add_c_register(c_reg_name, 64))
+
+                # WASM function return type.
+                c_reg_output_name = "%" + instr.output_name
+                c_reg_output = circuit.add_c_register(
+                    c_reg_output_name, 64
+                )
+                circuit.add_wasm_to_reg(
+                    matched_str.group(2),
+                    self.wasm_handler,
+                    param_regs,
+                    [c_reg_output]
+                )
             else:  # Classical instruction.
                 # Create registers to hold classical constants.
                 c_reg_map = self._create_register_map(circuit)
