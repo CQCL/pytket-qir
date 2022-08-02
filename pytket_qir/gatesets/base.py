@@ -5,8 +5,8 @@ from typing import Callable, Dict, List, NamedTuple, Union
 from pyqir.generator.types import Double, Integer, Qubit, Result, Void  # type: ignore
 
 
-PyQirInputTypes = Union[Double, Qubit, Result]
-PyQirOutputTypes = Union[Integer, Result, Void]
+PyQirParameterTypes = Union[Double, Qubit, Result]
+PyQirReturnTypes = Union[Integer, Result, Void]
 
 
 class OpNat(Enum):
