@@ -47,7 +47,7 @@ class OpSpec(Enum):
     CTLADJ = "ctladj"
 
 
-qir_gate_base_fields =  [
+qir_gate_base_fields = [
     (
         "opnat",
         OpNat,
@@ -71,7 +71,8 @@ QirGate = NamedTuple(
 
 CustomQirGate = NamedTuple(
     "CustomQirGate",
-    qir_gate_base_fields + [
+    qir_gate_base_fields
+    + [
         (
             "function_signature",
             List[PyQirParameterTypes],

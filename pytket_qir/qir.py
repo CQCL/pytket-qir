@@ -90,15 +90,14 @@ classical_ops: Dict = {
 class QirParser:
     """A parser class to return a pytket circuit from a QIR file."""
 
-    def __init__(self,
+    def __init__(
+        self,
         file_path: str,
         gateset: Optional[CustomGateSet],
         wasm_handler: Optional[WasmFileHandler],
     ) -> None:
         self.module = QirModule(file_path)
-        self.gateset: CustomGateSet = (
-            gateset if gateset else PYQIR_GATES
-        )
+        self.gateset: CustomGateSet = gateset if gateset else PYQIR_GATES
         self.wasm_handler = wasm_handler
         self.qubits = self.get_required_qubits()
         self.bits = self.get_required_results()
@@ -234,7 +233,9 @@ class QirParser:
             elif instr.instr.is_call:  # WASM external call.
                 if not self.wasm_handler:
                     raise ValueError("A WASM file handler must be provided.")
-                matched_str = re.search("__quantum__(.+?)__(.+?)__(.+)", instr.func_name)
+                matched_str = re.search(
+                    "__quantum__(.+?)__(.+?)__(.+)", instr.func_name
+                )
                 # WASM function call parameters.
                 param_regs = []
                 for c_reg_index in range(len(instr.func_args)):
@@ -243,14 +244,9 @@ class QirParser:
 
                 # WASM function return type.
                 c_reg_output_name = "%" + instr.output_name
-                c_reg_output = circuit.add_c_register(
-                    c_reg_output_name, 64
-                )
+                c_reg_output = circuit.add_c_register(c_reg_output_name, 64)
                 circuit.add_wasm_to_reg(
-                    matched_str.group(2),
-                    self.wasm_handler,
-                    param_regs,
-                    [c_reg_output]
+                    matched_str.group(2), self.wasm_handler, param_regs, [c_reg_output]
                 )
             else:  # Classical instruction.
                 # Create registers to hold classical constants.
@@ -338,6 +334,7 @@ class Module:
     PyQir module extension to account for custom defined input gate set
     and calls to WASM files.
     """
+
     def __init__(
         self,
         name: str,
