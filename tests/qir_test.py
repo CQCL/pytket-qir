@@ -18,6 +18,7 @@ from typing import Generator
 import pytest  # type: ignore
 from pytket import Circuit, OpType
 from pytket.circuit import Conditional  # type: ignore
+from pytket.wasm import WasmFileHandler
 
 from pyqir.generator import bitcode_to_ir  # type: ignore
 
@@ -103,6 +104,13 @@ class TestQirToPytketGateTranslation:
         grover_bc_file_path = qir_files_dir / "SimpleGroverBaseProfile.bc"
         circuit = circuit_from_qir(grover_bc_file_path)
         assert circuit == grover_circuit
+
+    def test_wasm_only(self) -> None:
+        wasm_only_bc_file_path = qir_files_dir / "wasm_only_test.bc"
+        wasm_file = qir_files_dir / "wasm_file.wasm"
+        wasm_handler = WasmFileHandler(wasm_file) 
+        circuit = circuit_from_qir(wasm_only_bc_file_path, wasm_handler=wasm_handler)
+        assert circuit.depth() == 1
 
 
 class TestQirToPytketConditionals:
