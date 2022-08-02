@@ -310,7 +310,9 @@ class QirParser:
 
 
 def circuit_from_qir(
-    input_file: Union[str, os.PathLike], gateset: Optional[CustomGateSet] = None
+    input_file: Union[str, os.PathLike],
+    gateset: Optional[CustomGateSet] = None,
+    wasm_handler: Optional[WasmFileHandler] = None,
 ) -> Circuit:
     root, ext = os.path.splitext(os.path.basename(input_file))
     input_file_str = str(input_file)
@@ -324,7 +326,7 @@ def circuit_from_qir(
         with open(output_bc_file, "wb") as o:
             o.write(ir_to_bitcode(data))
         input_file_str = output_bc_file
-    return QirParser(input_file_str, gateset).circuit
+    return QirParser(input_file_str, gateset, wasm_handler).circuit
 
 
 class QIRUnsupportedError(Exception):
