@@ -58,7 +58,6 @@ from pyqir.generator.types import Qubit, Result  # type: ignore
 
 from pytket_qir.gatesets.base import (
     CustomGateSet,
-    GateSet,
     OpNat,
     OpName,
     OpSpec,
