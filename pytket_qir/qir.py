@@ -96,7 +96,7 @@ class QirParser:
         wasm_handler: Optional[WasmFileHandler],
     ) -> None:
         self.module = QirModule(file_path)
-        self.gateset: Union[GateSet, CustomGateSet] = (
+        self.gateset: CustomGateSet = (
             gateset if gateset else PYQIR_GATES
         )
         self.wasm_handler = wasm_handler
