@@ -110,7 +110,6 @@ class QirParser:
         )
 
     def get_required_qubits(self) -> int:
-        # Note: InteropFriendly is to be changed to EntryPoint in future versions.
         interop_funcs = self.module.get_funcs_by_attr("EntryPoint")
         qubits = interop_funcs[0].get_attribute_value("requiredQubits")
         if qubits is not None:
@@ -118,7 +117,6 @@ class QirParser:
         return 0
 
     def get_required_results(self) -> int:
-        # Note: InteropFriendly is to be changed to EntryPoint in future versions.
         interop_funcs = self.module.get_funcs_by_attr("EntryPoint")
         results = interop_funcs[0].get_attribute_value("requiredResults")
         if results is not None:
