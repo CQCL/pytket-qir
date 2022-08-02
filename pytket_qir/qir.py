@@ -492,14 +492,22 @@ def write_qir_file(
 
 
 def circuit_to_qir_bytes(
-    circ: Circuit, gateset: Optional[CustomGateSet] = None
+    circ: Circuit,
+    gateset: Optional[CustomGateSet] = None,
+    wasm_path: Optional[Union[str, os.PathLike]] = None,
 ) -> bytes:
     """Return a pytket circuit as bytes."""
+    if wasm_path:
+        try:
+            wasm_handler = WasmFileHandler(wasm_path)
+        except ValueError as ve:
+            raise ve
     module = Module(
         name="Pytket circuit",
         num_qubits=circ.n_qubits,
         num_results=len(circ.bits),
         gateset=gateset,
+        wasm_handler=wasm_handler if wasm_handler else None,
     )
     populated_module = circuit_to_module(circ, module)
     return ir_to_bitcode(populated_module.module.ir())
