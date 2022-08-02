@@ -334,8 +334,10 @@ class QIRUnsupportedError(Exception):
 
 
 class Module:
-    """Module extensions to account for any input gate set."""
-
+    """
+    PyQir module extension to account for custom defined input gate set
+    and calls to WASM files.
+    """
     def __init__(
         self,
         name: str,
