@@ -45,8 +45,18 @@ _PYQIR_TO_TK[
 ] = OpType.Measure
 
 
-PYQIR_GATES = GateSet(
+PYQIR_GATES = CustomGateSet(
     name="PyQir",
+    template=Template("__quantum__${opnat}__${opname}__${opspec}"),
+    gateset={
+        "wasm": CustomQirGate(
+            opnat=OpNat.HYBRID,
+            opname=OpName.WASM,
+            opspec=OpSpec.BODY,
+            function_signature=[types.INT],
+            return_type=types.INT,
+        ),
+    },
     tk_to_gateset=lambda optype: _TK_TO_PYQIR[optype],
     gateset_to_tk=lambda gate: _PYQIR_TO_TK[gate],
 )
