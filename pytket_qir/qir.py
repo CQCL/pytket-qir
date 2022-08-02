@@ -90,11 +90,16 @@ classical_ops: Dict = {
 class QirParser:
     """A parser class to return a pytket circuit from a QIR file."""
 
-    def __init__(self, file_path: str, gateset: Optional[CustomGateSet]) -> None:
+    def __init__(self,
+        file_path: str,
+        gateset: Optional[CustomGateSet],
+        wasm_handler: Optional[WasmFileHandler],
+    ) -> None:
         self.module = QirModule(file_path)
         self.gateset: Union[GateSet, CustomGateSet] = (
             gateset if gateset else PYQIR_GATES
         )
+        self.wasm_handler = wasm_handler
         self.qubits = self.get_required_qubits()
         self.bits = self.get_required_results()
         entry_block = self.module.functions[0].get_block_by_name("entry")
