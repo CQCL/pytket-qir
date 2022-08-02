@@ -83,11 +83,11 @@ CustomQirGate = NamedTuple(
         ),
         (
             "function_signature",
-            List[PyQirInputTypes],
+            List[PyQirParameterTypes],
         ),
         (
             "return_type",
-            PyQirOutputTypes,
+            PyQirReturnTypes,
         ),
     ],
 )
