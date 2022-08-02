@@ -344,13 +344,22 @@ class Module:
         num_qubits: int,
         num_results: int,
         gateset: Optional[CustomGateSet] = None,
+        wasm_handler: Optional[WasmFileHandler] = None,
     ) -> None:
         self.module = SimpleModule(name, num_qubits, num_results)
         self.builder = self.module.builder
         self.qis = BasicQisBuilder(self.builder)
-        if gateset:
+        self.gateset = gateset if gateset else PYQIR_GATES
+        self.wasm_handler = wasm_handler if wasm_handler else None
+
+        @property
+        def gateset(self):
+            return self.gateset
+
+        @gateset.setter
+        def gateset(self, gateset):
             self.gateset = gateset
-            for v in self.gateset.gateset.values():
+            for v in gateset.values():
                 self.__setattr__(
                     v.opname.value,
                     self.module.add_external_function(
@@ -362,8 +371,6 @@ class Module:
                         types.Function(v.function_signature, v.return_type),
                     ),
                 )
-        else:
-            self.default_gateset = PYQIR_GATES
 
 
 def _get_optype_and_params(op: Op) -> Tuple[OpType, List[float]]:
