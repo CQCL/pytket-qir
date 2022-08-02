@@ -231,6 +231,7 @@ class QirParser:
                 circuit.add_gate(op, unitids)
             elif instr.instr.is_qir_call:  # Setting the conditional bit for branching.
                 c_reg_index = instr.instr.call_func_params[0].constant.result_static_id
+                    raise ValueError("A WASM file handler must be provided.")
             else:  # Classical instruction.
                 # Create registers to hold classical constants.
                 c_reg_map = self._create_register_map(circuit)
