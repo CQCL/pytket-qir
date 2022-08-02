@@ -84,16 +84,6 @@ CustomQirGate = NamedTuple(
 )
 
 
-GateSet = NamedTuple(
-    "GateSet",
-    [
-        ("name", str),
-        ("tk_to_gateset", Callable),
-        ("gateset_to_tk", Callable),
-    ],
-)
-
-
 CustomGateSet = NamedTuple(
     "CustomGateSet",
     [
