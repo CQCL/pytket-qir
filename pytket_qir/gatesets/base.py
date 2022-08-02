@@ -37,6 +37,7 @@ class OpName(Enum):
     AND = "and"
     OR = "or"
     XOR = "xor"
+    WASM = "wasm"
 
 
 class OpSpec(Enum):
