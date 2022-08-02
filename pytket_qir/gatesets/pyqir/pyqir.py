@@ -1,7 +1,13 @@
+from string import Template
+
 from pytket import OpType  # type: ignore
+from pytket.circuit import WASMOp
+
+from pyqir.generator import types  # type: ignore
 
 from pytket_qir.gatesets.base import (
-    GateSet,
+    CustomQirGate,
+    CustomGateSet,
     OpNat,
     OpName,
     OpSpec,
