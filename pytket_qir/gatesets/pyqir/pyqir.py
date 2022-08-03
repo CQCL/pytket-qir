@@ -31,7 +31,7 @@ _TK_TO_PYQIR = {
     OpType.Rx: QirGate(opnat=OpNat.QIS, opname=OpName.Rx, opspec=OpSpec.BODY),
     OpType.Ry: QirGate(opnat=OpNat.QIS, opname=OpName.Ry, opspec=OpSpec.BODY),
     OpType.Rz: QirGate(opnat=OpNat.QIS, opname=OpName.Rz, opspec=OpSpec.BODY),
-    WASMOp: QirGate(opnat=OpNat.HYBRID, opname=OpName.WASM, opspec=OpSpec.BODY),
+    OpType.WASM: QirGate(opnat=OpNat.HYBRID, opname=OpName.WASM, opspec=OpSpec.BODY),
 }
 
 
