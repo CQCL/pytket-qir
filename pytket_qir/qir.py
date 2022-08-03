@@ -516,7 +516,7 @@ def circuit_to_qir_bytes(
         num_qubits=circ.n_qubits,
         num_results=len(circ.bits),
         gateset=gateset,
-        wasm_handler=wasm_handler if wasm_handler else None,
+        wasm_handler=wasm_handler,
     )
     populated_module = circuit_to_module(circ, module)
     return ir_to_bitcode(populated_module.module.ir())
