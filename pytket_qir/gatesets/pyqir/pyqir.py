@@ -1,7 +1,6 @@
 from string import Template
 
 from pytket import OpType  # type: ignore
-from pytket.circuit import WASMOp  # type: ignore
 
 from pyqir.generator import types  # type: ignore
 
