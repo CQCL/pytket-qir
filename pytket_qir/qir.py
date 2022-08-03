@@ -439,6 +439,11 @@ def circuit_to_module(circ: Circuit, module: Module) -> Module:
                 zero=lambda: condition_zero_block(),
             )
         elif isinstance(op, WASMOp):
+            gate = module.gateset.tk_to_gateset(op.type)
+            get_gate = getattr(module, gate.opname.value)
+            # This will still fails as non-void return types aren't
+            # present yet in pyqir.
+            x = module.builder.call(get_gate, [1])
         else:
             optype, params = _get_optype_and_params(op)
             qubits = _to_qis_qubits(command.qubits, module.module)
