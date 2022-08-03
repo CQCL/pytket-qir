@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from enum import Enum
 from string import Template
 from typing import Callable, Dict, List, NamedTuple, Union
@@ -47,42 +48,17 @@ class OpSpec(Enum):
     CTLADJ = "ctladj"
 
 
-qir_gate_base_fields = [
-    (
-        "opnat",
-        OpNat,
-    ),
-    (
-        "opname",
-        OpName,
-    ),
-    (
-        "opspec",
-        OpSpec,
-    ),
-]
+@dataclass(frozen=True)
+class QirGate:
+    opnat: OpNat
+    opname: OpName
+    opspec: OpSpec
 
 
-QirGate = NamedTuple(
-    "QirGate",
-    qir_gate_base_fields,
-)
-
-
-CustomQirGate = NamedTuple(
-    "CustomQirGate",
-    qir_gate_base_fields
-    + [
-        (
-            "function_signature",
-            List[PyQirParameterTypes],
-        ),
-        (
-            "return_type",
-            PyQirReturnTypes,
-        ),
-    ],
-)
+@dataclass(frozen=True)
+class CustomQirGate(QirGate):
+    function_signature: List[PyQirParameterTypes]
+    return_type: PyQirReturnTypes
 
 
 CustomGateSet = NamedTuple(
