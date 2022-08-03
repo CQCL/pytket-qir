@@ -362,11 +362,11 @@ class Module:
     @gateset.setter
     def gateset(self, new_gateset):
         self._gateset = new_gateset
-        for v in self._gateset.values():
+        for v in self._gateset.gateset.values():
             self.__setattr__(
                 v.opname.value,
                 self.module.add_external_function(
-                    self.gateset.template.substitute(
+                    self._gateset.template.substitute(
                         opnat=v.opnat.value,
                         opname=v.opname.value,
                         opspec=v.opspec.value,
