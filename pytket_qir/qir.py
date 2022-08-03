@@ -500,7 +500,7 @@ def circuit_to_qir_bytes(
     """Return a pytket circuit as bytes."""
     if wasm_path:
         try:
-            wasm_handler = WasmFileHandler(wasm_path)
+            wasm_handler = WasmFileHandler(str(wasm_path))
         except ValueError as ve:
             raise ve
     module = Module(
