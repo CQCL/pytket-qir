@@ -23,6 +23,7 @@ from pytket.wasm import WasmFileHandler
 from pyqir.generator import bitcode_to_ir  # type: ignore
 
 from pytket_qir.qir import (
+    circuit_to_qir_bytes,
     write_qir_file,
     circuit_from_qir,
 )
@@ -564,6 +565,19 @@ class TestPytketToQirGateTranslation:
         assert call_and in data
         assert call_or in data
         assert call_xor in data
+
+    @pytest.mark.skip(reason="Needs non-void return types in pyqir.")
+    def test_generate_wasmop(self) -> None:
+        wasm_file_path = qir_files_dir / "wasm_file.wasm"
+        wasm_handler = WasmFileHandler(str(wasm_file_path))
+
+        circuit = Circuit()
+        c0 = circuit.add_c_register("c0", 3)
+        c1 = circuit.add_c_register("c1", 4)
+        c2 = circuit.add_c_register("c2", 5)
+
+        circuit.add_wasm_to_reg("funcname", wasm_handler, [c0, c1], [c2]) 
+        circuit_to_qir_bytes(circuit, wasm_path=wasm_file_path)
 
 
 class TestPytketToQirConditional:
