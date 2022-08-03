@@ -233,8 +233,10 @@ class QirParser:
             elif instr.instr.is_call:  # WASM external call.
                 if not self.wasm_handler:
                     raise ValueError("A WASM file handler must be provided.")
+                func_name = instr.func_name
+                assert func_name
                 matched_str = re.search(
-                    "__quantum__(.+?)__(.+?)__(.+)", instr.func_name
+                    "__quantum__(.+?)__(.+?)__(.+)", func_name
                 )
                 # WASM function call parameters.
                 param_regs = []
