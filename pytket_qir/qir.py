@@ -12,7 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""This module contains all functionality to parse and generate QIR files."""
+"""
+This module contains all functionality to parse and generate QIR files
+from and to pytket circuits.
+"""
 
 import inspect
 import os
