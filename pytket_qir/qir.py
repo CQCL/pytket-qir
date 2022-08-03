@@ -443,7 +443,7 @@ def circuit_to_module(circ: Circuit, module: Module) -> Module:
             get_gate = getattr(module, gate.opname.value)
             # This will still fails as non-void return types aren't
             # present yet in pyqir.
-            x = module.builder.call(get_gate, [1])
+            # x = module.builder.call(get_gate, [1])
         else:
             optype, params = _get_optype_and_params(op)
             qubits = _to_qis_qubits(command.qubits, module.module)
