@@ -107,8 +107,8 @@ class TestQirToPytketGateTranslation:
 
     def test_wasm_only(self) -> None:
         wasm_only_bc_file_path = qir_files_dir / "wasm_only_test.bc"
-        wasm_file = qir_files_dir / "wasm_file.wasm"
-        wasm_handler = WasmFileHandler(wasm_file) 
+        wasm_file_path = qir_files_dir / "wasm_file.wasm"
+        wasm_handler = WasmFileHandler(str(wasm_file_path))
         circuit = circuit_from_qir(wasm_only_bc_file_path, wasm_handler=wasm_handler)
         assert circuit.depth() == 1
 
