@@ -350,7 +350,7 @@ class Module:
         self.module = SimpleModule(name, num_qubits, num_results)
         self.builder = self.module.builder
         self.qis = BasicQisBuilder(self.builder)
-        self._gateset = gateset if gateset else PYQIR_GATES
+        self.gateset = gateset if gateset else PYQIR_GATES
         self.wasm_handler = wasm_handler
 
     @property
