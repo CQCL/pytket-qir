@@ -348,28 +348,30 @@ class Module:
         self.module = SimpleModule(name, num_qubits, num_results)
         self.builder = self.module.builder
         self.qis = BasicQisBuilder(self.builder)
-        self.gateset = gateset if gateset else PYQIR_GATES
-        self.wasm_handler = wasm_handler if wasm_handler else None
+        self._gateset = gateset if gateset else PYQIR_GATES
+        self.wasm_handler = wasm_handler
 
-        @property
-        def gateset(self):
-            return self.gateset
+    @property
+    def gateset(self):
+        """A getter for the gateset."""
+        assert self._gateset
+        return self._gateset
 
-        @gateset.setter
-        def gateset(self, gateset):
-            self.gateset = gateset
-            for v in gateset.values():
-                self.__setattr__(
-                    v.opname.value,
-                    self.module.add_external_function(
-                        self.gateset.template.substitute(
-                            opnat=v.opnat.value,
-                            opname=v.opname.value,
-                            opspec=v.opspec.value,
-                        ),
-                        types.Function(v.function_signature, v.return_type),
+    @gateset.setter
+    def gateset(self, new_gateset):
+        self._gateset = new_gateset
+        for v in self._gateset.values():
+            self.__setattr__(
+                v.opname.value,
+                self.module.add_external_function(
+                    self.gateset.template.substitute(
+                        opnat=v.opnat.value,
+                        opname=v.opname.value,
+                        opspec=v.opspec.value,
                     ),
-                )
+                    types.Function(v.function_signature, v.return_type),
+                ),
+            )
 
 
 def _get_optype_and_params(op: Op) -> Tuple[OpType, List[float]]:
