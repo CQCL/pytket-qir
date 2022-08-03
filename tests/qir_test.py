@@ -576,7 +576,7 @@ class TestPytketToQirGateTranslation:
         c1 = circuit.add_c_register("c1", 4)
         c2 = circuit.add_c_register("c2", 5)
 
-        circuit.add_wasm_to_reg("funcname", wasm_handler, [c0, c1], [c2]) 
+        circuit.add_wasm_to_reg("funcname", wasm_handler, [c0, c1], [c2])
         circuit_to_qir_bytes(circuit, wasm_path=wasm_file_path)
 
 
