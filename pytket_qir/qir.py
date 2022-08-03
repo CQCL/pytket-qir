@@ -24,7 +24,7 @@ from typing import Dict, List, Optional, Tuple, Union
 
 from pytket import Circuit, OpType, Bit, Qubit  # type: ignore
 from pytket.wasm import WasmFileHandler
-from pytket.circuit import BitRegister, CircBox, Conditional, Op  # type: ignore
+from pytket.circuit import BitRegister, CircBox, Conditional, Op, WASMOp  # type: ignore
 from pytket.circuit.logic_exp import (
     BitWiseOp,
     RegAdd,
@@ -438,6 +438,7 @@ def circuit_to_module(circ: Circuit, module: Module) -> Module:
                 one=lambda: condition_one_block(),
                 zero=lambda: condition_zero_block(),
             )
+        elif isinstance(op, WASMOp):
         else:
             optype, params = _get_optype_and_params(op)
             qubits = _to_qis_qubits(command.qubits, module.module)
