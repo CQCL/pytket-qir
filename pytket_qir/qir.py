@@ -506,6 +506,7 @@ def circuit_to_qir_bytes(
     wasm_path: Optional[Union[str, os.PathLike]] = None,
 ) -> bytes:
     """Return a pytket circuit as an IR bitcode file."""
+    wasm_handler = None
     if wasm_path:
         try:
             wasm_handler = WasmFileHandler(str(wasm_path))
