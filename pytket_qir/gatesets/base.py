@@ -3,11 +3,11 @@ from enum import Enum
 from string import Template
 from typing import Callable, Dict, List, NamedTuple, Union
 
-from pyqir.generator.types import Double, Integer, Qubit, Result, Void  # type: ignore
+from pyqir.generator.types import Double, Int, Qubit, Result, Void  # type: ignore
 
 
 PyQirParameterTypes = Union[Double, Qubit, Result]
-PyQirReturnTypes = Union[Integer, Result, Void]
+PyQirReturnTypes = Union[Int, Result, Void]
 
 
 class OpNat(Enum):
