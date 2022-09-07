@@ -62,12 +62,13 @@ from pyqir.generator.types import Qubit, Result  # type: ignore
 
 from pytket_qir.gatesets.base import (
     CustomGateSet,
+    CustomQirGate,
     OpNat,
     OpName,
     OpSpec,
     QirGate,
 )
-from pytket_qir.gatesets.pyqir.pyqir import PYQIR_GATES  # type: ignore
+from pytket_qir.gatesets.pyqir.pyqir import PYQIR_GATES, _TK_TO_PYQIR  # type: ignore
 
 
 classical_ops: Dict = {
@@ -444,6 +445,13 @@ def circuit_to_module(circ: Circuit, module: Module) -> Module:
             # Need to create a singleton enum to hold the WASM function name.
             class ExtOpName(Enum):
                 WASM = op.func_name
+            gateset["wasm"] = CustomQirGate(
+                opnat=OpNat.HYBRID,
+                opname=ExtOpName.WASM,
+                opspec=OpSpec.BODY,
+                function_signature=[types.Int(32)],
+                return_type=types.Int(32),
+            )
             gate = module.gateset.tk_to_gateset(op.type)
             get_gate = getattr(module, gate.opname.value)
             # This will still fails as non-void return types aren't
