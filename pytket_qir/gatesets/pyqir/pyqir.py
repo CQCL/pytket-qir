@@ -30,7 +30,6 @@ _TK_TO_PYQIR = {
     OpType.Rx: QirGate(opnat=OpNat.QIS, opname=OpName.Rx, opspec=OpSpec.BODY),
     OpType.Ry: QirGate(opnat=OpNat.QIS, opname=OpName.Ry, opspec=OpSpec.BODY),
     OpType.Rz: QirGate(opnat=OpNat.QIS, opname=OpName.Rz, opspec=OpSpec.BODY),
-    OpType.WASM: QirGate(opnat=OpNat.HYBRID, opname=OpName.WASM, opspec=OpSpec.BODY),
 }
 
 
@@ -44,15 +43,7 @@ _PYQIR_TO_TK[
 PYQIR_GATES = CustomGateSet(
     name="PyQir",
     template=Template("__quantum__${opnat}__${opname}__${opspec}"),
-    gateset={
-        "wasm": CustomQirGate(
-            opnat=OpNat.HYBRID,
-            opname=OpName.WASM,
-            opspec=OpSpec.BODY,
-            function_signature=[types.INT],
-            return_type=types.INT,
-        ),
-    },
+    gateset={},
     tk_to_gateset=lambda optype: _TK_TO_PYQIR[optype],
     gateset_to_tk=lambda gate: _PYQIR_TO_TK[gate],
 )
