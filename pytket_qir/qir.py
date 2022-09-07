@@ -445,6 +445,23 @@ def circuit_to_module(circ: Circuit, module: Module) -> Module:
             # Need to create a singleton enum to hold the WASM function name.
             class ExtOpName(Enum):
                 WASM = op.func_name
+
+            # Update datastructures with WASM function name and
+            # appropriate definition.
+
+            # Update translation dict.
+            _TK_TO_PYQIR[OpType.WASM] = QirGate(
+                opnat=OpNat.HYBRID,
+                opname=ExtOpName.WASM,
+                opspec=OpSpec.BODY
+            )
+
+            # Update lambda translator with new dict definition.
+            lambda_converter = PYQIR_GATES.tk_to_gateset
+            lambda_converter = lambda optype: _TK_TO_PYQIR[optype]
+
+            # Update gateset.
+            gateset = PYQIR_GATES.gateset
             gateset["wasm"] = CustomQirGate(
                 opnat=OpNat.HYBRID,
                 opname=ExtOpName.WASM,
@@ -452,11 +469,13 @@ def circuit_to_module(circ: Circuit, module: Module) -> Module:
                 function_signature=[types.Int(32)],
                 return_type=types.Int(32),
             )
+
+            # Update gateset in module.
+            module.gateset = PYQIR_GATES
+
             gate = module.gateset.tk_to_gateset(op.type)
             get_gate = getattr(module, gate.opname.value)
-            # This will still fails as non-void return types aren't
-            # present yet in pyqir.
-            # x = module.builder.call(get_gate, [1])
+            module.builder.call(get_gate, [1])
         else:
             optype, params = _get_optype_and_params(op)
             qubits = _to_qis_qubits(command.qubits, module.module)
