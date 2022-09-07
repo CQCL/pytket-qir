@@ -1,6 +1,6 @@
 [[package]]
 name = "graphviz"
-version = "0.20"
+version = "0.20.1"
 description = "Simple Python interface for Graphviz"
 category = "main"
 optional = false
@@ -8,7 +8,7 @@ python-versions = ">=3.7"
 
 [package.extras]
 dev = ["tox (>=3)", "flake8", "pep8-naming", "wheel", "twine"]
-docs = ["sphinx (>=4)", "sphinx-autodoc-typehints", "sphinx-rtd-theme"]
+docs = ["sphinx (>=5)", "sphinx-autodoc-typehints", "sphinx-rtd-theme"]
 test = ["pytest (>=7)", "pytest-mock (>=3)", "mock (>=4)", "pytest-cov", "coverage"]
 
 [[package]]
@@ -60,7 +60,7 @@ tests = ["pytest (>=4.6)"]
 
 [[package]]
 name = "networkx"
-version = "2.8.5"
+version = "2.8.6"
 description = "Python package for creating and manipulating graphs and networks"
 category = "main"
 optional = false
@@ -68,14 +68,14 @@ python-versions = ">=3.8"
 
 [package.extras]
 default = ["numpy (>=1.19)", "scipy (>=1.8)", "matplotlib (>=3.4)", "pandas (>=1.3)"]
-developer = ["pre-commit (>=2.19)", "mypy (>=0.960)"]
+developer = ["pre-commit (>=2.20)", "mypy (>=0.961)"]
 doc = ["sphinx (>=5)", "pydata-sphinx-theme (>=0.9)", "sphinx-gallery (>=0.10)", "numpydoc (>=1.4)", "pillow (>=9.1)", "nb2plots (>=0.6)", "texext (>=0.6.6)"]
 extra = ["lxml (>=4.6)", "pygraphviz (>=1.9)", "pydot (>=1.4.2)", "sympy (>=1.10)"]
 test = ["pytest (>=7.1)", "pytest-cov (>=3.0)", "codecov (>=2.1)"]
 
 [[package]]
 name = "numpy"
-version = "1.23.1"
+version = "1.23.2"
 description = "NumPy is the fundamental package for array computing with Python."
 category = "main"
 optional = false
@@ -83,44 +83,60 @@ python-versions = ">=3.8"
 
 [[package]]
 name = "pyqir"
-version = "0.4.2a1"
+version = "0.6.0a1"
 description = "PyQIR - set of APIs for generating, parsing, and evaluating Quantum Intermediate Representation (QIR)"
 category = "main"
 optional = false
 python-versions = ">=3.6"
 
 [package.dependencies]
-pyqir-evaluator = ">=0.4.2a1"
-pyqir-generator = ">=0.4.2a1"
-pyqir-parser = ">=0.4.2a1"
+pyqir-evaluator = ">=0.6.0a1"
+pyqir-generator = ">=0.6.0a1"
+pyqir-parser = ">=0.6.0a1"
+
+[package.source]
+type = "file"
+url = "pyqir-0.6.0a1-py3-none-any.whl"
 
 [[package]]
 name = "pyqir-evaluator"
-version = "0.5.0a1"
+version = "0.6.0a1"
 description = "Python based QIR Evaluation (JIT) library."
 category = "main"
 optional = false
 python-versions = ">=3.6"
 
+[package.source]
+type = "file"
+url = "pyqir_evaluator-0.6.0a1-cp36-abi3-macosx_10_7_x86_64.whl"
+
 [[package]]
 name = "pyqir-generator"
-version = "0.5.0a1"
+version = "0.6.0a1"
 description = "Python based QIR generator library."
 category = "main"
 optional = false
 python-versions = ">=3.6"
 
+[package.source]
+type = "file"
+url = "pyqir_generator-0.6.0a1-cp36-abi3-macosx_10_7_x86_64.whl"
+
 [[package]]
 name = "pyqir-parser"
-version = "0.5.0a1"
+version = "0.6.0a1"
 description = "Python based QIR parser library."
 category = "main"
 optional = false
 python-versions = ">=3.6"
 
+[package.source]
+type = "file"
+url = "pyqir_parser-0.6.0a1-cp36-abi3-macosx_10_7_x86_64.whl"
+
 [[package]]
 name = "pytket"
-version = "1.5.0rc0"
+version = "1.6.0rc2"
 description = "Python module for interfacing with the CQC tket library of quantum software"
 category = "main"
 optional = false
@@ -139,22 +155,22 @@ typing-extensions = ">=4.2,<5.0"
 
 [[package]]
 name = "scipy"
-version = "1.8.1"
+version = "1.9.1"
 description = "SciPy: Scientific Library for Python"
 category = "main"
 optional = false
-python-versions = ">=3.8,<3.11"
+python-versions = ">=3.8,<3.12"
 
 [package.dependencies]
-numpy = ">=1.17.3,<1.25.0"
+numpy = ">=1.18.5,<1.25.0"
 
 [[package]]
 name = "sympy"
-version = "1.10.1"
+version = "1.11.1"
 description = "Computer algebra system (CAS) in Python"
 category = "main"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 
 [package.dependencies]
 mpmath = ">=0.19"
@@ -178,13 +194,10 @@ python-versions = ">=3.7"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8,<3.11"
-content-hash = "5e6815af6872736756057b383b84470bed8637593f82e401b6216b07848ae225"
+content-hash = "50c3315019a9d85e83b1888906c12fd8c383e5623194a9768dd252d08faeaf48"
 
 [metadata.files]
-graphviz = [
-    {file = "graphviz-0.20-py3-none-any.whl", hash = "sha256:62c5f48bcc534a45b4588c548ff75e419c1f1f3a33d31a91796ae80a7f581e4a"},
-    {file = "graphviz-0.20.zip", hash = "sha256:76bdfb73f42e72564ffe9c7299482f9d72f8e6cb8d54bce7b48ab323755e9ba5"},
-]
+graphviz = []
 jinja2 = [
     {file = "Jinja2-3.1.2-py3-none-any.whl", hash = "sha256:6088930bfe239f0e6710546ab9c19c9ef35e29792895fed6e6e31a023a182a61"},
     {file = "Jinja2-3.1.2.tar.gz", hash = "sha256:31351a702a408a9e7595a8fc6150fc3f43bb6bf7e319770cbc0db9df9437e852"},
@@ -242,41 +255,20 @@ mpmath = [
 networkx = []
 numpy = []
 pyqir = [
-    {file = "pyqir-0.4.2a1-py3-none-any.whl", hash = "sha256:d00b93204d2fac2dc2b3c2b2fb8588e79feeb8a4231869586d2c7d50cd944ddb"},
+    {file = "pyqir-0.6.0a1-py3-none-any.whl", hash = "sha256:ae5bd4d1d765663d1531f6ccec93a9348d35542fc059b266928ac686175080f8"},
 ]
-pyqir-evaluator = []
-pyqir-generator = []
-pyqir-parser = []
+pyqir-evaluator = [
+    {file = "pyqir_evaluator-0.6.0a1-cp36-abi3-macosx_10_7_x86_64.whl", hash = "sha256:0cebaa68974dfdd2ed5a4a8de3a01cf06029e9b24adeb29b49fac679daf04511"},
+]
+pyqir-generator = [
+    {file = "pyqir_generator-0.6.0a1-cp36-abi3-macosx_10_7_x86_64.whl", hash = "sha256:598f46694c89dfa760a08c74412f401e4e40ff3932786e346243e795bccceb89"},
+]
+pyqir-parser = [
+    {file = "pyqir_parser-0.6.0a1-cp36-abi3-macosx_10_7_x86_64.whl", hash = "sha256:a90e46f1374029e9bddb7e964ce5e16a96ee6fccdf3c1948e8404d1393441b8d"},
+]
 pytket = []
-scipy = [
-    {file = "scipy-1.8.1-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:65b77f20202599c51eb2771d11a6b899b97989159b7975e9b5259594f1d35ef4"},
-    {file = "scipy-1.8.1-cp310-cp310-macosx_12_0_arm64.whl", hash = "sha256:e013aed00ed776d790be4cb32826adb72799c61e318676172495383ba4570aa4"},
-    {file = "scipy-1.8.1-cp310-cp310-macosx_12_0_universal2.macosx_10_9_x86_64.whl", hash = "sha256:02b567e722d62bddd4ac253dafb01ce7ed8742cf8031aea030a41414b86c1125"},
-    {file = "scipy-1.8.1-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:1da52b45ce1a24a4a22db6c157c38b39885a990a566748fc904ec9f03ed8c6ba"},
-    {file = "scipy-1.8.1-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:a0aa8220b89b2e3748a2836fbfa116194378910f1a6e78e4675a095bcd2c762d"},
-    {file = "scipy-1.8.1-cp310-cp310-win_amd64.whl", hash = "sha256:4e53a55f6a4f22de01ffe1d2f016e30adedb67a699a310cdcac312806807ca81"},
-    {file = "scipy-1.8.1-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:28d2cab0c6ac5aa131cc5071a3a1d8e1366dad82288d9ec2ca44df78fb50e649"},
-    {file = "scipy-1.8.1-cp38-cp38-macosx_12_0_arm64.whl", hash = "sha256:6311e3ae9cc75f77c33076cb2794fb0606f14c8f1b1c9ff8ce6005ba2c283621"},
-    {file = "scipy-1.8.1-cp38-cp38-macosx_12_0_universal2.macosx_10_9_x86_64.whl", hash = "sha256:3b69b90c9419884efeffaac2c38376d6ef566e6e730a231e15722b0ab58f0328"},
-    {file = "scipy-1.8.1-cp38-cp38-manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:6cc6b33139eb63f30725d5f7fa175763dc2df6a8f38ddf8df971f7c345b652dc"},
-    {file = "scipy-1.8.1-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:9c4e3ae8a716c8b3151e16c05edb1daf4cb4d866caa385e861556aff41300c14"},
-    {file = "scipy-1.8.1-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:23b22fbeef3807966ea42d8163322366dd89da9bebdc075da7034cee3a1441ca"},
-    {file = "scipy-1.8.1-cp38-cp38-win32.whl", hash = "sha256:4b93ec6f4c3c4d041b26b5f179a6aab8f5045423117ae7a45ba9710301d7e462"},
-    {file = "scipy-1.8.1-cp38-cp38-win_amd64.whl", hash = "sha256:70ebc84134cf0c504ce6a5f12d6db92cb2a8a53a49437a6bb4edca0bc101f11c"},
-    {file = "scipy-1.8.1-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:f3e7a8867f307e3359cc0ed2c63b61a1e33a19080f92fe377bc7d49f646f2ec1"},
-    {file = "scipy-1.8.1-cp39-cp39-macosx_12_0_arm64.whl", hash = "sha256:2ef0fbc8bcf102c1998c1f16f15befe7cffba90895d6e84861cd6c6a33fb54f6"},
-    {file = "scipy-1.8.1-cp39-cp39-macosx_12_0_universal2.macosx_10_9_x86_64.whl", hash = "sha256:83606129247e7610b58d0e1e93d2c5133959e9cf93555d3c27e536892f1ba1f2"},
-    {file = "scipy-1.8.1-cp39-cp39-manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:93d07494a8900d55492401917a119948ed330b8c3f1d700e0b904a578f10ead4"},
-    {file = "scipy-1.8.1-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:d3b3c8924252caaffc54d4a99f1360aeec001e61267595561089f8b5900821bb"},
-    {file = "scipy-1.8.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:70de2f11bf64ca9921fda018864c78af7147025e467ce9f4a11bc877266900a6"},
-    {file = "scipy-1.8.1-cp39-cp39-win32.whl", hash = "sha256:1166514aa3bbf04cb5941027c6e294a000bba0cf00f5cdac6c77f2dad479b434"},
-    {file = "scipy-1.8.1-cp39-cp39-win_amd64.whl", hash = "sha256:9dd4012ac599a1e7eb63c114d1eee1bcfc6dc75a29b589ff0ad0bb3d9412034f"},
-    {file = "scipy-1.8.1.tar.gz", hash = "sha256:9e3fb1b0e896f14a85aa9a28d5f755daaeeb54c897b746df7a55ccb02b340f33"},
-]
-sympy = [
-    {file = "sympy-1.10.1-py3-none-any.whl", hash = "sha256:df75d738930f6fe9ebe7034e59d56698f29e85f443f743e51e47df0caccc2130"},
-    {file = "sympy-1.10.1.tar.gz", hash = "sha256:5939eeffdf9e152172601463626c022a2c27e75cf6278de8d401d50c9d58787b"},
-]
+scipy = []
+sympy = []
 types-pkg-resources = [
     {file = "types-pkg_resources-0.1.3.tar.gz", hash = "sha256:834a9b8d3dbea343562fd99d5d3359a726f6bf9d3733bccd2b4f3096fbab9dae"},
     {file = "types_pkg_resources-0.1.3-py2.py3-none-any.whl", hash = "sha256:0cb9972cee992249f93fff1a491bf2dc3ce674e5a1926e27d4f0866f7d9b6d9c"},
