@@ -17,6 +17,7 @@ This module contains all functionality to parse and generate QIR files
 from and to pytket circuits.
 """
 
+from enum import Enum
 import inspect
 import os
 import re
@@ -439,6 +440,10 @@ def circuit_to_module(circ: Circuit, module: Module) -> Module:
                 zero=lambda: condition_zero_block(),
             )
         elif isinstance(op, WASMOp):
+
+            # Need to create a singleton enum to hold the WASM function name.
+            class ExtOpName(Enum):
+                WASM = op.func_name
             gate = module.gateset.tk_to_gateset(op.type)
             get_gate = getattr(module, gate.opname.value)
             # This will still fails as non-void return types aren't
