@@ -24,9 +24,7 @@ _TK_TO_PYQIR = {
     OpType.CX: QirGate(opnat=OpNat.QIS, opname=OpName.CX, opspec=OpSpec.BODY),
     OpType.CZ: QirGate(opnat=OpNat.QIS, opname=OpName.CZ, opspec=OpSpec.BODY),
     OpType.Measure: QirGate(
-        opnat=OpNat.QIS,
-        opname=OpName.MEASUREZ,
-        opspec=OpSpec.BODY
+        opnat=OpNat.QIS, opname=OpName.MEASUREZ, opspec=OpSpec.BODY
     ),
     OpType.Rx: QirGate(opnat=OpNat.QIS, opname=OpName.Rx, opspec=OpSpec.BODY),
     OpType.Ry: QirGate(opnat=OpNat.QIS, opname=OpName.Ry, opspec=OpSpec.BODY),

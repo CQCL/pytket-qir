@@ -451,9 +451,7 @@ def circuit_to_module(circ: Circuit, module: Module) -> Module:
 
             # Update translation dict.
             _TK_TO_PYQIR[OpType.WASM] = QirGate(
-                opnat=OpNat.HYBRID,
-                opname=ExtOpName.WASM,
-                opspec=OpSpec.BODY
+                opnat=OpNat.HYBRID, opname=ExtOpName.WASM, opspec=OpSpec.BODY
             )
 
             # Update gateset.
