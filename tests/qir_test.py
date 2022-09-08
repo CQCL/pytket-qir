@@ -16,9 +16,9 @@ import os
 from pathlib import Path
 from typing import Generator
 import pytest  # type: ignore
-from pytket import Circuit, OpType
+from pytket import Circuit, OpType  # type: ignore
 from pytket.circuit import Conditional  # type: ignore
-from pytket.wasm import WasmFileHandler
+from pytket.wasm import WasmFileHandler  # type: ignore
 
 from pyqir.generator import bitcode_to_ir  # type: ignore
 
