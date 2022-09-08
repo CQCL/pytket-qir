@@ -456,10 +456,6 @@ def circuit_to_module(circ: Circuit, module: Module) -> Module:
                 opspec=OpSpec.BODY
             )
 
-            # Update lambda translator with new dict definition.
-            lambda_converter = PYQIR_GATES.tk_to_gateset
-            lambda_converter = lambda optype: _TK_TO_PYQIR[optype]
-
             # Update gateset.
             gateset = PYQIR_GATES.gateset
             gateset["wasm"] = CustomQirGate(
