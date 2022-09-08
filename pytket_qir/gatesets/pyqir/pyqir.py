@@ -2,10 +2,7 @@ from string import Template
 
 from pytket import OpType  # type: ignore
 
-from pyqir.generator import types  # type: ignore
-
 from pytket_qir.gatesets.base import (
-    CustomQirGate,
     CustomGateSet,
     OpNat,
     OpName,
