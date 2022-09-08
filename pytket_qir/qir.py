@@ -24,9 +24,9 @@ import re
 from typing import Dict, List, Optional, Tuple, Union
 
 from pytket import Circuit, OpType, Bit, Qubit  # type: ignore
-from pytket.wasm import WasmFileHandler
+from pytket.wasm import WasmFileHandler  # type: ignore
 from pytket.circuit import BitRegister, CircBox, Conditional, Op, WASMOp  # type: ignore
-from pytket.circuit.logic_exp import (
+from pytket.circuit.logic_exp import (  # type: ignore
     BitWiseOp,
     RegAdd,
     RegAnd,
