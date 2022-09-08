@@ -31,7 +31,7 @@ jobs:
           python -m pip install --upgrade pip
           # pip install pytest~=7.1
           pip install poetry
-          poetry install pytest~=7.1
+          poetry add pytest@~7.1
           poetry install
       - name: Run tests
         working-directory: ./tests
