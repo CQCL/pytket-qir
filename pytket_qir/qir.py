@@ -24,6 +24,7 @@ import re
 from typing import Dict, List, Optional, Tuple, Union
 
 from pytket import Circuit, OpType, Bit, Qubit  # type: ignore
+from pytket.qasm.qasm import _retrieve_registers
 from pytket.wasm import WasmFileHandler  # type: ignore
 from pytket.circuit import BitRegister, CircBox, Conditional, Op, WASMOp  # type: ignore
 from pytket.circuit.logic_exp import (  # type: ignore
@@ -441,6 +442,7 @@ def circuit_to_module(circ: Circuit, module: Module) -> Module:
                 zero=lambda: condition_zero_block(),
             )
         elif isinstance(op, WASMOp):
+            cregs = _retrieve_registers(circ.bits, BitRegister)
 
             # Need to create a singleton enum to hold the WASM function name.
             class ExtOpName(Enum):
