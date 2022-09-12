@@ -443,6 +443,23 @@ def circuit_to_module(circ: Circuit, module: Module) -> Module:
             )
         elif isinstance(op, WASMOp):
             cregs = _retrieve_registers(circ.bits, BitRegister)
+            args = command.args
+
+            inputs: List[str] = []
+            outputs: List[str] = []
+            for reglist, sizes in [
+                (inputs, op.input_widths),
+                (outputs, op.output_widths),
+            ]:
+                for in_width in sizes:
+                    bits = args[:in_width]
+                    args = args[in_width:]
+                    regname = bits[0].reg_name
+                    if bits != list(cregs[regname]):
+                        QASMUnsupportedError("WASM ops must act on entire registers.")
+                    reglist.append(regname)
+
+            reg = circ.get_c_register(inputs[0])
 
             # Need to create a singleton enum to hold the WASM function name.
             class ExtOpName(Enum):
