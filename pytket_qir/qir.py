@@ -496,7 +496,7 @@ def circuit_to_module(circ: Circuit, module: Module) -> Module:
 
             gate = module.gateset.tk_to_gateset(op.type)
             get_gate = getattr(module, gate.opname.value)
-            module.builder.call(get_gate, [1])
+            module.builder.call(get_gate, [ssa_var])
         else:
             optype, params = _get_optype_and_params(op)
             qubits = _to_qis_qubits(command.qubits, module.module)
