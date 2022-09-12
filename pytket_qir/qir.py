@@ -93,6 +93,10 @@ classical_ops: Dict = {
 }
 
 
+class WASMUnsupportedError(Exception):
+    pass
+
+
 class QirParser:
     """A parser class to return a pytket circuit from a QIR file."""
 
@@ -456,7 +460,7 @@ def circuit_to_module(circ: Circuit, module: Module) -> Module:
                     args = args[in_width:]
                     regname = bits[0].reg_name
                     if bits != list(cregs[regname]):
-                        QASMUnsupportedError("WASM ops must act on entire registers.")
+                        WASMUnsupportedError("WASM ops must act on entire registers.")
                     reglist.append(regname)
 
             reg = circ.get_c_register(inputs[0])
