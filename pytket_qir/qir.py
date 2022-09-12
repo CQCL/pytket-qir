@@ -459,7 +459,7 @@ def circuit_to_module(circ: Circuit, module: Module) -> Module:
                     wasm_bits = args[:in_width]
                     args = args[in_width:]
                     regname = wasm_bits[0].reg_name
-                    if bits != list(cregs[regname]):
+                    if wasm_bits != list(cregs[regname]):
                         WASMUnsupportedError("WASM ops must act on entire registers.")
                     reglist.append(regname)
 
