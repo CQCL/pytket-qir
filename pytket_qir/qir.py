@@ -479,8 +479,8 @@ def circuit_to_module(circ: Circuit, module: Module) -> Module:
                 opnat=OpNat.HYBRID,
                 opname=ExtOpName.WASM,
                 opspec=OpSpec.BODY,
-                function_signature=[types.Int(32)],
-                return_type=types.Int(32),
+                function_signature=[types.Int(64)],
+                return_type=types.Int(64),
             )
 
             # Update gateset in module.
