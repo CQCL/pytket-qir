@@ -486,6 +486,14 @@ def circuit_to_module(circ: Circuit, module: Module) -> Module:
             # Update gateset in module.
             module.gateset = PYQIR_GATES
 
+            # A utility function to convert from a pytket
+            #  BitRegister to an SSA variable via pyqir types.
+            reg2var = module.module.add_external_function(
+                "reg2var", types.Function([types.BOOL]*64, types.Int(64))
+            )
+            reg_bool = list(map(bool, reg))
+            ssa_var = module.builder.call(reg2var, [*reg_bool])
+
             gate = module.gateset.tk_to_gateset(op.type)
             get_gate = getattr(module, gate.opname.value)
             module.builder.call(get_gate, [1])
