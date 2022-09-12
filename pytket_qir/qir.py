@@ -489,7 +489,7 @@ def circuit_to_module(circ: Circuit, module: Module) -> Module:
             # A utility function to convert from a pytket
             #  BitRegister to an SSA variable via pyqir types.
             reg2var = module.module.add_external_function(
-                "reg2var", types.Function([types.BOOL]*64, types.Int(64))
+                "reg2var", types.Function([types.BOOL] * 64, types.Int(64))
             )
             reg_bool = list(map(bool, reg))
             ssa_var = module.builder.call(reg2var, [*reg_bool])
