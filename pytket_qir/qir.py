@@ -64,6 +64,7 @@ from pytket_qir.gatesets.base import (
     QirGate,
 )
 from pytket_qir.gatesets.pyqir.pyqir import PYQIR_GATES  # type: ignore
+from pytket_qir.utils.utils import QIRFormat
 
 
 classical_ops: Dict = {
@@ -456,9 +457,11 @@ def write_qir_file(
             out.write(ir_to_bitcode(populated_module.module.ir(), output_file))
 
 
-def circuit_to_qir_bytes(
-    circ: Circuit, gateset: Optional[CustomGateSet] = None
-) -> bytes:
+def circuit_to_qir(
+    circ: Circuit,
+    gateset: Optional[CustomGateSet] = None,
+    qir_format: Optional[QIRFormat] = QIRFormat.BITCODE
+) -> Union[str, bytes]:
     """Return a pytket circuit as bytes."""
     module = Module(
         name="Pytket circuit",
@@ -467,4 +470,7 @@ def circuit_to_qir_bytes(
         gateset=gateset,
     )
     populated_module = circuit_to_module(circ, module)
-    return ir_to_bitcode(populated_module.module.ir())
+    if qir_format == QIRFormat.BITCODE:
+        return populated_module.module.bitcode()
+    else:
+        return populated_module.module.ir()
