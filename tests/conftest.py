@@ -214,6 +214,11 @@ def nested_conditionals_circuit() -> Circuit:
 
 
 @fixture
+def circuit_classical_arithmetic() -> Circuit:
+    pass
+
+
+@fixture
 def bitwise_file() -> str:
     return "test_bitwise_ops.ll"
 
