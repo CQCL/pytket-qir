@@ -16,12 +16,14 @@ import os
 from pathlib import Path
 from typing import Generator
 import pytest  # type: ignore
-from pytket import Circuit, OpType
+from pytket import Circuit, OpType  # type: ignore
 from pytket.circuit import Conditional  # type: ignore
+from pytket.wasm import WasmFileHandler  # type: ignore
 
 from pyqir.generator import bitcode_to_ir  # type: ignore
 
 from pytket_qir.qir import (
+    circuit_to_qir_bytes,
     write_qir_file,
     circuit_from_qir,
 )
@@ -103,6 +105,13 @@ class TestQirToPytketGateTranslation:
         grover_bc_file_path = qir_files_dir / "SimpleGroverBaseProfile.bc"
         circuit = circuit_from_qir(grover_bc_file_path)
         assert circuit == grover_circuit
+
+    def test_wasm_only(self) -> None:
+        wasm_only_bc_file_path = qir_files_dir / "wasm_only_test.bc"
+        wasm_file_path = qir_files_dir / "wasm_file.wasm"
+        wasm_handler = WasmFileHandler(str(wasm_file_path))
+        circuit = circuit_from_qir(wasm_only_bc_file_path, wasm_handler=wasm_handler)
+        assert circuit.depth() == 1
 
 
 class TestQirToPytketConditionals:
@@ -559,6 +568,23 @@ class TestPytketToQirGateTranslation:
         assert call_and in data
         assert call_or in data
         assert call_xor in data
+
+    def test_generate_wasmop(self) -> None:
+        wasm_file_path = qir_files_dir / "wasm_adder.wasm"
+        wasm_handler = WasmFileHandler(str(wasm_file_path))
+
+        with open(qir_files_dir / "WASM.ll", "r") as input_file:
+            exp_data = input_file.read()
+
+        circuit = Circuit()
+        c0 = circuit.add_c_register("c0", 64)
+        c1 = circuit.add_c_register("c1", 64)
+
+        circuit.add_wasm_to_reg("add_one", wasm_handler, [c0], [c1])
+        ir_bytes = circuit_to_qir_bytes(circuit, wasm_path=wasm_file_path)
+
+        ll = bitcode_to_ir(ir_bytes)
+        assert ll in exp_data
 
 
 class TestPytketToQirConditional:

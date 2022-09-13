@@ -16,8 +16,8 @@ define void @main() #0 {
 entry:
   call void @__quantum__qis__x__body(%Qubit* null)
   call void @__quantum__qis__x__body(%Qubit* inttoptr (i64 1 to %Qubit*))
-  %equal = call i1 @__quantum__qis__read_result__body(%Result* null)
-  br i1 %equal, label %then, label %else
+  %0 = call i1 @__quantum__qis__read_result__body(%Result* null)
+  br i1 %0, label %then, label %else
 
 then:                                             ; preds = %entry
   call void @__quantum__qis__h__body(%Qubit* null)
@@ -30,18 +30,18 @@ else:                                             ; preds = %entry
 continue:                                         ; preds = %else, %then
   call void @__quantum__qis__y__body(%Qubit* null)
   call void @__quantum__qis__y__body(%Qubit* inttoptr (i64 1 to %Qubit*))
-  %equal1 = call i1 @__quantum__qis__read_result__body(%Result* inttoptr (i64 1 to %Result*))
-  br i1 %equal1, label %then2, label %else3
+  %1 = call i1 @__quantum__qis__read_result__body(%Result* inttoptr (i64 1 to %Result*))
+  br i1 %1, label %then1, label %else2
 
-then2:                                            ; preds = %continue
-  br label %continue4
+then1:                                            ; preds = %continue
+  br label %continue3
 
-else3:                                            ; preds = %continue
+else2:                                            ; preds = %continue
   call void @__quantum__qis__h__body(%Qubit* null)
   call void @__quantum__qis__h__body(%Qubit* inttoptr (i64 1 to %Qubit*))
-  br label %continue4
+  br label %continue3
 
-continue4:                                        ; preds = %else3, %then2
+continue3:                                        ; preds = %else2, %then1
   call void @__quantum__qis__z__body(%Qubit* null)
   call void @__quantum__qis__z__body(%Qubit* inttoptr (i64 1 to %Qubit*))
   ret void
@@ -49,4 +49,4 @@ continue4:                                        ; preds = %else3, %then2
 
 declare i1 @__quantum__qis__read_result__body(%Result*)
 
-attributes #0 = { "EntryPoint" "requiredQubits"="2" "requiredResults"="2" }
+attributes #0 = { "EntryPoint" }

@@ -1,17 +1,19 @@
+from dataclasses import dataclass
 from enum import Enum
 from string import Template
 from typing import Callable, Dict, List, NamedTuple, Union
 
-from pyqir.generator.types import Double, Integer, Qubit, Result, Void  # type: ignore
+from pyqir.generator.types import Double, Int, Qubit, Result, Void  # type: ignore
 
 
-PyQirInputTypes = Union[Double, Qubit, Result]
-PyQirOutputTypes = Union[Integer, Result, Void]
+PyQirParameterTypes = Union[Double, Qubit, Result]
+PyQirReturnTypes = Union[Int, Result, Void]
 
 
 class OpNat(Enum):
     QIS = "qis"
     CIS = "cis"
+    HYBRID = "hybrid"
 
 
 class OpName(Enum):
@@ -36,6 +38,7 @@ class OpName(Enum):
     AND = "and"
     OR = "or"
     XOR = "xor"
+    WASM = "wasm"
 
 
 class OpSpec(Enum):
@@ -45,60 +48,17 @@ class OpSpec(Enum):
     CTLADJ = "ctladj"
 
 
-QirGate = NamedTuple(
-    "QirGate",
-    [
-        (
-            "opnat",
-            OpNat,
-        ),
-        (
-            "opname",
-            OpName,
-        ),
-        (
-            "opspec",
-            OpSpec,
-        ),
-    ],
-)
+@dataclass(frozen=True)
+class QirGate:
+    opnat: OpNat
+    opname: Enum
+    opspec: OpSpec
 
 
-CustomQirGate = NamedTuple(
-    "CustomQirGate",
-    [
-        (
-            "opnat",
-            OpNat,
-        ),
-        (
-            "opname",
-            OpName,
-        ),
-        (
-            "opspec",
-            OpSpec,
-        ),
-        (
-            "function_signature",
-            List[PyQirInputTypes],
-        ),
-        (
-            "return_type",
-            PyQirOutputTypes,
-        ),
-    ],
-)
-
-
-GateSet = NamedTuple(
-    "GateSet",
-    [
-        ("name", str),
-        ("tk_to_gateset", Callable),
-        ("gateset_to_tk", Callable),
-    ],
-)
+@dataclass(frozen=True)
+class CustomQirGate(QirGate):
+    function_signature: List[PyQirParameterTypes]
+    return_type: PyQirReturnTypes
 
 
 CustomGateSet = NamedTuple(

@@ -12,16 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""This module contains all functionality to parse and generate QIR files."""
+"""
+This module contains all functionality to parse and generate QIR files
+from and to pytket circuits.
+"""
 
+from enum import Enum
 import inspect
 import os
 import re
 from typing import Dict, List, Optional, Tuple, Union
 
 from pytket import Circuit, OpType, Bit, Qubit  # type: ignore
-from pytket.circuit import BitRegister, CircBox, Conditional, Op  # type: ignore
-from pytket.circuit.logic_exp import (
+from pytket.qasm.qasm import _retrieve_registers  # type: ignore
+from pytket.wasm import WasmFileHandler  # type: ignore
+from pytket.circuit import BitRegister, CircBox, Conditional, Op, WASMOp  # type: ignore
+from pytket.circuit.logic_exp import (  # type: ignore
     BitWiseOp,
     RegAdd,
     RegAnd,
@@ -57,13 +63,13 @@ from pyqir.generator.types import Qubit, Result  # type: ignore
 
 from pytket_qir.gatesets.base import (
     CustomGateSet,
-    GateSet,
+    CustomQirGate,
     OpNat,
     OpName,
     OpSpec,
     QirGate,
 )
-from pytket_qir.gatesets.pyqir.pyqir import PYQIR_GATES  # type: ignore
+from pytket_qir.gatesets.pyqir.pyqir import PYQIR_GATES, _TK_TO_PYQIR  # type: ignore
 from pytket_qir.utils.utils import QIRFormat
 
 
@@ -88,14 +94,22 @@ classical_ops: Dict = {
 }
 
 
+class WASMUnsupportedError(Exception):
+    pass
+
+
 class QirParser:
     """A parser class to return a pytket circuit from a QIR file."""
 
-    def __init__(self, file_path: str, gateset: Optional[CustomGateSet]) -> None:
+    def __init__(
+        self,
+        file_path: str,
+        gateset: Optional[CustomGateSet],
+        wasm_handler: Optional[WasmFileHandler],
+    ) -> None:
         self.module = QirModule(file_path)
-        self.gateset: Union[GateSet, CustomGateSet] = (
-            gateset if gateset else PYQIR_GATES
-        )
+        self.gateset: CustomGateSet = gateset if gateset else PYQIR_GATES
+        self.wasm_handler = wasm_handler
         self.qubits = self.get_required_qubits()
         self.bits = self.get_required_results()
         entry_block = self.module.functions[0].get_block_by_name("entry")
@@ -106,7 +120,6 @@ class QirParser:
         )
 
     def get_required_qubits(self) -> int:
-        # Note: InteropFriendly is to be changed to EntryPoint in future versions.
         interop_funcs = self.module.get_funcs_by_attr("EntryPoint")
         qubits = interop_funcs[0].get_attribute_value("requiredQubits")
         if qubits is not None:
@@ -114,7 +127,6 @@ class QirParser:
         return 0
 
     def get_required_results(self) -> int:
-        # Note: InteropFriendly is to be changed to EntryPoint in future versions.
         interop_funcs = self.module.get_funcs_by_attr("EntryPoint")
         results = interop_funcs[0].get_attribute_value("requiredResults")
         if results is not None:
@@ -229,6 +241,25 @@ class QirParser:
                 circuit.add_gate(op, unitids)
             elif instr.instr.is_qir_call:  # Setting the conditional bit for branching.
                 c_reg_index = instr.instr.call_func_params[0].constant.result_static_id
+            elif instr.instr.is_call:  # WASM external call.
+                if not self.wasm_handler:
+                    raise ValueError("A WASM file handler must be provided.")
+                func_name = instr.func_name
+                assert func_name
+                matched_str = re.search("__quantum__(.+?)__(.+?)__(.+)", func_name)
+                assert matched_str
+                # WASM function call parameters.
+                param_regs = []
+                for c_reg_index in range(len(instr.func_args)):
+                    c_reg_name = "c_reg_wasm" + str(c_reg_index)
+                    param_regs.append(circuit.add_c_register(c_reg_name, 64))
+
+                # WASM function return type.
+                c_reg_output_name = "%" + instr.output_name
+                c_reg_output = circuit.add_c_register(c_reg_output_name, 64)
+                circuit.add_wasm_to_reg(
+                    matched_str.group(2), self.wasm_handler, param_regs, [c_reg_output]
+                )
             else:  # Classical instruction.
                 # Create registers to hold classical constants.
                 c_reg_map = self._create_register_map(circuit)
@@ -287,7 +318,9 @@ class QirParser:
 
 
 def circuit_from_qir(
-    input_file: Union[str, os.PathLike], gateset: Optional[CustomGateSet] = None
+    input_file: Union[str, os.PathLike],
+    gateset: Optional[CustomGateSet] = None,
+    wasm_handler: Optional[WasmFileHandler] = None,
 ) -> Circuit:
     root, ext = os.path.splitext(os.path.basename(input_file))
     input_file_str = str(input_file)
@@ -301,7 +334,7 @@ def circuit_from_qir(
         with open(output_bc_file, "wb") as o:
             o.write(ir_to_bitcode(data))
         input_file_str = output_bc_file
-    return QirParser(input_file_str, gateset).circuit
+    return QirParser(input_file_str, gateset, wasm_handler).circuit
 
 
 class QIRUnsupportedError(Exception):
@@ -309,7 +342,10 @@ class QIRUnsupportedError(Exception):
 
 
 class Module:
-    """Module extensions to account for any input gate set."""
+    """
+    PyQir module extension to account for custom defined input gate set
+    and calls to WASM files.
+    """
 
     def __init__(
         self,
@@ -317,26 +353,35 @@ class Module:
         num_qubits: int,
         num_results: int,
         gateset: Optional[CustomGateSet] = None,
+        wasm_handler: Optional[WasmFileHandler] = None,
     ) -> None:
         self.module = SimpleModule(name, num_qubits, num_results)
         self.builder = self.module.builder
         self.qis = BasicQisBuilder(self.builder)
-        if gateset:
-            self.gateset = gateset
-            for v in self.gateset.gateset.values():
-                self.__setattr__(
-                    v.opname.value,
-                    self.module.add_external_function(
-                        self.gateset.template.substitute(
-                            opnat=v.opnat.value,
-                            opname=v.opname.value,
-                            opspec=v.opspec.value,
-                        ),
-                        types.Function(v.function_signature, v.return_type),
+        self.gateset = gateset if gateset else PYQIR_GATES
+        self.wasm_handler = wasm_handler
+
+    @property
+    def gateset(self):
+        """A getter for the gateset."""
+        assert self._gateset
+        return self._gateset
+
+    @gateset.setter
+    def gateset(self, new_gateset):
+        self._gateset = new_gateset
+        for v in self._gateset.gateset.values():
+            self.__setattr__(
+                v.opname.value,
+                self.module.add_external_function(
+                    self._gateset.template.substitute(
+                        opnat=v.opnat.value,
+                        opname=v.opname.value,
+                        opspec=v.opspec.value,
                     ),
-                )
-        else:
-            self.default_gateset = PYQIR_GATES
+                    types.Function(v.function_signature, v.return_type),
+                ),
+            )
 
 
 def _get_optype_and_params(op: Op) -> Tuple[OpType, List[float]]:
@@ -401,11 +446,80 @@ def circuit_to_module(circ: Circuit, module: Module) -> Module:
                 one=lambda: condition_one_block(),
                 zero=lambda: condition_zero_block(),
             )
+        elif isinstance(op, WASMOp):
+            cregs = _retrieve_registers(circ.bits, BitRegister)
+            args = command.args
+
+            inputs: List[str] = []
+            outputs: List[str] = []
+            for reglist, sizes in [
+                (inputs, op.input_widths),
+                (outputs, op.output_widths),
+            ]:
+                for in_width in sizes:
+                    wasm_bits = args[:in_width]
+                    args = args[in_width:]
+                    regname = wasm_bits[0].reg_name
+                    if wasm_bits != list(cregs[regname]):
+                        WASMUnsupportedError("WASM ops must act on entire registers.")
+                    reglist.append(regname)
+
+            reg = circ.get_c_register(inputs[0])
+
+            # Need to create a singleton enum to hold the WASM function name.
+            class ExtOpName(Enum):
+                WASM = op.func_name
+
+            # Update datastructures with WASM function name and
+            # appropriate definition.
+
+            # Update translation dict.
+            _TK_TO_PYQIR[OpType.WASM] = QirGate(
+                opnat=OpNat.HYBRID, opname=ExtOpName.WASM, opspec=OpSpec.BODY
+            )
+
+            # Update gateset.
+            gateset = PYQIR_GATES.gateset
+            gateset["wasm"] = CustomQirGate(
+                opnat=OpNat.HYBRID,
+                opname=ExtOpName.WASM,
+                opspec=OpSpec.BODY,
+                function_signature=[types.Int(64)],
+                return_type=types.Int(64),
+            )
+
+            # Update gateset in module.
+            module.gateset = PYQIR_GATES
+
+            # A utility function to convert from a pytket
+            #  BitRegister to an SSA variable via pyqir types.
+            reg2var = module.module.add_external_function(
+                "reg2var", types.Function([types.BOOL] * 64, types.Int(64))
+            )
+            reg_bool = list(map(bool, reg))
+            ssa_var = module.builder.call(reg2var, [*reg_bool])
+
+            gate = module.gateset.tk_to_gateset(op.type)
+            get_gate = getattr(module, gate.opname.value)
+            module.builder.call(get_gate, [ssa_var])
         else:
             optype, params = _get_optype_and_params(op)
             qubits = _to_qis_qubits(command.qubits, module.module)
             results = _to_qis_results(command.bits, module.module)
-            if hasattr(module, "gateset"):
+            if module.gateset.name == "PyQir":
+                pyqir_gate = module.gateset.tk_to_gateset(optype)
+                if not pyqir_gate.opspec == OpSpec.BODY:
+                    opname = pyqir_gate.opname.value + "_" + pyqir_gate.opspec.value
+                    get_gate = getattr(module.qis, opname)
+                else:
+                    get_gate = getattr(module.qis, pyqir_gate.opname.value)
+                if params:
+                    get_gate(*params, *qubits)
+                elif results:
+                    get_gate(*qubits, results)
+                else:
+                    get_gate(*qubits)
+            else:
                 bits: Optional[List[Result]] = None
                 if type(optype) == BitWiseOp:
                     bits = _to_qis_bits(command.args, module.module)
@@ -419,19 +533,6 @@ def circuit_to_module(circ: Circuit, module: Module) -> Module:
                     module.builder.call(get_gate, [*qubits, results])
                 else:
                     module.builder.call(get_gate, qubits)
-            else:
-                pyqir_gate = module.default_gateset.tk_to_gateset(optype)
-                if not pyqir_gate.opspec == OpSpec.BODY:
-                    opname = pyqir_gate.opname.value + "_" + pyqir_gate.opspec.value
-                    get_gate = getattr(module.qis, opname)
-                else:
-                    get_gate = getattr(module.qis, pyqir_gate.opname.value)
-                if params:
-                    get_gate(*params, *qubits)
-                elif results:
-                    get_gate(*qubits, results)
-                else:
-                    get_gate(*qubits)
     return module
 
 
@@ -460,14 +561,22 @@ def write_qir_file(
 def circuit_to_qir(
     circ: Circuit,
     gateset: Optional[CustomGateSet] = None,
+    wasm_path: Optional[Union[str, os.PathLike]] = None,
     qir_format: Optional[QIRFormat] = QIRFormat.BITCODE
 ) -> Union[str, bytes]:
-    """Return a pytket circuit as bytes."""
+    """Return a pytket circuit as a QIR."""
+    wasm_handler = None
+    if wasm_path:
+        try:
+            wasm_handler = WasmFileHandler(str(wasm_path))
+        except ValueError as ve:
+            raise ve
     module = Module(
         name="Pytket circuit",
         num_qubits=circ.n_qubits,
         num_results=len(circ.bits),
         gateset=gateset,
+        wasm_handler=wasm_handler,
     )
     populated_module = circuit_to_module(circ, module)
     if qir_format == QIRFormat.BITCODE:
