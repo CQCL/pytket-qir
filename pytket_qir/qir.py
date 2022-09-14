@@ -26,7 +26,7 @@ from typing import Callable, Dict, List, Optional, Tuple, Union
 from pytket import Circuit, OpType, Bit, Qubit  # type: ignore
 from pytket.qasm.qasm import _retrieve_registers  # type: ignore
 from pytket.wasm import WasmFileHandler  # type: ignore
-from pytket.circuit import BitRegister, CircBox, Conditional, Op, WASMOp  # type: ignore
+from pytket.circuit import BitRegister, CircBox, ClassicalExpBox, Conditional, Op, WASMOp  # type: ignore
 from pytket.circuit.logic_exp import (  # type: ignore
     BitWiseOp,
     RegAdd,
@@ -502,6 +502,17 @@ def circuit_to_module(circ: Circuit, module: Module) -> Module:
             gate = module.gateset.tk_to_gateset(op.type)
             get_gate = getattr(module, gate.opname.value)
             module.builder.call(get_gate, [ssa_var])
+        elif isinstance(op, ClassicalExpBox):
+            # print(op.get_exp())
+            # if isinstance(op.get_exp(), RegAdd):
+            #     print("YAY")
+
+            source = module.module.add_external_function(
+                "source", types.Function([], types.Int(64))
+            )
+            x = module.builder.call(source, [])
+            y = module.builder.call(source, [])
+            _CLOPS_TO_PYQIR[type(op.get_exp())](module.builder)(x, y)
         else:
             optype, params = _get_optype_and_params(op)
             qubits = _to_qis_qubits(command.qubits, module.module)
