@@ -14,7 +14,7 @@
 
 """
 This module contains all functionality to parse and generate QIR files
-from and to pytket circuits.
+to and from pytket circuits.
 """
 
 from enum import Enum
