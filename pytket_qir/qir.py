@@ -249,7 +249,9 @@ class QirParser:
                     raise ValueError("The WASM function call is not defined.")
                 matched_str = re.search("__quantum__(.+?)__(.+?)__(.+)", func_name)
                 if not matched_str:
-                    raise ValueError("The WASM function call name is not propely defined.")
+                    raise ValueError(
+                        "The WASM function call name is not propely defined."
+                    )
                 # WASM function call parameters.
                 param_regs = []
                 for c_reg_index in range(len(instr.func_args)):
