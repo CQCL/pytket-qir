@@ -12,9 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from functools import partial
 import os
 from pathlib import Path
-from typing import Generator
+from typing import Callable, Generator, List, Tuple
 
 from pytest import fixture  # type: ignore
 
@@ -25,6 +26,8 @@ from pytket.circuit import (  # type: ignore
 )
 
 from pytket_qir.qir import write_qir_file
+
+from pyqir.generator import Builder, IntPredicate, Value
 
 qir_files_dir = Path("./qir_test_files")
 
@@ -215,7 +218,13 @@ def nested_conditionals_circuit() -> Circuit:
 
 @fixture
 def circuit_classical_arithmetic() -> Circuit:
-    pass
+    circ = Circuit(2)
+    a = circ.add_c_register("a", 3)
+    b = circ.add_c_register("b", 3)
+    c = circ.add_c_register("c", 3)
+    circ.add_classicalexpbox_register(a & b, c)
+    circ.add_classicalexpbox_register(a | b, c)
+    return circ
 
 
 @fixture
@@ -313,3 +322,30 @@ def pytket_nested_conditionals_circuit(
     write_qir_file(circuit, pytket_nested_conditionals_file_name)
     yield
     os.remove(pytket_nested_conditionals_file_name)
+
+
+_OPERATORS: List[Tuple[str, Callable[[Builder], Callable[[Value, Value], Value]]]] = [
+    ("and", lambda b: b.and_),
+    ("or", lambda b: b.or_),
+    ("xor", lambda b: b.xor),
+    ("add", lambda b: b.add),
+    ("sub", lambda b: b.sub),
+    ("mul", lambda b: b.mul),
+    ("shl", lambda b: b.shl),
+    ("lshr", lambda b: b.lshr),
+    ("icmp eq", lambda b: partial(b.icmp, IntPredicate.EQ)),
+    ("icmp ne", lambda b: partial(b.icmp, IntPredicate.NE)),
+    ("icmp ugt", lambda b: partial(b.icmp, IntPredicate.UGT)),
+    ("icmp uge", lambda b: partial(b.icmp, IntPredicate.UGE)),
+    ("icmp ult", lambda b: partial(b.icmp, IntPredicate.ULT)),
+    ("icmp ule", lambda b: partial(b.icmp, IntPredicate.ULE)),
+    ("icmp sgt", lambda b: partial(b.icmp, IntPredicate.SGT)),
+    ("icmp sge", lambda b: partial(b.icmp, IntPredicate.SGE)),
+    ("icmp slt", lambda b: partial(b.icmp, IntPredicate.SLT)),
+    ("icmp sle", lambda b: partial(b.icmp, IntPredicate.SLE)),
+]
+
+
+@fixture
+def operators() -> List:
+    return _OPERATORS
