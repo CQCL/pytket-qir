@@ -21,7 +21,7 @@ from enum import Enum
 import inspect
 import os
 import re
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 from pytket import Circuit, OpType, Bit, Qubit  # type: ignore
 from pytket.qasm.qasm import _retrieve_registers  # type: ignore
@@ -73,7 +73,7 @@ from pytket_qir.gatesets.pyqir.pyqir import PYQIR_GATES, _TK_TO_PYQIR  # type: i
 from pytket_qir.utils.utils import QIRFormat
 
 
-classical_ops: Dict = {
+classical_ops: Dict[str, Union[type, Dict[str, Callable]]] = {
     "is_add": RegAdd,
     "is_sub": RegSub,
     "is_mul": RegMul,
