@@ -14,7 +14,7 @@
 
 """
 This module contains all functionality to parse and generate QIR files
-from and to pytket circuits.
+to and from pytket circuits.
 """
 
 from enum import Enum
@@ -153,7 +153,8 @@ class QirParser:
         if instr.is_call:
             call_func_name = instr.call_func_name
             matched_str = re.search("__quantum__(.+?)__(.+?)__(.+)", call_func_name)
-            assert matched_str
+            if not matched_str:
+                raise ValueError("The WASM function call name is not propely defined.")
             opnat = OpNat(matched_str.group(1))
             opname = OpName(matched_str.group(2))
             opspec = OpSpec(matched_str.group(3))
@@ -261,9 +262,13 @@ class QirParser:
                 if not self.wasm_handler:
                     raise ValueError("A WASM file handler must be provided.")
                 func_name = instr.func_name
-                assert func_name
+                if not func_name:
+                    raise ValueError("The WASM function call is not defined.")
                 matched_str = re.search("__quantum__(.+?)__(.+?)__(.+)", func_name)
-                assert matched_str
+                if not matched_str:
+                    raise ValueError(
+                        "The WASM function call name is not propely defined."
+                    )
                 # WASM function call parameters.
                 param_regs = []
                 for c_reg_index in range(len(instr.func_args)):
@@ -472,6 +477,8 @@ def circuit_to_module(circ: Circuit, module: Module) -> Module:
                 (inputs, op.input_widths),
                 (outputs, op.output_widths),
             ]:
+                if not sizes:
+                    ValueError("WASM input or output registers have empty widths.")
                 for in_width in sizes:
                     wasm_bits = args[:in_width]
                     args = args[in_width:]
@@ -480,7 +487,7 @@ def circuit_to_module(circ: Circuit, module: Module) -> Module:
                         WASMUnsupportedError("WASM ops must act on entire registers.")
                     reglist.append(regname)
 
-            reg = circ.get_c_register(inputs[0])
+            bit_reg = circ.get_c_register(inputs[0])
 
             # Need to create a singleton enum to hold the WASM function name.
             class ExtOpName(Enum):
@@ -512,8 +519,8 @@ def circuit_to_module(circ: Circuit, module: Module) -> Module:
             reg2var = module.module.add_external_function(
                 "reg2var", types.Function([types.BOOL] * 64, types.Int(64))
             )
-            reg_bool = list(map(bool, reg))
-            ssa_var = module.builder.call(reg2var, [*reg_bool])
+            bool_reg = list(map(bool, bit_reg)) + [False] * (64 - bit_reg.size)
+            ssa_var = module.builder.call(reg2var, [*bool_reg])
 
             gate = module.gateset.tk_to_gateset(op.type)
             get_gate = getattr(module, gate.opname.value)
