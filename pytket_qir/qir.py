@@ -468,7 +468,7 @@ def circuit_to_module(circ: Circuit, module: Module) -> Module:
                         WASMUnsupportedError("WASM ops must act on entire registers.")
                     reglist.append(regname)
 
-            reg = circ.get_c_register(inputs[0])
+            bit_reg = circ.get_c_register(inputs[0])
 
             # Need to create a singleton enum to hold the WASM function name.
             class ExtOpName(Enum):
