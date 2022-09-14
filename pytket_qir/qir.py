@@ -136,7 +136,8 @@ class QirParser:
         if instr.is_call:
             call_func_name = instr.call_func_name
             matched_str = re.search("__quantum__(.+?)__(.+?)__(.+)", call_func_name)
-            assert matched_str
+            if not matched_str:
+                raise ValueError("The WASM function call name is not propely defined.")
             opnat = OpNat(matched_str.group(1))
             opname = OpName(matched_str.group(2))
             opspec = OpSpec(matched_str.group(3))
@@ -244,11 +245,11 @@ class QirParser:
                 if not self.wasm_handler:
                     raise ValueError("A WASM file handler must be provided.")
                 func_name = instr.func_name
-                if func_name:
+                if not func_name:
                     raise ValueError("The WASM function call is not defined.")
                 matched_str = re.search("__quantum__(.+?)__(.+?)__(.+)", func_name)
-                if matched_str:
-                    raise ValueError("The WASM function call is not propely defined.")
+                if not matched_str:
+                    raise ValueError("The WASM function call name is not propely defined.")
                 # WASM function call parameters.
                 param_regs = []
                 for c_reg_index in range(len(instr.func_args)):
