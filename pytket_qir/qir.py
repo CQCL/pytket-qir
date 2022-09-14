@@ -93,6 +93,22 @@ classical_ops: Dict[str, Union[type, Dict[str, Callable]]] = {
     "is_xor": RegXor,
 }
 
+_CLOPS_TO_PYQIR: Dict = {
+    RegAnd: lambda b: b.and_,
+    RegOr: lambda b: b.or_,
+    RegXor: lambda b: b.xor,
+    RegAdd: lambda b: b.add,
+    RegSub: lambda b: b.sub,
+    RegMul: lambda b: b.mul,
+    RegLsh: lambda b: b.shl,
+    RegRsh: lambda b: b.lshr,
+    reg_eq: lambda b: partial(b.icmp, IntPredicate.EQ),
+    reg_neq: lambda b: partial(b.icmp, IntPredicate.NE),
+    reg_gt: lambda b: partial(b.icmp, IntPredicate.UGT),
+    reg_geq: lambda b: partial(b.icmp, IntPredicate.UGE),
+    reg_lt: lambda b: partial(b.icmp, IntPredicate.ULT),
+    reg_leq: lambda b: partial(b.icmp, IntPredicate.ULE),
+}
 
 class WASMUnsupportedError(Exception):
     pass
