@@ -451,8 +451,6 @@ class QIRGenerator:
 
     def _get_c_regs_from_com(self, command: Command) -> Tuple[List[str]]:
         op = command.op
-        if isinstance(op, Conditional):
-            conditional_circuit = op.op.get_circuit()
         args = command.args
         inputs: List[str] = []
         outputs: List[str] = []
@@ -611,7 +609,7 @@ def write_qir_file(
         num_results=len(circ.bits),
         gateset=gateset,
     )
-    populated_module = circuit_to_module(circ, module)
+    populated_module = QIRGenerator(circ, module).module
     if ext == ".ll":
         with open(output_file, "w") as out:
             out.write(populated_module.module.ir())
@@ -640,7 +638,7 @@ def circuit_to_qir(
         gateset=gateset,
         wasm_handler=wasm_handler,
     )
-    populated_module = circuit_to_module(circ, module)
+    populated_module = QIRGenerator(circ, module).module
     if qir_format == QIRFormat.BITCODE:
         return populated_module.module.bitcode()
     else:
