@@ -18,6 +18,7 @@ to and from pytket circuits.
 """
 
 from enum import Enum
+from functools import partial
 import inspect
 import os
 import re
@@ -55,8 +56,9 @@ from pyqir.parser import (  # type: ignore
     QirInstr,
 )
 from pyqir.parser._native import PyQirInstruction  # type: ignore
-from pyqir.generator import SimpleModule, BasicQisBuilder, ir_to_bitcode, types  # type: ignore
+from pyqir.generator import SimpleModule, BasicQisBuilder, IntPredicate, ir_to_bitcode, types  # type: ignore
 from pyqir.parser._native import PyQirInstruction, PyQirOperand  # type: ignore
+from pyqir.parser._parser import QirIntConstant  # type: ignore
 from pyqir.generator import SimpleModule, BasicQisBuilder, ir_to_bitcode, types  # type: ignore
 from pyqir.generator.types import Qubit, Result  # type: ignore
 
@@ -70,7 +72,7 @@ from pytket_qir.gatesets.base import (
     QirGate,
 )
 from pytket_qir.gatesets.pyqir.pyqir import PYQIR_GATES, _TK_TO_PYQIR  # type: ignore
-from pytket_qir.utils.utils import QIRFormat
+from pytket_qir.utils.utils import QIRFormat  # type: ignore
 
 
 classical_ops: Dict[str, Union[type, Dict[str, Callable]]] = {
@@ -153,6 +155,7 @@ class QirParser:
     def get_optype(self, instr: PyQirInstruction) -> OpType:
         if instr.is_call:
             call_func_name = instr.call_func_name
+            assert call_func_name
             matched_str = re.search("__quantum__(.+?)__(.+?)__(.+)", call_func_name)
             if not matched_str:
                 raise ValueError("The WASM function call name is not propely defined.")
@@ -164,7 +167,9 @@ class QirParser:
 
     def get_params(self, instr: PyQirInstruction) -> List[float]:
         params: List = []
+        assert instr.call_func_params
         for param in instr.call_func_params:
+            assert param.constant
             if param.constant.is_float:
                 params.append(param.constant.float_double_value)
         return params
@@ -176,7 +181,9 @@ class QirParser:
 
     def get_qubit_indices(self, instr: PyQirInstruction) -> List[int]:
         params: List = []
+        assert instr.call_func_params
         for param in instr.call_func_params:
+            assert param.constant
             if param.constant.is_qubit:
                 params.append(param.constant.qubit_static_id)
             elif param.constant.is_result:
@@ -192,45 +199,43 @@ class QirParser:
     ) -> None:
         def add_classical_register(
             operands: Union[List, PyQirOperand], circuit: Circuit
-        ) -> Union[Tuple, PyQirOperand]:
+        ) -> Union[Tuple, BitRegister]:
             c_regs: List[BitRegister] = []
 
             def add_register(operands: List) -> List:
                 for index, operand in enumerate(operands):
-                    if operand.is_constant:
+
+                    if isinstance(operand, QirIntConstant):
                         c_reg = c_reg_map[index + 1]
-                        circuit.add_c_setreg(operand.constant.int_value, c_reg)
+                        circuit.add_c_setreg(operand.value, c_reg)
                         c_regs.append(c_reg)
                     else:
-                        assert operand.is_local
-                        register_name = "%" + operand.local_name  # Keep QIR syntax.
+                        register_name = "%" + operand.name  # Keep QIR syntax.
                         c_reg = circuit.get_c_register(register_name)
                         c_regs.append(c_reg)
                 return c_regs
 
-            if isinstance(operands, PyQirOperand):
-                operands = [operands]
-                return add_register(operands)[0]
-            else:
-                return tuple(add_register(operands))
-
-        operands = instr.instr.target_operands
+            if isinstance(operands, QirIntConstant):
+                return add_register([operands])[0]
+            elif isinstance(operands, List):
+                return tuple(add_register(list(operands)))
+        operands = instr.target_operands
         if classical_op == "is_icmp":
             c_reg1 = add_classical_register(operands[0], circuit)
             c_op = classical_ops[classical_op][instr.predicate]
             circuit.add_classicalexpbox_register(
                 c_op(
-                    c_reg1, operands[1].constant.int_value
+                    c_reg1, operands[1].value
                 ),  # Comparaison with constants.
                 c_reg_map[3],
             )
         else:
             c_op = classical_ops[classical_op]
             # Integer negation is represented as a substraction from 0.
-            if operands[0].is_constant:
-                if operands[0].constant.int_value == 0:
+            if isinstance(operands[0], QirIntConstant):
+                if operands[0].value == 0:
                     circuit.add_classicalexpbox_register(
-                        RegNeg(operands[1].constant.int_value), c_reg_map[3]
+                        RegNeg(operands[1].value), c_reg_map[3]
                     )
             c_reg1, c_reg2 = add_classical_register(operands, circuit)
             circuit.add_classicalexpbox_register(c_op(c_reg1, c_reg2), c_reg_map[3])
