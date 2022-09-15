@@ -543,13 +543,15 @@ class TestPytketToQirGateTranslation:
         assert call_ry in data
         assert call_rz in data
 
-    def test_classical_arithmetic(self, circuit_classical_arithmetic: Circuit, operators: List):
+    def test_classical_arithmetic(
+        self, circuit_classical_arithmetic: Circuit, operators: List
+    ):
         ll = circuit_to_qir(circuit_classical_arithmetic, qir_format=QIRFormat.IR)
         print(ll)
 
         for (name, build) in operators:
             pass
-        
+
     @pytest.mark.skip(reason="Waiting for feature releases in pyqir.")
     def test_bitwise_ops(self, circuit_bitwise_ops: Circuit) -> None:
         with open("test_bitwise_ops.ll", "r") as input_file:
