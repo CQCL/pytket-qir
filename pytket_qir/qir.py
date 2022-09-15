@@ -26,7 +26,7 @@ from typing import Callable, Dict, List, Optional, Tuple, Union
 from pytket import Circuit, OpType, Bit, Qubit  # type: ignore
 from pytket.qasm.qasm import _retrieve_registers  # type: ignore
 from pytket.wasm import WasmFileHandler  # type: ignore
-from pytket.circuit import BitRegister, CircBox, ClassicalExpBox, Conditional, Op, WASMOp  # type: ignore
+from pytket.circuit import BitRegister, CircBox, Command, ClassicalExpBox, Conditional, Op, WASMOp  # type: ignore
 from pytket.circuit.logic_exp import (  # type: ignore
     BitWiseOp,
     RegAdd,
@@ -441,6 +441,7 @@ def _to_qis_bits(args: List[Bit], mod: SimpleModule) -> List[Result]:
 def circuit_to_module(circ: Circuit, module: Module) -> Module:
     """A method to generate a QIR string from a pytket circuit."""
     for command in circ:
+    def _get_c_regs_from_com(self, command: Command) -> Tuple[List[str]]:
         op = command.op
         if isinstance(op, Conditional):
             conditional_circuit = op.op.get_circuit()
