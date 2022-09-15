@@ -93,7 +93,7 @@ classical_ops: Dict[str, Union[type, Dict[str, Callable]]] = {
     "is_xor": RegXor,
 }
 
-_CLOPS_TO_PYQIR: Dict = {
+_TK_CLOPS_TO_PYQIR: Dict = {
     RegAnd: lambda b: b.and_,
     RegOr: lambda b: b.or_,
     RegXor: lambda b: b.xor,
