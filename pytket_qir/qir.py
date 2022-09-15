@@ -110,7 +110,7 @@ _TK_CLOPS_TO_PYQIR: Dict = {
     reg_leq: lambda b: partial(b.icmp, IntPredicate.ULE),
 }
 
-class WASMUnsupportedError(Exception):
+class CommandUnsupportedError(Exception):
     pass
 
 
