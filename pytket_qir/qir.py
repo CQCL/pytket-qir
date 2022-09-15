@@ -438,9 +438,17 @@ def _to_qis_bits(args: List[Bit], mod: SimpleModule) -> List[Result]:
     return []
 
 
-def circuit_to_module(circ: Circuit, module: Module) -> Module:
-    """A method to generate a QIR string from a pytket circuit."""
-    for command in circ:
+class QIRGenerator:
+    """A generator class to produce a QIR file from a pytket circuit."""
+
+    def __init__(self, circuit: Circuit, module: Module) -> None:
+        self.circuit = circuit
+        self.cregs = _retrieve_registers(self.circuit.bits, BitRegister)
+        self.reg2var = module.module.add_external_function(
+            "reg2var", types.Function([types.BOOL] * 64, types.Int(64))
+        )
+        self.module = self.circuit_to_module(circuit, module)
+
     def _get_c_regs_from_com(self, command: Command) -> Tuple[List[str]]:
         op = command.op
         if isinstance(op, Conditional):
