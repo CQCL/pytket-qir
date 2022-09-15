@@ -1,8 +1,8 @@
 source_filename = "Pytket circuit"
 
-declare i64 @__quantum__hybrid__add_one__body(i64)
-
 declare i64 @reg2var(i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1)
+
+declare i64 @__quantum__hybrid__add_one__body(i64)
 
 define void @main() #0 {
 entry:
