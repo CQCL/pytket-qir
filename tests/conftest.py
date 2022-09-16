@@ -27,7 +27,7 @@ from pytket.circuit import (  # type: ignore
 
 from pytket_qir.qir import write_qir_file
 
-from pyqir.generator import Builder, IntPredicate, Value
+from pyqir.generator import Builder, IntPredicate, Value  # type: ignore
 
 qir_files_dir = Path("./qir_test_files")
 
