@@ -6,7 +6,7 @@ from typing import Callable, Dict, List, NamedTuple, Union
 from pyqir.generator.types import Double, Int, Qubit, Result, Void  # type: ignore
 
 
-PyQirParameterTypes = Union[Double, Qubit, Result]
+PyQirParameterTypes = Union[Double, Int, Qubit, Result]
 PyQirReturnTypes = Union[Int, Result, Void]
 
 
