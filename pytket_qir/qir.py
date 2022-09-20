@@ -650,7 +650,7 @@ class QIRGenerator:
         return module
 
 
-def circuit_to_qir(
+def circuit_to_pyqir_module(
     circ: Circuit,
     gateset: Optional[CustomGateSet] = None,
     wasm_path: Optional[Union[str, os.PathLike]] = None,
@@ -693,7 +693,7 @@ def write_qir_file(
         file_param = "w"
     else:
         raise ValueError("The file extension should either be '.ll' or '.bc'.")
-    populated_module = circuit_to_qir(
+    populated_module = circuit_to_pyqir_module(
         circ=circ,
         gateset=gateset,
         wasm_path=wasm_path,

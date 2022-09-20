@@ -23,7 +23,7 @@ from pytket.wasm import WasmFileHandler  # type: ignore
 from pyqir.generator import bitcode_to_ir  # type: ignore
 
 from pytket_qir.qir import (
-    circuit_to_qir,
+    circuit_to_pyqir_module,
     write_qir_file,
     circuit_from_qir,
 )
@@ -588,7 +588,7 @@ class TestPytketToQirGateTranslation:
         c1 = circuit.add_c_register("c1", 64)
 
         circuit.add_wasm_to_reg("add_one", wasm_handler, [c0], [c1])
-        ir_bytes = circuit_to_qir(circuit, wasm_path=wasm_file_path)
+        ir_bytes = circuit_to_pyqir_module(circuit, wasm_path=wasm_file_path)
         assert isinstance(ir_bytes, bytes)
 
         ll = bitcode_to_ir(ir_bytes)
