@@ -22,12 +22,13 @@ from functools import partial
 import inspect
 import os
 import re
-from typing import Sequence, cast, Callable, Dict, List, Optional, Tuple, Union
+from typing import cast, Callable, Dict, List, Optional, Sequence, Tuple, Union
+
 
 from pytket import Circuit, OpType, Bit, Qubit  # type: ignore
-from pytket.qasm.qasm import Value, _retrieve_registers  # type: ignore
+from pytket.qasm.qasm import _retrieve_registers  # type: ignore
 from pytket.wasm import WasmFileHandler  # type: ignore
-from pytket.circuit import BitRegister, CircBox, Command, ClassicalExpBox, Conditional, Op, WASMOp  # type: ignore
+from pytket.circuit import BitRegister, CircBox, Command, Conditional, Op, WASMOp  # type: ignore
 from pytket.circuit.logic_exp import (  # type: ignore
     BitWiseOp,
     RegAdd,
@@ -63,7 +64,7 @@ from pyqir.parser import (  # type: ignore
 )
 from pyqir.parser._native import PyQirInstruction  # type: ignore
 from pyqir.generator import SimpleModule, BasicQisBuilder, IntPredicate, ir_to_bitcode, types  # type: ignore
-from pyqir.parser._native import PyQirInstruction, PyQirOperand  # type: ignore
+from pyqir.parser._native import PyQirInstruction   # type: ignore
 from pyqir.parser._parser import QirIntConstant, QirICmpInstr, QirCallInstr, QirOpInstr, QirOperand  # type: ignore
 from pyqir.generator import SimpleModule, BasicQisBuilder, ir_to_bitcode, types  # type: ignore
 from pyqir.generator.types import Qubit, Result  # type: ignore
@@ -473,6 +474,19 @@ def _to_qis_bits(args: List[Bit], mod: SimpleModule) -> Sequence[Result]:
     return []
 
 
+def _reg2ssa_var(bit_reg: BitRegister, module: Module) -> Callable:
+    # A utility function to convert from a pytket
+    #  BitRegister to an SSA variable via pyqir types.
+    reg2var = module.module.add_external_function(
+        "reg2var", types.Function([types.BOOL] * 64, types.Int(64))
+    )
+    if bit_reg.size <= 64:  # Widening by zero-padding.
+        bool_reg = list(map(bool, bit_reg)) + [False] * (64 - bit_reg.size)
+    else:  # Narrowing by truncation.
+        bool_reg = list(map(bool, bit_reg[:64]))
+    return module.builder.call(reg2var, [*bool_reg])
+
+
 class QIRGenerator:
     """A generator class to produce a QIR file from a pytket circuit."""
 
@@ -495,11 +509,8 @@ class QIRGenerator:
                 (inputs, op.input_widths),
                 (outputs, op.output_widths),
             ]:
-                if not sizes:
-                    ValueError(
-                        "Command op input or output registers have empty widths."
-                    )
                 for in_width in sizes:
+                    assert in_width > 0
                     com_bits = args[:in_width]
                     args = args[in_width:]
                     regname = com_bits[0].reg_name
@@ -596,11 +607,8 @@ class QIRGenerator:
                 # Update gateset in module.
                 module.gateset = PYQIR_GATES
 
-                # A utility function to convert from a pytket
-                # BitRegister to an SSA variable via pyqir types.
-                # Zero-pad if size mismatch.
-                bool_reg = list(map(bool, bit_reg)) + [False] * (64 - bit_reg.size)
-                ssa_var = module.builder.call(self.reg2var, [*bool_reg])
+                # Convert a bool regoster to an ssa variable.
+                ssa_var = _reg2ssa_var(bit_reg, module)
                 assert ssa_var
 
                 gate = module.gateset.tk_to_gateset(op.type)
