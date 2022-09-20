@@ -546,11 +546,16 @@ class TestPytketToQirGateTranslation:
     def test_classical_arithmetic(
         self, circuit_classical_arithmetic: Circuit, operators: List
     ):
-        ll = circuit_to_qir(circuit_classical_arithmetic, qir_format=QIRFormat.IR)
-        print(ll)
+        with open("ClassicalCircuit.ll", "r") as input_file:
+            data = input_file.readlines()
 
-        for (name, build) in operators:
-            pass
+        with open(qir_files_dir / "ClassicalCircuit.ll", "r") as input_file:
+           exp_data = input_file.readlines()
+
+        for line in data:
+            assert (
+                line in exp_data
+            )
 
     @pytest.mark.skip(reason="Waiting for feature releases in pyqir.")
     def test_bitwise_ops(self, circuit_bitwise_ops: Circuit) -> None:
