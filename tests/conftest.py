@@ -24,8 +24,9 @@ from pytket.circuit import (  # type: ignore
     CircBox,
     OpType,
 )
+from pytket.circuit.logic_exp import reg_eq, reg_neq, reg_geq, reg_gt, reg_lt, reg_leq
 
-from pytket_qir.qir import write_qir_file
+from pytket_qir.qir import circuit_to_qir, write_qir_file
 
 from pyqir.generator import Builder, IntPredicate, Value  # type: ignore
 
@@ -224,6 +225,22 @@ def circuit_classical_arithmetic() -> Circuit:
     c = circ.add_c_register("c", 3)
     circ.add_classicalexpbox_register(a & b, c)
     circ.add_classicalexpbox_register(a | b, c)
+    circ.add_classicalexpbox_register(a ^ b, c)
+    circ.add_classicalexpbox_register(a + b, c)
+    circ.add_classicalexpbox_register(a - b, c)
+    circ.add_classicalexpbox_register(a * b, c)
+    # circ.add_classicalexpbox_register(a // b, c) No division yet.
+    circ.add_classicalexpbox_register(a << b, c)
+    circ.add_classicalexpbox_register(a >> b, c)
+    circ.add_classicalexpbox_register(reg_eq(a, b), c)
+    circ.add_classicalexpbox_register(reg_neq(a, b), c)
+    circ.add_classicalexpbox_register(reg_gt(a, b), c)
+    circ.add_classicalexpbox_register(reg_geq(a, b), c)
+    circ.add_classicalexpbox_register(reg_lt(a, b), c)
+    circ.add_classicalexpbox_register(reg_leq(a, b), c)
+    circuit_to_qir(circ)
+    yield
+    os
     return circ
 
 

@@ -1,16 +1,8 @@
-; ModuleID = 'SimpleConditionalCircuit'
-source_filename = "SimpleConditionalCircuit"
+; ModuleID = 'Pytket circuit'
+source_filename = "Pytket circuit"
 
 %Qubit = type opaque
 %Result = type opaque
-
-declare void @__quantum__qis__y__body(%Qubit*)
-
-declare void @__quantum__qis__z__body(%Qubit*)
-
-declare void @__quantum__qis__x__body(%Qubit*)
-
-declare void @__quantum__qis__h__body(%Qubit*)
 
 define void @main() #0 {
 entry:
@@ -47,6 +39,14 @@ continue3:                                        ; preds = %else2, %then1
   ret void
 }
 
+declare void @__quantum__qis__x__body(%Qubit*)
+
 declare i1 @__quantum__qis__read_result__body(%Result*)
+
+declare void @__quantum__qis__h__body(%Qubit*)
+
+declare void @__quantum__qis__y__body(%Qubit*)
+
+declare void @__quantum__qis__z__body(%Qubit*)
 
 attributes #0 = { "EntryPoint" }
