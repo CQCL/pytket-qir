@@ -28,7 +28,15 @@ from typing import cast, Callable, Dict, List, Optional, Sequence, Tuple, Union
 from pytket import Circuit, OpType, Bit, Qubit  # type: ignore
 from pytket.qasm.qasm import _retrieve_registers  # type: ignore
 from pytket.wasm import WasmFileHandler  # type: ignore
-from pytket.circuit import BitRegister, CircBox, Command, Conditional, Op, WASMOp  # type: ignore
+from pytket.circuit import (  # type: ignore
+    BitRegister,
+    CircBox,
+    ClassicalExpBox,
+    Command,
+    Conditional,
+    Op,
+    WASMOp,
+)
 from pytket.circuit.logic_exp import (  # type: ignore
     BitWiseOp,
     RegAdd,
@@ -64,7 +72,7 @@ from pyqir.parser import (  # type: ignore
 )
 from pyqir.parser._native import PyQirInstruction  # type: ignore
 from pyqir.generator import SimpleModule, BasicQisBuilder, IntPredicate, ir_to_bitcode, types  # type: ignore
-from pyqir.parser._native import PyQirInstruction   # type: ignore
+from pyqir.parser._native import PyQirInstruction  # type: ignore
 from pyqir.parser._parser import QirIntConstant, QirICmpInstr, QirCallInstr, QirOpInstr, QirOperand  # type: ignore
 from pyqir.generator import SimpleModule, BasicQisBuilder, ir_to_bitcode, types  # type: ignore
 from pyqir.generator.types import Qubit, Result  # type: ignore
