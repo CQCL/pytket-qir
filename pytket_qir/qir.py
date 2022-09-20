@@ -679,7 +679,7 @@ def circuit_to_pyqir_module(
 
 def write_qir_file(
     circ: Circuit,
-    file_name: Optional[str] = None,
+    file_name: str,
     gateset: Optional[CustomGateSet] = None,
     wasm_path: Optional[Union[str, os.PathLike]] = None,
 ) -> None:
