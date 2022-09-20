@@ -473,8 +473,8 @@ def circuit_to_module(circ: Circuit, module: Module) -> Module:
                 (inputs, op.input_widths),
                 (outputs, op.output_widths),
             ]:
-                assert sizes > 0
                 for in_width in sizes:
+                    assert in_width > 0
                     wasm_bits = args[:in_width]
                     args = args[in_width:]
                     regname = wasm_bits[0].reg_name
