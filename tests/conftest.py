@@ -30,7 +30,7 @@ from pytket.circuit.logic_exp import (  # type: ignore
     reg_geq,
     reg_gt,
     reg_lt,
-    reg_leq
+    reg_leq,
 )
 
 from pytket_qir.qir import write_qir_file
