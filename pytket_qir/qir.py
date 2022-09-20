@@ -640,28 +640,6 @@ class QIRGenerator:
         return module
 
 
-def write_qir_file(
-    circ: Circuit, output_file: str, gateset: Optional[CustomGateSet] = None
-) -> None:
-    """A method to generate a qir file from a tket circuit."""
-    root, ext = os.path.splitext(os.path.basename(output_file))
-    if ext not in [".ll", ".bc"]:
-        raise ValueError("The file extension should either be '.ll' or '.bc'.")
-    module = Module(
-        name=root,
-        num_qubits=circ.n_qubits,
-        num_results=len(circ.bits),
-        gateset=gateset,
-    )
-    populated_module = QIRGenerator(circ, module).module
-    if ext == ".ll":
-        with open(output_file, "w") as out:
-            out.write(populated_module.module.ir())
-    elif ext == ".bc":
-        with open(output_file, "wb") as out:
-            out.write(ir_to_bitcode(populated_module.module.ir(), output_file))
-
-
 def circuit_to_qir(
     circ: Circuit,
     gateset: Optional[CustomGateSet] = None,
@@ -687,3 +665,29 @@ def circuit_to_qir(
         return populated_module.module.bitcode()
     else:
         return populated_module.module.ir()
+
+
+def write_qir_file(
+    circ: Circuit,
+    file_name: Optional[str] = None,
+    gateset: Optional[CustomGateSet] = None,
+    wasm_path: Optional[Union[str, os.PathLike]] = None,
+) -> None:
+    """A method to generate a qir file from a tket circuit."""
+    root, ext = os.path.splitext(os.path.basename(file_name))
+    if ext == ".bc":
+        qir_format = QIRFormat.BITCODE
+        file_param = "wb"
+    elif ext == ".ll":
+        qir_format = QIRFormat.IR
+        file_param = "w"
+    else:
+        raise ValueError("The file extension should either be '.ll' or '.bc'.")
+    populated_module = circuit_to_qir(
+        circ=circ,
+        gateset=gateset,
+        wasm_path=wasm_path,
+        qir_format=qir_format,
+    )
+    with open(file_name, file_param) as out:
+        out.write(populated_module)
