@@ -24,7 +24,14 @@ from pytket.circuit import (  # type: ignore
     CircBox,
     OpType,
 )
-from pytket.circuit.logic_exp import reg_eq, reg_neq, reg_geq, reg_gt, reg_lt, reg_leq
+from pytket.circuit.logic_exp import (  # type: ignore
+    reg_eq,
+    reg_neq,
+    reg_geq,
+    reg_gt,
+    reg_lt,
+    reg_leq
+)
 
 from pytket_qir.qir import write_qir_file
 
