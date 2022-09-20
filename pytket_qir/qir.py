@@ -21,7 +21,7 @@ from enum import Enum
 import inspect
 import os
 import re
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 from pytket import Circuit, OpType, Bit, Qubit  # type: ignore
 from pytket.qasm.qasm import _retrieve_registers  # type: ignore
@@ -420,6 +420,18 @@ def _to_qis_bits(args: List[Bit], mod: SimpleModule) -> List[Result]:
         return [mod.results[bit.index[0]] for bit in args[:-1]]
     return []
 
+def _reg2ssa_var(bit_reg: BitRegister, module: Module) -> Callable:
+    # A utility function to convert from a pytket
+    #  BitRegister to an SSA variable via pyqir types.
+    reg2var = module.module.add_external_function(
+        "reg2var", types.Function([types.BOOL] * 64, types.Int(64))
+    )
+    if bit_reg.size <= 64:  # Widening by zero-padding.
+        bool_reg = list(map(bool, bit_reg)) + [False] * (64 - bit_reg.size)
+    else:  # Narrowing by truncation.
+        bool_reg = list(map(bool, bit_reg[:64]))
+    return module.builder.call(reg2var, [*bool_reg])
+
 
 def circuit_to_module(circ: Circuit, module: Module) -> Module:
     """A method to generate a QIR string from a pytket circuit."""
@@ -497,13 +509,8 @@ def circuit_to_module(circ: Circuit, module: Module) -> Module:
             # Update gateset in module.
             module.gateset = PYQIR_GATES
 
-            # A utility function to convert from a pytket
-            #  BitRegister to an SSA variable via pyqir types.
-            reg2var = module.module.add_external_function(
-                "reg2var", types.Function([types.BOOL] * 64, types.Int(64))
-            )
-            bool_reg = list(map(bool, bit_reg)) + [False] * (64 - bit_reg.size)
-            ssa_var = module.builder.call(reg2var, [*bool_reg])
+            # Create an ssa variable from the bit register.
+            ssa_var = _reg2ssa_var(bit_reg, module)
 
             gate = module.gateset.tk_to_gateset(op.type)
             get_gate = getattr(module, gate.opname.value)
