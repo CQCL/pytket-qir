@@ -510,7 +510,17 @@ class QIRGenerator:
                     reglist.append(regname)
         elif isinstance(op, ClassicalExpBox):
             for reglist, sizes in [
-                (inputs, list(map(lambda obj: obj.size if isinstance(obj, BitRegister) else None, op.get_exp().args))),
+                (
+                    inputs,
+                    list(
+                        map(
+                            lambda obj: obj.size
+                            if isinstance(obj, BitRegister)
+                            else None,
+                            op.get_exp().args,
+                        )
+                    ),
+                ),
                 (outputs, [op.get_n_o()]),
             ]:
                 if not sizes:
