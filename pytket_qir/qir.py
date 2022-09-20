@@ -420,6 +420,7 @@ def _to_qis_bits(args: List[Bit], mod: SimpleModule) -> List[Result]:
         return [mod.results[bit.index[0]] for bit in args[:-1]]
     return []
 
+
 def _reg2ssa_var(bit_reg: BitRegister, module: Module) -> Callable:
     # A utility function to convert from a pytket
     #  BitRegister to an SSA variable via pyqir types.
