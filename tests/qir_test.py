@@ -550,12 +550,10 @@ class TestPytketToQirGateTranslation:
             data = input_file.readlines()
 
         with open(qir_files_dir / "ClassicalCircuit.ll", "r") as input_file:
-           exp_data = input_file.readlines()
+            exp_data = input_file.readlines()
 
         for line in data:
-            assert (
-                line in exp_data
-            )
+            assert line in exp_data
 
     @pytest.mark.skip(reason="Waiting for feature releases in pyqir.")
     def test_bitwise_ops(self, circuit_bitwise_ops: Circuit) -> None:
