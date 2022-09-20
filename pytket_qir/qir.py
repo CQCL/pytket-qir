@@ -473,8 +473,7 @@ def circuit_to_module(circ: Circuit, module: Module) -> Module:
                 (inputs, op.input_widths),
                 (outputs, op.output_widths),
             ]:
-                if not sizes:
-                    ValueError("WASM input or output registers have empty widths.")
+                assert sizes > 0
                 for in_width in sizes:
                     wasm_bits = args[:in_width]
                     args = args[in_width:]
