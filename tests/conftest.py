@@ -251,6 +251,30 @@ def circuit_classical_arithmetic() -> Circuit:
 
 
 @fixture
+def circuit_classical_reg2const_arithmetic() -> Circuit:
+    circ = Circuit(2)
+    a = circ.add_c_register("a", 3)
+    b = circ.add_c_register("b", 3)
+    c = circ.add_c_register("c", 3)
+    circ.add_c_setreg(3, b)
+    circ.add_classicalexpbox_register(a + b, c)
+    circ.add_classicalexpbox_register(a - b, c)
+    circ.add_classicalexpbox_register(a * b, c)
+    # circ.add_classicalexpbox_register(a // b, c) No division yet.
+    circ.add_classicalexpbox_register(a << b, c)
+    circ.add_classicalexpbox_register(a >> b, c)
+    circ.add_classicalexpbox_register(reg_eq(a, b), c)
+    circ.add_classicalexpbox_register(reg_neq(a, b), c)
+    circ.add_classicalexpbox_register(reg_gt(a, b), c)
+    circ.add_classicalexpbox_register(reg_geq(a, b), c)
+    circ.add_classicalexpbox_register(reg_lt(a, b), c)
+    circ.add_classicalexpbox_register(reg_leq(a, b), c)
+    write_qir_file(circ, "ClassicalReg2ConstCircuit.ll")
+    yield
+    os.remove("ClassicalReg2ConstCircuit.ll")
+
+
+@fixture
 def bitwise_file() -> str:
     return "test_bitwise_ops.ll"
 

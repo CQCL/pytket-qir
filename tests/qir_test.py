@@ -543,13 +543,24 @@ class TestPytketToQirGateTranslation:
         assert call_ry in data
         assert call_rz in data
 
-    def test_classical_arithmetic(
-        self, circuit_classical_arithmetic: Circuit, operators: List
-    ):
+    def test_classical_reg2reg_arithmetic(
+        self, circuit_classical_arithmetic: Circuit):
         with open("ClassicalCircuit.ll", "r") as input_file:
             data = input_file.readlines()
 
         with open(qir_files_dir / "ClassicalCircuit.ll", "r") as input_file:
+            exp_data = input_file.readlines()
+
+        for line in data:
+            assert line in exp_data
+
+    def test_classical_reg2const_arithmetic(
+        self, circuit_classical_reg2const_arithmetic: Circuit):
+
+        with open("ClassicalReg2ConstCircuit.ll", "r") as input_file:
+            data = input_file.readlines()
+
+        with open(qir_files_dir / "ClassicalReg2ConstCircuit.ll", "r") as input_file:
             exp_data = input_file.readlines()
 
         for line in data:
