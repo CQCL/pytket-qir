@@ -490,8 +490,8 @@ class QIRGenerator:
         self.circuit = circuit
         self.module = module
         self.cregs = _retrieve_registers(self.circuit.bits, BitRegister)
-        self.set_cregs = {}  # Keep track of set registers.
-        self.ssa_vars = {}  # Keep track of set ssa variables.
+        self.set_cregs: Dict[str, List] = {}  # Keep track of set registers.
+        self.ssa_vars: Dict[str, Callable] = {}  # Keep track of set ssa variables.
         self.reg2var = module.module.add_external_function(
             "reg2var", types.Function([types.BOOL] * 64, types.Int(64))
         )
