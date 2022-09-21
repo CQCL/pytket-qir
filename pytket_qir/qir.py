@@ -628,8 +628,7 @@ class QIRGenerator:
                 ssa_vars: List = []
                 for inp in inputs:
                     bit_reg = circ.get_c_register(inp)
-                    bool_reg = list(map(bool, bit_reg)) + [False] * (64 - bit_reg.size)
-                    ssa_vars.append(module.builder.call(self.reg2var, [*bool_reg]))
+                    ssa_vars.append(_reg2ssa_var(bit_reg, module))
 
                 _TK_CLOPS_TO_PYQIR[type(op.get_exp())](module.builder)(*ssa_vars)
             else:
