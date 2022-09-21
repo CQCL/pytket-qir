@@ -497,7 +497,8 @@ class QIRGenerator:
         self.reg2var = module.module.add_external_function(
             "reg2var", types.Function([types.BOOL] * 64, types.Int(64))
         )
-        self.module = self.circuit_to_module(circuit, module)
+        self.populated_module = self.circuit_to_module(circuit, module)
+
     def _reg2ssa_var(self, bit_reg: BitRegister) -> Callable:
         # A utility function to convert from a pytket
         # BitRegister to an SSA variable via pyqir types.
@@ -696,7 +697,7 @@ def circuit_to_pyqir_module(
         gateset=gateset,
         wasm_handler=wasm_handler,
     )
-    populated_module = QIRGenerator(circ, module).module
+    populated_module = QIRGenerator(circ, module).populated_module
     if qir_format == QIRFormat.BITCODE:
         return populated_module.module.bitcode()
     else:
