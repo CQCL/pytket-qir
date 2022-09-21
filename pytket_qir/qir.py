@@ -567,6 +567,21 @@ class QIRGenerator:
                             "Command ops must act on entire registers."
                         )
                     reglist.append(regname)
+        elif isinstance(op, SetBitsOp):
+            for reglist, sizes in [
+                (inputs, [op.n_inputs]),
+                (outputs, [op.n_outputs]),
+            ]:
+                 for in_width in sizes:
+                     if in_width > 0:
+                         com_bits = args[:in_width]
+                         args = args[in_width:]
+                         regname = com_bits[0].reg_name
+                         if com_bits != list(self.cregs[regname]):
+                             CommandUnsupportedError(
+                                 "Command ops must act on entire registers."
+                             )
+                         reglist.append(regname)
         return inputs, outputs
 
     def circuit_to_module(self, circ: Circuit, module: Module) -> Module:
@@ -643,6 +658,10 @@ class QIRGenerator:
                     ssa_vars.append(self._reg2ssa_var(bit_reg))
 
                 _TK_CLOPS_TO_PYQIR[type(op.get_exp())](module.builder)(*ssa_vars)
+            elif isinstance(op, SetBitsOp):
+                inputs, outputs = self._get_c_regs_from_com(command)
+                for out in outputs:
+                    self.set_cregs[out] = command.op.values
             else:
                 optype, params = _get_optype_and_params(op)
                 qubits = _to_qis_qubits(command.qubits, module.module)
