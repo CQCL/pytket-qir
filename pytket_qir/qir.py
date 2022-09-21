@@ -35,6 +35,7 @@ from pytket.circuit import (  # type: ignore
     Command,
     Conditional,
     Op,
+    SetBitsOp,
     WASMOp,
 )
 from pytket.circuit.logic_exp import (  # type: ignore
