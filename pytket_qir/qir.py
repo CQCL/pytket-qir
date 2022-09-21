@@ -490,6 +490,7 @@ class QIRGenerator:
 
     def __init__(self, circuit: Circuit, module: Module) -> None:
         self.circuit = circuit
+        self.module = module
         self.cregs = _retrieve_registers(self.circuit.bits, BitRegister)
         self.reg2var = module.module.add_external_function(
             "reg2var", types.Function([types.BOOL] * 64, types.Int(64))
