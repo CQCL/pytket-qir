@@ -483,17 +483,6 @@ def _to_qis_bits(args: List[Bit], mod: SimpleModule) -> Sequence[Result]:
     return []
 
 
-def _reg2ssa_var(bit_reg: BitRegister, module: Module) -> Callable:
-    # A utility function to convert from a pytket
-    #  BitRegister to an SSA variable via pyqir types.
-    reg2var = module.module.add_external_function(
-        "reg2var", types.Function([types.BOOL] * 64, types.Int(64))
-    )
-    if bit_reg.size <= 64:  # Widening by zero-padding.
-        bool_reg = list(map(bool, bit_reg)) + [False] * (64 - bit_reg.size)
-    else:  # Narrowing by truncation.
-        bool_reg = list(map(bool, bit_reg[:64]))
-    return module.builder.call(reg2var, [*bool_reg])
 
 
 class QIRGenerator:
@@ -506,6 +495,24 @@ class QIRGenerator:
             "reg2var", types.Function([types.BOOL] * 64, types.Int(64))
         )
         self.module = self.circuit_to_module(circuit, module)
+    def _reg2ssa_var(self, bit_reg: BitRegister) -> Callable:
+        # A utility function to convert from a pytket
+        # BitRegister to an SSA variable via pyqir types.
+        # Check the register has been previously set.
+        reg_name = bit_reg[0].reg_name
+        if reg_name not in self.ssa_vars.keys():
+            if (reg_value := self.set_cregs.get(reg_name)):
+                bit_reg = reg_value
+
+            if (size := len(bit_reg)) <= 64:  # Widening by zero-padding.
+                bool_reg = list(map(bool, bit_reg)) + [False] * (64 - size)
+            else:  # Narrowing by truncation.
+                bool_reg = list(map(bool, bit_reg[:64]))
+            ssa_var = self.module.builder.call(self.reg2var, [*bool_reg])
+            self.ssa_vars[reg_name] = ssa_var
+            return ssa_var
+        else:
+            return self.ssa_vars[reg_name]
 
     def _get_c_regs_from_com(self, command: Command) -> Tuple[List[str], List[str]]:
         op = command.op
@@ -617,7 +624,7 @@ class QIRGenerator:
                 module.gateset = PYQIR_GATES
 
                 # Convert a bool regoster to an ssa variable.
-                ssa_var = _reg2ssa_var(bit_reg, module)
+                ssa_var = self._reg2ssa_var(bit_reg)
                 assert ssa_var
 
                 gate = module.gateset.tk_to_gateset(op.type)
@@ -629,7 +636,7 @@ class QIRGenerator:
                 ssa_vars: List = []
                 for inp in inputs:
                     bit_reg = circ.get_c_register(inp)
-                    ssa_vars.append(_reg2ssa_var(bit_reg, module))
+                    ssa_vars.append(self._reg2ssa_var(bit_reg))
 
                 _TK_CLOPS_TO_PYQIR[type(op.get_exp())](module.builder)(*ssa_vars)
             else:
