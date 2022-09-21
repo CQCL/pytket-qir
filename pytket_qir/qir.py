@@ -483,8 +483,6 @@ def _to_qis_bits(args: List[Bit], mod: SimpleModule) -> Sequence[Result]:
     return []
 
 
-
-
 class QIRGenerator:
     """A generator class to produce a QIR file from a pytket circuit."""
 
@@ -505,7 +503,7 @@ class QIRGenerator:
         # Check the register has been previously set.
         reg_name = bit_reg[0].reg_name
         if reg_name not in self.ssa_vars.keys():
-            if (reg_value := self.set_cregs.get(reg_name)):
+            if reg_value := self.set_cregs.get(reg_name):
                 bit_reg = reg_value
 
             if (size := len(bit_reg)) <= 64:  # Widening by zero-padding.
@@ -572,16 +570,16 @@ class QIRGenerator:
                 (inputs, [op.n_inputs]),
                 (outputs, [op.n_outputs]),
             ]:
-                 for in_width in sizes:
-                     if in_width > 0:
-                         com_bits = args[:in_width]
-                         args = args[in_width:]
-                         regname = com_bits[0].reg_name
-                         if com_bits != list(self.cregs[regname]):
-                             CommandUnsupportedError(
-                                 "Command ops must act on entire registers."
-                             )
-                         reglist.append(regname)
+                for in_width in sizes:
+                    if in_width > 0:
+                        com_bits = args[:in_width]
+                        args = args[in_width:]
+                        regname = com_bits[0].reg_name
+                        if com_bits != list(self.cregs[regname]):
+                            CommandUnsupportedError(
+                                "Command ops must act on entire registers."
+                            )
+                        reglist.append(regname)
         return inputs, outputs
 
     def circuit_to_module(self, circ: Circuit, module: Module) -> Module:
