@@ -14,7 +14,7 @@
 
 import os
 from pathlib import Path
-from typing import Generator, List
+from typing import Generator
 import pytest  # type: ignore
 from pytket import Circuit, OpType  # type: ignore
 from pytket.circuit import Conditional  # type: ignore
@@ -22,13 +22,11 @@ from pytket.wasm import WasmFileHandler  # type: ignore
 
 from pyqir.generator import bitcode_to_ir  # type: ignore
 
-from pytket_qir.qir import (
-    circuit_to_pyqir_module,
+from pytket_qir.generator import (
+    circuit_to_qir,
     write_qir_file,
-    circuit_from_qir,
 )
-from pytket_qir.utils.utils import QIRFormat  # type: ignore
-
+from pytket_qir.parser import circuit_from_qir
 
 qir_files_dir = Path("./qir_test_files")
 
@@ -602,7 +600,7 @@ class TestPytketToQirGateTranslation:
         c1 = circuit.add_c_register("c1", 64)
 
         circuit.add_wasm_to_reg("add_one", wasm_handler, [c0], [c1])
-        ir_bytes = circuit_to_pyqir_module(circuit, wasm_path=wasm_file_path)
+        ir_bytes = circuit_to_qir(circuit, wasm_path=wasm_file_path)
         assert isinstance(ir_bytes, bytes)
 
         ll = bitcode_to_ir(ir_bytes)

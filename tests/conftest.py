@@ -33,9 +33,10 @@ from pytket.circuit.logic_exp import (  # type: ignore
     reg_leq,
 )
 
+from pyqir.generator import Builder, IntPredicate, Value  # type: ignore
+
 from pytket_qir.qir import write_qir_file  # type: ignore
 
-from pyqir.generator import Builder, IntPredicate, Value  # type: ignore
 
 qir_files_dir = Path("./qir_test_files")
 

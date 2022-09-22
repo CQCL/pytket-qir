@@ -64,6 +64,8 @@ from pytket.circuit.logic_exp import (  # type: ignore
     RegNeg,
 )
 
+from pyqir.generator import SimpleModule, BasicQisBuilder, IntPredicate, ir_to_bitcode, types  # type: ignore
+from pyqir.generator.types import Qubit, Result  # type: ignore
 from pyqir.parser import (  # type: ignore
     QirBlock,
     QirBrTerminator,
@@ -72,12 +74,7 @@ from pyqir.parser import (  # type: ignore
     QirInstr,
 )
 from pyqir.parser._native import PyQirInstruction  # type: ignore
-from pyqir.generator import SimpleModule, BasicQisBuilder, IntPredicate, ir_to_bitcode, types  # type: ignore
-from pyqir.parser._native import PyQirInstruction  # type: ignore
 from pyqir.parser._parser import QirIntConstant, QirICmpInstr, QirCallInstr, QirOpInstr, QirOperand  # type: ignore
-from pyqir.generator import SimpleModule, BasicQisBuilder, ir_to_bitcode, types  # type: ignore
-from pyqir.generator.types import Qubit, Result  # type: ignore
-
 
 from pytket_qir.gatesets.base import (
     CustomGateSet,
@@ -87,11 +84,11 @@ from pytket_qir.gatesets.base import (
     OpSpec,
     QirGate,
 )
-from pytket_qir.gatesets.pyqir.pyqir import PYQIR_GATES, _TK_TO_PYQIR  # type: ignore
-from pytket_qir.utils.utils import QIRFormat  # type: ignore
+from pytket_qir.gatesets.pyqir import PYQIR_GATES, _TK_TO_PYQIR  # type: ignore
+from pytket_qir.utils import QIRFormat  # type: ignore
 
 
-classical_ops: Dict[str, Union[type, Dict[str, Callable]]] = {
+_PYQIR_TO_TK_CLOPS: Dict[str, Union[type, Dict[str, Callable]]] = {
     "is_add": RegAdd,
     "is_sub": RegSub,
     "is_mul": RegMul,
@@ -246,7 +243,7 @@ class QirParser:
         if classical_op == "is_icmp":
             assert isinstance(instr, QirICmpInstr)
             c_reg1 = add_classical_register(operands[0], circuit)
-            c_op_dict = cast(Dict, classical_ops[classical_op])
+            c_op_dict = cast(Dict, _PYQIR_TO_TK_CLOPS[classical_op])
             c_op = c_op_dict[instr.predicate]
             # import pdb; pdb.set_trace()
             assert isinstance(operands[1], QirIntConstant)
@@ -256,7 +253,7 @@ class QirParser:
             )
         else:
             # import pdb; pdb.set_trace()
-            c_op = cast(Callable, classical_ops[classical_op])
+            c_op = cast(Callable, _PYQIR_TO_TK_CLOPS[classical_op])
             # Integer negation is represented as a substraction from 0.
             if isinstance(operands[0], QirIntConstant):
                 assert isinstance(operands[1], QirIntConstant)
@@ -332,7 +329,7 @@ class QirParser:
                 # Retain only supported classical ops.
                 if (
                     len(filtered_attrs) == 1
-                    and (matching := filtered_attrs[0]) in classical_ops.keys()
+                    and (matching := filtered_attrs[0]) in _PYQIR_TO_TK_CLOPS.keys()
                 ):
                     # Generate a register with a unique name
                     # from the QIR one to hold the operation result
@@ -392,7 +389,7 @@ def circuit_from_qir(
     input_file_str = str(input_file)
     output_bc_file: str = ""
     if ext not in [".ll", ".bc"]:
-        raise TypeError("Can only convert .bc or .ll files.")
+        raise TypeError("Can only convert '.bc' or '.ll' files.")
     if ext == ".ll":
         with open(input_file_str, "r") as f:
             data = f.read()
@@ -484,7 +481,7 @@ def _to_qis_bits(args: List[Bit], mod: SimpleModule) -> Sequence[Result]:
 
 
 class QIRGenerator:
-    """A generator class to produce a QIR file from a pytket circuit."""
+    """Generate QIR from a pytket circuit."""
 
     def __init__(self, circuit: Circuit, module: Module) -> None:
         self.circuit = circuit
@@ -492,20 +489,18 @@ class QIRGenerator:
         self.cregs = _retrieve_registers(self.circuit.bits, BitRegister)
         self.set_cregs: Dict[str, List] = {}  # Keep track of set registers.
         self.ssa_vars: Dict[str, Callable] = {}  # Keep track of set ssa variables.
-        self.reg2var = module.module.add_external_function(
+        self.reg2var = self.module.module.add_external_function(
             "reg2var", types.Function([types.BOOL] * 64, types.Int(64))
         )
-        self.populated_module = self.circuit_to_module(circuit, module)
+        self.populated_module = self.circuit_to_module(circuit, self.module)
 
     def _reg2ssa_var(self, bit_reg: BitRegister) -> Callable:
-        # A utility function to convert from a pytket
-        # BitRegister to an SSA variable via pyqir types.
+        """Convert a BitRegister to an SSA variable via pyqir types."""
         # Check the register has been previously set.
         reg_name = bit_reg[0].reg_name
         if reg_name not in self.ssa_vars.keys():
             if reg_value := self.set_cregs.get(reg_name):
                 bit_reg = reg_value
-
             if (size := len(bit_reg)) <= 64:  # Widening by zero-padding.
                 bool_reg = list(map(bool, bit_reg)) + [False] * (64 - size)
             else:  # Narrowing by truncation.
@@ -517,6 +512,7 @@ class QIRGenerator:
             return self.ssa_vars[reg_name]
 
     def _get_c_regs_from_com(self, command: Command) -> Tuple[List[str], List[str]]:
+        """Get classical registers for several command op types."""
         op = command.op
         args = command.args
         inputs: List[str] = []
@@ -583,7 +579,7 @@ class QIRGenerator:
         return inputs, outputs
 
     def circuit_to_module(self, circ: Circuit, module: Module) -> Module:
-        """A method to generate a QIR string from a pytket circuit."""
+        """Populate a PyQir module from a pytket circuit."""
         for command in circ:
             op = command.op
             if isinstance(op, Conditional):
@@ -640,7 +636,7 @@ class QIRGenerator:
                 # Update gateset in module.
                 module.gateset = PYQIR_GATES
 
-                # Convert a bool regoster to an ssa variable.
+                # Convert a bool register to an ssa variable.
                 ssa_var = self._reg2ssa_var(bit_reg)
                 assert ssa_var
 
@@ -694,13 +690,13 @@ class QIRGenerator:
         return module
 
 
-def circuit_to_pyqir_module(
+def circuit_to_qir(
     circ: Circuit,
     gateset: Optional[CustomGateSet] = None,
     wasm_path: Optional[Union[str, os.PathLike]] = None,
     qir_format: Optional[QIRFormat] = QIRFormat.BITCODE,
 ) -> Union[str, bytes]:
-    """Return a pytket circuit as a QIR."""
+    """Return QIR from a pytket circuit."""
     wasm_handler = None
     if wasm_path:
         try:
@@ -727,8 +723,8 @@ def write_qir_file(
     gateset: Optional[CustomGateSet] = None,
     wasm_path: Optional[Union[str, os.PathLike]] = None,
 ) -> None:
-    """A method to generate a qir file from a tket circuit."""
-    root, ext = os.path.splitext(os.path.basename(file_name))
+    """Generate a QIR file from a pytket circuit."""
+    _, ext = os.path.splitext(os.path.basename(file_name))
     if ext == ".bc":
         qir_format = QIRFormat.BITCODE
         file_param = "wb"
@@ -737,11 +733,11 @@ def write_qir_file(
         file_param = "w"
     else:
         raise ValueError("The file extension should either be '.ll' or '.bc'.")
-    populated_module = circuit_to_pyqir_module(
+    qir = circuit_to_qir(
         circ=circ,
         gateset=gateset,
         wasm_path=wasm_path,
         qir_format=qir_format,
     )
     with open(file_name, file_param) as out:
-        out.write(populated_module)
+        out.write(qir)
