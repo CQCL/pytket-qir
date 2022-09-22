@@ -53,7 +53,7 @@ from pytket.circuit.logic_exp import (  # type: ignore
     RegXor,
 )
 
-from pyqir.generator import SimpleModule, IntPredicate, types  # type: ignore
+from pyqir.generator import IntPredicate, types  # type: ignore
 from pyqir.generator.types import Qubit, Result  # type: ignore
 
 from pytket_qir.gatesets.base import (
@@ -90,39 +90,6 @@ class CommandUnsupportedError(Exception):
     pass
 
 
-def _get_optype_and_params(op: Op) -> Tuple[OpType, Sequence[float]]:
-    optype = op.type
-    params: List = []
-    if optype == OpType.ExplicitPredicate:
-        if op.get_name() == "AND":
-            optype = BitWiseOp.AND
-        elif op.get_name() == "OR":
-            optype = BitWiseOp.OR
-        elif op.get_name() == "XOR":
-            optype = BitWiseOp.XOR
-    else:
-        params = op.params
-        if optype == OpType.TK1:
-            params = [op.params[1], op.params[0] - 0.5, op.params[2] + 0.5]
-    return (optype, params)
-
-
-def _to_qis_qubits(qubits: List[Qubit], mod: SimpleModule) -> Sequence[Qubit]:
-    return [mod.qubits[qubit.index[0]] for qubit in qubits]
-
-
-def _to_qis_results(bits: List[Bit], mod: SimpleModule) -> Optional[Result]:
-    if bits:
-        return mod.results[bits[0].index[0]]
-    return None
-
-
-def _to_qis_bits(args: List[Bit], mod: SimpleModule) -> Sequence[Result]:
-    if args:
-        return [mod.results[bit.index[0]] for bit in args[:-1]]
-    return []
-
-
 class QIRGenerator:
     """Generate QIR from a pytket circuit."""
 
@@ -136,6 +103,35 @@ class QIRGenerator:
             "reg2var", types.Function([types.BOOL] * 64, types.Int(64))
         )
         self.populated_module = self.circuit_to_module(circuit, self.module)
+
+    def _get_optype_and_params(self, op: Op) -> Tuple[OpType, Sequence[float]]:
+        optype = op.type
+        params: List = []
+        if optype == OpType.ExplicitPredicate:
+            if op.get_name() == "AND":
+                optype = BitWiseOp.AND
+            elif op.get_name() == "OR":
+                optype = BitWiseOp.OR
+            elif op.get_name() == "XOR":
+                optype = BitWiseOp.XOR
+        else:
+            params = op.params
+            if optype == OpType.TK1:
+                params = [op.params[1], op.params[0] - 0.5, op.params[2] + 0.5]
+        return (optype, params)
+
+    def _to_qis_qubits(self, qubits: List[Qubit]) -> Sequence[Qubit]:
+        return [self.module.module.qubits[qubit.index[0]] for qubit in qubits]
+
+    def _to_qis_results(self, bits: List[Bit]) -> Optional[Result]:
+        if bits:
+            return self.module.module.results[bits[0].index[0]]
+        return None
+
+    def _to_qis_bits(self, args: List[Bit]) -> Sequence[Result]:
+        if args:
+            return [self.module.module.results[bit.index[0]] for bit in args[:-1]]
+        return []
 
     def _reg2ssa_var(self, bit_reg: BitRegister) -> Callable:
         """Convert a BitRegister to an SSA variable via pyqir types."""
@@ -300,9 +296,9 @@ class QIRGenerator:
                 for out in outputs:
                     self.set_cregs[out] = command.op.values
             else:
-                optype, params = _get_optype_and_params(op)
-                qubits = _to_qis_qubits(command.qubits, module.module)
-                results = _to_qis_results(command.bits, module.module)
+                optype, params = self._get_optype_and_params(op)
+                qubits = self._to_qis_qubits(command.qubits)
+                results = self._to_qis_results(command.bits)
                 if module.gateset.name == "PyQir":
                     pyqir_gate = module.gateset.tk_to_gateset(optype)
                     if not pyqir_gate.opspec == OpSpec.BODY:
@@ -319,7 +315,7 @@ class QIRGenerator:
                 else:
                     bits: Optional[Sequence[Result]] = None
                     if type(optype) == BitWiseOp:
-                        bits = _to_qis_bits(command.args, module.module)
+                        bits = self._to_qis_bits(command.args)
                     gate = module.gateset.tk_to_gateset(optype)
                     get_gate = getattr(module, gate.opname.value)
                     if bits:
