@@ -65,7 +65,10 @@ from pytket_qir.gatesets.base import (
 )
 from pytket_qir.gatesets.pyqir import PYQIR_GATES, _TK_TO_PYQIR  # type: ignore
 from pytket_qir.module import Module
-from pytket_qir.utils import QIRFormat  # type: ignore
+from pytket_qir.utils import (  # type: ignore
+    CommandUnsupportedError,
+    QIRFormat,
+)
 
 
 _TK_CLOPS_TO_PYQIR: Dict = {
@@ -84,10 +87,6 @@ _TK_CLOPS_TO_PYQIR: Dict = {
     RegLt: lambda b: partial(b.icmp, IntPredicate.ULT),
     RegLeq: lambda b: partial(b.icmp, IntPredicate.ULE),
 }
-
-
-class CommandUnsupportedError(Exception):
-    pass
 
 
 class QIRGenerator:
@@ -151,7 +150,7 @@ class QIRGenerator:
             return self.ssa_vars[reg_name]
 
     def _get_c_regs_from_com(self, command: Command) -> Tuple[List[str], List[str]]:
-        """Get classical registers for several command op types."""
+        """Get classical registers from command op types."""
         op = command.op
         args = command.args
         inputs: List[str] = []
@@ -188,7 +187,7 @@ class QIRGenerator:
                 (outputs, [op.get_n_o()]),
             ]:
                 if not sizes:
-                    ValueError(
+                    CommandUnsupportedError(
                         "Command op input or output registers have empty widths."
                     )
                 for in_width in sizes:
