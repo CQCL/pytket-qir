@@ -75,7 +75,7 @@ test = ["pytest (>=7.1)", "pytest-cov (>=3.0)", "codecov (>=2.1)"]
 
 [[package]]
 name = "numpy"
-version = "1.23.2"
+version = "1.23.3"
 description = "NumPy is the fundamental package for array computing with Python."
 category = "main"
 optional = false
@@ -83,60 +83,44 @@ python-versions = ">=3.8"
 
 [[package]]
 name = "pyqir"
-version = "0.6.0a1"
+version = "0.6.0"
 description = "PyQIR - set of APIs for generating, parsing, and evaluating Quantum Intermediate Representation (QIR)"
 category = "main"
 optional = false
 python-versions = ">=3.6"
 
 [package.dependencies]
-pyqir-evaluator = ">=0.6.0a1"
-pyqir-generator = ">=0.6.0a1"
-pyqir-parser = ">=0.6.0a1"
-
-[package.source]
-type = "file"
-url = "pyqir-0.6.0a1-py3-none-any.whl"
+pyqir-evaluator = ">=0.6.0"
+pyqir-generator = ">=0.6.0"
+pyqir-parser = ">=0.6.0"
 
 [[package]]
 name = "pyqir-evaluator"
-version = "0.6.0a1"
+version = "0.6.0"
 description = "Python based QIR Evaluation (JIT) library."
 category = "main"
 optional = false
 python-versions = ">=3.6"
 
-[package.source]
-type = "file"
-url = "pyqir_evaluator-0.6.0a1-cp36-abi3-macosx_10_7_x86_64.whl"
-
 [[package]]
 name = "pyqir-generator"
-version = "0.6.0a1"
+version = "0.6.0"
 description = "Python based QIR generator library."
 category = "main"
 optional = false
 python-versions = ">=3.6"
 
-[package.source]
-type = "file"
-url = "pyqir_generator-0.6.0a1-cp36-abi3-macosx_10_7_x86_64.whl"
-
 [[package]]
 name = "pyqir-parser"
-version = "0.6.0a1"
+version = "0.6.0"
 description = "Python based QIR parser library."
 category = "main"
 optional = false
 python-versions = ">=3.6"
 
-[package.source]
-type = "file"
-url = "pyqir_parser-0.6.0a1-cp36-abi3-macosx_10_7_x86_64.whl"
-
 [[package]]
 name = "pytket"
-version = "1.6.0rc2"
+version = "1.6.1"
 description = "Python module for interfacing with the CQC tket library of quantum software"
 category = "main"
 optional = false
@@ -194,7 +178,7 @@ python-versions = ">=3.7"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8,<3.11"
-content-hash = "50c3315019a9d85e83b1888906c12fd8c383e5623194a9768dd252d08faeaf48"
+content-hash = "031b65bc1ae3470c7c458b667b40c1b9074c8c376823daaa3c3c8a859e695b83"
 
 [metadata.files]
 graphviz = []
@@ -254,18 +238,10 @@ mpmath = [
 ]
 networkx = []
 numpy = []
-pyqir = [
-    {file = "pyqir-0.6.0a1-py3-none-any.whl", hash = "sha256:ae5bd4d1d765663d1531f6ccec93a9348d35542fc059b266928ac686175080f8"},
-]
-pyqir-evaluator = [
-    {file = "pyqir_evaluator-0.6.0a1-cp36-abi3-macosx_10_7_x86_64.whl", hash = "sha256:0cebaa68974dfdd2ed5a4a8de3a01cf06029e9b24adeb29b49fac679daf04511"},
-]
-pyqir-generator = [
-    {file = "pyqir_generator-0.6.0a1-cp36-abi3-macosx_10_7_x86_64.whl", hash = "sha256:598f46694c89dfa760a08c74412f401e4e40ff3932786e346243e795bccceb89"},
-]
-pyqir-parser = [
-    {file = "pyqir_parser-0.6.0a1-cp36-abi3-macosx_10_7_x86_64.whl", hash = "sha256:a90e46f1374029e9bddb7e964ce5e16a96ee6fccdf3c1948e8404d1393441b8d"},
-]
+pyqir = []
+pyqir-evaluator = []
+pyqir-generator = []
+pyqir-parser = []
 pytket = []
 scipy = []
 sympy = []
