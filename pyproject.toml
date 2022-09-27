@@ -10,24 +10,13 @@ authors = ["Roland Guichard <roland.guichard@cambridgequantum.com>"]
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"
 pytket = "^1.3.0rc1"
-pyqir = { file = "pyqir-0.6.0a1-py3-none-any.whl"}
-pyqir-parser = { file = "pyqir_parser-0.6.0a1-cp36-abi3-macosx_10_7_x86_64.whl"}
-pyqir-evaluator = { file = "pyqir_evaluator-0.6.0a1-cp36-abi3-macosx_10_7_x86_64.whl"}
-pyqir-generator = { file = "pyqir_generator-0.6.0a1-cp36-abi3-macosx_10_7_x86_64.whl"}
+pyqir = "^0.6.0"
+pyqir-parser = "^0.6.0"
+pyqir-evaluator = "^0.6.0"
+pyqir-generator = "^0.6.0"
 
 [tool.poetry.scripts]
 compile-bc-test-files = "tests.qir_test_files.compile_bc_test_files:compile_to_bc"
-
-[tool.black]
-exclude = '''
-
-(
-  /(
-     notebooks
-  )/
-
-)
-'''
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
