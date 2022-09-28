@@ -435,7 +435,7 @@ def _reg2ssa_var(bit_reg: BitRegister, module: Module, wasm_type_value: int) -> 
     return module.builder.call(reg2var, [*bool_reg])
 
 
-def circuit_to_module(circ: Circuit, module: Module, wasm_type: Optional[WASMType] = WASMType.INT64) -> Module:
+def circuit_to_module(circ: Circuit, module: Module, wasm_type: WASMType = WASMType.INT64) -> Module:
     """A method to generate a QIR string from a pytket circuit."""
     wasm_type_value = wasm_type.value
     for command in circ:
