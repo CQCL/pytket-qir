@@ -581,7 +581,7 @@ def circuit_to_qir_bytes(
     module_name = "Generated from {} pytket circuit".format(
         circ.name if circ.name is not None else "input"
     )
-    if wasm_path:
+    if wasm_path is not None:
         try:
             wasm_handler = WasmFileHandler(str(wasm_path))
             wasm_file_name = os.path.basename(str(wasm_path))
