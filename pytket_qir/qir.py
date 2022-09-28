@@ -245,10 +245,10 @@ class QirParser:
                 if not self.wasm_handler:
                     raise ValueError("A WASM file handler must be provided.")
                 func_name = instr.func_name
-                if not func_name:
+                if func_name is None:
                     raise ValueError("The WASM function call is not defined.")
                 matched_str = re.search("__quantum__(.+?)__(.+?)__(.+)", func_name)
-                if not matched_str:
+                if matched_str is None:
                     raise ValueError(
                         "The WASM function call name is not propely defined."
                     )
