@@ -1,4 +1,4 @@
-source_filename = "Pytket circuit"
+source_filename = "Generated from input pytket circuit and wasm_adder.wasm file."
 
 declare i64 @__quantum__hybrid__add_one__body(i64)
 

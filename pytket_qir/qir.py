@@ -578,13 +578,16 @@ def circuit_to_qir_bytes(
 ) -> bytes:
     """Return a pytket circuit as an IR bitcode file."""
     wasm_handler = None
+    module_name = "Generated from {} pytket circuit".format(circ.name if circ.name is not None else "input")
     if wasm_path:
         try:
             wasm_handler = WasmFileHandler(str(wasm_path))
+            wasm_file_name = os.path.basename(str(wasm_path))
+            module_name = module_name + " and {} file.".format(wasm_file_name)
         except ValueError as ve:
             raise ve
     module = Module(
-        name="Pytket circuit",
+        name=module_name,
         num_qubits=circ.n_qubits,
         num_results=len(circ.bits),
         gateset=gateset,
