@@ -422,11 +422,14 @@ def _to_qis_bits(args: List[Bit], mod: SimpleModule) -> List[Result]:
     return []
 
 
-def _reg2ssa_var(bit_reg: BitRegister, module: Module, wasm_type_value: int) -> Callable:
+def _reg2ssa_var(
+    bit_reg: BitRegister, module: Module, wasm_type_value: int
+) -> Callable:
     # A utility function to convert from a pytket
     #  BitRegister to an SSA variable via pyqir types.
     reg2var = module.module.add_external_function(
-        "reg2var", types.Function([types.BOOL] * wasm_type_value, types.Int(wasm_type_value))
+        "reg2var",
+        types.Function([types.BOOL] * wasm_type_value, types.Int(wasm_type_value)),
     )
     if bit_reg.size <= wasm_type_value:  # Widening by zero-padding.
         bool_reg = list(map(bool, bit_reg)) + [False] * (wasm_type_value - bit_reg.size)
@@ -435,7 +438,9 @@ def _reg2ssa_var(bit_reg: BitRegister, module: Module, wasm_type_value: int) -> 
     return module.builder.call(reg2var, [*bool_reg])
 
 
-def circuit_to_module(circ: Circuit, module: Module, wasm_type: WASMType = WASMType.INT64) -> Module:
+def circuit_to_module(
+    circ: Circuit, module: Module, wasm_type: WASMType = WASMType.INT64
+) -> Module:
     """A method to generate a QIR string from a pytket circuit."""
     wasm_type_value = wasm_type.value
     for command in circ:
@@ -577,7 +582,7 @@ def circuit_to_qir_bytes(
     circ: Circuit,
     gateset: Optional[CustomGateSet] = None,
     wasm_path: Optional[Union[str, os.PathLike]] = None,
-    wasm_type: Optional[WASMType] = WASMType.INT64
+    wasm_type: Optional[WASMType] = WASMType.INT64,
 ) -> bytes:
     """Return a pytket circuit as an IR bitcode file."""
     wasm_handler = None
