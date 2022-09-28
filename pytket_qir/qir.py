@@ -439,9 +439,10 @@ def _reg2ssa_var(
 
 
 def circuit_to_module(
-    circ: Circuit, module: Module, wasm_type: WASMType = WASMType.INT64
+    circ: Circuit, module: Module, wasm_type: Optional[WASMType] = WASMType.INT64
 ) -> Module:
     """A method to generate a QIR string from a pytket circuit."""
+    assert wasm_type
     wasm_type_value = wasm_type.value
     for command in circ:
         op = command.op
@@ -594,7 +595,6 @@ def circuit_to_qir_bytes(
             wasm_handler = WasmFileHandler(str(wasm_path))
             wasm_file_name = os.path.basename(str(wasm_path))
             module_name = module_name + " and {} file.".format(wasm_file_name)
-            assert wasm_type
         except ValueError as ve:
             raise ve
     module = Module(
