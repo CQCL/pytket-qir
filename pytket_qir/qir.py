@@ -586,6 +586,7 @@ def circuit_to_qir_bytes(
 ) -> bytes:
     """Return a pytket circuit as an IR bitcode file."""
     wasm_handler = None
+    assert wasm_type
     module_name = "Generated from {} pytket circuit".format(
         circ.name if circ.name is not None else "input"
     )
