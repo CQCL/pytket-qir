@@ -93,7 +93,7 @@ classical_ops: Dict = {
 }
 
 
-class WASMUnsupportedError(Exception):
+class WASMError(Exception):
     pass
 
 
@@ -479,7 +479,7 @@ def circuit_to_module(circ: Circuit, module: Module) -> Module:
                     args = args[in_width:]
                     regname = wasm_bits[0].reg_name
                     if wasm_bits != list(cregs[regname]):
-                        WASMUnsupportedError("WASM ops must act on entire registers.")
+                        WASMError("WASM ops must act on entire registers.")
                     reglist.append(regname)
 
             bit_reg = circ.get_c_register(inputs[0])
