@@ -24,7 +24,7 @@ from pytket.circuit import (  # type: ignore
     OpType,
 )
 
-from pytket_qir.qir import write_qir_file  # type: ignore
+from pytket_qir.qir import write_qir_file
 
 qir_files_dir = Path("./qir_test_files")
 
