@@ -368,7 +368,7 @@ class Module:
     @property
     def gateset(self):
         """A getter for the gateset."""
-        assert self._gateset
+        assert self._gateset is not None
         return self._gateset
 
     @gateset.setter
