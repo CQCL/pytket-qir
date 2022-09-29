@@ -431,12 +431,13 @@ def _reg2ssa_var(
 ) -> Callable:
     # A utility function to convert from a pytket
     #  BitRegister to an SSA variable via pyqir types.
+    bit_reg_list = list(bit_reg)
     reg2var = module.module.add_external_function(
         "reg2var",
         types.Function([types.BOOL] * wasm_int_size, types.Int(wasm_int_size)),
     )
-    if bit_reg.size <= wasm_type_value:  # Widening by zero-padding.
-        bool_reg = list(map(bool, bit_reg)) + [False] * (wasm_type_value - bit_reg.size)
+    if bit_reg.size <= wasm_int_size:  # Widening by zero-padding.
+        bool_reg = list(map(bool, bit_reg_list)) + [False] * (wasm_int_size - bit_reg.size)
     else:  # Narrowing by truncation.
         bool_reg = list(map(bool, bit_reg_list[:wasm_int_size]))
     return module.builder.call(reg2var, [*bool_reg])
