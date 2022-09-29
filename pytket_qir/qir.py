@@ -243,7 +243,7 @@ class QirParser:
             elif instr.instr.is_qir_call:  # Setting the conditional bit for branching.
                 c_reg_index = instr.instr.call_func_params[0].constant.result_static_id
             elif instr.instr.is_call:  # WASM external call.
-                if self.wasm_handler is not None:
+                if self.wasm_handler is None:
                     raise ValueError("A WASM file handler must be provided.")
                 func_name = instr.func_name
                 if func_name is None:
