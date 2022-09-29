@@ -260,11 +260,15 @@ class QirParser:
                 param_regs = []
                 for c_reg_index in range(len(instr.func_args)):
                     c_reg_name = "c_reg_wasm" + str(c_reg_index)
-                    param_regs.append(circuit.add_c_register(c_reg_name, self.wasm_int_type.size))
+                    param_regs.append(
+                        circuit.add_c_register(c_reg_name, self.wasm_int_type.size)
+                    )
 
                 # WASM function return type.
                 c_reg_output_name = "%" + instr.output_name
-                c_reg_output = circuit.add_c_register(c_reg_output_name, self.wasm_int_type.size)
+                c_reg_output = circuit.add_c_register(
+                    c_reg_output_name, self.wasm_int_type.size
+                )
                 circuit.add_wasm_to_reg(
                     matched_str.group(2), self.wasm_handler, param_regs, [c_reg_output]
                 )
@@ -426,9 +430,7 @@ def _to_qis_bits(args: List[Bit], mod: SimpleModule) -> List[Result]:
     return []
 
 
-def _reg2ssa_var(
-    bit_reg: BitRegister, module: Module, wasm_int_size: int
-) -> Callable:
+def _reg2ssa_var(bit_reg: BitRegister, module: Module, wasm_int_size: int) -> Callable:
     # A utility function to convert from a pytket
     #  BitRegister to an SSA variable via pyqir types.
     bit_reg_list = list(bit_reg)
@@ -437,7 +439,9 @@ def _reg2ssa_var(
         types.Function([types.BOOL] * wasm_int_size, types.Int(wasm_int_size)),
     )
     if bit_reg.size <= wasm_int_size:  # Widening by zero-padding.
-        bool_reg = list(map(bool, bit_reg_list)) + [False] * (wasm_int_size - bit_reg.size)
+        bool_reg = list(map(bool, bit_reg_list)) + [False] * (
+            wasm_int_size - bit_reg.size
+        )
     else:  # Narrowing by truncation.
         bool_reg = list(map(bool, bit_reg_list[:wasm_int_size]))
     return module.builder.call(reg2var, [*bool_reg])
