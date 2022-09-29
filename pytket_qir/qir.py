@@ -70,7 +70,7 @@ from pytket_qir.gatesets.base import (
     QirGate,
 )
 from pytket_qir.gatesets.pyqir.pyqir import PYQIR_GATES, _TK_TO_PYQIR  # type: ignore
-from pytket_qir.utils import WASMType
+from pytket_qir.utils import WasmInt, WASMI32
 
 
 classical_ops: Dict = {
@@ -106,10 +106,13 @@ class QirParser:
         file_path: str,
         gateset: Optional[CustomGateSet],
         wasm_handler: Optional[WasmFileHandler],
+        wasm_int_type: Optional[WasmInt] = WASMI32,
     ) -> None:
         self.module = QirModule(file_path)
         self.gateset: CustomGateSet = gateset if gateset else PYQIR_GATES
         self.wasm_handler = wasm_handler
+        assert wasm_int_type
+        self.wasm_int_type = wasm_int_type
         self.qubits = self.get_required_qubits()
         self.bits = self.get_required_results()
         entry_block = self.module.functions[0].get_block_by_name("entry")
@@ -257,11 +260,11 @@ class QirParser:
                 param_regs = []
                 for c_reg_index in range(len(instr.func_args)):
                     c_reg_name = "c_reg_wasm" + str(c_reg_index)
-                    param_regs.append(circuit.add_c_register(c_reg_name, 64))
+                    param_regs.append(circuit.add_c_register(c_reg_name, self.wasm_int_type.size))
 
                 # WASM function return type.
                 c_reg_output_name = "%" + instr.output_name
-                c_reg_output = circuit.add_c_register(c_reg_output_name, 64)
+                c_reg_output = circuit.add_c_register(c_reg_output_name, self.wasm_int_type.size)
                 circuit.add_wasm_to_reg(
                     matched_str.group(2), self.wasm_handler, param_regs, [c_reg_output]
                 )
@@ -326,6 +329,7 @@ def circuit_from_qir(
     input_file: Union[str, os.PathLike],
     gateset: Optional[CustomGateSet] = None,
     wasm_handler: Optional[WasmFileHandler] = None,
+    wasm_int_type: Optional[WasmInt] = WASMI32,
 ) -> Circuit:
     root, ext = os.path.splitext(os.path.basename(input_file))
     input_file_str = str(input_file)
@@ -339,7 +343,7 @@ def circuit_from_qir(
         with open(output_bc_file, "wb") as o:
             o.write(ir_to_bitcode(data))
         input_file_str = output_bc_file
-    return QirParser(input_file_str, gateset, wasm_handler).circuit
+    return QirParser(input_file_str, gateset, wasm_handler, wasm_int_type).circuit
 
 
 class QIRUnsupportedError(Exception):
@@ -423,27 +427,27 @@ def _to_qis_bits(args: List[Bit], mod: SimpleModule) -> List[Result]:
 
 
 def _reg2ssa_var(
-    bit_reg: BitRegister, module: Module, wasm_type_value: int
+    bit_reg: BitRegister, module: Module, wasm_int_size: int
 ) -> Callable:
     # A utility function to convert from a pytket
     #  BitRegister to an SSA variable via pyqir types.
     reg2var = module.module.add_external_function(
         "reg2var",
-        types.Function([types.BOOL] * wasm_type_value, types.Int(wasm_type_value)),
+        types.Function([types.BOOL] * wasm_int_size, types.Int(wasm_int_size)),
     )
     if bit_reg.size <= wasm_type_value:  # Widening by zero-padding.
         bool_reg = list(map(bool, bit_reg)) + [False] * (wasm_type_value - bit_reg.size)
     else:  # Narrowing by truncation.
-        bool_reg = list(map(bool, bit_reg[:wasm_type_value]))
+        bool_reg = list(map(bool, bit_reg_list[:wasm_int_size]))
     return module.builder.call(reg2var, [*bool_reg])
 
 
 def circuit_to_module(
-    circ: Circuit, module: Module, wasm_type: Optional[WASMType] = WASMType.INT64
+    circ: Circuit, module: Module, wasm_int_type: Optional[WasmInt] = WASMI32
 ) -> Module:
     """A method to generate a QIR string from a pytket circuit."""
-    assert wasm_type
-    wasm_type_value = wasm_type.value
+    assert wasm_int_type
+    wasm_int_size = wasm_int_type.size
     for command in circ:
         op = command.op
         if isinstance(op, Conditional):
@@ -515,15 +519,15 @@ def circuit_to_module(
                 opnat=OpNat.HYBRID,
                 opname=ExtOpName.WASM,
                 opspec=OpSpec.BODY,
-                function_signature=[types.Int(wasm_type_value)],
-                return_type=types.Int(wasm_type_value),
+                function_signature=[types.Int(wasm_int_size)],
+                return_type=types.Int(wasm_int_size),
             )
 
             # Update gateset in module.
             module.gateset = PYQIR_GATES
 
             # Create an ssa variable from the bit register.
-            ssa_var = _reg2ssa_var(bit_reg, module, wasm_type_value)
+            ssa_var = _reg2ssa_var(bit_reg, module, wasm_int_size)
 
             gate = module.gateset.tk_to_gateset(op.type)
             get_gate = getattr(module, gate.opname.value)
@@ -609,5 +613,5 @@ def circuit_to_qir_bytes(
         gateset=gateset,
         wasm_handler=wasm_handler,
     )
-    populated_module = circuit_to_module(circ, module, wasm_type)
+    populated_module = circuit_to_module(circ, module, wasm_int_type)
     return ir_to_bitcode(populated_module.module.ir())
