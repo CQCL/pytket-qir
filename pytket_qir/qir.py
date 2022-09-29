@@ -591,7 +591,7 @@ def circuit_to_qir_bytes(
     circ: Circuit,
     gateset: Optional[CustomGateSet] = None,
     wasm_path: Optional[Union[str, os.PathLike]] = None,
-    wasm_type: Optional[WASMType] = WASMType.INT64,
+    wasm_int_type: Optional[WasmInt] = WASMI32,
 ) -> bytes:
     """Return a pytket circuit as an IR bitcode file."""
     wasm_handler = None
