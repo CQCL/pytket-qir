@@ -498,9 +498,7 @@ def circuit_to_module(
             try:
                 bit_reg = circ.get_c_register(inputs[0])
             except RuntimeError:
-                raise WASMError(
-                    "WASM function calls expect a parameter that is not defined in the WASM op."
-                )
+                bit_reg = BitRegister("wasm_input", 0)
 
             # Need to create a singleton enum to hold the WASM function name.
             class ExtOpName(Enum):
