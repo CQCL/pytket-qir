@@ -601,6 +601,7 @@ class TestPytketToQirGateTranslation:
         ll = bitcode_to_ir(ir_bytes)
         assert ll in exp_data
 
+
 class TestPytketToQirConditional:
     """
     A class to test the translation of pytket conditional
