@@ -111,7 +111,7 @@ class QirParser:
         self.module = QirModule(file_path)
         self.gateset: CustomGateSet = gateset if gateset else PYQIR_GATES
         self.wasm_handler = wasm_handler
-        assert wasm_int_type
+        assert wasm_int_type is not None
         self.wasm_int_type = wasm_int_type
         assert qir_int_type
         self.qir_int_type = qir_int_type
