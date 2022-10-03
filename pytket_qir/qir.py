@@ -70,7 +70,6 @@ from pytket_qir.gatesets.base import (
     QirGate,
 )
 from pytket_qir.gatesets.pyqir.pyqir import PYQIR_GATES, _TK_TO_PYQIR  # type: ignore
-from pytket_qir.utils import WasmInt, WASMI32
 
 
 classical_ops: Dict = {
@@ -106,13 +105,16 @@ class QirParser:
         file_path: str,
         gateset: Optional[CustomGateSet],
         wasm_handler: Optional[WasmFileHandler],
-        wasm_int_type: Optional[WasmInt] = WASMI32,
+        wasm_int_type: Optional[types.Int] = types.Int(32),
+        qir_int_type: Optional[types.Int] = types.Int(64),
     ) -> None:
         self.module = QirModule(file_path)
         self.gateset: CustomGateSet = gateset if gateset else PYQIR_GATES
         self.wasm_handler = wasm_handler
         assert wasm_int_type
         self.wasm_int_type = wasm_int_type
+        assert qir_int_type
+        self.qir_int_type = qir_int_type
         self.qubits = self.get_required_qubits()
         self.bits = self.get_required_results()
         entry_block = self.module.functions[0].get_block_by_name("entry")
@@ -223,8 +225,8 @@ class QirParser:
 
     def _create_register_map(self, circuit: Circuit) -> Dict:
         # Generate two reusable registers to hold temporary constants.
-        c_reg1 = BitRegister("c_reg_1", 64)
-        c_reg2 = BitRegister("c_reg_2", 64)
+        c_reg1 = BitRegister("c_reg_1", self.qir_int_type.width)
+        c_reg2 = BitRegister("c_reg_2", self.qir_int_type.width)
         if all(reg in circuit.c_registers for reg in [c_reg1, c_reg2]):
             c_reg1 = circuit.get_c_register("c_reg_1")
             c_reg2 = circuit.get_c_register("c_reg_2")
@@ -261,13 +263,13 @@ class QirParser:
                 for c_reg_index in range(len(instr.func_args)):
                     c_reg_name = "c_reg_wasm" + str(c_reg_index)
                     param_regs.append(
-                        circuit.add_c_register(c_reg_name, self.wasm_int_type.size)
+                        circuit.add_c_register(c_reg_name, self.wasm_int_type.width)
                     )
 
                 # WASM function return type.
                 c_reg_output_name = "%" + instr.output_name
                 c_reg_output = circuit.add_c_register(
-                    c_reg_output_name, self.wasm_int_type.size
+                    c_reg_output_name, self.wasm_int_type.width
                 )
                 circuit.add_wasm_to_reg(
                     matched_str.group(2), self.wasm_handler, param_regs, [c_reg_output]
@@ -292,7 +294,7 @@ class QirParser:
                     # and add it to the register map.
                     c_reg_name3 = "%" + instr.instr.output_name
                     c_reg3 = circuit.add_c_register(
-                        c_reg_name3, 64
+                        c_reg_name3, self.qir_int_type.width
                     )  # Int64 supported in LLVM/QIR and L3.
                     c_reg_map[3] = c_reg3
                     self.add_classical_op(matching, instr, circuit, c_reg_map)
@@ -333,7 +335,7 @@ def circuit_from_qir(
     input_file: Union[str, os.PathLike],
     gateset: Optional[CustomGateSet] = None,
     wasm_handler: Optional[WasmFileHandler] = None,
-    wasm_int_type: Optional[WasmInt] = WASMI32,
+    wasm_int_type: Optional[types.Int] = types.Int(32),
 ) -> Circuit:
     root, ext = os.path.splitext(os.path.basename(input_file))
     input_file_str = str(input_file)
@@ -448,11 +450,11 @@ def _reg2ssa_var(bit_reg: BitRegister, module: Module, wasm_int_size: int) -> Ca
 
 
 def circuit_to_module(
-    circ: Circuit, module: Module, wasm_int_type: Optional[WasmInt] = WASMI32
+    circ: Circuit, module: Module, wasm_int_type: Optional[types.Int] = types.Int(32)
 ) -> Module:
     """A method to generate a QIR string from a pytket circuit."""
     assert wasm_int_type
-    wasm_int_size = wasm_int_type.size
+    wasm_int_size = wasm_int_type.width
     for command in circ:
         op = command.op
         if isinstance(op, Conditional):
@@ -595,7 +597,7 @@ def circuit_to_qir_bytes(
     circ: Circuit,
     gateset: Optional[CustomGateSet] = None,
     wasm_path: Optional[Union[str, os.PathLike]] = None,
-    wasm_int_type: Optional[WasmInt] = WASMI32,
+    wasm_int_type: Optional[types.Int] = types.Int(32),
 ) -> bytes:
     """Return a pytket circuit as an IR bitcode file."""
     wasm_handler = None
