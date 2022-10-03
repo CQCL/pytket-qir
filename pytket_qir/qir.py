@@ -507,22 +507,21 @@ def circuit_to_module(
                 bit_reg = BitRegister("wasm_input", 0)
 
             # Need to create a singleton enum to hold the WASM function name.
-            class ExtOpName(Enum):
-                WASM = op.func_name
+            WasmName = Enum("WasmName", [("WASM", op.func_name)])
 
             # Update datastructures with WASM function name and
             # appropriate definition.
 
             # Update translation dict.
             _TK_TO_PYQIR[OpType.WASM] = QirGate(
-                opnat=OpNat.HYBRID, opname=ExtOpName.WASM, opspec=OpSpec.BODY
+                opnat=OpNat.HYBRID, opname=WasmName.WASM, opspec=OpSpec.BODY
             )
 
             # Update gateset.
             gateset = PYQIR_GATES.gateset
             gateset["wasm"] = CustomQirGate(
                 opnat=OpNat.HYBRID,
-                opname=ExtOpName.WASM,
+                opname=WasmName.WASM,
                 opspec=OpSpec.BODY,
                 function_signature=[types.Int(wasm_int_size)],
                 return_type=types.Int(wasm_int_size),
