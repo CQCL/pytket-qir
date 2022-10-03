@@ -50,7 +50,7 @@ class OpSpec(Enum):
 @dataclass(frozen=True)
 class QirGate:
     opnat: OpNat
-    opname: OpName | Enum
+    opname: Union[OpName, Enum]
     opspec: OpSpec
 
 
