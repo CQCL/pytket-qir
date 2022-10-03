@@ -503,7 +503,7 @@ def circuit_to_module(
 
             try:
                 bit_reg = circ.get_c_register(inputs[0])
-            except RuntimeError:
+            except IndexError:
                 bit_reg = BitRegister("wasm_input", 0)
 
             # Need to create a singleton enum to hold the WASM function name.

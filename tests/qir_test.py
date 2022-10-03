@@ -583,6 +583,23 @@ class TestPytketToQirGateTranslation:
         ll = bitcode_to_ir(ir_bytes)
         assert ll in exp_data
 
+    def test_generate_wasmop_with_empty_inputs(self) -> None:
+        wasm_file_path = qir_files_dir / "wasm_adder.wasm"
+        wasm_handler = WasmFileHandler(str(wasm_file_path))
+
+        with open(qir_files_dir / "WASM_noinputs.ll", "r") as input_file:
+            exp_data = input_file.read()
+
+        circuit = Circuit()
+        c0 = circuit.add_c_register("c0", 64)
+        c1 = circuit.add_c_register("c1", 64)
+
+        circuit.add_wasm_to_reg("add_one", wasm_handler, [], [c1])
+        circuit.add_wasm_to_reg("add_one", wasm_handler, [], [c1])
+        ir_bytes = circuit_to_qir_bytes(circuit, wasm_path=wasm_file_path)
+
+        ll = bitcode_to_ir(ir_bytes)
+        assert ll in exp_data
 
 class TestPytketToQirConditional:
     """
