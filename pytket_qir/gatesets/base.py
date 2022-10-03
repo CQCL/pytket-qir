@@ -38,7 +38,6 @@ class OpName(Enum):
     AND = "and"
     OR = "or"
     XOR = "xor"
-    WASM = "wasm"
 
 
 class OpSpec(Enum):
@@ -51,7 +50,7 @@ class OpSpec(Enum):
 @dataclass(frozen=True)
 class QirGate:
     opnat: OpNat
-    opname: Enum
+    opname: OpName
     opspec: OpSpec
 
 
