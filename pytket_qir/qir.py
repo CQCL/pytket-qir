@@ -723,7 +723,6 @@ def circuit_to_qir(
         wasm_handler=wasm_handler,
     )
     populated_module = QIRGenerator(circ, module, wasm_int_type).module
-    # import pdb; pdb.set_trace()
     if qir_format == QIRFormat.BITCODE:
         return populated_module.module.bitcode()
     else:
