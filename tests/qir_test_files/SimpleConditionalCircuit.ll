@@ -1,5 +1,5 @@
-; ModuleID = 'Pytket circuit'
-source_filename = "Pytket circuit"
+; ModuleID = 'Generated from input pytket circuit'
+source_filename = "Generated from input pytket circuit"
 
 %Qubit = type opaque
 %Result = type opaque
@@ -43,13 +43,10 @@ declare void @__quantum__qis__x__body(%Qubit*)
 
 declare i1 @__quantum__qis__read_result__body(%Result*)
 
-<<<<<<< HEAD
 declare void @__quantum__qis__h__body(%Qubit*)
 
 declare void @__quantum__qis__y__body(%Qubit*)
 
 declare void @__quantum__qis__z__body(%Qubit*)
 
-=======
->>>>>>> develop
 attributes #0 = { "EntryPoint" }
