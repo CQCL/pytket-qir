@@ -152,7 +152,7 @@ class QirParser:
         self.wasm_handler = wasm_handler
         assert wasm_int_type is not None
         self.wasm_int_type = wasm_int_type
-        assert qir_int_type
+        assert qir_int_type is not None
         self.qir_int_type = qir_int_type
         self.qubits = self.get_required_qubits()
         self.bits = self.get_required_results()
@@ -180,7 +180,7 @@ class QirParser:
     def get_optype(self, instr: PyQirInstruction) -> OpType:
         if instr.is_call:
             call_func_name = instr.call_func_name
-            assert call_func_name
+            assert call_func_name is not None
             matched_str = re.search("__quantum__(.+?)__(.+?)__(.+)", call_func_name)
             if not matched_str:
                 raise ValueError("The WASM function call name is not propely defined.")
@@ -192,9 +192,9 @@ class QirParser:
 
     def get_params(self, instr: PyQirInstruction) -> List[float]:
         params: List = []
-        assert instr.call_func_params
+        assert instr.call_func_params is not None
         for param in instr.call_func_params:
-            assert param.constant
+            assert param.constant is not None
             if param.constant.is_float:
                 params.append(param.constant.float_double_value)
         return params
@@ -206,9 +206,9 @@ class QirParser:
 
     def get_qubit_indices(self, instr: PyQirInstruction) -> List[int]:
         params: List = []
-        assert instr.call_func_params
+        assert instr.call_func_params is not None
         for param in instr.call_func_params:
-            assert param.constant
+            assert param.constant is not None
             if param.constant.is_qubit:
                 params.append(param.constant.qubit_static_id)
             elif param.constant.is_result:
@@ -294,9 +294,9 @@ class QirParser:
                 unitids = self.get_qubit_indices(instr.instr)
                 circuit.add_gate(op, unitids)
             elif instr.instr.is_qir_call:  # Setting the conditional bit for branching.
-                assert instr.instr.call_func_params
+                assert instr.instr.call_func_params is not None
                 param = instr.instr.call_func_params[0]
-                assert param.constant
+                assert param.constant is not None
                 c_reg_index = param.constant.result_static_id
                 c_reg_index = instr.instr.call_func_params[0].constant.result_static_id
             elif instr.instr.is_call:  # WASM external call.
@@ -318,8 +318,8 @@ class QirParser:
                         circuit.add_c_register(c_reg_name, self.wasm_int_type.width)
                     )
 
-                # WASM function return type.
-                assert instr.output_name
+                # WASM function return  type.
+                assert instr.output_name is not None
                 c_reg_output_name = "%" + instr.output_name
                 c_reg_output = circuit.add_c_register(
                     c_reg_output_name, self.wasm_int_type.width
@@ -345,7 +345,7 @@ class QirParser:
                     # Generate a register with a unique name
                     # from the QIR one to hold the operation result
                     # and add it to the register map.
-                    assert instr.output_name
+                    assert instr.output_name is not None
                     c_reg_name3 = "%" + instr.output_name
                     c_reg3 = circuit.add_c_register(
                         c_reg_name3, self.qir_int_type.width
@@ -515,7 +515,7 @@ class QIRGenerator:
     ) -> None:
         self.circuit = circuit
         self.cregs = _retrieve_registers(self.circuit.bits, BitRegister)
-        assert wasm_int_type
+        assert wasm_int_type is not None
         self.wasm_int_type = wasm_int_type
         self.module = self.circuit_to_module(circuit, module)
 
