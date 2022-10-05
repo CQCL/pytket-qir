@@ -235,7 +235,6 @@ class QirParser:
                         circuit.add_c_setreg(operand.value, c_reg)
                         c_regs.append(c_reg)
                     else:
-                        # import pdb; pdb.set_trace()
                         register_name = "%" + operand.name  # Keep QIR syntax.
                         c_reg = circuit.get_c_register(register_name)
                         c_regs.append(c_reg)
@@ -247,8 +246,6 @@ class QirParser:
                 return tuple(add_register(list(operands)))
             return None
 
-        # import pdb; pdb.set_trace()
-        # assert instr.target_operands
         assert isinstance(instr, QirOpInstr)
         operands = instr.target_operands
         c_op: Callable
@@ -257,14 +254,12 @@ class QirParser:
             c_reg1 = add_classical_register(operands[0], circuit)
             c_op_dict = cast(Dict, classical_ops[classical_op])
             c_op = c_op_dict[instr.predicate]
-            # import pdb; pdb.set_trace()
             assert isinstance(operands[1], QirIntConstant)
             circuit.add_classicalexpbox_register(
                 c_op(c_reg1, operands[1].value),  # Comparaison with constants.
                 c_reg_map[3],
             )
         else:
-            # import pdb; pdb.set_trace()
             c_op = cast(Callable, classical_ops[classical_op])
             # Integer negation is represented as a substraction from 0.
             if isinstance(operands[0], QirIntConstant):
@@ -356,9 +351,6 @@ class QirParser:
                         c_reg_name3, self.qir_int_type.width
                     )  # Int64 supported in LLVM/QIR and L3.
                     c_reg_map[3] = c_reg3
-                    # import pdb; pdb.set_trace()
-                    # instr = cast(instr, PyQirInstruction)
-                    # assert isinstance(instr, PyQirInstruction)
                     self.add_classical_op(matching, instr, circuit, c_reg_map)
                 else:
                     raise ValueError("Unsupported instruction.")
@@ -525,9 +517,6 @@ class QIRGenerator:
         self.cregs = _retrieve_registers(self.circuit.bits, BitRegister)
         assert wasm_int_type
         self.wasm_int_type = wasm_int_type
-        # self.reg2var = module.module.add_external_function(
-        #     "reg2var", types.Function([types.BOOL] * 64, types.Int(64))
-        # )
         self.module = self.circuit_to_module(circuit, module)
 
     def _get_c_regs_from_com(self, command: Command) -> Tuple[List[str], List[str]]:
@@ -585,7 +574,6 @@ class QIRGenerator:
         self,
         circ: Circuit,
         module: Module,
-        # wasm_int_type: Optional[types.Int] = types.Int(32),
     ) -> Module:
         """A method to generate a QIR string from a pytket circuit."""
         wasm_int_size = self.wasm_int_type.width
