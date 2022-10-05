@@ -72,7 +72,8 @@ from pyqir.parser import (  # type: ignore
 )
 from pyqir.parser._native import PyQirInstruction  # type: ignore
 from pyqir.generator import SimpleModule, BasicQisBuilder, IntPredicate, ir_to_bitcode, types  # type: ignore
-from pyqir.parser._native import PyQirInstruction  # type: ignore
+from pyqir.generator._native import Value  # type: ignore
+from pyqir.parser._native import PyQirInstruction   # type: ignore
 from pyqir.parser._parser import QirIntConstant, QirICmpInstr, QirCallInstr, QirOpInstr, QirOperand  # type: ignore
 from pyqir.generator import SimpleModule, BasicQisBuilder, ir_to_bitcode, types  # type: ignore
 from pyqir.generator.types import Qubit, Result  # type: ignore
@@ -179,8 +180,7 @@ class QirParser:
 
     def get_optype(self, instr: PyQirInstruction) -> OpType:
         if instr.is_call:
-            call_func_name = instr.call_func_name
-            assert call_func_name is not None
+            call_func_name = cast(str, instr.call_func_name)
             matched_str = re.search("__quantum__(.+?)__(.+?)__(.+)", call_func_name)
             if not matched_str:
                 raise ValueError("The WASM function call name is not propely defined.")
@@ -192,8 +192,8 @@ class QirParser:
 
     def get_params(self, instr: PyQirInstruction) -> List[float]:
         params: List = []
-        assert instr.call_func_params is not None
-        for param in instr.call_func_params:
+        call_func_params = cast(List, instr.call_func_params)
+        for param in call_func_params:
             assert param.constant is not None
             if param.constant.is_float:
                 params.append(param.constant.float_double_value)
@@ -206,8 +206,8 @@ class QirParser:
 
     def get_qubit_indices(self, instr: PyQirInstruction) -> List[int]:
         params: List = []
-        assert instr.call_func_params is not None
-        for param in instr.call_func_params:
+        call_func_params = cast(List, instr.call_func_params)
+        for param in call_func_params:
             assert param.constant is not None
             if param.constant.is_qubit:
                 params.append(param.constant.qubit_static_id)
@@ -246,27 +246,27 @@ class QirParser:
                 return tuple(add_register(list(operands)))
             return None
 
-        assert isinstance(instr, QirOpInstr)
+        instr = cast(QirOpInstr, instr)
         operands = instr.target_operands
         c_op: Callable
         if classical_op == "is_icmp":
-            assert isinstance(instr, QirICmpInstr)
+            instr = cast(QirICmpInstr, instr)
             c_reg1 = add_classical_register(operands[0], circuit)
             c_op_dict = cast(Dict, classical_ops[classical_op])
             c_op = c_op_dict[instr.predicate]
-            assert isinstance(operands[1], QirIntConstant)
+            operand1 = cast(QirIntConstant, operands[1])
             circuit.add_classicalexpbox_register(
-                c_op(c_reg1, operands[1].value),  # Comparaison with constants.
+                c_op(c_reg1, operand1.value),  # Comparaison with constants.
                 c_reg_map[3],
             )
         else:
             c_op = cast(Callable, classical_ops[classical_op])
             # Integer negation is represented as a substraction from 0.
             if isinstance(operands[0], QirIntConstant):
-                assert isinstance(operands[1], QirIntConstant)
+                operand1 = cast(QirIntConstant, operands[1])
                 if operands[0].value == 0:
                     circuit.add_classicalexpbox_register(
-                        RegNeg(operands[1].value), c_reg_map[3]
+                        RegNeg(operand1.value), c_reg_map[3]
                     )
             c_reg1, c_reg2 = add_classical_register(operands, circuit)
             circuit.add_classicalexpbox_register(c_op(c_reg1, c_reg2), c_reg_map[3])
@@ -294,15 +294,15 @@ class QirParser:
                 unitids = self.get_qubit_indices(instr.instr)
                 circuit.add_gate(op, unitids)
             elif instr.instr.is_qir_call:  # Setting the conditional bit for branching.
-                assert instr.instr.call_func_params is not None
-                param = instr.instr.call_func_params[0]
+                params = cast(List, instr.instr.call_func_params)
+                param = params[0]
                 assert param.constant is not None
                 c_reg_index = param.constant.result_static_id
-                c_reg_index = instr.instr.call_func_params[0].constant.result_static_id
             elif instr.instr.is_call:  # WASM external call.
+                instr = cast(QirCallInstr, instr)
                 if self.wasm_handler is None:
                     raise ValueError("A WASM file handler must be provided.")
-                func_name = instr.func_name
+                func_name = cast(str, instr.func_name)
                 if func_name is None:
                     raise ValueError("The WASM function call is not defined.")
                 matched_str = re.search("__quantum__(.+?)__(.+?)__(.+)", func_name)
@@ -319,8 +319,8 @@ class QirParser:
                     )
 
                 # WASM function return  type.
-                assert instr.output_name is not None
-                c_reg_output_name = "%" + instr.output_name
+                output_name = cast(str, instr.output_name)
+                c_reg_output_name = "%" + output_name
                 c_reg_output = circuit.add_c_register(
                     c_reg_output_name, self.wasm_int_type.width
                 )
@@ -345,8 +345,8 @@ class QirParser:
                     # Generate a register with a unique name
                     # from the QIR one to hold the operation result
                     # and add it to the register map.
-                    assert instr.output_name is not None
-                    c_reg_name3 = "%" + instr.output_name
+                    output_name = cast(str, instr.output_name)
+                    c_reg_name3 = "%" + output_name
                     c_reg3 = circuit.add_c_register(
                         c_reg_name3, self.qir_int_type.width
                     )  # Int64 supported in LLVM/QIR and L3.
@@ -356,10 +356,12 @@ class QirParser:
                     raise ValueError("Unsupported instruction.")
 
         if isinstance(term, QirCondBrTerminator):
-            if_condition_block = self.module.functions[0].get_block_by_name(
-                term.true_dest
+            if_condition_block = cast(
+                QirBlock,
+                self.module.functions[0].get_block_by_name(
+                    term.true_dest
+                )
             )
-            assert isinstance(if_condition_block, QirBlock)
             if_condition_circuit = self.block_to_circuit(
                 if_condition_block, Circuit(self.qubits, self.bits)
             )
@@ -368,18 +370,22 @@ class QirParser:
             args = list(range(self.qubits)) + list(range(self.bits))  # Order matters.
             circuit.add_circbox(circ_box, args, condition=c_reg[c_reg_index])
 
-            else_condition_block = self.module.functions[0].get_block_by_name(
-                term.false_dest
+            else_condition_block = cast(
+                QirBlock,
+                self.module.functions[0].get_block_by_name(
+                    term.false_dest
+                )
             )
-            assert isinstance(else_condition_block, QirBlock)
             else_condition_circuit = self.block_to_circuit(
                 else_condition_block, Circuit(self.qubits, self.bits)
             )
             circuit.append(else_condition_circuit)
 
         if isinstance(term, QirBrTerminator):
-            next_block = self.module.functions[0].get_block_by_name(term.dest)
-            assert isinstance(next_block, QirBlock)
+            next_block = cast(
+                QirBlock,
+                self.module.functions[0].get_block_by_name(term.dest)
+            )
             next_circuit = self.block_to_circuit(
                 next_block, Circuit(self.qubits, self.bits)
             )
@@ -477,19 +483,19 @@ def _to_qis_qubits(qubits: List[Qubit], mod: SimpleModule) -> Sequence[Qubit]:
     return [mod.qubits[qubit.index[0]] for qubit in qubits]
 
 
-def _to_qis_results(bits: List[Bit], mod: SimpleModule) -> Optional[Result]:
+def _to_qis_results(bits: List[Bit], mod: SimpleModule) -> Optional[Union[Value, float]]:
     if bits:
         return mod.results[bits[0].index[0]]
     return None
 
 
-def _to_qis_bits(args: List[Bit], mod: SimpleModule) -> Sequence[Result]:
+def _to_qis_bits(args: List[Bit], mod: SimpleModule) -> Sequence[Union[Value, bool, int, float]]:
     if args:
         return [mod.results[bit.index[0]] for bit in args[:-1]]
     return []
 
 
-def _reg2ssa_var(bit_reg: BitRegister, module: Module, int_size: int) -> Callable:
+def _reg2ssa_var(bit_reg: BitRegister, module: Module, int_size: int) -> Value:
     # A utility function to convert from a pytket
     #  BitRegister to an SSA variable via pyqir types.
     bit_reg_list = list(bit_reg)
@@ -501,7 +507,7 @@ def _reg2ssa_var(bit_reg: BitRegister, module: Module, int_size: int) -> Callabl
         bool_reg = list(map(bool, bit_reg_list)) + [False] * (int_size - bit_reg.size)
     else:  # Narrowing by truncation.
         bool_reg = list(map(bool, bit_reg_list[:int_size]))
-    return module.builder.call(reg2var, [*bool_reg])
+    return cast(Value, module.builder.call(reg2var, [*bool_reg]))
 
 
 class QIRGenerator:
@@ -668,7 +674,7 @@ class QIRGenerator:
                     else:
                         get_gate(*qubits)
                 else:
-                    bits: Optional[Sequence[Result]] = None
+                    bits: Optional[Sequence[Union[Value, bool, int, float]]] = None
                     if type(optype) == BitWiseOp:
                         bits = _to_qis_bits(command.args, module.module)
                     gate = module.gateset.tk_to_gateset(optype)
