@@ -739,7 +739,7 @@ def write_qir_file(
         qir_format = QIRFormat.IR
         file_param = "w"
     else:
-        raise ValueError("The file extension should either be '.ll' or '.bc'.")
+        raise ValueError("The file extension must either be '.ll' or '.bc'.")
     qir = circuit_to_qir(
         circ=circ,
         gateset=gateset,
