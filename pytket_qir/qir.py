@@ -73,7 +73,7 @@ from pyqir.parser import (  # type: ignore
 from pyqir.parser._native import PyQirInstruction  # type: ignore
 from pyqir.generator import SimpleModule, BasicQisBuilder, IntPredicate, ir_to_bitcode, types  # type: ignore
 from pyqir.generator._native import Value  # type: ignore
-from pyqir.parser._native import PyQirInstruction   # type: ignore
+from pyqir.parser._native import PyQirInstruction  # type: ignore
 from pyqir.parser._parser import QirIntConstant, QirICmpInstr, QirCallInstr, QirOpInstr, QirOperand  # type: ignore
 from pyqir.generator import SimpleModule, BasicQisBuilder, ir_to_bitcode, types  # type: ignore
 from pyqir.generator.types import Qubit, Result  # type: ignore
@@ -357,10 +357,7 @@ class QirParser:
 
         if isinstance(term, QirCondBrTerminator):
             if_condition_block = cast(
-                QirBlock,
-                self.module.functions[0].get_block_by_name(
-                    term.true_dest
-                )
+                QirBlock, self.module.functions[0].get_block_by_name(term.true_dest)
             )
             if_condition_circuit = self.block_to_circuit(
                 if_condition_block, Circuit(self.qubits, self.bits)
@@ -371,10 +368,7 @@ class QirParser:
             circuit.add_circbox(circ_box, args, condition=c_reg[c_reg_index])
 
             else_condition_block = cast(
-                QirBlock,
-                self.module.functions[0].get_block_by_name(
-                    term.false_dest
-                )
+                QirBlock, self.module.functions[0].get_block_by_name(term.false_dest)
             )
             else_condition_circuit = self.block_to_circuit(
                 else_condition_block, Circuit(self.qubits, self.bits)
@@ -383,8 +377,7 @@ class QirParser:
 
         if isinstance(term, QirBrTerminator):
             next_block = cast(
-                QirBlock,
-                self.module.functions[0].get_block_by_name(term.dest)
+                QirBlock, self.module.functions[0].get_block_by_name(term.dest)
             )
             next_circuit = self.block_to_circuit(
                 next_block, Circuit(self.qubits, self.bits)
@@ -483,13 +476,17 @@ def _to_qis_qubits(qubits: List[Qubit], mod: SimpleModule) -> Sequence[Qubit]:
     return [mod.qubits[qubit.index[0]] for qubit in qubits]
 
 
-def _to_qis_results(bits: List[Bit], mod: SimpleModule) -> Optional[Union[Value, float]]:
+def _to_qis_results(
+    bits: List[Bit], mod: SimpleModule
+) -> Optional[Union[Value, float]]:
     if bits:
         return mod.results[bits[0].index[0]]
     return None
 
 
-def _to_qis_bits(args: List[Bit], mod: SimpleModule) -> Sequence[Union[Value, bool, int, float]]:
+def _to_qis_bits(
+    args: List[Bit], mod: SimpleModule
+) -> Sequence[Union[Value, bool, int, float]]:
     if args:
         return [mod.results[bit.index[0]] for bit in args[:-1]]
     return []
