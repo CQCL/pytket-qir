@@ -501,8 +501,9 @@ def circuit_to_module(
 
             try:
                 bit_reg = circ.get_c_register(inputs[0])
+                input_type_list = [types.Int(wasm_int_size)]
             except IndexError:
-                bit_reg = BitRegister("wasm_input", 0)
+                input_type_list = []
 
             # Need to create a singleton enum to hold the WASM function name.
             WasmName = Enum("WasmName", [("WASM", op.func_name)])
@@ -521,19 +522,22 @@ def circuit_to_module(
                 opnat=OpNat.HYBRID,
                 opname=WasmName.WASM,
                 opspec=OpSpec.BODY,
-                function_signature=[types.Int(wasm_int_size)],
+                function_signature=input_type_list,
                 return_type=types.Int(wasm_int_size),
             )
 
             # Update gateset in module.
             module.gateset = PYQIR_GATES
 
-            # Create an ssa variable from the bit register.
-            ssa_var = _reg2ssa_var(bit_reg, module, wasm_int_size)
+            # Create an ssa variable if there is an input to the WASMOp.
+            if len(input_type_list) == 0:
+                ssa_args = []
+            else:
+                ssa_args = [_reg2ssa_var(bit_reg, module, wasm_int_size)]
 
             gate = module.gateset.tk_to_gateset(op.type)
             get_gate = getattr(module, gate.opname.value)
-            module.builder.call(get_gate, [ssa_var])
+            module.builder.call(get_gate, ssa_args)
         else:
             optype, params = _get_optype_and_params(op)
             qubits = _to_qis_qubits(command.qubits, module.module)
