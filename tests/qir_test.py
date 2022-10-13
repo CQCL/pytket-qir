@@ -111,6 +111,9 @@ class TestQirToPytketGateTranslation:
         wasm_file_path = qir_files_dir / "wasm_adder.wasm"
         wasm_handler = WasmFileHandler(str(wasm_file_path))
         circuit = circuit_from_qir(wasm_only_bc_file_path, wasm_handler=wasm_handler)
+        com = circuit.get_commands()[0]
+        assert com.op.type == OpType.WASM
+        assert len(com.args) == 64
         assert circuit.depth() == 1
 
 
