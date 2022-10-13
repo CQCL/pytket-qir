@@ -103,17 +103,15 @@ class QirParser:
     def __init__(
         self,
         file_path: str,
-        gateset: Optional[CustomGateSet],
-        wasm_handler: Optional[WasmFileHandler],
-        wasm_int_type: Optional[types.Int] = types.Int(32),
-        qir_int_type: Optional[types.Int] = types.Int(64),
+        gateset: CustomGateSet = None,
+        wasm_handler: WasmFileHandler = None,
+        wasm_int_type: types.Int = types.Int(32),
+        qir_int_type: types.Int = types.Int(64),
     ) -> None:
         self.module = QirModule(file_path)
-        self.gateset: CustomGateSet = gateset if gateset else PYQIR_GATES
+        self.gateset: CustomGateSet = gateset if gateset is not None else PYQIR_GATES
         self.wasm_handler = wasm_handler
-        assert wasm_int_type is not None
         self.wasm_int_type = wasm_int_type
-        assert qir_int_type
         self.qir_int_type = qir_int_type
         self.qubits = self.get_required_qubits()
         self.bits = self.get_required_results()
