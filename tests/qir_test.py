@@ -108,9 +108,12 @@ class TestQirToPytketGateTranslation:
 
     def test_wasm_only(self) -> None:
         wasm_only_bc_file_path = qir_files_dir / "wasm_only_test.bc"
-        wasm_file_path = qir_files_dir / "wasm_file.wasm"
+        wasm_file_path = qir_files_dir / "wasm_adder.wasm"
         wasm_handler = WasmFileHandler(str(wasm_file_path))
         circuit = circuit_from_qir(wasm_only_bc_file_path, wasm_handler=wasm_handler)
+        com = circuit.get_commands()[0]
+        assert com.op.type == OpType.WASM
+        assert len(com.args) == 64
         assert circuit.depth() == 1
 
 
@@ -584,7 +587,7 @@ class TestPytketToQirGateTranslation:
         assert ll in exp_data
 
     def test_generate_wasmop_with_empty_inputs(self) -> None:
-        wasm_file_path = qir_files_dir / "wasm_adder.wasm"
+        wasm_file_path = qir_files_dir / "wasm_empty_adder.wasm"
         wasm_handler = WasmFileHandler(str(wasm_file_path))
 
         with open(qir_files_dir / "WASM_noinputs.ll", "r") as input_file:
@@ -594,8 +597,8 @@ class TestPytketToQirGateTranslation:
         c0 = circuit.add_c_register("c0", 64)
         c1 = circuit.add_c_register("c1", 64)
 
-        circuit.add_wasm_to_reg("add_one", wasm_handler, [], [c1])
-        circuit.add_wasm_to_reg("add_one", wasm_handler, [], [c1])
+        circuit.add_wasm_to_reg("empty_add_one", wasm_handler, [], [c1])
+        circuit.add_wasm_to_reg("empty_add_one", wasm_handler, [], [c1])
         ir_bytes = circuit_to_qir_bytes(circuit, wasm_path=wasm_file_path)
 
         ll = bitcode_to_ir(ir_bytes)
