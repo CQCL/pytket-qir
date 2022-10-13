@@ -43,4 +43,4 @@ continue3:                                        ; preds = %else2, %then1
 
 declare i1 @__quantum__qis__read_result__body(%Result*)
 
-attributes #0 = { "EntryPoint" "requiredQubits"="2" "requiredResults"="2" }
+attributes #0 = { "EntryPoint" }
