@@ -116,6 +116,11 @@ class TestQirToPytketGateTranslation:
         assert len(com.args) == 64
         assert circuit.depth() == 1
 
+    def test_rt_function_calls_and_tags(self) -> None:
+        rt_function_file_path = qir_files_dir / "tag_examples.bc"
+        circuit = circuit_from_qir(rt_function_file_path)
+        print(circuit.get_commands())
+
 
 class TestQirToPytketConditionals:
     """A class to test circuit translation containing conditionals."""
