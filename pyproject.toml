@@ -10,10 +10,10 @@ authors = ["Roland Guichard <roland.guichard@cambridgequantum.com>"]
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"
 pytket = "^1.3.0rc1"
-pyqir = "^0.6.0"
-pyqir-parser = "^0.6.0"
-pyqir-evaluator = "^0.6.0"
-pyqir-generator = "^0.6.0"
+pyqir = "^0.6.2"
+pyqir-parser = "^0.6.2"
+pyqir-evaluator = "^0.6.2"
+pyqir-generator = "^0.6.2"
 
 [tool.poetry.scripts]
 compile-bc-test-files = "tests.qir_test_files.compile_bc_test_files:compile_to_bc"
