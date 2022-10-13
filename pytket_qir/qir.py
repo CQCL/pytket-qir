@@ -249,6 +249,11 @@ class QirParser:
                 circuit.add_gate(op, unitids)
             elif instr.instr.is_qir_call:  # Setting the conditional bit for branching.
                 c_reg_index = instr.instr.call_func_params[0].constant.result_static_id
+            elif instr.instr.is_rt_call:  # Runtime function call.
+                bits = self.get_qubit_indices(instr.instr)
+                if len(instr.func_args) > 1:
+                    tag = self.get_tag(instr)
+                circuit.add_barrier(qubits=[], bits=bits, data=tag)
             elif instr.instr.is_call:  # WASM external call.
                 if self.wasm_handler is None:
                     raise ValueError("A WASM file handler must be provided.")
