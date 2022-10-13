@@ -169,6 +169,10 @@ class QirParser:
                 params.append(param.constant.result_static_id)
         return params
 
+    def get_tag(self, instr: QirInstr) -> str:
+        arg = instr.func_args[1]
+        return self.module.get_global_bytes_value(arg)
+
     def add_classical_op(
         self,
         classical_op: str,
