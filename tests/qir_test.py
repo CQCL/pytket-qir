@@ -613,6 +613,7 @@ class TestPytketToQirGateTranslation:
         ir_bytes = cast(bytes, circuit_to_qir(circuit, wasm_path=wasm_file_path))
 
         ll = bitcode_to_ir(ir_bytes)
+
         assert ll in exp_data
 
 
