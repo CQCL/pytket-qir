@@ -103,8 +103,8 @@ class QirParser:
     def __init__(
         self,
         file_path: str,
-        gateset: CustomGateSet = None,
-        wasm_handler: WasmFileHandler = None,
+        gateset: Optional[CustomGateSet] = None,
+        wasm_handler: Optional[WasmFileHandler] = None,
         wasm_int_type: types.Int = types.Int(32),
         qir_int_type: types.Int = types.Int(64),
     ) -> None:
