@@ -6,8 +6,8 @@ from typing import Callable, Dict, List, NamedTuple, Union
 from pyqir.generator.types import Double, Int, Qubit, Result, Void  # type: ignore
 
 
-PyQirParameterTypes = Union[Double, Int, Qubit, Result]
-PyQirReturnTypes = Union[Int, Result, Void]
+PyQirParameterType = Union[Double, Int, Qubit, Result]
+PyQirReturnType = Union[Int, Result, Void]
 
 
 class OpNat(Enum):
@@ -51,14 +51,14 @@ class OpSpec(Enum):
 @dataclass(frozen=True)
 class QirGate:
     opnat: OpNat
-    opname: Enum
+    opname: Union[OpName, Enum]
     opspec: OpSpec
 
 
 @dataclass(frozen=True)
 class CustomQirGate(QirGate):
-    function_signature: List[PyQirParameterTypes]
-    return_type: PyQirReturnTypes
+    function_signature: List[PyQirParameterType]
+    return_type: PyQirReturnType
 
 
 CustomGateSet = NamedTuple(
