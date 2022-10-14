@@ -143,17 +143,15 @@ class QirParser:
     def __init__(
         self,
         file_path: str,
-        gateset: Optional[CustomGateSet],
-        wasm_handler: Optional[WasmFileHandler],
-        wasm_int_type: Optional[types.Int] = types.Int(32),
-        qir_int_type: Optional[types.Int] = types.Int(64),
+        gateset: Optional[CustomGateSet] = None,
+        wasm_handler: Optional[WasmFileHandler] = None,
+        wasm_int_type: types.Int = types.Int(32),
+        qir_int_type: types.Int = types.Int(64),
     ) -> None:
         self.module = QirModule(file_path)
-        self.gateset: CustomGateSet = gateset if gateset else PYQIR_GATES
+        self.gateset: CustomGateSet = gateset if gateset is not None else PYQIR_GATES
         self.wasm_handler = wasm_handler
-        assert wasm_int_type is not None
         self.wasm_int_type = wasm_int_type
-        assert qir_int_type is not None
         self.qir_int_type = qir_int_type
         self.qubits = self.get_required_qubits()
         self.bits = self.get_required_results()
@@ -514,11 +512,10 @@ class QIRGenerator:
         self,
         circuit: Circuit,
         module: Module,
-        wasm_int_type: Optional[types.Int] = types.Int(32),
+        wasm_int_type: types.Int = types.Int(32),
     ) -> None:
         self.circuit = circuit
         self.cregs = _retrieve_registers(self.circuit.bits, BitRegister)
-        assert wasm_int_type is not None
         self.wasm_int_type = wasm_int_type
         self.module = self.circuit_to_module(circuit, module)
 
@@ -611,8 +608,9 @@ class QIRGenerator:
                 inputs, _ = self._get_c_regs_from_com(command)
                 try:
                     bit_reg = circ.get_c_register(inputs[0])
+                    input_type_list = [types.Int(wasm_int_size)]
                 except IndexError:
-                    bit_reg = BitRegister("wasm_input", 0)
+                    input_type_list = []
 
                 # Need to create a singleton enum to hold the WASM function name.
                 WasmName = Enum("WasmName", [("WASM", op.func_name)])
@@ -631,19 +629,22 @@ class QIRGenerator:
                     opnat=OpNat.HYBRID,
                     opname=WasmName.WASM,
                     opspec=OpSpec.BODY,
-                    function_signature=[types.Int(wasm_int_size)],
+                    function_signature=input_type_list,
                     return_type=types.Int(wasm_int_size),
                 )
 
                 # Update gateset in module.
                 module.gateset = PYQIR_GATES
 
-                # Create an ssa variable from the bit register.
-                ssa_var = _reg2ssa_var(bit_reg, module, wasm_int_size)
+                # Create an ssa variable if there is an input to the WASMOp.
+                if len(input_type_list) == 0:
+                    ssa_args = []
+                else:
+                    ssa_args = [_reg2ssa_var(bit_reg, module, wasm_int_size)]
 
                 gate = module.gateset.tk_to_gateset(op.type)
                 get_gate = getattr(module, gate.opname.value)
-                module.builder.call(get_gate, [ssa_var])
+                module.builder.call(get_gate, ssa_args)
             elif isinstance(op, ClassicalExpBox):
                 inputs, _ = self._get_c_regs_from_com(command)
 

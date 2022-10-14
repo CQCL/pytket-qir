@@ -43,4 +43,4 @@ declare void @__quantum__qis__y__body(%Qubit*)
 
 declare void @__quantum__qis__z__body(%Qubit*)
 
-attributes #0 = { "EntryPoint" }
+attributes #0 = { "EntryPoint" "requiredQubits"="2" "requiredResults"="2" }

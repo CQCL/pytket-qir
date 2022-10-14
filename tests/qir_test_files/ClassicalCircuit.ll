@@ -50,4 +50,4 @@ entry:
   ret void
 }
 
-attributes #0 = { "EntryPoint" }
+attributes #0 = { "EntryPoint" "requiredQubits"="2" "requiredResults"="9" }
