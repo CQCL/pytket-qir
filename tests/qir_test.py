@@ -27,7 +27,6 @@ from pytket_qir.qir import (
     write_qir_file,
     circuit_from_qir,
 )
-from pytket_qir.utils.utils import QIRFormat  # type: ignore
 
 
 qir_files_dir = Path("./qir_test_files")
@@ -607,7 +606,6 @@ class TestPytketToQirGateTranslation:
             exp_data = input_file.read()
 
         circuit = Circuit()
-        c0 = circuit.add_c_register("c0", 64)
         c1 = circuit.add_c_register("c1", 64)
 
         circuit.add_wasm_to_reg("empty_add_one", wasm_handler, [], [c1])

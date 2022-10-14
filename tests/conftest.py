@@ -19,6 +19,7 @@ from typing import Callable, Generator, List, Tuple
 
 from pytest import fixture  # type: ignore
 
+from pyqir.generator import Builder, IntPredicate, Value  # type: ignore
 from pytket import Circuit  # type: ignore
 from pytket.circuit import (  # type: ignore
     CircBox,
@@ -35,7 +36,6 @@ from pytket.circuit.logic_exp import (  # type: ignore
 
 from pytket_qir.qir import write_qir_file  # type: ignore
 
-from pyqir.generator import Builder, IntPredicate, Value  # type: ignore
 
 qir_files_dir = Path("./qir_test_files")
 

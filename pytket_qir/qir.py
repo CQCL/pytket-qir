@@ -76,7 +76,7 @@ from pyqir.generator._native import Value  # type: ignore
 from pyqir.parser._native import PyQirInstruction  # type: ignore
 from pyqir.parser._parser import QirIntConstant, QirICmpInstr, QirCallInstr, QirOpInstr, QirOperand  # type: ignore
 from pyqir.generator import SimpleModule, BasicQisBuilder, ir_to_bitcode, types  # type: ignore
-from pyqir.generator.types import Qubit, Result  # type: ignore
+from pyqir.generator.types import Qubit   # type: ignore
 
 
 from pytket_qir.gatesets.base import (
@@ -729,7 +729,7 @@ def write_qir_file(
     wasm_int_type: Optional[types.Int] = types.Int(32),
 ) -> None:
     """A method to generate a qir file from a tket circuit."""
-    root, ext = os.path.splitext(os.path.basename(file_name))
+    _, ext = os.path.splitext(os.path.basename(file_name))
     if ext == ".bc":
         qir_format = QIRFormat.BITCODE
         file_param = "wb"
