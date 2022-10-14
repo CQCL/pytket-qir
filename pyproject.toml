@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pytket-qir"
-version = "0.1.3rc1"
+version = "0.1.3"
 description = "Python module for interfacing QIR with the Quantinuum pytket library."
 readme = "README.md"
 license = "LICENSE"
