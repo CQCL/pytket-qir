@@ -14,7 +14,7 @@
 
 import os
 from pathlib import Path
-from typing import Generator
+from typing import Generator, List, cast
 import pytest  # type: ignore
 from pytket import Circuit, OpType  # type: ignore
 from pytket.circuit import Conditional  # type: ignore
@@ -23,10 +23,11 @@ from pytket.wasm import WasmFileHandler  # type: ignore
 from pyqir.generator import bitcode_to_ir  # type: ignore
 
 from pytket_qir.qir import (
-    circuit_to_qir_bytes,
+    circuit_to_qir,
     write_qir_file,
     circuit_from_qir,
 )
+from pytket_qir.utils.utils import QIRFormat  # type: ignore
 
 
 qir_files_dir = Path("./qir_test_files")
@@ -545,6 +546,18 @@ class TestPytketToQirGateTranslation:
         assert call_ry in data
         assert call_rz in data
 
+    def test_classical_arithmetic(
+        self, circuit_classical_arithmetic: Circuit, operators: List
+    ):
+        with open("ClassicalCircuit.ll", "r") as input_file:
+            data = input_file.readlines()
+
+        with open(qir_files_dir / "ClassicalCircuit.ll", "r") as input_file:
+            exp_data = input_file.readlines()
+
+        for line in data:
+            assert line in exp_data
+
     @pytest.mark.skip(reason="Waiting for feature releases in pyqir.")
     def test_bitwise_ops(self, circuit_bitwise_ops: Circuit) -> None:
         with open("test_bitwise_ops.ll", "r") as input_file:
@@ -581,7 +594,7 @@ class TestPytketToQirGateTranslation:
         c1 = circuit.add_c_register("c1", 64)
 
         circuit.add_wasm_to_reg("add_one", wasm_handler, [c0], [c1])
-        ir_bytes = circuit_to_qir_bytes(circuit, wasm_path=wasm_file_path)
+        ir_bytes = cast(bytes, circuit_to_qir(circuit, wasm_path=wasm_file_path))
 
         ll = bitcode_to_ir(ir_bytes)
         assert ll in exp_data
@@ -599,7 +612,7 @@ class TestPytketToQirGateTranslation:
 
         circuit.add_wasm_to_reg("empty_add_one", wasm_handler, [], [c1])
         circuit.add_wasm_to_reg("empty_add_one", wasm_handler, [], [c1])
-        ir_bytes = circuit_to_qir_bytes(circuit, wasm_path=wasm_file_path)
+        ir_bytes = cast(bytes, circuit_to_qir(circuit, wasm_path=wasm_file_path))
 
         ll = bitcode_to_ir(ir_bytes)
         assert ll in exp_data
