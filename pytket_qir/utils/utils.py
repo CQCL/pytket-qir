@@ -10,8 +10,9 @@ class ClassicalExpBoxError(Exception):
     pass
 
 
-class ClassicalExpBoxError(Exception):
+class SetBitsOpError(Exception):
     pass
+
 
 class WASMError(Exception):
     pass
