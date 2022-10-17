@@ -6,5 +6,12 @@ class QIRFormat(Enum):
     BITCODE: str = "bitcode"
 
 
-class CommandUnsupportedError(Exception):
+class ClassicalExpBoxError(Exception):
+    pass
+
+
+class ClassicalExpBoxError(Exception):
+    pass
+
+class WASMError(Exception):
     pass

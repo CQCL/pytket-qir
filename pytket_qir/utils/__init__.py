@@ -1,4 +1,6 @@
 from pytket_qir.utils.utils import (
-    CommandUnsupportedError,
+    ClassicalExpBoxError,
     QIRFormat,
+    SetBitsOpError,
+    WASMError,
 )

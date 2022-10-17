@@ -560,7 +560,6 @@ class TestPytketToQirGateTranslation:
     def test_classical_reg2const_arithmetic(
         self, circuit_classical_reg2const_arithmetic: Circuit
     ):
-
         with open("ClassicalReg2ConstCircuit.ll", "r") as input_file:
             data = input_file.readlines()
 
@@ -594,7 +593,7 @@ class TestPytketToQirGateTranslation:
         assert call_or in data
         assert call_xor in data
 
-    def test_generate_wasmop(self) -> None:
+    def test_generate_wasmop_with_nonempty_inputs(self) -> None:
         wasm_file_path = qir_files_dir / "wasm_adder.wasm"
         wasm_handler = WasmFileHandler(str(wasm_file_path))
 
@@ -609,6 +608,7 @@ class TestPytketToQirGateTranslation:
         ir_bytes = cast(bytes, circuit_to_qir(circuit, wasm_path=wasm_file_path))
 
         ll = bitcode_to_ir(ir_bytes)
+        # print(ll)
         assert ll in exp_data
 
     def test_generate_wasmop_with_empty_inputs(self) -> None:

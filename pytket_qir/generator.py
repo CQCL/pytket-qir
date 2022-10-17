@@ -20,7 +20,7 @@ to and from pytket circuits.
 from enum import Enum
 from functools import partial
 import os
-from typing import Callable, Dict, List, Optional, Sequence, Tuple, Union
+from typing import cast, Dict, List, Optional, Sequence, Tuple, Union
 
 
 from pytket import Circuit, OpType, Bit, Qubit  # type: ignore
@@ -55,19 +55,23 @@ from pytket.circuit.logic_exp import (  # type: ignore
 
 from pyqir.generator import IntPredicate, types  # type: ignore
 from pyqir.generator.types import Qubit, Result  # type: ignore
+from pyqir.generator._native import Value  # type: ignore
 
 from pytket_qir.gatesets.base import (
     CustomGateSet,
     CustomQirGate,
     OpNat,
     OpSpec,
+    PyQirParameterType,
     QirGate,
 )
 from pytket_qir.gatesets.pyqir import PYQIR_GATES, _TK_TO_PYQIR  # type: ignore
 from pytket_qir.module import Module
 from pytket_qir.utils import (  # type: ignore
-    CommandUnsupportedError,
+    ClassicalExpBoxError,
     QIRFormat,
+    SetBitsOpError,
+    WASMError,
 )
 
 
@@ -92,15 +96,20 @@ _TK_CLOPS_TO_PYQIR: Dict = {
 class QIRGenerator:
     """Generate QIR from a pytket circuit."""
 
-    def __init__(self, circuit: Circuit, module: Module) -> None:
+    def __init__(
+        self,
+        circuit: Circuit,
+        module: Module,
+        wasm_int_type: types.Int = types.Int(32),
+        qir_int_type: types.Int = types.Int(64),
+    ) -> None:
         self.circuit = circuit
         self.module = module
+        self.wasm_int_type = wasm_int_type
+        self.qir_int_type = qir_int_type
         self.cregs = _retrieve_registers(self.circuit.bits, BitRegister)
         self.set_cregs: Dict[str, List] = {}  # Keep track of set registers.
-        self.ssa_vars: Dict[str, Callable] = {}  # Keep track of set ssa variables.
-        self.reg2var = self.module.module.add_external_function(
-            "reg2var", types.Function([types.BOOL] * 64, types.Int(64))
-        )
+        self.ssa_vars: Dict[str, Value] = {}  # Keep track of set ssa variables.
         self.populated_module = self.circuit_to_module(circuit, self.module)
 
     def _get_optype_and_params(self, op: Op) -> Tuple[OpType, Sequence[float]]:
@@ -132,25 +141,27 @@ class QIRGenerator:
             return [self.module.module.results[bit.index[0]] for bit in args[:-1]]
         return []
 
-    def _reg2ssa_var(self, bit_reg: BitRegister) -> Callable:
-        """Convert a BitRegister to an SSA variable via pyqir types."""
+    def _reg2ssa_var(self, bit_reg: BitRegister, int_size: int) -> Value:
+        # A utility function to convert from a pytket
+        #  BitRegister to an SSA variable via pyqir types.
         reg_name = bit_reg[0].reg_name
         if reg_name not in self.ssa_vars.keys():
             # Check the register has been previously set.
             # If not, initialise it to 0.
-            if reg_value := self.set_cregs.get(reg_name):
-                bit_reg = reg_value
-            else:
-                bit_reg = [False] * len(bit_reg)
-            if (size := len(bit_reg)) <= 64:  # Widening by zero-padding.
-                bool_reg = bit_reg + [False] * (64 - size)
+            bit_reg_list = list(bit_reg)
+            reg2var = self.module.module.add_external_function(
+                "reg2var",
+                types.Function([types.BOOL] * int_size, types.Int(int_size)),
+            )
+            if (size := bit_reg.size) <= int_size:  # Widening by zero-padding.
+                bool_reg = list(map(bool, bit_reg_list)) + [False] * (int_size - size)
             else:  # Narrowing by truncation.
-                bool_reg = bit_reg[:64]
-            ssa_var = self.module.builder.call(self.reg2var, [*bool_reg])
+                bool_reg = list(map(bool, bit_reg_list[:int_size]))
+            ssa_var = cast(Value, self.module.builder.call(reg2var, [*bool_reg]))
             self.ssa_vars[reg_name] = ssa_var
             return ssa_var
         else:
-            return self.ssa_vars[reg_name]
+            return cast(Value, self.ssa_vars[reg_name])
 
     def _get_c_regs_from_com(self, command: Command) -> Tuple[List[str], List[str]]:
         """Get classical registers from command op types."""
@@ -170,9 +181,7 @@ class QIRGenerator:
                     args = args[in_width:]
                     regname = com_bits[0].reg_name
                     if com_bits != list(self.cregs[regname]):
-                        CommandUnsupportedError(
-                            "Command ops must act on entire registers."
-                        )
+                        WASMError("WASM ops must act on entire registers.")
                     reglist.append(regname)
         elif isinstance(op, ClassicalExpBox):
             for reglist, sizes in [
@@ -190,16 +199,17 @@ class QIRGenerator:
                 (outputs, [op.get_n_o()]),
             ]:
                 if not sizes:
-                    CommandUnsupportedError(
-                        "Command op input or output registers have empty widths."
+                    ClassicalExpBoxError(
+                        "ClassicalExpBox op input or output \
+                        registers have empty widths."
                     )
                 for in_width in sizes:
                     com_bits = args[:in_width]
                     args = args[in_width:]
                     regname = com_bits[0].reg_name
                     if com_bits != list(self.cregs[regname]):
-                        CommandUnsupportedError(
-                            "Command ops must act on entire registers."
+                        ClassicalExpBoxError(
+                            "ClassicalExpBox ops must act on entire registers."
                         )
                     reglist.append(regname)
         elif isinstance(op, SetBitsOp):
@@ -213,9 +223,7 @@ class QIRGenerator:
                         args = args[in_width:]
                         regname = com_bits[0].reg_name
                         if com_bits != list(self.cregs[regname]):
-                            CommandUnsupportedError(
-                                "Command ops must act on entire registers."
-                            )
+                            SetBitsOpError("SetBitOp must act on entire registers.")
                         reglist.append(regname)
         return inputs, outputs
 
@@ -249,48 +257,55 @@ class QIRGenerator:
                     zero=lambda: condition_zero_block(),
                 )
             elif isinstance(op, WASMOp):
+                wasm_int_size = self.wasm_int_type.width
                 inputs, _ = self._get_c_regs_from_com(command)
-                bit_reg = circ.get_c_register(inputs[0])
+                input_type_list: List[PyQirParameterType]
+                try:
+                    bit_reg = circ.get_c_register(inputs[0])
+                    input_type_list = [types.Int(wasm_int_size)]
+                except IndexError:
+                    input_type_list = []
 
                 # Need to create a singleton enum to hold the WASM function name.
-                class ExtOpName(Enum):
-                    WASM = op.func_name
+                WasmName = Enum("WasmName", [("WASM", op.func_name)])
 
                 # Update datastructures with WASM function name and
                 # appropriate definition.
 
                 # Update translation dict.
                 _TK_TO_PYQIR[OpType.WASM] = QirGate(
-                    opnat=OpNat.HYBRID, opname=ExtOpName.WASM, opspec=OpSpec.BODY
+                    opnat=OpNat.HYBRID, opname=WasmName.WASM, opspec=OpSpec.BODY
                 )
 
                 # Update gateset.
                 gateset = PYQIR_GATES.gateset
                 gateset["wasm"] = CustomQirGate(
                     opnat=OpNat.HYBRID,
-                    opname=ExtOpName.WASM,
+                    opname=WasmName.WASM,
                     opspec=OpSpec.BODY,
-                    function_signature=[types.Int(64)],
-                    return_type=types.Int(64),
+                    function_signature=input_type_list,
+                    return_type=types.Int(wasm_int_size),
                 )
 
                 # Update gateset in module.
                 module.gateset = PYQIR_GATES
 
-                # Convert a bool register to an ssa variable.
-                ssa_var = self._reg2ssa_var(bit_reg)
-                assert ssa_var
+                # Create an ssa variable if there is an input to the WASMOp.
+                if len(input_type_list) == 0:
+                    ssa_args = []
+                else:
+                    ssa_args = [self._reg2ssa_var(bit_reg, wasm_int_size)]
 
                 gate = module.gateset.tk_to_gateset(op.type)
                 get_gate = getattr(module, gate.opname.value)
-                module.builder.call(get_gate, [ssa_var])
+                module.builder.call(get_gate, ssa_args)
             elif isinstance(op, ClassicalExpBox):
                 inputs, _ = self._get_c_regs_from_com(command)
 
                 ssa_vars: List = []
                 for inp in inputs:
                     bit_reg = circ.get_c_register(inp)
-                    ssa_vars.append(self._reg2ssa_var(bit_reg))
+                    ssa_vars.append(self._reg2ssa_var(bit_reg, self.qir_int_type.width))
 
                 _TK_CLOPS_TO_PYQIR[type(op.get_exp())](module.builder)(*ssa_vars)
             elif isinstance(op, SetBitsOp):
@@ -335,23 +350,29 @@ def circuit_to_qir(
     circ: Circuit,
     gateset: Optional[CustomGateSet] = None,
     wasm_path: Optional[Union[str, os.PathLike]] = None,
-    qir_format: Optional[QIRFormat] = QIRFormat.BITCODE,
+    wasm_int_type: types.Int = types.Int(32),
+    qir_format: QIRFormat = QIRFormat.BITCODE,
 ) -> Union[str, bytes]:
-    """Return QIR from a pytket circuit."""
+    """Return a pytket circuit as QIR."""
     wasm_handler = None
-    if wasm_path:
+    module_name = "Generated from {} pytket circuit".format(
+        circ.name if circ.name is not None else "input"
+    )
+    if wasm_path is not None:
         try:
             wasm_handler = WasmFileHandler(str(wasm_path))
+            wasm_file_name = os.path.basename(str(wasm_path))
+            module_name = module_name + " and {} file.".format(wasm_file_name)
         except ValueError as ve:
             raise ve
     module = Module(
-        name="Pytket circuit",
+        name=module_name,
         num_qubits=circ.n_qubits,
         num_results=len(circ.bits),
         gateset=gateset,
         wasm_handler=wasm_handler,
     )
-    populated_module = QIRGenerator(circ, module).populated_module
+    populated_module = QIRGenerator(circ, module, wasm_int_type).module
     if qir_format == QIRFormat.BITCODE:
         return populated_module.module.bitcode()
     else:
@@ -363,8 +384,9 @@ def write_qir_file(
     file_name: str,
     gateset: Optional[CustomGateSet] = None,
     wasm_path: Optional[Union[str, os.PathLike]] = None,
+    wasm_int_type: types.Int = types.Int(32),
 ) -> None:
-    """Generate a QIR file from a pytket circuit."""
+    """A method to generate a qir file from a tket circuit."""
     _, ext = os.path.splitext(os.path.basename(file_name))
     if ext == ".bc":
         qir_format = QIRFormat.BITCODE
@@ -373,11 +395,12 @@ def write_qir_file(
         qir_format = QIRFormat.IR
         file_param = "w"
     else:
-        raise ValueError("The file extension should either be '.ll' or '.bc'.")
+        raise ValueError("The file extension must either be '.ll' or '.bc'.")
     qir = circuit_to_qir(
         circ=circ,
         gateset=gateset,
         wasm_path=wasm_path,
+        wasm_int_type=wasm_int_type,
         qir_format=qir_format,
     )
     with open(file_name, file_param) as out:
