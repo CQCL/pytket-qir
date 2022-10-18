@@ -144,7 +144,9 @@ class QIRGenerator:
     def _reg2ssa_var(self, bit_reg: BitRegister, int_size: int) -> Value:
         """Convert a BitRegister to an SSA variable using pyqir types."""
         reg_name = bit_reg[0].reg_name
-        if reg_name not in self.ssa_vars.keys():  # Check if the register has been previously set.
+        if (
+            reg_name not in self.ssa_vars.keys()
+        ):  # Check if the register has been previously set.
             reg2var = self.module.module.add_external_function(
                 "reg2var",
                 types.Function([types.BOOL] * int_size, types.Int(int_size)),
@@ -310,7 +312,7 @@ class QIRGenerator:
 
                 _TK_CLOPS_TO_PYQIR[type(op.get_exp())](module.builder)(*ssa_vars)
             elif isinstance(op, SetBitsOp):
-                inputs, outputs = self._get_c_regs_from_com(command)
+                _, outputs = self._get_c_regs_from_com(command)
                 for out in outputs:
                     self.set_cregs[out] = command.op.values
             else:
