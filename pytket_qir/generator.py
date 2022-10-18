@@ -142,12 +142,9 @@ class QIRGenerator:
         return []
 
     def _reg2ssa_var(self, bit_reg: BitRegister, int_size: int) -> Value:
-        # A utility function to convert from a pytket
-        #  BitRegister to an SSA variable via pyqir types.
+        """Convert a BitRegister to an SSA variable using pyqir types."""
         reg_name = bit_reg[0].reg_name
-        if reg_name not in self.ssa_vars.keys():
-            # Check the register has been previously set.
-            # If not, initialise it to 0.
+        if reg_name not in self.ssa_vars.keys():  # Check if the register has been previously set.
             bit_reg_list = list(bit_reg)
             reg2var = self.module.module.add_external_function(
                 "reg2var",
