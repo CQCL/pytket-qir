@@ -145,15 +145,19 @@ class QIRGenerator:
         """Convert a BitRegister to an SSA variable using pyqir types."""
         reg_name = bit_reg[0].reg_name
         if reg_name not in self.ssa_vars.keys():  # Check if the register has been previously set.
-            bit_reg_list = list(bit_reg)
             reg2var = self.module.module.add_external_function(
                 "reg2var",
                 types.Function([types.BOOL] * int_size, types.Int(int_size)),
             )
-            if (size := bit_reg.size) <= int_size:  # Widening by zero-padding.
-                bool_reg = list(map(bool, bit_reg_list)) + [False] * (int_size - size)
+            # Check if the register has been previously set. If not, initialise to 0.
+            if reg_value := self.set_cregs.get(reg_name):
+                bit_reg = reg_value
+            else:
+                bit_reg = [False] * len(bit_reg)
+            if (size := len(bit_reg)) <= int_size:  # Widening by zero-padding.
+                bool_reg = bit_reg + [False] * (int_size - size)
             else:  # Narrowing by truncation.
-                bool_reg = list(map(bool, bit_reg_list[:int_size]))
+                bool_reg = bit_reg[:int_size]
             ssa_var = cast(Value, self.module.builder.call(reg2var, [*bool_reg]))
             self.ssa_vars[reg_name] = ssa_var
             return ssa_var
