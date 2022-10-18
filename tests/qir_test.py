@@ -608,7 +608,7 @@ class TestPytketToQirGateTranslation:
         ir_bytes = cast(bytes, circuit_to_qir(circuit, wasm_path=wasm_file_path))
 
         ll = bitcode_to_ir(ir_bytes)
-        # print(ll)
+
         assert ll in exp_data
 
     def test_generate_wasmop_with_empty_inputs(self) -> None:
