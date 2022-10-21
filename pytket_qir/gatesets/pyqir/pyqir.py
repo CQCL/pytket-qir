@@ -42,6 +42,7 @@ _PYQIR_TO_TK[
 PYQIR_GATES = CustomGateSet(
     name="PyQir",
     template=Template("__quantum__${opnat}__${opname}__${opspec}"),
+    base_gateset=_TK_TO_PYQIR.keys() | set(),
     gateset={},
     tk_to_gateset=lambda optype: _TK_TO_PYQIR[optype],
     gateset_to_tk=lambda gate: _PYQIR_TO_TK[gate],
