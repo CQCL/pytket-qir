@@ -326,7 +326,9 @@ class QIRGenerator:
                 for out in outputs:
                     self.set_cregs[out] = command.op.values
             else:
-                rebased_circ = self._rebase_to_gateset(command)  # Check if the command must be rebased.
+                rebased_circ = self._rebase_to_gateset(
+                    command
+                )  # Check if the command must be rebased.
                 if rebased_circ is not None:
                     self.circuit_to_module(rebased_circ, module)
                 else:
@@ -336,7 +338,9 @@ class QIRGenerator:
                     if module.gateset.name == "PyQir":
                         pyqir_gate = module.gateset.tk_to_gateset(optype)
                         if not pyqir_gate.opspec == OpSpec.BODY:
-                            opname = pyqir_gate.opname.value + "_" + pyqir_gate.opspec.value
+                            opname = (
+                                pyqir_gate.opname.value + "_" + pyqir_gate.opspec.value
+                            )
                             get_gate = getattr(module.qis, opname)
                         else:
                             get_gate = getattr(module.qis, pyqir_gate.opname.value)
