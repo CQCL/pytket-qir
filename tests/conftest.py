@@ -287,6 +287,16 @@ def file_name() -> str:
 
 
 @fixture
+def rebased_circuit() -> Generator:
+    rebased_circuit_file_name = "RebasedCircuit.ll"
+    c = Circuit(2)
+    c.CY(0, 1)
+    write_qir_file(c, rebased_circuit_file_name)
+    yield
+    os.remove(rebased_circuit_file_name)
+
+
+@fixture
 def circuit_pyqir_gateset(file_name: str) -> Generator:
     c = Circuit(2, 2)
     c.H(0)
