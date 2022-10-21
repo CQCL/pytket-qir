@@ -52,6 +52,7 @@ from pytket.circuit.logic_exp import (  # type: ignore
     RegRsh,
     RegXor,
 )
+from pytket.passes import auto_rebase_pass
 
 from pyqir.generator import IntPredicate, types  # type: ignore
 from pyqir.generator.types import Qubit, Result  # type: ignore
@@ -108,9 +109,21 @@ class QIRGenerator:
         self.wasm_int_type = wasm_int_type
         self.qir_int_type = qir_int_type
         self.cregs = _retrieve_registers(self.circuit.bits, BitRegister)
+        self.target_gateset = self.module.gateset.base_gateset
+        self.rebase_to_gateset = auto_rebase_pass(self.target_gateset)
         self.set_cregs: Dict[str, List] = {}  # Keep track of set registers.
         self.ssa_vars: Dict[str, Value] = {}  # Keep track of set ssa variables.
         self.populated_module = self.circuit_to_module(circuit, self.module)
+
+    def _rebase_to_gateset(self, command: Command) -> Optional[Circuit]:
+        """Rebase to the target gateset if needed."""
+        if command.op.type not in self.module.gateset.base_gateset:
+            # import pdb; pdb.set_trace()
+            circ = Circuit(self.circuit.n_qubits)
+            circ.add_gate(command.op.type, command.args)
+            self.rebase_to_gateset.apply(circ)
+            return circ
+        return None
 
     def _get_optype_and_params(self, op: Op) -> Tuple[OpType, Sequence[float]]:
         optype = op.type
@@ -332,6 +345,9 @@ class QIRGenerator:
                         get_gate(*qubits, results)
                     else:
                         get_gate(*qubits)
+                rebased_circ = self._rebase_to_gateset(command)  # Check if the command must be rebased.
+                if rebased_circ is not None:
+                    self.circuit_to_module(rebased_circ, module)
                 else:
                     bits: Optional[Sequence[Result]] = None
                     if type(optype) == BitWiseOp:
