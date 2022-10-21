@@ -52,7 +52,7 @@ from pytket.circuit.logic_exp import (  # type: ignore
     RegRsh,
     RegXor,
 )
-from pytket.passes import auto_rebase_pass
+from pytket.passes import auto_rebase_pass  # type: ignore
 
 from pyqir.generator import IntPredicate, types  # type: ignore
 from pyqir.generator.types import Qubit, Result  # type: ignore
