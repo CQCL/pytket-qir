@@ -52,6 +52,7 @@ from pytket.circuit.logic_exp import (  # type: ignore
     RegRsh,
     RegXor,
 )
+from pytket.passes import auto_rebase_pass  # type: ignore
 
 from pyqir.generator import IntPredicate, types  # type: ignore
 from pyqir.generator.types import Qubit, Result  # type: ignore
@@ -108,9 +109,21 @@ class QIRGenerator:
         self.wasm_int_type = wasm_int_type
         self.qir_int_type = qir_int_type
         self.cregs = _retrieve_registers(self.circuit.bits, BitRegister)
+        self.target_gateset = self.module.gateset.base_gateset
+        # Will throw an exception if the rebase can not handle the target gateset.
+        self.rebase_to_gateset = auto_rebase_pass(self.target_gateset)
         self.set_cregs: Dict[str, List] = {}  # Keep track of set registers.
         self.ssa_vars: Dict[str, Value] = {}  # Keep track of set ssa variables.
         self.populated_module = self.circuit_to_module(circuit, self.module)
+
+    def _rebase_to_gateset(self, command: Command) -> Optional[Circuit]:
+        """Rebase to the target gateset if needed."""
+        if command.op.type not in self.module.gateset.base_gateset:
+            circ = Circuit(self.circuit.n_qubits)
+            circ.add_gate(command.op.type, command.args)
+            self.rebase_to_gateset.apply(circ)
+            return circ
+        return None
 
     def _get_optype_and_params(self, op: Op) -> Tuple[OpType, Sequence[float]]:
         optype = op.type
@@ -124,8 +137,6 @@ class QIRGenerator:
                 optype = BitWiseOp.XOR
         else:
             params = op.params
-            if optype == OpType.TK1:
-                params = [op.params[1], op.params[0] - 0.5, op.params[2] + 0.5]
         return (optype, params)
 
     def _to_qis_qubits(self, qubits: List[Qubit]) -> Sequence[Qubit]:
@@ -142,21 +153,24 @@ class QIRGenerator:
         return []
 
     def _reg2ssa_var(self, bit_reg: BitRegister, int_size: int) -> Value:
-        # A utility function to convert from a pytket
-        #  BitRegister to an SSA variable via pyqir types.
+        """Convert a BitRegister to an SSA variable using pyqir types."""
         reg_name = bit_reg[0].reg_name
-        if reg_name not in self.ssa_vars.keys():
-            # Check the register has been previously set.
-            # If not, initialise it to 0.
-            bit_reg_list = list(bit_reg)
+        if (
+            reg_name not in self.ssa_vars.keys()
+        ):  # Check if the register has been previously set.
             reg2var = self.module.module.add_external_function(
                 "reg2var",
                 types.Function([types.BOOL] * int_size, types.Int(int_size)),
             )
-            if (size := bit_reg.size) <= int_size:  # Widening by zero-padding.
-                bool_reg = list(map(bool, bit_reg_list)) + [False] * (int_size - size)
+            # Check if the register has been previously set. If not, initialise to 0.
+            if reg_value := self.set_cregs.get(reg_name):
+                bit_reg = reg_value
+            else:
+                bit_reg = [False] * len(bit_reg)
+            if (size := len(bit_reg)) <= int_size:  # Widening by zero-padding.
+                bool_reg = bit_reg + [False] * (int_size - size)
             else:  # Narrowing by truncation.
-                bool_reg = list(map(bool, bit_reg_list[:int_size]))
+                bool_reg = bit_reg[:int_size]
             ssa_var = cast(Value, self.module.builder.call(reg2var, [*bool_reg]))
             self.ssa_vars[reg_name] = ssa_var
             return ssa_var
@@ -198,12 +212,12 @@ class QIRGenerator:
                 ),
                 (outputs, [op.get_n_o()]),
             ]:
-                if not sizes:
-                    ClassicalExpBoxError(
-                        "ClassicalExpBox op input or output \
-                        registers have empty widths."
-                    )
                 for in_width in sizes:
+                    if in_width == 0:
+                        raise ClassicalExpBoxError(
+                            "ClassicalExpBox op input or output \
+                            registers have empty widths."
+                        )
                     com_bits = args[:in_width]
                     args = args[in_width:]
                     regname = com_bits[0].reg_name
@@ -214,17 +228,19 @@ class QIRGenerator:
                     reglist.append(regname)
         elif isinstance(op, SetBitsOp):
             for reglist, sizes in [
-                (inputs, [op.n_inputs]),
                 (outputs, [op.n_outputs]),
             ]:
                 for in_width in sizes:
-                    if in_width > 0:
-                        com_bits = args[:in_width]
-                        args = args[in_width:]
-                        regname = com_bits[0].reg_name
-                        if com_bits != list(self.cregs[regname]):
-                            SetBitsOpError("SetBitOp must act on entire registers.")
-                        reglist.append(regname)
+                    if in_width == 0:
+                        raise SetBitsOpError(
+                            "A value is getting assigned to an empty register."
+                        )
+                    com_bits = args[:in_width]
+                    args = args[in_width:]
+                    regname = com_bits[0].reg_name
+                    if com_bits != list(self.cregs[regname]):
+                        SetBitsOpError("SetBitOp must act on entire registers.")
+                    reglist.append(regname)
         return inputs, outputs
 
     def circuit_to_module(self, circ: Circuit, module: Module) -> Module:
@@ -309,40 +325,48 @@ class QIRGenerator:
 
                 _TK_CLOPS_TO_PYQIR[type(op.get_exp())](module.builder)(*ssa_vars)
             elif isinstance(op, SetBitsOp):
-                inputs, outputs = self._get_c_regs_from_com(command)
+                _, outputs = self._get_c_regs_from_com(command)
                 for out in outputs:
                     self.set_cregs[out] = command.op.values
             else:
-                optype, params = self._get_optype_and_params(op)
-                qubits = self._to_qis_qubits(command.qubits)
-                results = self._to_qis_results(command.bits)
-                if module.gateset.name == "PyQir":
-                    pyqir_gate = module.gateset.tk_to_gateset(optype)
-                    if not pyqir_gate.opspec == OpSpec.BODY:
-                        opname = pyqir_gate.opname.value + "_" + pyqir_gate.opspec.value
-                        get_gate = getattr(module.qis, opname)
-                    else:
-                        get_gate = getattr(module.qis, pyqir_gate.opname.value)
-                    if params:
-                        get_gate(*params, *qubits)
-                    elif results:
-                        get_gate(*qubits, results)
-                    else:
-                        get_gate(*qubits)
+                rebased_circ = self._rebase_to_gateset(
+                    command
+                )  # Check if the command must be rebased.
+                if rebased_circ is not None:
+                    self.circuit_to_module(rebased_circ, module)
                 else:
-                    bits: Optional[Sequence[Result]] = None
-                    if type(optype) == BitWiseOp:
-                        bits = self._to_qis_bits(command.args)
-                    gate = module.gateset.tk_to_gateset(optype)
-                    get_gate = getattr(module, gate.opname.value)
-                    if bits:
-                        module.builder.call(get_gate, bits)  # type: ignore
-                    elif params:
-                        module.builder.call(get_gate, [*params, *qubits])
-                    elif results:
-                        module.builder.call(get_gate, [*qubits, results])  # type: ignore
+                    optype, params = self._get_optype_and_params(op)
+                    qubits = self._to_qis_qubits(command.qubits)
+                    results = self._to_qis_results(command.bits)
+                    if module.gateset.name == "PyQir":
+                        pyqir_gate = module.gateset.tk_to_gateset(optype)
+                        if not pyqir_gate.opspec == OpSpec.BODY:
+                            opname = (
+                                pyqir_gate.opname.value + "_" + pyqir_gate.opspec.value
+                            )
+                            get_gate = getattr(module.qis, opname)
+                        else:
+                            get_gate = getattr(module.qis, pyqir_gate.opname.value)
+                        if params:
+                            get_gate(*params, *qubits)
+                        elif results:
+                            get_gate(*qubits, results)
+                        else:
+                            get_gate(*qubits)
                     else:
-                        module.builder.call(get_gate, qubits)
+                        bits: Optional[Sequence[Result]] = None
+                        if type(optype) == BitWiseOp:
+                            bits = self._to_qis_bits(command.args)
+                        gate = module.gateset.tk_to_gateset(optype)
+                        get_gate = getattr(module, gate.opname.value)
+                        if bits:
+                            module.builder.call(get_gate, bits)  # type: ignore
+                        elif params:
+                            module.builder.call(get_gate, [*params, *qubits])
+                        elif results:
+                            module.builder.call(get_gate, [*qubits, results])  # type: ignore
+                        else:
+                            module.builder.call(get_gate, qubits)
         return module
 
 

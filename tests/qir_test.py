@@ -27,6 +27,8 @@ from pytket_qir.generator import (
     write_qir_file,
 )
 from pytket_qir.parser import circuit_from_qir
+from pytket_qir.utils import SetBitsOpError
+from pytket_qir.utils.utils import ClassicalExpBoxError
 
 
 qir_files_dir = Path("./qir_test_files")
@@ -477,11 +479,21 @@ class TestQirToPytketClassicalOps:
 class TestPytketToQirGateTranslation:
     """A class to test the gate translation from a pytket circuit to a QIR program."""
 
-    def test_raise_pyqir_gateset_keyerror(self) -> None:
+    def test_rebase_circuit(self) -> None:
+        rebased_circuit_file_name = "RebasedCircuit.ll"
         c = Circuit(2)
         c.CY(0, 1)
-        with pytest.raises(KeyError):
-            write_qir_file(c, "RaiseError.ll")
+        write_qir_file(c, rebased_circuit_file_name)
+
+        with open("RebasedCircuit.ll", "r") as input_file:
+            data = input_file.readlines()
+
+        with open(qir_files_dir / "RebasedCircuit.ll", "r") as input_file:
+            exp_data = input_file.readlines()
+
+        for line in data:
+            assert line in exp_data
+        os.remove(rebased_circuit_file_name)
 
     def test_qir_from_pytket_circuit_and_pyqir_gateset(
         self, circuit_pyqir_gateset: Generator
@@ -550,6 +562,21 @@ class TestPytketToQirGateTranslation:
         assert call_ry in data
         assert call_rz in data
 
+    def test_raises_empty_setbit_error(self) -> None:
+        c = Circuit(0)
+        a = c.add_c_register("a", 0)
+        c.add_c_setreg(2, a)
+        with pytest.raises(SetBitsOpError):
+            write_qir_file(c, "empty_setbit_circuit.ll")
+
+    def test_raises_empty_classicalexpbox_error(self) -> None:
+        c = Circuit(0)
+        a = c.add_c_register("a", 0)
+        b = c.add_c_register("b", 0)
+        c.add_classicalexpbox_register(a ^ b, b)
+        with pytest.raises(ClassicalExpBoxError):
+            write_qir_file(c, "empty_classicalexpbox_circuit.ll")
+
     def test_classical_arithmetic(
         self, circuit_classical_arithmetic: Circuit, operators: List
     ):
@@ -613,7 +640,7 @@ class TestPytketToQirGateTranslation:
         ir_bytes = cast(bytes, circuit_to_qir(circuit, wasm_path=wasm_file_path))
 
         ll = bitcode_to_ir(ir_bytes)
-        # print(ll)
+
         assert ll in exp_data
 
     def test_generate_wasmop_with_empty_inputs(self) -> None:

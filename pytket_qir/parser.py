@@ -308,9 +308,6 @@ class QirParser:
                         c_reg_name3, self.qir_int_type.width
                     )  # Int64 supported in LLVM/QIR and L3.
                     c_reg_map[3] = c_reg3
-                    # import pdb; pdb.set_trace()
-                    # instr = cast(instr, PyQirInstruction)
-                    # assert isinstance(instr, PyQirInstruction)
                     self.add_classical_op(matching, instr, circuit, c_reg_map)
                 else:
                     raise ValueError("Unsupported instruction.")
