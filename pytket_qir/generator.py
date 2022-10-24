@@ -231,7 +231,9 @@ class QIRGenerator:
                 (outputs, [op.n_outputs]),
             ]:
                 for in_width in sizes:
-                    if in_width > 0:
+                    if in_width == 0:
+                        raise SetBitsOpError("A value is getting assigned to an empty register.")
+                    else:
                         com_bits = args[:in_width]
                         args = args[in_width:]
                         regname = com_bits[0].reg_name
