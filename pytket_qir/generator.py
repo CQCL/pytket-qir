@@ -228,7 +228,6 @@ class QIRGenerator:
                     reglist.append(regname)
         elif isinstance(op, SetBitsOp):
             for reglist, sizes in [
-                (inputs, [op.n_inputs]),
                 (outputs, [op.n_outputs]),
             ]:
                 for in_width in sizes:
