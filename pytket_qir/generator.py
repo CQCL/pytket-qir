@@ -212,12 +212,12 @@ class QIRGenerator:
                 ),
                 (outputs, [op.get_n_o()]),
             ]:
-                if not sizes:
-                    ClassicalExpBoxError(
-                        "ClassicalExpBox op input or output \
-                        registers have empty widths."
-                    )
                 for in_width in sizes:
+                    if in_width == 0:
+                        raise ClassicalExpBoxError(
+                            "ClassicalExpBox op input or output \
+                            registers have empty widths."
+                        )
                     com_bits = args[:in_width]
                     args = args[in_width:]
                     regname = com_bits[0].reg_name
@@ -232,14 +232,15 @@ class QIRGenerator:
             ]:
                 for in_width in sizes:
                     if in_width == 0:
-                        raise SetBitsOpError("A value is getting assigned to an empty register.")
-                    else:
-                        com_bits = args[:in_width]
-                        args = args[in_width:]
-                        regname = com_bits[0].reg_name
-                        if com_bits != list(self.cregs[regname]):
-                            SetBitsOpError("SetBitOp must act on entire registers.")
-                        reglist.append(regname)
+                        raise SetBitsOpError(
+                            "A value is getting assigned to an empty register."
+                        )
+                    com_bits = args[:in_width]
+                    args = args[in_width:]
+                    regname = com_bits[0].reg_name
+                    if com_bits != list(self.cregs[regname]):
+                        SetBitsOpError("SetBitOp must act on entire registers.")
+                    reglist.append(regname)
         return inputs, outputs
 
     def circuit_to_module(self, circ: Circuit, module: Module) -> Module:
