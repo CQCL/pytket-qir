@@ -27,6 +27,7 @@ from pytket_qir.generator import (
     write_qir_file,
 )
 from pytket_qir.parser import circuit_from_qir
+from pytket_qir.utils import SetBitsOpError
 
 
 qir_files_dir = Path("./qir_test_files")
@@ -554,6 +555,13 @@ class TestPytketToQirGateTranslation:
         assert call_rx in data
         assert call_ry in data
         assert call_rz in data
+
+    def test_raises_empty_setbit_error(self) -> None:
+        c = Circuit(0)
+        a = c.add_c_register("a", 0)
+        c.add_c_setreg(2, a)
+        with pytest.raises(SetBitsOpError):
+            write_qir_file(c, "empty_setbit_circuit.ll")
 
     def test_classical_arithmetic(
         self, circuit_classical_arithmetic: Circuit, operators: List
