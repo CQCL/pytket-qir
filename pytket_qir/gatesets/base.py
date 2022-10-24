@@ -1,10 +1,10 @@
 from dataclasses import dataclass
 from enum import Enum
 from string import Template
-from typing import Callable, Dict, List, NamedTuple, Union
+from typing import Callable, Dict, List, NamedTuple, Set, Union
 
 from pyqir.generator.types import Double, Int, Qubit, Result, Void  # type: ignore
-
+from pytket import OpType  # type: ignore
 
 PyQirParameterType = Union[Double, Int, Qubit, Result]
 PyQirReturnType = Union[Int, Result, Void]
@@ -66,6 +66,7 @@ CustomGateSet = NamedTuple(
     [
         ("name", str),
         ("template", Template),
+        ("base_gateset", Set[OpType]),
         ("gateset", Dict[str, CustomQirGate]),
         ("tk_to_gateset", Callable),
         ("gateset_to_tk", Callable),

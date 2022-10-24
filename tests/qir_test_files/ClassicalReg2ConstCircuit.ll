@@ -1,5 +1,5 @@
-; ModuleID = 'Pytket circuit'
-source_filename = "Pytket circuit"
+; ModuleID = 'Generated from input pytket circuit'
+source_filename = "Generated from input pytket circuit"
 
 declare i64 @reg2var(i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1)
 
@@ -21,4 +21,4 @@ entry:
   ret void
 }
 
-attributes #0 = { "EntryPoint" }
+attributes #0 = { "EntryPoint" "requiredQubits"="2" "requiredResults"="9" }
