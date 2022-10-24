@@ -472,7 +472,12 @@ class TestQirToPytketClassicalOps:
 class TestPytketToQirGateTranslation:
     """A class to test the gate translation from a pytket circuit to a QIR program."""
 
-    def test_rebase_circuit(self, rebased_circuit) -> None:
+    def test_rebase_circuit(self) -> None:
+        rebased_circuit_file_name = "RebasedCircuit.ll"
+        c = Circuit(2)
+        c.CY(0, 1)
+        write_qir_file(c, rebased_circuit_file_name)
+
         with open("RebasedCircuit.ll", "r") as input_file:
             data = input_file.readlines()
 
@@ -481,6 +486,7 @@ class TestPytketToQirGateTranslation:
 
         for line in data:
             assert line in exp_data
+        os.remove(rebased_circuit_file_name)
 
     def test_qir_from_pytket_circuit_and_pyqir_gateset(
         self, circuit_pyqir_gateset: Generator
