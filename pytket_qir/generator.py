@@ -110,6 +110,7 @@ class QIRGenerator:
         self.qir_int_type = qir_int_type
         self.cregs = _retrieve_registers(self.circuit.bits, BitRegister)
         self.target_gateset = self.module.gateset.base_gateset
+        # Will throw an exception if the rebase can not handle the target gateset.
         self.rebase_to_gateset = auto_rebase_pass(self.target_gateset)
         self.set_cregs: Dict[str, List] = {}  # Keep track of set registers.
         self.ssa_vars: Dict[str, Value] = {}  # Keep track of set ssa variables.
