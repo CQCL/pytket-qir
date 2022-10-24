@@ -28,6 +28,7 @@ from pytket_qir.generator import (
 )
 from pytket_qir.parser import circuit_from_qir
 from pytket_qir.utils import SetBitsOpError
+from pytket_qir.utils.utils import ClassicalExpBoxError
 
 
 qir_files_dir = Path("./qir_test_files")
@@ -562,6 +563,14 @@ class TestPytketToQirGateTranslation:
         c.add_c_setreg(2, a)
         with pytest.raises(SetBitsOpError):
             write_qir_file(c, "empty_setbit_circuit.ll")
+
+    def test_raises_empty_classicalexpbox_error(self) -> None:
+        c = Circuit(0)
+        a = c.add_c_register("a", 0)
+        b = c.add_c_register("b", 0)
+        c.add_classicalexpbox_register(a ^ b, b)
+        with pytest.raises(ClassicalExpBoxError):
+            write_qir_file(c, "empty_classicalexpbox_circuit.ll")
 
     def test_classical_arithmetic(
         self, circuit_classical_arithmetic: Circuit, operators: List
