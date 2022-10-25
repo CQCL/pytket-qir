@@ -118,10 +118,76 @@ class TestQirToPytketGateTranslation:
         assert len(com.args) == 64
         assert circuit.depth() == 1
 
-    def test_rt_function_calls_and_tags(self) -> None:
-        rt_function_file_path = qir_files_dir / "tag_examples.bc"
+    def test_untagged_rt_functions(self) -> None:
+        rt_function_file_path = qir_files_dir / "untagged_rt_functions.bc"
         circuit = circuit_from_qir(rt_function_file_path)
-        print(circuit.get_commands())
+        coms = circuit.get_commands()
+
+        assert coms[0].op.type == OpType.Measure
+        assert coms[0].qubits[0].index[0] == 1
+        assert coms[0].bits[0].index[0] == 1
+        assert coms[1].op.type == OpType.H
+        assert coms[1].qubits[0].index[0] == 0
+        assert coms[2].op.type == OpType.Measure
+        assert coms[2].qubits[0].index[0] == 0
+        assert coms[2].bits[0].index[0] == 0
+        assert coms[3].op.type == OpType.Barrier
+        assert coms[3].qubits == []
+        assert coms[3].bits[0].index[0] == 1
+        assert (
+            coms[3].op.data
+            == '{"name": "__quantum__rt__result_record_output", "arg": 1}'
+        )
+        assert coms[4].op.type == OpType.Reset
+        assert coms[4].qubits[0].index[0] == 1
+        assert coms[4].bits == []
+        assert coms[5].op.type == OpType.Barrier
+        assert coms[5].qubits == []
+        assert coms[5].bits[0].index[0] == 0
+        assert (
+            coms[5].op.data
+            == '{"name": "__quantum__rt__result_record_output", "arg": 0}'
+        )
+        assert coms[6].op.type == OpType.Reset
+        assert coms[6].qubits[0].index[0] == 0
+        assert coms[6].bits == []
+
+    def test_tagged_rt_functions(self) -> None:
+        rt_function_file_path = qir_files_dir / "tagged_rt_functions.bc"
+        circuit = circuit_from_qir(rt_function_file_path)
+        coms = circuit.get_commands()
+
+        data1 = (
+            '{"name": "__quantum__rt__result_record_output",'
+            '"arg": 1, "tag": "0_t1\\u0000"}'
+        )
+        data2 = (
+            '{"name": "__quantum__rt__result_record_output", '
+            '"arg": 0, "tag": "0_t0\\u0000"}'
+        )
+
+        assert coms[0].op.type == OpType.Measure
+        assert coms[0].qubits[0].index[0] == 1
+        assert coms[0].bits[0].index[0] == 1
+        assert coms[1].op.type == OpType.H
+        assert coms[1].qubits[0].index[0] == 0
+        assert coms[2].op.type == OpType.Measure
+        assert coms[2].qubits[0].index[0] == 0
+        assert coms[2].bits[0].index[0] == 0
+        assert coms[3].op.type == OpType.Barrier
+        assert coms[3].qubits == []
+        assert coms[3].bits[0].index[0] == 1
+        assert coms[3].op.data == data1
+        assert coms[4].op.type == OpType.Reset
+        assert coms[4].qubits[0].index[0] == 1
+        assert coms[4].bits == []
+        assert coms[5].op.type == OpType.Barrier
+        assert coms[5].qubits == []
+        assert coms[5].bits[0].index[0] == 0
+        assert coms[5].op.data == data2
+        assert coms[6].op.type == OpType.Reset
+        assert coms[6].qubits[0].index[0] == 0
+        assert coms[6].bits == []
 
 
 class TestQirToPytketConditionals:
