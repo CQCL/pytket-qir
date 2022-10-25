@@ -18,6 +18,7 @@ to and from pytket circuits.
 """
 
 import inspect
+import json
 import os
 import re
 from typing import cast, Callable, Dict, List, Optional, Tuple, Union
@@ -56,6 +57,7 @@ from pyqir.parser import (  # type: ignore
     QirCondBrTerminator,
     QirModule,
     QirInstr,
+    QirRtCallInstr,
 )
 from pyqir.parser._native import PyQirInstruction  # type: ignore
 from pyqir.generator import ir_to_bitcode, types  # type: ignore
