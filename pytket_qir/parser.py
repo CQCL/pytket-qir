@@ -268,6 +268,15 @@ class QirParser:
                 param = params[0]
                 assert param.constant is not None
                 c_reg_index = param.constant.result_static_id
+            elif instr.instr.is_rt_call:  # Runtime function call.
+                instr = cast(QirRtCallInstr, instr)
+                bits = self.get_qubit_indices(instr.instr)
+                arg, tag = self.get_arg_and_tag(instr)
+                # Create a JSON object for the data to be passed.
+                data = {"name": cast(str, instr.func_name), "arg": arg}
+                if tag is not None:
+                    data["tag"] = tag
+                circuit.add_barrier(qubits=[], bits=bits, data=json.dumps(data))
             elif instr.instr.is_call:  # WASM external call.
                 instr = cast(QirCallInstr, instr)
                 if self.wasm_handler is None:
