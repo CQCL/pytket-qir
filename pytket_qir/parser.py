@@ -174,6 +174,17 @@ class QirParser:
                 params.append(param.constant.result_static_id)
         return params
 
+    def get_arg_and_tag(self, instr: QirRtCallInstr) -> Tuple[int, Optional[str]]:
+        args = cast(List, instr.func_args)
+        arg_value = args[0].value
+        try:
+            tag = args[1]
+            tag_value = cast(bytes, self.module.get_global_bytes_value(tag))
+            tag_str = tag_value.decode("utf-8")
+        except IndexError:
+            tag_str = None
+        return arg_value, tag_str
+
     def add_classical_op(
         self,
         classical_op: str,
