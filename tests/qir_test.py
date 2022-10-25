@@ -159,11 +159,11 @@ class TestQirToPytketGateTranslation:
 
         data1 = (
             '{"name": "__quantum__rt__result_record_output",'
-            '"arg": 1, "tag": "0_t1\\u0000"}'
+            ' "arg": 1, "tag": "0_t1\\u0000"}'
         )
         data2 = (
-            '{"name": "__quantum__rt__result_record_output", '
-            '"arg": 0, "tag": "0_t0\\u0000"}'
+            '{"name": "__quantum__rt__result_record_output",'
+            ' "arg": 0, "tag": "0_t0\\u0000"}'
         )
 
         assert coms[0].op.type == OpType.Measure
