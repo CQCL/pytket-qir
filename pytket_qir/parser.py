@@ -58,12 +58,13 @@ from pyqir.parser import (  # type: ignore
     QirCondBrTerminator,
     QirModule,
     QirInstr,
+    QirResultConstant,
     QirRtCallInstr,
 )
 from pyqir.parser._native import PyQirInstruction  # type: ignore
 from pyqir.generator import ir_to_bitcode, types  # type: ignore
 from pyqir.parser._native import PyQirInstruction  # type: ignore
-from pyqir.parser._parser import QirIntConstant, QirICmpInstr, QirCallInstr, QirOpInstr, QirOperand  # type: ignore
+from pyqir.parser._parser import QirIntConstant, QirICmpInstr, QirCallInstr, QirOpInstr, QirOperand, QirLocalOperand  # type: ignore
 from pyqir.generator import ir_to_bitcode, types  # type: ignore
 
 
