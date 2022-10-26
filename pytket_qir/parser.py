@@ -291,7 +291,11 @@ class QirParser:
                 data = {"name": cast(str, instr.func_name), "arg": arg}
                 if tag is not None:
                     data["tag"] = tag
-                circuit.add_barrier(qubits=[], bits=bits, data=json.dumps(data))
+                if bits:
+                    circuit.add_barrier(qubits=[], bits=bits, data=json.dumps(data))
+                else:
+                    bits = circuit.get_c_register(arg)
+                    circuit.add_barrier(units=bits, data=json.dumps(data))
             elif instr.instr.is_call:  # WASM external call.
                 instr = cast(QirCallInstr, instr)
                 if self.wasm_handler is None:
