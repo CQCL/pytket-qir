@@ -155,9 +155,9 @@ class QirParser:
         params: List = []
         call_func_params = cast(List, instr.call_func_params)
         for param in call_func_params:
-            assert param.constant is not None
-            if param.constant.is_float:
-                params.append(param.constant.float_double_value)
+            if param.is_constant:
+                if param.constant.is_float:
+                    params.append(param.constant.float_double_value)
         return params
 
     def get_operation(self, instr: QirInstr) -> Op:
@@ -169,11 +169,11 @@ class QirParser:
         params: List = []
         call_func_params = cast(List, instr.call_func_params)
         for param in call_func_params:
-            assert param.constant is not None
-            if param.constant.is_qubit:
-                params.append(param.constant.qubit_static_id)
-            elif param.constant.is_result:
-                params.append(param.constant.result_static_id)
+            if param.is_constant:
+                if param.constant.is_qubit:
+                    params.append(param.constant.qubit_static_id)
+                elif param.constant.is_result:
+                    params.append(param.constant.result_static_id)
         return params
 
     def get_arg_and_tag(self, instr: QirRtCallInstr) -> Tuple[int, Optional[str]]:
