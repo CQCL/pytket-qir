@@ -119,75 +119,82 @@ class TestQirToPytketGateTranslation:
         assert circuit.depth() == 1
 
     def test_untagged_rt_functions(self) -> None:
+
         rt_function_file_path = qir_files_dir / "untagged_rt_functions.bc"
         circuit = circuit_from_qir(rt_function_file_path)
-        coms = circuit.get_commands()
 
-        assert coms[0].op.type == OpType.Measure
-        assert coms[0].qubits[0].index[0] == 1
-        assert coms[0].bits[0].index[0] == 1
-        assert coms[1].op.type == OpType.H
-        assert coms[1].qubits[0].index[0] == 0
-        assert coms[2].op.type == OpType.Measure
-        assert coms[2].qubits[0].index[0] == 0
-        assert coms[2].bits[0].index[0] == 0
-        assert coms[3].op.type == OpType.Barrier
-        assert coms[3].qubits == []
-        assert coms[3].bits[0].index[0] == 1
+        barriers = circuit.commands_of_type(OpType.Barrier)
+        assert barriers[0].op.type == OpType.Barrier
         assert (
-            coms[3].op.data
-            == '{"name": "__quantum__rt__result_record_output", "arg": 1}'
+            barriers[0].op.data
+            == '{"name": "__quantum__rt__integer_record_output", "arg": "%0"}'
         )
-        assert coms[4].op.type == OpType.Reset
-        assert coms[4].qubits[0].index[0] == 1
-        assert coms[4].bits == []
-        assert coms[5].op.type == OpType.Barrier
-        assert coms[5].qubits == []
-        assert coms[5].bits[0].index[0] == 0
+        assert barriers[0].qubits == []
+        assert circuit.get_c_register(
+            barriers[0].args[0].reg_name
+        ) == circuit.get_c_register("%0")
+        assert barriers[1].op.type == OpType.Barrier
         assert (
-            coms[5].op.data
+            barriers[1].op.data
+            == '{"name": "__quantum__rt__bool_record_output", "arg": "%1"}'
+        )
+        assert barriers[1].qubits == []
+        assert circuit.get_c_register(
+            barriers[1].args[0].reg_name
+        ) == circuit.get_c_register("%1")
+        assert barriers[2].op.type == OpType.Barrier
+        assert (
+            barriers[2].op.data
             == '{"name": "__quantum__rt__result_record_output", "arg": 0}'
         )
-        assert coms[6].op.type == OpType.Reset
-        assert coms[6].qubits[0].index[0] == 0
-        assert coms[6].bits == []
+        assert barriers[2].qubits == []
+        assert barriers[2].bits[0].index[0] == 0
+        assert barriers[3].op.type == OpType.Barrier
+        assert (
+            barriers[3].op.data
+            == '{"name": "__quantum__rt__result_record_output", "arg": 1}'
+        )
+        assert barriers[3].qubits == []
+        assert barriers[3].bits[0].index[0] == 1
 
     def test_tagged_rt_functions(self) -> None:
         rt_function_file_path = qir_files_dir / "tagged_rt_functions.bc"
         circuit = circuit_from_qir(rt_function_file_path)
-        coms = circuit.get_commands()
 
-        data1 = (
-            '{"name": "__quantum__rt__result_record_output",'
-            ' "arg": 1, "tag": "0_t1\\u0000"}'
+        barriers = circuit.commands_of_type(OpType.Barrier)
+
+        assert barriers[0].op.type == OpType.Barrier
+        assert (
+            barriers[0].op.data == '{"name": "__quantum__rt__integer_record_output",'
+            ' "arg": "%0", "tag": "0_t2\\u0000"}'
         )
-        data2 = (
-            '{"name": "__quantum__rt__result_record_output",'
+        assert barriers[0].qubits == []
+        assert circuit.get_c_register(
+            barriers[0].args[0].reg_name
+        ) == circuit.get_c_register("%0")
+        assert barriers[1].op.type == OpType.Barrier
+        assert (
+            barriers[1].op.data == '{"name": "__quantum__rt__bool_record_output",'
+            ' "arg": "%1", "tag": "0_t3\\u0000"}'
+        )
+        assert barriers[1].qubits == []
+        assert circuit.get_c_register(
+            barriers[1].args[0].reg_name
+        ) == circuit.get_c_register("%1")
+        assert barriers[2].op.type == OpType.Barrier
+        assert (
+            barriers[2].op.data == '{"name": "__quantum__rt__result_record_output",'
             ' "arg": 0, "tag": "0_t0\\u0000"}'
         )
-
-        assert coms[0].op.type == OpType.Measure
-        assert coms[0].qubits[0].index[0] == 1
-        assert coms[0].bits[0].index[0] == 1
-        assert coms[1].op.type == OpType.H
-        assert coms[1].qubits[0].index[0] == 0
-        assert coms[2].op.type == OpType.Measure
-        assert coms[2].qubits[0].index[0] == 0
-        assert coms[2].bits[0].index[0] == 0
-        assert coms[3].op.type == OpType.Barrier
-        assert coms[3].qubits == []
-        assert coms[3].bits[0].index[0] == 1
-        assert coms[3].op.data == data1
-        assert coms[4].op.type == OpType.Reset
-        assert coms[4].qubits[0].index[0] == 1
-        assert coms[4].bits == []
-        assert coms[5].op.type == OpType.Barrier
-        assert coms[5].qubits == []
-        assert coms[5].bits[0].index[0] == 0
-        assert coms[5].op.data == data2
-        assert coms[6].op.type == OpType.Reset
-        assert coms[6].qubits[0].index[0] == 0
-        assert coms[6].bits == []
+        assert barriers[2].qubits == []
+        assert barriers[2].bits[0].index[0] == 0
+        assert barriers[3].op.type == OpType.Barrier
+        assert (
+            barriers[3].op.data == '{"name": "__quantum__rt__result_record_output",'
+            ' "arg": 1, "tag": "0_t1\\u0000"}'
+        )
+        assert barriers[3].qubits == []
+        assert barriers[3].bits[0].index[0] == 1
 
 
 class TestQirToPytketConditionals:
