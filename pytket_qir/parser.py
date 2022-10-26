@@ -17,6 +17,7 @@ This module contains all functionality to parse and generate QIR files
 to and from pytket circuits.
 """
 
+import functools
 import inspect
 import json
 import os
@@ -176,7 +177,20 @@ class QirParser:
 
     def get_arg_and_tag(self, instr: QirRtCallInstr) -> Tuple[int, Optional[str]]:
         args = cast(List, instr.func_args)
-        arg_value = args[0].value
+
+        @functools.singledispatch
+        def convert_argument(arg):
+            pass
+
+        @convert_argument.register
+        def _(arg: QirLocalOperand):
+            return "%" + arg.name
+
+        @convert_argument.register
+        def _(arg: QirResultConstant):
+            return arg.value
+
+        arg_value = convert_argument(args[0])
         try:
             tag = args[1]
             tag_value = cast(bytes, self.module.get_global_bytes_value(tag))
