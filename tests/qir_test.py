@@ -204,20 +204,22 @@ class TestQirToPytketGateTranslation:
         conditionals = []
 
         for com in circuit.get_commands():
-            if com.op.type == OpType.Conditional:  # Raising an error if I use .commands_of_type(OpType.Conditional)
+            if (
+                com.op.type == OpType.Conditional
+            ):  # Raising an error if I use .commands_of_type(OpType.Conditional)
                 conditionals.append(com)
 
         conditional0 = conditionals[0]
         conditional0.op.type == OpType.Conditional
         assert conditional0.bits == list(output_register)
         assert conditional0.op.value == 1
-        assert sum([n * 2 ** k for k, n in enumerate(conditional0.op.op.values)]) == 99
+        assert sum([n * 2**k for k, n in enumerate(conditional0.op.op.values)]) == 99
 
         conditional1 = conditionals[1]
         conditional1.op.type == OpType.Conditional
         assert conditional1.bits == list(output_register)
         assert conditional1.op.value == 0
-        assert sum([n * 2 ** k for k, n in enumerate(conditional1.op.op.values)]) == 22
+        assert sum([n * 2**k for k, n in enumerate(conditional1.op.op.values)]) == 22
 
     def test_zext(self) -> None:
         zext_function_file_path = qir_files_dir / "zext.ll"
