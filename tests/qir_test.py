@@ -228,8 +228,8 @@ class TestQirToPytketGateTranslation:
         output_reg = circuit.get_c_register("%0")
 
         barrier = circuit.get_commands()[0]
-        barrier.bits == list(output_reg)
-        barrier.op.data == '{"name": "zext"}'
+        assert barrier.bits == list(output_reg)
+        assert barrier.op.data == '{"name": "zext"}'
 
 
 class TestQirToPytketConditionals:
