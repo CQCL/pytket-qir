@@ -60,6 +60,7 @@ from pyqir.parser import (  # type: ignore
     QirInstr,
     QirResultConstant,
     QirRtCallInstr,
+    QirSelectInstr,
 )
 from pyqir.parser._native import PyQirInstruction  # type: ignore
 from pyqir.generator import ir_to_bitcode, types  # type: ignore
@@ -298,24 +299,28 @@ class QirParser:
                     bits = circuit.get_c_register(arg)
                     circuit.add_barrier(units=bits, data=json.dumps(data))
             elif instr.instr.is_select:
-                output_name = "%" + instr.output_name
-                output_reg = circuit.add_c_register(output_name, instr.true_value.width)
-                condition_name = "%" + instr.condition.name
+                instr = cast(QirSelectInstr, instr)
+                output_name = "%" + str(instr.output_name)
+                true_value = cast(QirIntConstant, instr.true_value)
+                false_value = cast(QirIntConstant, instr.false_value)
+                output_reg = circuit.add_c_register(output_name, true_value.width)
+                condition = cast(QirLocalOperand, instr.condition)
+                condition_name = "%" + str(condition.name)
                 condition_reg = circuit.get_c_register(condition_name)
                 circuit.add_c_setreg(
-                    instr.true_value.value,
+                    true_value.value,
                     output_reg,
                     condition_bits=[condition_reg[0]],
                     condition_value=1,
                 )
                 circuit.add_c_setreg(
-                    instr.false_value.value,
+                    false_value.value,
                     output_reg,
                     condition_bits=[condition_reg[0]],
                     condition_value=0,
                 )
             elif instr.instr.is_zext:
-                output_name = "%" + instr.output_name
+                output_name = "%" + str(instr.output_name)
                 output_reg = circuit.add_c_register(
                     output_name, self.qir_int_type.width
                 )
