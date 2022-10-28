@@ -297,6 +297,18 @@ class QirParser:
                 else:
                     bits = circuit.get_c_register(arg)
                     circuit.add_barrier(units=bits, data=json.dumps(data))
+            elif instr.instr.is_select:
+                output_name = "%" + instr.output_name
+                output_reg = circuit.add_c_register(output_name, instr.true_value.width)
+                condition_name = "%" + instr.condition.name
+                condition_reg = circuit.get_c_register(condition_name)
+                circuit.add_c_setreg(instr.true_value.value, output_reg, condition_bits=[condition_reg[0]], condition_value=1)
+                circuit.add_c_setreg(instr.false_value.value, output_reg, condition_bits=[condition_reg[0]], condition_value=0)
+            elif instr.instr.is_zext:
+                output_name = "%" + instr.output_name
+                output_reg = circuit.add_c_register(output_name, self.qir_int_type.width)
+                data = {"name": "zext"}
+                circuit.add_barrier(units=output_reg, data=json.dumps(data))
             elif instr.instr.is_call:  # WASM external call.
                 instr = cast(QirCallInstr, instr)
                 if self.wasm_handler is None:
