@@ -213,20 +213,18 @@ class TestQirToPytketGateTranslation:
         conditional0.op.type == OpType.Conditional
         assert conditional0.bits == list(output_register)
         assert conditional0.op.value == 1
-        input_value_lst = [
-            int(n) * 2**k for k, n in enumerate(conditional0.op.op.values)
-        ]
-        input_value = sum(input_value_lst)
+        input_value = 0
+        for k, n in enumerate(conditional0.op.op.values):
+            input_value += int(n) * 2**k
         assert input_value == 99
 
         conditional1 = conditionals[1]
         conditional1.op.type == OpType.Conditional
         assert conditional1.bits == list(output_register)
         assert conditional1.op.value == 0
-        input_value_lst = [
-            int(n) * 2**k for k, n in enumerate(conditional1.op.op.values)
-        ]
-        input_value = sum(input_value_lst)
+        input_value = 0
+        for k, n in enumerate(conditional1.op.op.values):
+            input_value += int(n) * 2**k
         assert input_value == 22
 
     def test_zext(self) -> None:
