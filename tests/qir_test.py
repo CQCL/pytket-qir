@@ -27,8 +27,7 @@ from pytket_qir.generator import (
     write_qir_file,
 )
 from pytket_qir.parser import circuit_from_qir
-from pytket_qir.utils import SetBitsOpError
-from pytket_qir.utils.utils import ClassicalExpBoxError
+from pytket_qir.utils import ClassicalExpBoxError, InstructionError, SetBitsOpError
 
 
 qir_files_dir = Path("./qir_test_files")
@@ -195,6 +194,40 @@ class TestQirToPytketGateTranslation:
         )
         assert barriers[3].qubits == []
         assert barriers[3].bits[0].index[0] == 1
+
+    def test_select(self) -> None:
+        select_function_file_path = qir_files_dir / "select.bc"
+
+        circuit = circuit_from_qir(select_function_file_path)
+        output_register = circuit.get_c_register("%1")
+
+        conditionals = []
+
+        for com in circuit.get_commands():
+            if com.op.type == OpType.Conditional:  # Raising an error if I use .commands_of_type(OpType.Conditional)
+                conditionals.append(com)
+
+        conditional0 = conditionals[0]
+        conditional0.op.type == OpType.Conditional
+        assert conditional0.bits == list(output_register)
+        assert conditional0.op.value == 1
+        assert sum([n * 2 ** k for k, n in enumerate(conditional0.op.op.values)]) == 99
+
+        conditional1 = conditionals[1]
+        conditional1.op.type == OpType.Conditional
+        assert conditional1.bits == list(output_register)
+        assert conditional1.op.value == 0
+        assert sum([n * 2 ** k for k, n in enumerate(conditional1.op.op.values)]) == 22
+
+    def test_zext(self) -> None:
+        zext_function_file_path = qir_files_dir / "zext.ll"
+
+        circuit = circuit_from_qir(zext_function_file_path)
+        output_reg = circuit.get_c_register("%0")
+
+        barrier = circuit.get_commands()[0]
+        barrier.bits == list(output_reg)
+        barrier.op.data == '{"name": "zext"}'
 
 
 class TestQirToPytketConditionals:
@@ -545,7 +578,7 @@ class TestQirToPytketClassicalOps:
 
     def test_not_supported_op(self) -> None:
         not_supported_bc_file = qir_files_dir / "not_supported.bc"
-        with pytest.raises(ValueError):
+        with pytest.raises(InstructionError):
             circuit_from_qir(not_supported_bc_file)
 
 
