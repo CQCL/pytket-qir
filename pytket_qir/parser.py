@@ -372,7 +372,6 @@ class QirParser:
             if_condition_block = cast(
                 QirBlock, self.module.functions[0].get_block_by_name(term.true_dest)
             )
-            assert isinstance(if_condition_block, QirBlock)
             if_condition_circuit = self.block_to_circuit(
                 if_condition_block, Circuit(self.qubits, self.bits)
             )
@@ -384,7 +383,6 @@ class QirParser:
             else_condition_block = cast(
                 QirBlock, self.module.functions[0].get_block_by_name(term.false_dest)
             )
-            assert isinstance(else_condition_block, QirBlock)
             else_condition_circuit = self.block_to_circuit(
                 else_condition_block, Circuit(self.qubits, self.bits)
             )
