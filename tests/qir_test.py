@@ -215,6 +215,7 @@ class TestQirToPytketGateTranslation:
         assert conditional0.op.value == 1
         input_value = 0
         values = cast(List, conditional0.op.op.values)
+        print(values)
         for k, n in enumerate(values):
             print(k, n)
             input_value += int(n) * 2**k
