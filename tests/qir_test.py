@@ -214,8 +214,11 @@ class TestQirToPytketGateTranslation:
         assert conditional0.bits == list(output_register)
         assert conditional0.op.value == 1
         input_value = 0
-        for k, n in enumerate(conditional0.op.op.values):
+        values = cast(List, conditional0.op.op.values)
+        for k, n in enumerate(values):
+            print(k, n)
             input_value += int(n) * 2**k
+            print(input_value)
         assert input_value == 99
 
         conditional1 = conditionals[1]
