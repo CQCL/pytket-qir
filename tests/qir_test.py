@@ -213,7 +213,9 @@ class TestQirToPytketGateTranslation:
         conditional0.op.type == OpType.Conditional
         assert conditional0.bits == list(output_register)
         assert conditional0.op.value == 1
-        input_value_lst = [int(n) * 2 ** k for k, n in enumerate(conditional0.op.op.values)]
+        input_value_lst = [
+            int(n) * 2**k for k, n in enumerate(conditional0.op.op.values)
+        ]
         input_value = sum(input_value_lst)
         assert input_value == 99
 
@@ -221,7 +223,9 @@ class TestQirToPytketGateTranslation:
         conditional1.op.type == OpType.Conditional
         assert conditional1.bits == list(output_register)
         assert conditional1.op.value == 0
-        input_value_lst = [int(n) * 2 ** k for k, n in enumerate(conditional1.op.op.values)]
+        input_value_lst = [
+            int(n) * 2**k for k, n in enumerate(conditional1.op.op.values)
+        ]
         input_value = sum(input_value_lst)
         assert input_value == 22
 
