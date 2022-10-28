@@ -77,6 +77,7 @@ from pytket_qir.gatesets.base import (
 )
 
 from pytket_qir.gatesets.pyqir.pyqir import PYQIR_GATES  # type: ignore
+from pytket_qir.utils import InstructionError, WASMError
 
 
 _PYQIR_TO_TK_CLOPS: Dict[str, Union[type, Dict[str, Callable]]] = {
@@ -144,7 +145,7 @@ class QirParser:
             call_func_name = cast(str, instr.call_func_name)
             matched_str = re.search("__quantum__(.+?)__(.+?)__(.+)", call_func_name)
             if not matched_str:
-                raise ValueError("The WASM function call name is not propely defined.")
+                raise WASMError("The WASM function call name is not properly defined.")
             opnat = OpNat(matched_str.group(1))
             opname = OpName(matched_str.group(2))
             opspec = OpSpec(matched_str.group(3))
@@ -299,14 +300,14 @@ class QirParser:
             elif instr.instr.is_call:  # WASM external call.
                 instr = cast(QirCallInstr, instr)
                 if self.wasm_handler is None:
-                    raise ValueError("A WASM file handler must be provided.")
+                    raise WASMError("A WASM file handler must be provided.")
                 func_name = cast(str, instr.func_name)
                 if func_name is None:
-                    raise ValueError("The WASM function call is not defined.")
+                    raise WASMError("The WASM function call is not defined.")
                 matched_str = re.search("__quantum__(.+?)__(.+?)__(.+)", func_name)
                 if matched_str is None:
-                    raise ValueError(
-                        "The WASM function call name is not propely defined."
+                    raise WASMError(
+                        "The WASM function call name is not properly defined."
                     )
                 # WASM function call parameters.
                 param_regs = []
@@ -351,7 +352,9 @@ class QirParser:
                     c_reg_map[3] = c_reg3
                     self.add_classical_op(matching, instr, circuit, c_reg_map)
                 else:
-                    raise ValueError("Unsupported instruction.")
+                    raise InstructionError(
+                        "The instruction {:} is currently not supported.".format(type(instr))
+                    )
 
         if isinstance(term, QirCondBrTerminator):
             if_condition_block = cast(
