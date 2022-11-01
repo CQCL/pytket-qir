@@ -210,7 +210,7 @@ class TestQirToPytketGateTranslation:
                 conditionals.append(com)
 
         conditional0 = conditionals[0]
-        conditional0.op.type == OpType.Conditional
+        assert conditional0.op.type == OpType.Conditional
         assert conditional0.bits == list(output_register)
         assert conditional0.op.value == 1
         assert (
@@ -219,7 +219,7 @@ class TestQirToPytketGateTranslation:
         )
 
         conditional1 = conditionals[1]
-        conditional1.op.type == OpType.Conditional
+        assert conditional1.op.type == OpType.Conditional
         assert conditional1.bits == list(output_register)
         assert conditional1.op.value == 0
         assert (
