@@ -213,23 +213,13 @@ class TestQirToPytketGateTranslation:
         conditional0.op.type == OpType.Conditional
         assert conditional0.bits == list(output_register)
         assert conditional0.op.value == 1
-        input_value = 0
-        values = cast(List, conditional0.op.op.values)
-        print(values)
-        for k, n in enumerate(values):
-            print(k, n)
-            input_value += int(n) * 2**k
-            print(input_value)
-        assert input_value == 99
+        assert sum([int(n) * 2**k for k, n in enumerate(conditional0.op.op.values)]) == 99
 
         conditional1 = conditionals[1]
         conditional1.op.type == OpType.Conditional
         assert conditional1.bits == list(output_register)
         assert conditional1.op.value == 0
-        input_value = 0
-        for k, n in enumerate(conditional1.op.op.values):
-            input_value += int(n) * 2**k
-        assert input_value == 22
+        assert sum([int(n) * 2**k for k, n in enumerate(conditional1.op.op.values)]) == 22
 
     def test_zext(self) -> None:
         zext_function_file_path = qir_files_dir / "zext.ll"
@@ -683,7 +673,7 @@ class TestPytketToQirGateTranslation:
     def test_raises_empty_setbit_error(self) -> None:
         c = Circuit(0)
         a = c.add_c_register("a", 0)
-        c.add_c_setreg(2, a)
+        c.add_c_setreg(0, a)  # Only value assignable to empty register.
         with pytest.raises(SetBitsOpError):
             write_qir_file(c, "empty_setbit_circuit.ll")
 
