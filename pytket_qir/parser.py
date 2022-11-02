@@ -17,7 +17,9 @@ This module contains all functionality to parse and generate QIR files
 to and from pytket circuits.
 """
 
+import functools
 import inspect
+import json
 import os
 import re
 from typing import cast, Callable, Dict, List, Optional, Tuple, Union
@@ -56,11 +58,14 @@ from pyqir.parser import (  # type: ignore
     QirCondBrTerminator,
     QirModule,
     QirInstr,
+    QirResultConstant,
+    QirRtCallInstr,
+    QirSelectInstr,
 )
 from pyqir.parser._native import PyQirInstruction  # type: ignore
 from pyqir.generator import ir_to_bitcode, types  # type: ignore
 from pyqir.parser._native import PyQirInstruction  # type: ignore
-from pyqir.parser._parser import QirIntConstant, QirICmpInstr, QirCallInstr, QirOpInstr, QirOperand  # type: ignore
+from pyqir.parser._parser import QirIntConstant, QirICmpInstr, QirCallInstr, QirOpInstr, QirOperand, QirLocalOperand  # type: ignore
 from pyqir.generator import ir_to_bitcode, types  # type: ignore
 
 
@@ -73,6 +78,7 @@ from pytket_qir.gatesets.base import (
 )
 
 from pytket_qir.gatesets.pyqir.pyqir import PYQIR_GATES  # type: ignore
+from pytket_qir.utils import InstructionError, WASMError
 
 
 _PYQIR_TO_TK_CLOPS: Dict[str, Union[type, Dict[str, Callable]]] = {
@@ -140,7 +146,7 @@ class QirParser:
             call_func_name = cast(str, instr.call_func_name)
             matched_str = re.search("__quantum__(.+?)__(.+?)__(.+)", call_func_name)
             if not matched_str:
-                raise ValueError("The WASM function call name is not propely defined.")
+                raise WASMError("The WASM function call name is not properly defined.")
             opnat = OpNat(matched_str.group(1))
             opname = OpName(matched_str.group(2))
             opspec = OpSpec(matched_str.group(3))
@@ -151,9 +157,9 @@ class QirParser:
         params: List = []
         call_func_params = cast(List, instr.call_func_params)
         for param in call_func_params:
-            assert param.constant is not None
-            if param.constant.is_float:
-                params.append(param.constant.float_double_value)
+            if param.is_constant:
+                if param.constant.is_float:
+                    params.append(param.constant.float_double_value)
         return params
 
     def get_operation(self, instr: QirInstr) -> Op:
@@ -165,12 +171,36 @@ class QirParser:
         params: List = []
         call_func_params = cast(List, instr.call_func_params)
         for param in call_func_params:
-            assert param.constant is not None
-            if param.constant.is_qubit:
-                params.append(param.constant.qubit_static_id)
-            elif param.constant.is_result:
-                params.append(param.constant.result_static_id)
+            if param.is_constant:
+                if param.constant.is_qubit:
+                    params.append(param.constant.qubit_static_id)
+                elif param.constant.is_result:
+                    params.append(param.constant.result_static_id)
         return params
+
+    def get_arg_and_tag(self, instr: QirRtCallInstr) -> Tuple[int, Optional[str]]:
+        args = cast(List, instr.func_args)
+
+        @functools.singledispatch
+        def convert_argument(arg):
+            pass
+
+        @convert_argument.register
+        def _(arg: QirLocalOperand):
+            return "%" + arg.name
+
+        @convert_argument.register
+        def _(arg: QirResultConstant):
+            return arg.value
+
+        arg_value = convert_argument(args[0])
+        try:
+            tag = args[1]
+            tag_value = cast(bytes, self.module.get_global_bytes_value(tag))
+            tag_str = tag_value.decode("utf-8")
+        except IndexError:
+            tag_str = None
+        return arg_value, tag_str
 
     def add_classical_op(
         self,
@@ -255,17 +285,58 @@ class QirParser:
                 param = params[0]
                 assert param.constant is not None
                 c_reg_index = param.constant.result_static_id
+            elif instr.instr.is_rt_call:  # Runtime function call.
+                instr = cast(QirRtCallInstr, instr)
+                bits = self.get_qubit_indices(instr.instr)
+                arg, tag = self.get_arg_and_tag(instr)
+                # Create a JSON object for the data to be passed.
+                data = {"name": cast(str, instr.func_name), "arg": arg}
+                if tag is not None:
+                    data["tag"] = tag
+                if bits:
+                    circuit.add_barrier(qubits=[], bits=bits, data=json.dumps(data))
+                else:
+                    bits = circuit.get_c_register(arg)
+                    circuit.add_barrier(units=bits, data=json.dumps(data))
+            elif instr.instr.is_select:
+                instr = cast(QirSelectInstr, instr)
+                output_name = "%" + str(instr.output_name)
+                true_value = cast(QirIntConstant, instr.true_value)
+                false_value = cast(QirIntConstant, instr.false_value)
+                output_reg = circuit.add_c_register(output_name, true_value.width)
+                condition = cast(QirLocalOperand, instr.condition)
+                condition_name = "%" + str(condition.name)
+                condition_reg = circuit.get_c_register(condition_name)
+                circuit.add_c_setreg(
+                    true_value.value,
+                    output_reg,
+                    condition_bits=[condition_reg[0]],
+                    condition_value=1,
+                )
+                circuit.add_c_setreg(
+                    false_value.value,
+                    output_reg,
+                    condition_bits=[condition_reg[0]],
+                    condition_value=0,
+                )
+            elif instr.instr.is_zext:
+                output_name = "%" + str(instr.output_name)
+                output_reg = circuit.add_c_register(
+                    output_name, self.qir_int_type.width
+                )
+                data = {"name": "zext"}
+                circuit.add_barrier(units=output_reg, data=json.dumps(data))
             elif instr.instr.is_call:  # WASM external call.
                 instr = cast(QirCallInstr, instr)
                 if self.wasm_handler is None:
-                    raise ValueError("A WASM file handler must be provided.")
+                    raise WASMError("A WASM file handler must be provided.")
                 func_name = cast(str, instr.func_name)
                 if func_name is None:
-                    raise ValueError("The WASM function call is not defined.")
+                    raise WASMError("The WASM function call is not defined.")
                 matched_str = re.search("__quantum__(.+?)__(.+?)__(.+)", func_name)
                 if matched_str is None:
-                    raise ValueError(
-                        "The WASM function call name is not propely defined."
+                    raise WASMError(
+                        "The WASM function call name is not properly defined."
                     )
                 # WASM function call parameters.
                 param_regs = []
@@ -310,13 +381,16 @@ class QirParser:
                     c_reg_map[3] = c_reg3
                     self.add_classical_op(matching, instr, circuit, c_reg_map)
                 else:
-                    raise ValueError("Unsupported instruction.")
+                    raise InstructionError(
+                        "The instruction {:} is currently not supported.".format(
+                            type(instr)
+                        )
+                    )
 
         if isinstance(term, QirCondBrTerminator):
             if_condition_block = cast(
                 QirBlock, self.module.functions[0].get_block_by_name(term.true_dest)
             )
-            assert isinstance(if_condition_block, QirBlock)
             if_condition_circuit = self.block_to_circuit(
                 if_condition_block, Circuit(self.qubits, self.bits)
             )
@@ -328,7 +402,6 @@ class QirParser:
             else_condition_block = cast(
                 QirBlock, self.module.functions[0].get_block_by_name(term.false_dest)
             )
-            assert isinstance(else_condition_block, QirBlock)
             else_condition_circuit = self.block_to_circuit(
                 else_condition_block, Circuit(self.qubits, self.bits)
             )

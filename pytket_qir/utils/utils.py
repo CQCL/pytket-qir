@@ -6,6 +6,10 @@ class QIRFormat(Enum):
     BITCODE: str = "bitcode"
 
 
+class InstructionError(Exception):
+    pass
+
+
 class ClassicalExpBoxError(Exception):
     pass
 

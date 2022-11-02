@@ -27,8 +27,7 @@ from pytket_qir.generator import (
     write_qir_file,
 )
 from pytket_qir.parser import circuit_from_qir
-from pytket_qir.utils import SetBitsOpError
-from pytket_qir.utils.utils import ClassicalExpBoxError
+from pytket_qir.utils import ClassicalExpBoxError, InstructionError, SetBitsOpError
 
 
 qir_files_dir = Path("./qir_test_files")
@@ -117,6 +116,120 @@ class TestQirToPytketGateTranslation:
         assert com.op.type == OpType.WASM
         assert len(com.args) == 64
         assert circuit.depth() == 1
+
+    def test_untagged_rt_functions(self) -> None:
+
+        rt_function_file_path = qir_files_dir / "untagged_rt_functions.bc"
+        circuit = circuit_from_qir(rt_function_file_path)
+
+        barriers = circuit.commands_of_type(OpType.Barrier)
+        assert barriers[0].op.type == OpType.Barrier
+        assert (
+            barriers[0].op.data
+            == '{"name": "__quantum__rt__integer_record_output", "arg": "%0"}'
+        )
+        assert barriers[0].qubits == []
+        assert circuit.get_c_register(
+            barriers[0].args[0].reg_name
+        ) == circuit.get_c_register("%0")
+        assert barriers[1].op.type == OpType.Barrier
+        assert (
+            barriers[1].op.data
+            == '{"name": "__quantum__rt__bool_record_output", "arg": "%1"}'
+        )
+        assert barriers[1].qubits == []
+        assert circuit.get_c_register(
+            barriers[1].args[0].reg_name
+        ) == circuit.get_c_register("%1")
+        assert barriers[2].op.type == OpType.Barrier
+        assert (
+            barriers[2].op.data
+            == '{"name": "__quantum__rt__result_record_output", "arg": 0}'
+        )
+        assert barriers[2].qubits == []
+        assert barriers[2].bits[0].index[0] == 0
+        assert barriers[3].op.type == OpType.Barrier
+        assert (
+            barriers[3].op.data
+            == '{"name": "__quantum__rt__result_record_output", "arg": 1}'
+        )
+        assert barriers[3].qubits == []
+        assert barriers[3].bits[0].index[0] == 1
+
+    def test_tagged_rt_functions(self) -> None:
+        rt_function_file_path = qir_files_dir / "tagged_rt_functions.bc"
+        circuit = circuit_from_qir(rt_function_file_path)
+
+        barriers = circuit.commands_of_type(OpType.Barrier)
+
+        assert barriers[0].op.type == OpType.Barrier
+        assert (
+            barriers[0].op.data == '{"name": "__quantum__rt__integer_record_output",'
+            ' "arg": "%0", "tag": "0_t2\\u0000"}'
+        )
+        assert barriers[0].qubits == []
+        assert circuit.get_c_register(
+            barriers[0].args[0].reg_name
+        ) == circuit.get_c_register("%0")
+        assert barriers[1].op.type == OpType.Barrier
+        assert (
+            barriers[1].op.data == '{"name": "__quantum__rt__bool_record_output",'
+            ' "arg": "%1", "tag": "0_t3\\u0000"}'
+        )
+        assert barriers[1].qubits == []
+        assert circuit.get_c_register(
+            barriers[1].args[0].reg_name
+        ) == circuit.get_c_register("%1")
+        assert barriers[2].op.type == OpType.Barrier
+        assert (
+            barriers[2].op.data == '{"name": "__quantum__rt__result_record_output",'
+            ' "arg": 0, "tag": "0_t0\\u0000"}'
+        )
+        assert barriers[2].qubits == []
+        assert barriers[2].bits[0].index[0] == 0
+        assert barriers[3].op.type == OpType.Barrier
+        assert (
+            barriers[3].op.data == '{"name": "__quantum__rt__result_record_output",'
+            ' "arg": 1, "tag": "0_t1\\u0000"}'
+        )
+        assert barriers[3].qubits == []
+        assert barriers[3].bits[0].index[0] == 1
+
+    def test_select(self) -> None:
+        select_function_file_path = qir_files_dir / "select.bc"
+
+        circuit = circuit_from_qir(select_function_file_path)
+        output_register = circuit.get_c_register("%1")
+
+        conditionals = []
+
+        for com in circuit.get_commands():
+            if (
+                com.op.type == OpType.Conditional
+            ):  # Raising an error if I use .commands_of_type(OpType.Conditional)
+                conditionals.append(com)
+
+        conditional0 = conditionals[0]
+        assert conditional0.op.type == OpType.Conditional
+        assert conditional0.bits == list(output_register)
+        assert conditional0.op.value == 1
+        assert sum([n * 2**k for k, n in enumerate(conditional0.op.op.values)]) == 99
+
+        conditional1 = conditionals[1]
+        assert conditional1.op.type == OpType.Conditional
+        assert conditional1.bits == list(output_register)
+        assert conditional1.op.value == 0
+        assert sum([n * 2**k for k, n in enumerate(conditional1.op.op.values)]) == 22
+
+    def test_zext(self) -> None:
+        zext_function_file_path = qir_files_dir / "zext.ll"
+
+        circuit = circuit_from_qir(zext_function_file_path)
+        output_reg = circuit.get_c_register("%0")
+
+        barrier = circuit.get_commands()[0]
+        assert barrier.bits == list(output_reg)
+        assert barrier.op.data == '{"name": "zext"}'
 
 
 class TestQirToPytketConditionals:
@@ -467,7 +580,7 @@ class TestQirToPytketClassicalOps:
 
     def test_not_supported_op(self) -> None:
         not_supported_bc_file = qir_files_dir / "not_supported.bc"
-        with pytest.raises(ValueError):
+        with pytest.raises(InstructionError):
             circuit_from_qir(not_supported_bc_file)
 
 
@@ -560,7 +673,7 @@ class TestPytketToQirGateTranslation:
     def test_raises_empty_setbit_error(self) -> None:
         c = Circuit(0)
         a = c.add_c_register("a", 0)
-        c.add_c_setreg(2, a)
+        c.add_c_setreg(0, a)  # Only value assignable to empty register.
         with pytest.raises(SetBitsOpError):
             write_qir_file(c, "empty_setbit_circuit.ll")
 
