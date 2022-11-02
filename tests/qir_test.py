@@ -214,7 +214,7 @@ class TestQirToPytketGateTranslation:
         assert conditional0.bits == list(output_register)
         assert conditional0.op.value == 1
         assert (
-            sum([int(n) * 2**k for k, n in enumerate(conditional0.op.op.values)])
+            sum([n * 2**k for k, n in enumerate(conditional0.op.op.values)])
             == 99
         )
 
@@ -223,7 +223,7 @@ class TestQirToPytketGateTranslation:
         assert conditional1.bits == list(output_register)
         assert conditional1.op.value == 0
         assert (
-            sum([int(n) * 2**k for k, n in enumerate(conditional1.op.op.values)])
+            sum([n * 2**k for k, n in enumerate(conditional1.op.op.values)])
             == 22
         )
 
