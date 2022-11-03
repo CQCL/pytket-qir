@@ -120,7 +120,7 @@ python-versions = ">=3.6"
 
 [[package]]
 name = "pytket"
-version = "1.8.0"
+version = "1.8.1"
 description = "Python module for interfacing with the CQC tket library of quantum software"
 category = "main"
 optional = false
