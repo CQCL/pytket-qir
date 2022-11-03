@@ -1,6 +1,6 @@
 # pytket-qir
 
-`pytket-qir` is a python package, aimed at interafacing QIR programs with `pytket`.
+`pytket-qir` is a python package, aimed at interfacing QIR programs with `pytket`.
 
 The source code can be found in the corresponding GitHub repository.
 
