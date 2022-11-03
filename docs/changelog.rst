@@ -20,6 +20,7 @@ Minor new features:
  * Keep track of created ssa variables for reuse.
  * `reg2const` arithmetic.
 
+
 * Rebase circuits to target gateset.
 
 Updates:
