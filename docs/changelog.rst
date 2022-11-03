@@ -17,8 +17,9 @@ Minor new features:
 * Support for `select` and `zext` functions in the parser.
 
 * Classical arithmetic in the generator.
-  * Keep track of created ssa variables for reuse.
-  * `reg2const` arithmetic.
+ * Keep track of created ssa variables for reuse.
+ * `reg2const` arithmetic.
+
 
 * Rebase circuits to target gateset.
 
