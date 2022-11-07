@@ -120,6 +120,7 @@ class QirParser:
         self.qir_int_type = qir_int_type
         self.qubits = self.get_required_qubits()
         self.bits = self.get_required_results()
+        self.set_cregs: Dict[str, BitRegister] = {}  # Keep track of set registers.
         entry_block = self.module.functions[0].get_block_by_name("entry")
         if entry_block is None:
             raise NotImplementedError("The QIR file does not contain an entry block.")
@@ -223,7 +224,11 @@ class QirParser:
                         c_regs.append(c_reg)
                     else:
                         register_name = "%" + operand.name  # Keep QIR syntax.
-                        c_reg = circuit.get_c_register(register_name)
+                        if set_creg := self.set_cregs.get(register_name):
+                            c_reg = set_creg
+                            circuit.add_c_register(c_reg)
+                        else:
+                            c_reg = circuit.get_c_register(register_name)
                         c_regs.append(c_reg)
                 return c_regs
 
@@ -378,6 +383,7 @@ class QirParser:
                     c_reg3 = circuit.add_c_register(
                         c_reg_name3, self.qir_int_type.width
                     )  # Int64 supported in LLVM/QIR and L3.
+                    self.set_cregs[c_reg_name3] = c_reg3
                     c_reg_map[3] = c_reg3
                     self.add_classical_op(matching, instr, circuit, c_reg_map)
                 else:
