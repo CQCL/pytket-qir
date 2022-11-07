@@ -400,17 +400,25 @@ class QirParser:
             if_condition_circuit = self.block_to_circuit(
                 if_condition_block, Circuit(self.qubits, self.bits)
             )
+            # Add registers created in the branch circuit to the main circuit.
+            for reg in self.set_cregs.values():
+                circuit.add_c_register(reg)
+            # Flatten registers to avoid circuit being non-simple for Circbox.
+            if_condition_circuit.flatten_registers()
+            circuit.flatten_registers()
             circ_box = CircBox(if_condition_circuit)
             c_reg = circuit.get_c_register("c")
-            args = list(range(self.qubits)) + list(range(self.bits))  # Order matters.
+            args = list(range(len(if_condition_circuit.qubits))) + list(
+                range(len(if_condition_circuit.bits))
+            )  # Order matters.
             circuit.add_circbox(circ_box, args, condition=c_reg[c_reg_index])
-
             else_condition_block = cast(
                 QirBlock, self.module.functions[0].get_block_by_name(term.false_dest)
             )
             else_condition_circuit = self.block_to_circuit(
                 else_condition_block, Circuit(self.qubits, self.bits)
             )
+            else_condition_circuit.flatten_registers()
             circuit.append(else_condition_circuit)
 
         if isinstance(term, QirBrTerminator):
