@@ -578,6 +578,60 @@ class TestQirToPytketClassicalOps:
         reconstructed_expr = "(" + c_reg_names[1] + " - " + c_reg_names[3] + ")"
         assert str(coms[11].op.get_exp()) == reconstructed_expr
 
+    def test_classical_and_controlflow(self) -> None:
+        classical_and_controlflow_file = qir_files_dir / "classical_and_controlflow.bc"
+        circuit = circuit_from_qir(classical_and_controlflow_file)
+        com0 = circuit.get_commands()[0]
+        assert sum([n * 2**k for k, n in enumerate(com0.op.values)]) == 1
+        com1 = circuit.get_commands()[1]
+        assert sum([n * 2**k for k, n in enumerate(com1.op.values)]) == 2
+        com2 = circuit.get_commands()[2]
+        assert str(com2.op.get_exp()) == "(c_reg_1 + c_reg_2)"
+        com3 = circuit.get_commands()[3]
+        assert sum([n * 2**k for k, n in enumerate(com3.op.values)]) == 4
+        com4 = circuit.get_commands()[4]
+        assert sum([n * 2**k for k, n in enumerate(com4.op.values)]) == 3
+        com5 = circuit.get_commands()[5]
+        assert str(com5.op.get_exp()) == "(%0 + c_reg_2)"
+        com6 = circuit.get_commands()[6]
+        assert sum([n * 2**k for k, n in enumerate(com6.op.values)]) == 2
+        com7 = circuit.get_commands()[7]
+        assert str(com7.op.get_exp()) == "(c_reg_1 - c_reg_2)"
+        # com8 is the conditional box handled below.
+        com9 = circuit.get_commands()[9]
+        assert str(com9.op.get_exp()) == "(%1 - %2)"
+        com10 = circuit.get_commands()[10]
+        assert com10.op.type == OpType.H
+        com11 = circuit.get_commands()[11]
+        assert com11.op.type == OpType.Measure
+        com12 = circuit.get_commands()[12]
+        assert com12.op.type == OpType.Reset
+
+        classical_boxes = []
+        for com in circuit.get_commands():
+            if com.op.type == OpType.Conditional:
+                classical_boxes.append(com)
+
+        subcoms = classical_boxes[0].op.op.get_circuit().get_commands()
+
+        assert str(subcoms[0].op.get_exp()) == "(%1 - %2)"
+        com1 = subcoms[1]
+        assert sum([n * 2**k for k, n in enumerate(com1.op.values)]) == 1
+        com2 = subcoms[2]
+        assert com2.op.type == OpType.Z
+        com3 = subcoms[3]
+        assert str(com3.op.get_exp()) == "(%2 + c_reg_2)"
+        com4 = subcoms[4]
+        assert com4.op.type == OpType.H
+        com5 = subcoms[5]
+        assert str(com5.op.get_exp()) == "(%4 + %1)"
+        com6 = subcoms[6]
+        assert com6.op.type == OpType.Measure
+        com7 = subcoms[7]
+        assert str(com7.op.get_exp()) == "(%1 - %5)"
+        com8 = subcoms[8]
+        assert com8.op.type == OpType.Reset
+
     def test_not_supported_op(self) -> None:
         not_supported_bc_file = qir_files_dir / "not_supported.bc"
         with pytest.raises(InstructionError):
