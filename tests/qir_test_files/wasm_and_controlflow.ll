@@ -10,7 +10,7 @@ declare i32 @reg2var(i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1,
 
 declare i32 @__quantum__hybrid__add_one__body(i32)
 
-define void @classical_and_controlflow() local_unnamed_addr #0 {
+define void @wasm_and_controlflow() local_unnamed_addr #0 {
 entry:
   %0 = call i32 @reg2var(i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false)
   %1 = add i64 3, 4
