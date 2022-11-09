@@ -439,7 +439,9 @@ class QirParser:
             c_reg = circuit.get_c_register("c")
             arguments: List = [
                 qubit.index[0] for qubit in if_condition_circuit.qubits
-            ] + [bit.index[0] for bit in if_condition_circuit.bits]  # Order matters.
+            ] + [
+                bit.index[0] for bit in if_condition_circuit.bits
+            ]  # Order matters.
             circuit.add_circbox(circ_box, arguments, condition=c_reg[c_reg_index])
             else_condition_block = cast(
                 QirBlock, self.module.functions[0].get_block_by_name(term.false_dest)
