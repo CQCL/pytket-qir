@@ -632,6 +632,38 @@ class TestQirToPytketClassicalOps:
         com8 = subcoms[8]
         assert com8.op.type == OpType.Reset
 
+    def test_wasm_and_controlflow(self) -> None:
+        wasm_file_path = qir_files_dir / "wasm_adder.wasm"
+        wasm_handler = WasmFileHandler(str(wasm_file_path))
+        wasm_and_controlflow_file = qir_files_dir / "wasm_and_controlflow.bc"
+        circuit = circuit_from_qir(wasm_and_controlflow_file, wasm_handler=wasm_handler)
+
+        coms = circuit.get_commands()
+        com0 = coms[0]
+        assert sum([n * 2**k for k, n in enumerate(com0.op.values)]) == 0
+        com1 = coms[1]
+        assert sum([n * 2**k for k, n in enumerate(com1.op.values)]) == 3
+        com2 = coms[2]
+        assert sum([n * 2**k for k, n in enumerate(com2.op.values)]) == 4
+        com3 = coms[3]
+        assert str(com3.op.get_exp()) == "(c_reg_1 + c_reg_2)"
+        com5 = coms[5]
+        assert sum([n * 2**k for k, n in enumerate(com5.op.values)]) == 2
+        com6 = coms[6]
+        assert str(com6.op.get_exp()) == "(%1 + c_reg_2)"
+
+        subcircuit = coms[4].op.op.get_circuit()
+
+        coms = subcircuit.get_commands()
+
+        com0 = coms[0]
+        assert com0.op.type == OpType.WASM
+        assert com0.op.func_name == "add_one"
+        com1 = coms[1]
+        assert sum([n * 2**k for k, n in enumerate(com1.op.values)]) == 2
+        com2 = coms[2]
+        assert str(com2.op.get_exp()) == "(%1 + c_reg_2)"
+
     def test_not_supported_op(self) -> None:
         not_supported_bc_file = qir_files_dir / "not_supported.bc"
         with pytest.raises(InstructionError):
