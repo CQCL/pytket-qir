@@ -342,23 +342,53 @@ class QirParser:
                             instr
                         )
                     )
-                # WASM function call parameters.
-                param_regs = []
-                for c_reg_index in range(len(instr.func_args)):
-                    c_reg_name = "c_reg_wasm" + str(c_reg_index)
-                    param_regs.append(
-                        circuit.add_c_register(c_reg_name, self.wasm_int_type.width)
+                if func_name.startswith("reg2var"):
+                    register_name = "%" + cast(str, instr.output_name)
+                    value = sum(
+                        [n.value * 2**k for k, n in enumerate(instr.func_args)]  # type: ignore
                     )
+                    c_reg = circuit.add_c_register(
+                        register_name, self.wasm_int_type.width
+                    )
+                    self.set_cregs[register_name] = c_reg
+                    circuit.add_c_setreg(value, c_reg)
+                elif func_name.startswith("__quantum"):
+                    matched_str = re.search("__quantum__(.+?)__(.+?)__(.+)", func_name)
+                    if matched_str is None:
+                        raise WASMError(
+                            "The WASM function call name is not properly defined."
+                        )
+                    # WASM function call parameters.
+                    param_regs = []
+                    instr_arg = instr.func_args[0]
+                    if instr_arg.op.is_local:
+                        instr_arg = cast(QirLocalOperand, instr_arg)
+                        input_reg_name = "%" + cast(str, instr_arg.name)
+                        c_reg = self.set_cregs.get(input_reg_name)
+                        circuit.add_c_register(c_reg)
+                        param_regs.append(c_reg)
+                    else:
+                        for c_reg_index in range(len(instr.func_args)):
+                            c_reg_name = "c_reg_wasm" + str(c_reg_index)
+                            param_regs.append(
+                                circuit.add_c_register(
+                                    c_reg_name, self.wasm_int_type.width
+                                )
+                            )
 
-                # WASM function return  type.
-                output_name = cast(str, instr.output_name)
-                c_reg_output_name = "%" + output_name
-                c_reg_output = circuit.add_c_register(
-                    c_reg_output_name, self.wasm_int_type.width
-                )
-                circuit.add_wasm_to_reg(
-                    matched_str.group(2), self.wasm_handler, param_regs, [c_reg_output]
-                )
+                    # WASM function return type.
+                    output_name = cast(str, instr.output_name)
+                    c_reg_output_name = "%" + output_name
+                    c_reg_output = circuit.add_c_register(
+                        c_reg_output_name, self.wasm_int_type.width
+                    )
+                    self.set_cregs[c_reg_output_name] = c_reg_output
+                    circuit.add_wasm_to_reg(
+                        matched_str.group(2),
+                        self.wasm_handler,
+                        param_regs,
+                        [c_reg_output],
+                    )
             else:  # Classical instruction.
                 # Create registers to hold classical constants.
                 c_reg_map = self._create_register_map(circuit)
