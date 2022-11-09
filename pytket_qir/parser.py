@@ -331,7 +331,7 @@ class QirParser:
                 )
                 data = {"name": "zext"}
                 circuit.add_barrier(units=output_reg, data=json.dumps(data))
-            elif instr.instr.is_call:  # WASM external call.
+            elif instr.instr.is_call:  # reg2var, WASM external calls.
                 instr = cast(QirCallInstr, instr)
                 if self.wasm_handler is None:
                     raise WASMError("A WASM file handler must be provided.")
