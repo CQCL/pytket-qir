@@ -286,6 +286,12 @@ class QirParser:
                 unitids = self.get_qubit_indices(instr.instr)
                 circuit.add_gate(op, unitids)
             elif instr.instr.is_qir_call:  # Setting the conditional bit for branching.
+                # Create and log register to hold the condition value.
+                output_name = "%" + str(instr.output_name)
+                output_reg = circuit.add_c_register(
+                    output_name, self.qir_int_type.width
+                )
+                self.set_cregs[output_name] = output_reg
                 params = cast(List, instr.instr.call_func_params)
                 param = params[0]
                 assert param.constant is not None
