@@ -150,7 +150,7 @@ def multiple_conditionals_circuit() -> Circuit:
     circ_box_1 = CircBox(condition_circuit_1)
     c_reg = circuit.get_c_register("c")
     circuit.add_circbox(circ_box_1, args, condition=c_reg[0])
-    circuit.Measure(2, 1).add_gate(OpType.Reset, [2])
+    circuit.Measure(2, 193).add_gate(OpType.Reset, [2])
     circuit.add_circbox(circ_box_1_1, args, condition=c_reg[1])
     circuit.CX(4, 3).H(4)
     circuit.Measure(4, 258).add_gate(OpType.Reset, [4])
@@ -218,9 +218,9 @@ def nested_conditionals_circuit() -> Circuit:
     circuit.add_circbox(circ_box_1, args, condition=c_reg[0])
 
     circuit.CX(4, 3).CX(4, 2).CX(3, 2).CX(2, 1).CX(4, 0).CX(3, 0).CX(1, 0)
-    circuit.add_gate(OpType.Reset, [1]).Measure(2, 1)
-    circuit.add_gate(OpType.Reset, [2]).Measure(3, 2)
-    circuit.add_gate(OpType.Reset, [3]).Measure(4, 3)
+    circuit.add_gate(OpType.Reset, [1]).Measure(2, 193)
+    circuit.add_gate(OpType.Reset, [2]).Measure(3, 194)
+    circuit.add_gate(OpType.Reset, [3]).Measure(4, 195)
     circuit.add_gate(OpType.Reset, [4])
 
     return circuit
