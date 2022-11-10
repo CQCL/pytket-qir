@@ -443,7 +443,8 @@ class QirParser:
             reg_map = circuit.flatten_registers()
             circuit._reg_map = reg_map
             circ_box = CircBox(if_condition_circuit)
-            condition_name = "%" + str(term.condition.name)
+            term_condition = cast(QirLocalOperand, term.condition)
+            condition_name = "%" + str(term_condition.name)
             if set_creg := self.set_cregs.get(condition_name):
                 condition_reg = set_creg
                 condition_bit = reg_map[condition_reg[c_reg_index]]
