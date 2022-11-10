@@ -440,15 +440,22 @@ class QirParser:
                 circuit.add_c_register(reg)
             # Flatten registers to avoid circuit being non-simple for Circbox.
             if_condition_circuit.flatten_registers()
-            circuit.flatten_registers()
+            reg_map = circuit.flatten_registers()
+            circuit._reg_map = reg_map
             circ_box = CircBox(if_condition_circuit)
-            c_reg = circuit.get_c_register("c")
+            condition_name = "%" + str(term.condition.name)
+            if set_creg := self.set_cregs.get(condition_name):
+                condition_reg = set_creg
+                condition_bit = reg_map[condition_reg[c_reg_index]]
+            else:
+                condition_reg = circuit.get_c_register("c")
+                condition_bit = condition_reg[c_reg_index]
             arguments: List = [
                 qubit.index[0] for qubit in if_condition_circuit.qubits
             ] + [
                 bit.index[0] for bit in if_condition_circuit.bits
             ]  # Order matters.
-            circuit.add_circbox(circ_box, arguments, condition=c_reg[c_reg_index])
+            circuit.add_circbox(circ_box, arguments, condition=condition_bit)
             else_condition_block = cast(
                 QirBlock, self.module.functions[0].get_block_by_name(term.false_dest)
             )
