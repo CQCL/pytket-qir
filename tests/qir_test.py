@@ -440,7 +440,7 @@ class TestQirToPytketConditionals:
             nested_conditional_circuit_1.get_commands(),
             exp_nested_conditional_circuit_1.get_commands(),
         ):
-            com1 == com2
+            assert com1 == com2
 
         inter_circuit = Circuit(5, 205)
         for com in circuit.get_commands()[16:30]:
@@ -453,7 +453,7 @@ class TestQirToPytketConditionals:
         for com1, com2 in zip(
             inter_circuit.get_commands(), exp_inter_circuit.get_commands()
         ):
-            com1 == com2
+            assert com1 == com2
 
         assert inverse_reg_map[circuit.get_commands()[30].args[0]].reg_name == "c"
         assert inverse_reg_map[circuit.get_commands()[30].args[0]].index[0] == 2
