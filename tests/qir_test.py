@@ -118,7 +118,6 @@ class TestQirToPytketGateTranslation:
         assert circuit.depth() == 1
 
     def test_untagged_rt_functions(self) -> None:
-
         rt_function_file_path = qir_files_dir / "untagged_rt_functions.bc"
         circuit = circuit_from_qir(rt_function_file_path)
 
