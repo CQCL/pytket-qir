@@ -366,7 +366,10 @@ class QirParser:
                         )
                     # WASM function call parameters.
                     param_regs = []
-                    instr_arg = instr.func_args[0]
+                    if instr.func_args is None:
+                        raise WASMError("Instruction argument is empty.")
+                    else:
+                        instr_arg = instr.func_args[0]
                     if instr_arg.op.is_local:
                         instr_arg = cast(QirLocalOperand, instr_arg)
                         input_reg_name = "%" + cast(str, instr_arg.name)
