@@ -317,7 +317,11 @@ class QirParser:
                 output_reg = circuit.add_c_register(output_name, true_value.width)
                 condition = cast(QirLocalOperand, instr.condition)
                 condition_name = "%" + str(condition.name)
-                condition_reg = circuit.get_c_register(condition_name)
+                if c_reg := self.set_cregs.get(condition_name):
+                    condition_reg = c_reg
+                    circuit.add_c_register(condition_reg)
+                else:
+                    condition_reg = circuit.get_c_register(condition_name)
                 circuit.add_c_setreg(
                     true_value.value,
                     output_reg,
