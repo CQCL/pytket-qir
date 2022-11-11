@@ -707,6 +707,46 @@ class TestQirToPytketClassicalOps:
         com2 = coms[2]
         assert str(com2.op.get_exp()) == "(%1 + c_reg_2)"
 
+    def test_select_and_controlflow(self) -> None:
+        select_and_controlflow_file = qir_files_dir / "select_and_controlflow.bc"
+        circuit = circuit_from_qir(select_and_controlflow_file)
+
+        inverse_reg_map = {v: k for k, v in circuit._reg_map.items()}
+        coms = circuit.get_commands()
+        com0 = coms[0]
+        assert sum([n * 2**k for k, n in enumerate(com0.op.values)]) == 1
+        com1 = coms[1]
+        assert sum([n * 2**k for k, n in enumerate(com1.op.values)]) == 0
+        com2 = coms[2]
+        assert str(com2.op.get_exp()) == "(c_reg_1 + c_reg_2)"
+        com3 = coms[3]
+        assert sum([n * 2**k for k, n in enumerate(com3.op.values)]) == 3
+        com4 = coms[4]
+        assert sum([n * 2**k for k, n in enumerate(com4.op.values)]) == 4
+        com5 = coms[5]
+        assert str(com5.op.get_exp()) == "(c_reg_1 + c_reg_2)"
+        com6 = coms[6]
+
+        assert inverse_reg_map[com6.args[0]].reg_name == "%2"
+
+        com7 = coms[7]
+        assert sum([n * 2**k for k, n in enumerate(com7.op.values)]) == 2
+        com8 = coms[8]
+        assert str(com8.op.get_exp()) == "(%1 + c_reg_2)"
+
+        condition_circuit = com6.op.op.get_circuit()
+        coms = condition_circuit.get_commands()
+
+        com0 = coms[0]
+        assert inverse_reg_map[com0.args[0]].reg_name == "%0"
+        assert sum([n * 2**k for k, n in enumerate(com0.op.op.values)]) == 99
+        com1 = coms[1]
+        assert sum([n * 2**k for k, n in enumerate(com1.op.values)]) == 2
+        com2 = coms[2]
+        assert sum([n * 2**k for k, n in enumerate(com2.op.op.values)]) == 22
+        com3 = coms[3]
+        assert str(com3.op.get_exp()) == "(%1 + c_reg_2)"
+
     def test_not_supported_op(self) -> None:
         not_supported_bc_file = qir_files_dir / "not_supported.bc"
         with pytest.raises(InstructionError):
