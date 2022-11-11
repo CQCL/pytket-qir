@@ -118,7 +118,6 @@ class TestQirToPytketGateTranslation:
         assert circuit.depth() == 1
 
     def test_untagged_rt_functions(self) -> None:
-
         rt_function_file_path = qir_files_dir / "untagged_rt_functions.bc"
         circuit = circuit_from_qir(rt_function_file_path)
 
@@ -240,23 +239,32 @@ class TestQirToPytketConditionals:
 
         circuit = circuit_from_qir(one_conditional_bc_path)
 
-        non_condition_circuit = Circuit(5, 13)
+        non_condition_circuit = Circuit(circuit.n_qubits, circuit.n_bits)
         for com in circuit.get_commands()[:15]:
             non_condition_circuit.add_gate(com.op, com.args)
 
-        exp_non_condition_circuit = Circuit(5, 13)
+        exp_non_condition_circuit = Circuit(circuit.n_qubits, circuit.n_bits)
         for com in one_conditional_circuit.get_commands()[:15]:
             exp_non_condition_circuit.add_gate(com.op, com.args)
 
         assert non_condition_circuit == exp_non_condition_circuit
 
         condition_com = circuit.get_commands()[15]
+
+        inverse_reg_map = {v: k for k, v in circuit._reg_map.items()}
+        assert inverse_reg_map[condition_com.args[0]].reg_name == "%0"
+
         condition_circuit = condition_com.op.op.get_circuit()
 
         exp_condition_com = one_conditional_circuit.get_commands()[15]
         exp_condition_circuit = exp_condition_com.op.op.get_circuit()
 
-        assert condition_circuit == exp_condition_circuit
+        # Comparing commands as I get a type error while comparing circuits.
+        # TypeError: unhashable type: 'instancemethod'.
+        for com1, com2 in zip(
+            condition_circuit.get_commands(), exp_condition_circuit.get_commands()
+        ):
+            assert com1 == com2
 
         final_circuit = Circuit(5, 13)
         for com in circuit.get_commands()[16:]:
@@ -278,17 +286,21 @@ class TestQirToPytketConditionals:
 
         circuit = circuit_from_qir(multiple_conditionals_bc_file_path)
 
-        non_condition_circuit = Circuit(6, 6)
+        non_condition_circuit = Circuit(circuit.n_qubits, circuit.n_bits)
         for com in circuit.get_commands()[:10]:
             non_condition_circuit.add_gate(com.op, com.args)
 
-        exp_non_condition_circuit = Circuit(6, 6)
+        exp_non_condition_circuit = Circuit(circuit.n_qubits, circuit.n_bits)
         for com in multiple_conditionals_circuit.get_commands()[:10]:
             exp_non_condition_circuit.add_gate(com.op, com.args)
 
         assert non_condition_circuit == exp_non_condition_circuit
 
         condition_com_1 = circuit.get_commands()[10]
+
+        inverse_reg_map = {v: k for k, v in circuit._reg_map.items()}
+        assert inverse_reg_map[condition_com_1.args[0]].reg_name == "%0"
+
         condition_circuit_1 = condition_com_1.op.op.get_circuit()
         condition_circuit_1_coms = condition_circuit_1.get_commands()
 
@@ -296,8 +308,8 @@ class TestQirToPytketConditionals:
         exp_condition_circuit_1 = exp_condition_com_1.op.op.get_circuit()
         exp_condition_circuit_1_coms = exp_condition_circuit_1.get_commands()
 
-        non_condition_circuit_1 = Circuit(6, 6)
-        exp_non_condition_circuit_1 = Circuit(6, 6)
+        non_condition_circuit_1 = Circuit(6, 262)
+        exp_non_condition_circuit_1 = Circuit(6, 262)
 
         for com in condition_circuit_1_coms:
             if not isinstance(com.op, Conditional):
@@ -315,8 +327,10 @@ class TestQirToPytketConditionals:
         exp_condition_circuit_1_1_coms = (
             exp_condition_circuit_1_coms[3].op.op.get_circuit().get_commands()
         )
-        non_condition_circuit_1_1 = Circuit(6, 6)
-        exp_non_condition_circuit_1_1 = Circuit(6, 6)
+        non_condition_circuit_1_1 = Circuit(6, 262)
+        exp_non_condition_circuit_1_1 = Circuit(6, 262)
+
+        assert inverse_reg_map[condition_circuit_1_coms[3].args[0]].reg_name == "%1"
 
         for com in condition_circuit_1_1_coms:
             if not isinstance(com.op, Conditional):
@@ -334,8 +348,10 @@ class TestQirToPytketConditionals:
         exp_condition_circuit_1_1_1_coms = (
             exp_condition_circuit_1_1_coms[5].op.op.get_circuit().get_commands()
         )
-        non_condition_circuit_1_1_1 = Circuit(6, 6)
-        exp_non_condition_circuit_1_1_1 = Circuit(6, 6)
+        non_condition_circuit_1_1_1 = Circuit(6, 262)
+        exp_non_condition_circuit_1_1_1 = Circuit(6, 262)
+
+        assert inverse_reg_map[condition_circuit_1_1_coms[5].args[0]].reg_name == "%2"
 
         for com in condition_circuit_1_1_1_coms:
             if not isinstance(com.op, Conditional):
@@ -356,6 +372,8 @@ class TestQirToPytketConditionals:
         non_condition_circuit_1_1_1_1 = Circuit(6, 6)
         exp_non_condition_circuit_1_1_1_1 = Circuit(6, 6)
 
+        assert inverse_reg_map[condition_circuit_1_1_1_coms[3].args[0]].reg_name == "%3"
+
         for com in condition_circuit_1_1_1_1_coms:
             if not isinstance(com.op, Conditional):
                 non_condition_circuit_1_1_1_1.add_gate(com.op, com.args)
@@ -373,11 +391,11 @@ class TestQirToPytketConditionals:
         nested_conditionals_bc_file_path = qir_files_dir / "nested_conditionals.bc"
         circuit = circuit_from_qir(nested_conditionals_bc_file_path)
 
-        non_condition_circuit = Circuit(5, 13)
+        non_condition_circuit = Circuit(5, 205)
         for com in circuit.get_commands()[:15]:
             non_condition_circuit.add_gate(com.op, com.args)
 
-        exp_non_condition_circuit = Circuit(5, 13)
+        exp_non_condition_circuit = Circuit(5, 205)
         for com in nested_conditionals_circuit.get_commands()[:15]:
             exp_non_condition_circuit.add_gate(com.op, com.args)
 
@@ -388,13 +406,16 @@ class TestQirToPytketConditionals:
             15
         ].op.op.get_circuit()
 
-        non_condition_circuit_1 = Circuit(5, 13)
+        inverse_reg_map = {v: k for k, v in circuit._reg_map.items()}
+        assert inverse_reg_map[circuit.get_commands()[15].args[0]].reg_name == "%0"
+
+        non_condition_circuit_1 = Circuit(5, 205)
         coms = condition_circuit_1.get_commands()
         del coms[15]
         for com in coms:
             non_condition_circuit_1.add_gate(com.op, com.args)
 
-        exp_non_condition_circuit_1 = Circuit(5, 13)
+        exp_non_condition_circuit_1 = Circuit(5, 205)
         coms = exp_condition_circuit_1.get_commands()
         del coms[15]
         for com in coms:
@@ -409,17 +430,32 @@ class TestQirToPytketConditionals:
             15
         ].op.op.get_circuit()
 
-        assert nested_conditional_circuit_1 == exp_nested_conditional_circuit_1
+        assert (
+            inverse_reg_map[condition_circuit_1.get_commands()[15].args[0]].reg_name
+            == "%1"
+        )
 
-        inter_circuit = Circuit(5, 13)
+        for com1, com2 in zip(
+            nested_conditional_circuit_1.get_commands(),
+            exp_nested_conditional_circuit_1.get_commands(),
+        ):
+            assert com1 == com2
+
+        inter_circuit = Circuit(5, 205)
         for com in circuit.get_commands()[16:30]:
             inter_circuit.add_gate(com.op, com.args)
 
-        exp_inter_circuit = Circuit(5, 13)
+        exp_inter_circuit = Circuit(5, 205)
         for com in nested_conditionals_circuit.get_commands()[16:30]:
             exp_inter_circuit.add_gate(com.op, com.args)
 
-        assert inter_circuit == exp_inter_circuit
+        for com1, com2 in zip(
+            inter_circuit.get_commands(), exp_inter_circuit.get_commands()
+        ):
+            assert com1 == com2
+
+        assert inverse_reg_map[circuit.get_commands()[30].args[0]].reg_name == "c"
+        assert inverse_reg_map[circuit.get_commands()[30].args[0]].index[0] == 2
 
 
 class TestQirToPytketClassicalOps:
@@ -577,6 +613,138 @@ class TestQirToPytketClassicalOps:
 
         reconstructed_expr = "(" + c_reg_names[1] + " - " + c_reg_names[3] + ")"
         assert str(coms[11].op.get_exp()) == reconstructed_expr
+
+    def test_classical_and_controlflow(self) -> None:
+        classical_and_controlflow_file = qir_files_dir / "classical_and_controlflow.bc"
+        circuit = circuit_from_qir(classical_and_controlflow_file)
+        com0 = circuit.get_commands()[0]
+        assert sum([n * 2**k for k, n in enumerate(com0.op.values)]) == 1
+        com1 = circuit.get_commands()[1]
+        assert sum([n * 2**k for k, n in enumerate(com1.op.values)]) == 2
+        com2 = circuit.get_commands()[2]
+        assert str(com2.op.get_exp()) == "(c_reg_1 + c_reg_2)"
+        com3 = circuit.get_commands()[3]
+        assert sum([n * 2**k for k, n in enumerate(com3.op.values)]) == 4
+        com4 = circuit.get_commands()[4]
+        assert sum([n * 2**k for k, n in enumerate(com4.op.values)]) == 3
+        com5 = circuit.get_commands()[5]
+        assert str(com5.op.get_exp()) == "(%0 + c_reg_2)"
+        com6 = circuit.get_commands()[6]
+        assert sum([n * 2**k for k, n in enumerate(com6.op.values)]) == 2
+        com7 = circuit.get_commands()[7]
+        assert str(com7.op.get_exp()) == "(c_reg_1 - c_reg_2)"
+        # com8 is the conditional box handled below.
+        com9 = circuit.get_commands()[9]
+        assert str(com9.op.get_exp()) == "(%1 - %2)"
+        com10 = circuit.get_commands()[10]
+        assert com10.op.type == OpType.H
+        com11 = circuit.get_commands()[11]
+        assert com11.op.type == OpType.Measure
+        com12 = circuit.get_commands()[12]
+        assert com12.op.type == OpType.Reset
+
+        classical_boxes = []
+        for com in circuit.get_commands():
+            if com.op.type == OpType.Conditional:
+                classical_boxes.append(com)
+
+        subcoms = classical_boxes[0].op.op.get_circuit().get_commands()
+
+        assert str(subcoms[0].op.get_exp()) == "(%1 - %2)"
+        com1 = subcoms[1]
+        assert sum([n * 2**k for k, n in enumerate(com1.op.values)]) == 1
+        com2 = subcoms[2]
+        assert com2.op.type == OpType.Z
+        com3 = subcoms[3]
+        assert str(com3.op.get_exp()) == "(%2 + c_reg_2)"
+        com4 = subcoms[4]
+        assert com4.op.type == OpType.H
+        com5 = subcoms[5]
+        assert str(com5.op.get_exp()) == "(%4 + %1)"
+        com6 = subcoms[6]
+        assert com6.op.type == OpType.Measure
+        com7 = subcoms[7]
+        assert str(com7.op.get_exp()) == "(%1 - %5)"
+        com8 = subcoms[8]
+        assert com8.op.type == OpType.Reset
+
+    def test_wasm_and_controlflow(self) -> None:
+        wasm_file_path = qir_files_dir / "wasm_adder.wasm"
+        wasm_handler = WasmFileHandler(str(wasm_file_path))
+        wasm_and_controlflow_file = qir_files_dir / "wasm_and_controlflow.bc"
+        circuit = circuit_from_qir(wasm_and_controlflow_file, wasm_handler=wasm_handler)
+
+        coms = circuit.get_commands()
+        com0 = coms[0]
+        assert sum([n * 2**k for k, n in enumerate(com0.op.values)]) == 0
+        com1 = coms[1]
+        assert sum([n * 2**k for k, n in enumerate(com1.op.values)]) == 3
+        com2 = coms[2]
+        assert sum([n * 2**k for k, n in enumerate(com2.op.values)]) == 4
+        com3 = coms[3]
+        assert str(com3.op.get_exp()) == "(c_reg_1 + c_reg_2)"
+        com5 = coms[5]
+        assert sum([n * 2**k for k, n in enumerate(com5.op.values)]) == 2
+        com6 = coms[6]
+        assert str(com6.op.get_exp()) == "(%1 + c_reg_2)"
+
+        inverse_reg_map = {v: k for k, v in circuit._reg_map.items()}
+
+        com4 = coms[4]
+        # Check the condition bit is correct before flattening.
+        assert inverse_reg_map[com4.args[0]].reg_name == "%2"
+
+        subcircuit = coms[4].op.op.get_circuit()
+
+        coms = subcircuit.get_commands()
+
+        com0 = coms[0]
+        assert com0.op.type == OpType.WASM
+        assert com0.op.func_name == "add_one"
+        com1 = coms[1]
+        assert sum([n * 2**k for k, n in enumerate(com1.op.values)]) == 2
+        com2 = coms[2]
+        assert str(com2.op.get_exp()) == "(%1 + c_reg_2)"
+
+    def test_select_and_controlflow(self) -> None:
+        select_and_controlflow_file = qir_files_dir / "select_and_controlflow.bc"
+        circuit = circuit_from_qir(select_and_controlflow_file)
+
+        inverse_reg_map = {v: k for k, v in circuit._reg_map.items()}
+        coms = circuit.get_commands()
+        com0 = coms[0]
+        assert sum([n * 2**k for k, n in enumerate(com0.op.values)]) == 1
+        com1 = coms[1]
+        assert sum([n * 2**k for k, n in enumerate(com1.op.values)]) == 0
+        com2 = coms[2]
+        assert str(com2.op.get_exp()) == "(c_reg_1 + c_reg_2)"
+        com3 = coms[3]
+        assert sum([n * 2**k for k, n in enumerate(com3.op.values)]) == 3
+        com4 = coms[4]
+        assert sum([n * 2**k for k, n in enumerate(com4.op.values)]) == 4
+        com5 = coms[5]
+        assert str(com5.op.get_exp()) == "(c_reg_1 + c_reg_2)"
+        com6 = coms[6]
+
+        assert inverse_reg_map[com6.args[0]].reg_name == "%2"
+
+        com7 = coms[7]
+        assert sum([n * 2**k for k, n in enumerate(com7.op.values)]) == 2
+        com8 = coms[8]
+        assert str(com8.op.get_exp()) == "(%1 + c_reg_2)"
+
+        condition_circuit = com6.op.op.get_circuit()
+        coms = condition_circuit.get_commands()
+
+        com0 = coms[0]
+        assert inverse_reg_map[com0.args[0]].reg_name == "%0"
+        assert sum([n * 2**k for k, n in enumerate(com0.op.op.values)]) == 99
+        com1 = coms[1]
+        assert sum([n * 2**k for k, n in enumerate(com1.op.values)]) == 2
+        com2 = coms[2]
+        assert sum([n * 2**k for k, n in enumerate(com2.op.op.values)]) == 22
+        com3 = coms[3]
+        assert str(com3.op.get_exp()) == "(%1 + c_reg_2)"
 
     def test_not_supported_op(self) -> None:
         not_supported_bc_file = qir_files_dir / "not_supported.bc"

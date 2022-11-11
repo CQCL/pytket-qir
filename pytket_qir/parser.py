@@ -120,6 +120,7 @@ class QirParser:
         self.qir_int_type = qir_int_type
         self.qubits = self.get_required_qubits()
         self.bits = self.get_required_results()
+        self.set_cregs: Dict[str, BitRegister] = {}  # Keep track of set registers.
         entry_block = self.module.functions[0].get_block_by_name("entry")
         if entry_block is None:
             raise NotImplementedError("The QIR file does not contain an entry block.")
@@ -223,7 +224,11 @@ class QirParser:
                         c_regs.append(c_reg)
                     else:
                         register_name = "%" + operand.name  # Keep QIR syntax.
-                        c_reg = circuit.get_c_register(register_name)
+                        if set_creg := self.set_cregs.get(register_name):
+                            c_reg = set_creg
+                            circuit.add_c_register(c_reg)
+                        else:
+                            c_reg = circuit.get_c_register(register_name)
                         c_regs.append(c_reg)
                 return c_regs
 
@@ -281,6 +286,12 @@ class QirParser:
                 unitids = self.get_qubit_indices(instr.instr)
                 circuit.add_gate(op, unitids)
             elif instr.instr.is_qir_call:  # Setting the conditional bit for branching.
+                # Create and log register to hold the condition value.
+                output_name = "%" + str(instr.output_name)
+                output_reg = circuit.add_c_register(
+                    output_name, self.qir_int_type.width
+                )
+                self.set_cregs[output_name] = output_reg
                 params = cast(List, instr.instr.call_func_params)
                 param = params[0]
                 assert param.constant is not None
@@ -306,7 +317,11 @@ class QirParser:
                 output_reg = circuit.add_c_register(output_name, true_value.width)
                 condition = cast(QirLocalOperand, instr.condition)
                 condition_name = "%" + str(condition.name)
-                condition_reg = circuit.get_c_register(condition_name)
+                if c_reg := self.set_cregs.get(condition_name):
+                    condition_reg = c_reg
+                    circuit.add_c_register(condition_reg)
+                else:
+                    condition_reg = circuit.get_c_register(condition_name)
                 circuit.add_c_setreg(
                     true_value.value,
                     output_reg,
@@ -326,35 +341,67 @@ class QirParser:
                 )
                 data = {"name": "zext"}
                 circuit.add_barrier(units=output_reg, data=json.dumps(data))
-            elif instr.instr.is_call:  # WASM external call.
+            elif instr.instr.is_call:  # reg2var, WASM external calls.
                 instr = cast(QirCallInstr, instr)
                 if self.wasm_handler is None:
                     raise WASMError("A WASM file handler must be provided.")
                 func_name = cast(str, instr.func_name)
                 if func_name is None:
-                    raise WASMError("The WASM function call is not defined.")
-                matched_str = re.search("__quantum__(.+?)__(.+?)__(.+)", func_name)
-                if matched_str is None:
-                    raise WASMError(
-                        "The WASM function call name is not properly defined."
+                    raise InstructionError(
+                        "The function call for instruction {:} is not defined.".format(
+                            instr
+                        )
                     )
-                # WASM function call parameters.
-                param_regs = []
-                for c_reg_index in range(len(instr.func_args)):
-                    c_reg_name = "c_reg_wasm" + str(c_reg_index)
-                    param_regs.append(
-                        circuit.add_c_register(c_reg_name, self.wasm_int_type.width)
+                if func_name.startswith("reg2var"):
+                    register_name = "%" + cast(str, instr.output_name)
+                    value = sum(
+                        [n.value * 2**k for k, n in enumerate(instr.func_args)]  # type: ignore
                     )
+                    c_reg = circuit.add_c_register(
+                        register_name, self.wasm_int_type.width
+                    )
+                    self.set_cregs[register_name] = c_reg
+                    circuit.add_c_setreg(value, c_reg)
+                elif func_name.startswith("__quantum"):
+                    matched_str = re.search("__quantum__(.+?)__(.+?)__(.+)", func_name)
+                    if matched_str is None:
+                        raise WASMError(
+                            "The WASM function call name is not properly defined."
+                        )
+                    # WASM function call parameters.
+                    param_regs = []
+                    if not instr.func_args:
+                        raise WASMError("Instruction argument is empty.")
+                    else:
+                        instr_arg = instr.func_args[0]
+                    if instr_arg.op.is_local:
+                        instr_arg = cast(QirLocalOperand, instr_arg)
+                        input_reg_name = "%" + cast(str, instr_arg.name)
+                        c_reg = self.set_cregs.get(input_reg_name)
+                        circuit.add_c_register(c_reg)
+                        param_regs.append(c_reg)
+                    else:
+                        for c_reg_index in range(len(instr.func_args)):
+                            c_reg_name = "c_reg_wasm" + str(c_reg_index)
+                            param_regs.append(
+                                circuit.add_c_register(
+                                    c_reg_name, self.wasm_int_type.width
+                                )
+                            )
 
-                # WASM function return  type.
-                output_name = cast(str, instr.output_name)
-                c_reg_output_name = "%" + output_name
-                c_reg_output = circuit.add_c_register(
-                    c_reg_output_name, self.wasm_int_type.width
-                )
-                circuit.add_wasm_to_reg(
-                    matched_str.group(2), self.wasm_handler, param_regs, [c_reg_output]
-                )
+                    # WASM function return type.
+                    output_name = cast(str, instr.output_name)
+                    c_reg_output_name = "%" + output_name
+                    c_reg_output = circuit.add_c_register(
+                        c_reg_output_name, self.wasm_int_type.width
+                    )
+                    self.set_cregs[c_reg_output_name] = c_reg_output
+                    circuit.add_wasm_to_reg(
+                        matched_str.group(2),
+                        self.wasm_handler,
+                        param_regs,
+                        [c_reg_output],
+                    )
             else:  # Classical instruction.
                 # Create registers to hold classical constants.
                 c_reg_map = self._create_register_map(circuit)
@@ -378,6 +425,7 @@ class QirParser:
                     c_reg3 = circuit.add_c_register(
                         c_reg_name3, self.qir_int_type.width
                     )  # Int64 supported in LLVM/QIR and L3.
+                    self.set_cregs[c_reg_name3] = c_reg3
                     c_reg_map[3] = c_reg3
                     self.add_classical_op(matching, instr, circuit, c_reg_map)
                 else:
@@ -394,17 +442,35 @@ class QirParser:
             if_condition_circuit = self.block_to_circuit(
                 if_condition_block, Circuit(self.qubits, self.bits)
             )
+            # Add registers created in the branch circuit to the main circuit.
+            for reg in self.set_cregs.values():
+                circuit.add_c_register(reg)
+            # Flatten registers to avoid circuit being non-simple for Circbox.
+            if_condition_circuit.flatten_registers()
+            reg_map = circuit.flatten_registers()
+            circuit._reg_map = reg_map
             circ_box = CircBox(if_condition_circuit)
-            c_reg = circuit.get_c_register("c")
-            args = list(range(self.qubits)) + list(range(self.bits))  # Order matters.
-            circuit.add_circbox(circ_box, args, condition=c_reg[c_reg_index])
-
+            term_condition = cast(QirLocalOperand, term.condition)
+            condition_name = "%" + str(term_condition.name)
+            if set_creg := self.set_cregs.get(condition_name):
+                condition_reg = set_creg
+                condition_bit = reg_map[condition_reg[c_reg_index]]
+            else:
+                condition_reg = circuit.get_c_register("c")
+                condition_bit = condition_reg[c_reg_index]
+            arguments: List = [
+                qubit.index[0] for qubit in if_condition_circuit.qubits
+            ] + [
+                bit.index[0] for bit in if_condition_circuit.bits
+            ]  # Order matters.
+            circuit.add_circbox(circ_box, arguments, condition=condition_bit)
             else_condition_block = cast(
                 QirBlock, self.module.functions[0].get_block_by_name(term.false_dest)
             )
             else_condition_circuit = self.block_to_circuit(
                 else_condition_block, Circuit(self.qubits, self.bits)
             )
+            else_condition_circuit.flatten_registers()
             circuit.append(else_condition_circuit)
 
         if isinstance(term, QirBrTerminator):
