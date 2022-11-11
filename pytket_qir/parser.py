@@ -370,7 +370,7 @@ class QirParser:
                         )
                     # WASM function call parameters.
                     param_regs = []
-                    if instr.func_args is None:
+                    if not instr.func_args:
                         raise WASMError("Instruction argument is empty.")
                     else:
                         instr_arg = instr.func_args[0]
