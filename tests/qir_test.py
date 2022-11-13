@@ -12,16 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
 import os
 from pathlib import Path
+from string import Template
 from typing import Generator, List, cast
 import pytest  # type: ignore
 from pytket import Circuit, OpType  # type: ignore
 from pytket.circuit import Conditional  # type: ignore
 from pytket.wasm import WasmFileHandler  # type: ignore
 
-from pyqir.generator import bitcode_to_ir  # type: ignore
+from pyqir.generator import bitcode_to_ir, types
+from pytket_qir.gatesets.base import OpName, OpNat, OpSpec, QirGate  # type: ignore
 
+from pytket_qir.gatesets.base import CustomGateSet, CustomQirGate
+from pytket_qir.gatesets.pyqir import PYQIR_GATES, _TK_TO_PYQIR
 from pytket_qir.generator import (
     circuit_to_qir,
     write_qir_file,
@@ -118,7 +123,6 @@ class TestQirToPytketGateTranslation:
         assert circuit.depth() == 1
 
     def test_untagged_rt_functions(self) -> None:
-
         rt_function_file_path = qir_files_dir / "untagged_rt_functions.bc"
         circuit = circuit_from_qir(rt_function_file_path)
 
@@ -768,6 +772,55 @@ class TestPytketToQirGateTranslation:
         ll = bitcode_to_ir(ir_bytes)
 
         assert ll in exp_data
+
+    def test_generate_rt_record_output_functions(self) -> None:
+        circuit = Circuit()
+        c_reg_1 = circuit.add_c_register("c_reg_1", 64)
+        c_reg_2 = circuit.add_c_register("c_reg_2", 64)
+        output_reg = circuit.add_c_register("%0", 64)
+        circuit.add_c_setreg(1, c_reg_1)
+        circuit.add_c_setreg(2, c_reg_2)
+        circuit.add_classicalexpbox_register(c_reg_1 + c_reg_2, output_reg)
+        # Extend PyQir base gateset to account for Barrier.
+        # extended_tk_to_pyqir = _TK_TO_PYQIR
+
+        qir_gate = QirGate(
+            opnat=OpNat.RT,
+            opname=OpName.INT,
+            opspec=OpSpec.REC_OUT,
+        )
+
+        _TK_TO_PYQIR[OpType.Barrier] = qir_gate
+        # import pdb; pdb.set_trace()
+
+        qir_barrier = CustomQirGate(
+            opnat=OpNat.RT,
+            opname=OpName.INT,
+            opspec=OpSpec.REC_OUT,
+            function_signature=[types.Int(64)],
+            return_type=types.VOID,
+        )
+
+        # extended_tk_to_pyqir[OpType.Barrier] = qir_barrier
+        _PYQIR_TO_TK = {v: k for k, v in _TK_TO_PYQIR.items()}
+        # gateset = PYQIR_GATES.gateset
+        # gateset["rt_int"] = qir_barrier
+
+        ext_pyqir_gates = CustomGateSet(
+            name="ExtPyQir",
+            template=Template("__quantum__${opnat}__${opname}__${opspec}"),
+            base_gateset=set(_TK_TO_PYQIR.keys()),
+            gateset={"rt_int": qir_barrier},
+            tk_to_gateset=lambda optype: _TK_TO_PYQIR[optype],
+            gateset_to_tk=lambda gate: _PYQIR_TO_TK[gate],
+        )
+
+        data = {"name": "__quantum__rt__integer_record_output", "arg": "%0"}
+        circuit.add_barrier(units=output_reg, data=json.dumps(data))
+
+        # ir_bytes = cast(bytes, circuit_to_qir(circuit))
+        ir = circuit_to_qir(circuit, gateset=ext_pyqir_gates)
+        print(bitcode_to_ir(ir))
 
 
 class TestPytketToQirConditional:
