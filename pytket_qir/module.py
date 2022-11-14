@@ -77,6 +77,6 @@ class Module:
                         opname=v.opname.value,
                         opspec=v.opspec.value,
                     ),
-                    types.Function(v.function_signature, v.return_type),
+                    self.module.types.function(v.return_type, v.function_signature),
                 ),
             )
