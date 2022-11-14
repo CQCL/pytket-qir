@@ -281,12 +281,11 @@ class QirGenerator:
                     zero=lambda: condition_zero_block(),
                 )
             elif isinstance(op, WASMOp):
-                wasm_int_size = self.wasm_int_type.width
                 inputs, _ = self._get_c_regs_from_com(command)
-                input_type_list: List[PyQirParameterType]
+                input_type_list: List[Type]
                 try:
                     bit_reg = circ.get_c_register(inputs[0])
-                    input_type_list = [types.Int(wasm_int_size)]
+                    input_type_list = [self.wasm_int_type]
                 except IndexError:
                     input_type_list = []
 
