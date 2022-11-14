@@ -60,7 +60,7 @@ tests = ["pytest (>=4.6)"]
 
 [[package]]
 name = "networkx"
-version = "2.8.7"
+version = "2.8.8"
 description = "Python package for creating and manipulating graphs and networks"
 category = "main"
 optional = false
@@ -68,10 +68,10 @@ python-versions = ">=3.8"
 
 [package.extras]
 default = ["numpy (>=1.19)", "scipy (>=1.8)", "matplotlib (>=3.4)", "pandas (>=1.3)"]
-developer = ["pre-commit (>=2.20)", "mypy (>=0.981)"]
-doc = ["sphinx (>=5)", "pydata-sphinx-theme (>=0.9)", "sphinx-gallery (>=0.10)", "numpydoc (>=1.4)", "pillow (>=9.1)", "nb2plots (>=0.6)", "texext (>=0.6.6)"]
+developer = ["pre-commit (>=2.20)", "mypy (>=0.982)"]
+doc = ["sphinx (>=5.2)", "pydata-sphinx-theme (>=0.11)", "sphinx-gallery (>=0.11)", "numpydoc (>=1.5)", "pillow (>=9.2)", "nb2plots (>=0.6)", "texext (>=0.6.6)"]
 extra = ["lxml (>=4.6)", "pygraphviz (>=1.9)", "pydot (>=1.4.2)", "sympy (>=1.10)"]
-test = ["pytest (>=7.1)", "pytest-cov (>=3.0)", "codecov (>=2.1)"]
+test = ["pytest (>=7.2)", "pytest-cov (>=4.0)", "codecov (>=2.1)"]
 
 [[package]]
 name = "numpy"
@@ -83,16 +83,18 @@ python-versions = ">=3.8"
 
 [[package]]
 name = "pyqir"
-version = "0.6.2"
-description = "PyQIR - set of APIs for generating, parsing, and evaluating Quantum Intermediate Representation (QIR)"
+version = "0.7.0a1"
+description = "PyQIR parses, generates and evaluates the Quantum Intermediate Representation."
 category = "main"
 optional = false
-python-versions = ">=3.6"
+python-versions = ">= 3.7"
 
-[package.dependencies]
-pyqir-evaluator = ">=0.6.2"
-pyqir-generator = ">=0.6.2"
-pyqir-parser = ">=0.6.2"
+[package.extras]
+test = ["pytest (>=7.2.0,<7.3.0)"]
+
+[package.source]
+type = "file"
+url = "pyqir-0.7.0a1-cp37-abi3-macosx_10_7_x86_64.whl"
 
 [[package]]
 name = "pyqir-evaluator"
@@ -192,7 +194,7 @@ python-versions = ">=3.7"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8,<3.11"
-content-hash = "4b26eeee8a482b753f0caa242ac0f58c9fff931a664b48fd055e3480767620e4"
+content-hash = "5ae5a60b9678f5610309ab808ec67d63b5f911c9e2ac790d804c0ba8b5fe7694"
 
 [metadata.files]
 graphviz = []
@@ -202,7 +204,9 @@ markupsafe = []
 mpmath = []
 networkx = []
 numpy = []
-pyqir = []
+pyqir = [
+    {file = "pyqir-0.7.0a1-cp37-abi3-macosx_10_7_x86_64.whl", hash = "sha256:d6631613e5e8b9b0d40244ce21fb0b806b21b69fbee456172ee850c14338fbb2"},
+]
 pyqir-evaluator = []
 pyqir-generator = []
 pyqir-parser = []

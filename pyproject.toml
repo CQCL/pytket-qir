@@ -9,8 +9,8 @@ authors = ["Roland Guichard <roland.guichard@cambridgequantum.com>"]
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"
-pytket = "^1.8.0"
-pyqir = "^0.6.2"
+pytket = "^1.8.1"
+pyqir = { file = "pyqir-0.7.0a1-cp37-abi3-macosx_10_7_x86_64.whl" }
 pyqir-parser = "^0.6.2"
 pyqir-evaluator = "^0.6.2"
 pyqir-generator = "^0.6.2"
