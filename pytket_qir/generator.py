@@ -70,9 +70,10 @@ from pytket_qir.gatesets.pyqir import PYQIR_GATES, _TK_TO_PYQIR  # type: ignore
 from pytket_qir.module import Module
 from pytket_qir.utils import (  # type: ignore
     ClassicalExpBoxError,
-    QIRFormat,
+    QirFormat,
     SetBitsOpError,
     WASMError,
+    BarrierError,
 )
 
 
