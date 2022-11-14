@@ -57,9 +57,7 @@ from pytket.circuit.logic_exp import (  # type: ignore
 )
 from pytket.passes import auto_rebase_pass  # type: ignore
 
-from pyqir.generator import IntPredicate, types  # type: ignore
-from pyqir.generator.types import Qubit, Result  # type: ignore
-from pyqir.generator._native import Value  # type: ignore
+from pyqir import const, IntPredicate, IntType, SimpleModule, Type, Value  # type: ignore
 
 from pytket_qir.gatesets.base import (
     CustomGateSet,
