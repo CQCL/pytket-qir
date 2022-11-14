@@ -317,7 +317,7 @@ class QirGenerator:
                 if len(input_type_list) == 0:
                     ssa_args = []
                 else:
-                    ssa_args = [self._reg2ssa_var(bit_reg, wasm_int_size)]
+                    ssa_args = [self._reg2ssa_var(bit_reg, self.wasm_int_type.width)]
 
                 gate = module.gateset.tk_to_gateset(op.type)
                 get_gate = getattr(module, gate.opname.value)
