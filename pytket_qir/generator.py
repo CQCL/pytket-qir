@@ -171,6 +171,8 @@ class QirGenerator:
             # Check if the register has been previously set. If not, initialise to 0.
             if reg_value := self.set_cregs.get(reg_name):
                 bit_reg = reg_value
+                value = sum([n * 2**k for k, n in enumerate(reg_value)])
+                return const(self.types.int(64), value)
             else:
                 bit_reg = [False] * len(bit_reg)
             if (size := len(bit_reg)) <= int_size:  # Widening by zero-padding.
