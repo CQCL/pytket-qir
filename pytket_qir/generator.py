@@ -399,9 +399,8 @@ def circuit_to_qir(
     gateset: Optional[CustomGateSet] = None,
     module: Optional[SimpleModule] = None,
     wasm_path: Optional[Union[str, os.PathLike]] = None,
-    wasm_int_type: types.Int = types.Int(32),
-    qir_format: QIRFormat = QIRFormat.BITCODE,
     wasm_int_size: int = 32,
+    qir_format: QirFormat = QirFormat.BITCODE,
 ) -> Union[str, bytes]:
     """Return a pytket circuit as QIR."""
     wasm_handler = None
@@ -439,10 +438,10 @@ def write_qir_file(
     """A method to generate a qir file from a tket circuit."""
     _, ext = os.path.splitext(os.path.basename(file_name))
     if ext == ".bc":
-        qir_format = QIRFormat.BITCODE
+        qir_format = QirFormat.BITCODE
         file_param = "wb"
     elif ext == ".ll":
-        qir_format = QIRFormat.IR
+        qir_format = QirFormat.IR
         file_param = "w"
     else:
         raise ValueError("The file extension must either be '.ll' or '.bc'.")
