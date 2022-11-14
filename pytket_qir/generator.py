@@ -378,7 +378,7 @@ class QirGenerator:
                         else:
                             get_gate(*qubits)
                     else:
-                        bits: Optional[Sequence[Result]] = None
+                        bits: Optional[Sequence[Value]] = None
                         if type(optype) == BitWiseOp:
                             bits = self._to_qis_bits(command.args)
                         gate = module.gateset.tk_to_gateset(optype)
