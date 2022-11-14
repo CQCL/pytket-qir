@@ -121,7 +121,7 @@ class QirGenerator:
     def _rebase_to_gateset(self, command: Command) -> Optional[Circuit]:
         """Rebase to the target gateset if needed."""
         if command.op.type not in self.module.gateset.base_gateset:
-            circ = Circuit(self.circuit.n_qubits)
+            circ = Circuit(self.circuit.n_qubits, self.circuit.n_bits)
             circ.add_gate(command.op.type, command.args)
             self.rebase_to_gateset.apply(circ)
             return circ
