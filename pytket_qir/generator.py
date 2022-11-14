@@ -137,6 +137,8 @@ class QirGenerator:
                 optype = BitWiseOp.OR
             elif op.get_name() == "XOR":
                 optype = BitWiseOp.XOR
+        elif optype == OpType.Barrier:
+            pass
         else:
             params = op.params
         return (optype, params)
@@ -144,12 +146,12 @@ class QirGenerator:
     def _to_qis_qubits(self, qubits: List[Qubit]) -> Sequence[Qubit]:
         return [self.module.module.qubits[qubit.index[0]] for qubit in qubits]
 
-    def _to_qis_results(self, bits: List[Bit]) -> Optional[Result]:
+    def _to_qis_results(self, bits: List[Bit]) -> Optional[Value]:
         if bits:
             return self.module.module.results[bits[0].index[0]]
         return None
 
-    def _to_qis_bits(self, args: List[Bit]) -> Sequence[Result]:
+    def _to_qis_bits(self, args: List[Bit]) -> Sequence[Value]:
         if args:
             return [self.module.module.results[bit.index[0]] for bit in args[:-1]]
         return []
