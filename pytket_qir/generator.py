@@ -102,13 +102,14 @@ class QirGenerator:
         self,
         circuit: Circuit,
         module: Module,
-        wasm_int_type: types.Int = types.Int(32),
-        qir_int_type: types.Int = types.Int(64),
+        wasm_int_size: int = 32,
+        qir_int_size: int = 64,
     ) -> None:
         self.circuit = circuit
         self.module = module
-        self.wasm_int_type = wasm_int_type
-        self.qir_int_type = qir_int_type
+        self.types = self.module.module.types
+        self.wasm_int_type: IntType = cast(IntType, self.types.int(wasm_int_size))
+        self.qir_int_type: IntType = cast(IntType, self.types.int(qir_int_size))
         self.cregs = _retrieve_registers(self.circuit.bits, BitRegister)
         self.target_gateset = self.module.gateset.base_gateset
         # Will throw an exception if the rebase can not handle the target gateset.
