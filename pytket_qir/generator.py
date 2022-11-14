@@ -307,7 +307,7 @@ class QirGenerator:
                     opname=WasmName.WASM,
                     opspec=OpSpec.BODY,
                     function_signature=input_type_list,
-                    return_type=types.Int(wasm_int_size),
+                    return_type=self.wasm_int_type,
                 )
 
                 # Update gateset in module.
