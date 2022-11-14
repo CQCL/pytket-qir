@@ -397,6 +397,7 @@ class QirGenerator:
 def circuit_to_qir(
     circ: Circuit,
     gateset: Optional[CustomGateSet] = None,
+    module: Optional[SimpleModule] = None,
     wasm_path: Optional[Union[str, os.PathLike]] = None,
     wasm_int_type: types.Int = types.Int(32),
     qir_format: QIRFormat = QIRFormat.BITCODE,
