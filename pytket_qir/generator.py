@@ -164,7 +164,9 @@ class QirGenerator:
         ):  # Check if the register has been previously set.
             reg2var = self.module.module.add_external_function(
                 "reg2var",
-                types.Function([types.BOOL] * int_size, types.Int(int_size)),
+                self.types.function(
+                    self.types.int(int_size), [self.types.bool] * int_size
+                ),
             )
             # Check if the register has been previously set. If not, initialise to 0.
             if reg_value := self.set_cregs.get(reg_name):
