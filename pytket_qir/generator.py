@@ -95,7 +95,7 @@ _TK_CLOPS_TO_PYQIR: Dict = {
 }
 
 
-class QIRGenerator:
+class QirGenerator:
     """Generate QIR from a pytket circuit."""
 
     def __init__(
