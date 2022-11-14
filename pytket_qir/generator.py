@@ -336,6 +336,22 @@ class QirGenerator:
                 _, outputs = self._get_c_regs_from_com(command)
                 for out in outputs:
                     self.set_cregs[out] = command.op.values
+            elif isinstance(op, MetaOp):
+                optype, _ = self._get_optype_and_params(op)
+                gate = module.gateset.tk_to_gateset(optype)
+                get_gate = getattr(module, gate.opname.value)
+                data = json.loads(op.data)
+                func_name = cast(str, data["name"])
+                matched_str = re.search("__quantum__(.+?)__(.+?)__(.+)", func_name)
+                if not matched_str:
+                    raise BarrierError("The runtime function name is not properly defined.") 
+                if matched_str.group(2) == "result":
+                    res_index = data["index"]
+                    ssa_var = self.module.module.results[res_index]
+                else:
+                    ssa_var_name = data["arg"]
+                    ssa_var = self.ssa_vars[ssa_var_name]
+                module.builder.call(get_gate, [ssa_var])
             else:
                 rebased_circ = self._rebase_to_gateset(
                     command
