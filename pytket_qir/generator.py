@@ -64,7 +64,6 @@ from pytket_qir.gatesets.base import (
     CustomQirGate,
     OpNat,
     OpSpec,
-    PyQirParameterType,
     QirGate,
 )
 from pytket_qir.gatesets.pyqir import PYQIR_GATES, _TK_TO_PYQIR  # type: ignore
