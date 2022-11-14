@@ -18,8 +18,10 @@ to and from pytket circuits.
 """
 
 from enum import Enum
+import json
 from functools import partial
 import os
+import re
 from typing import cast, Dict, List, Optional, Sequence, Tuple, Union
 
 
@@ -32,6 +34,7 @@ from pytket.circuit import (  # type: ignore
     Command,
     Conditional,
     Op,
+    MetaOp,
     SetBitsOp,
     WASMOp,
 )
