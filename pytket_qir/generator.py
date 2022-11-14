@@ -412,15 +412,22 @@ def circuit_to_qir(
             wasm_ext = " and {} file.".format(wasm_file_name)
         except ValueError as ve:
             raise ve
-    module = Module(
-        name=module_name,
-        num_qubits=circ.n_qubits,
-        num_results=len(circ.bits),
-        gateset=gateset,
-        wasm_handler=wasm_handler,
-    )
-    populated_module = QIRGenerator(circ, module, wasm_int_type).module
-    if qir_format == QIRFormat.BITCODE:
+    if module is not None:
+        mod = Module(module=module, gateset=gateset, wasm_handler=wasm_handler)
+    else:
+        module_name = "Generated from {} pytket circuit".format(
+            circ.name if circ.name is not None else "input"
+        )
+        module_name = module_name + wasm_ext
+        mod = Module(
+            name=module_name,
+            num_qubits=circ.n_qubits,
+            num_results=len(circ.bits),
+            gateset=gateset,
+            wasm_handler=wasm_handler,
+        )
+    populated_module = QirGenerator(circ, mod, wasm_int_size).module
+    if qir_format == QirFormat.BITCODE:
         return populated_module.module.bitcode()
     else:
         return populated_module.module.ir()
