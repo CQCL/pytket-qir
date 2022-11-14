@@ -401,6 +401,7 @@ def circuit_to_qir(
     wasm_path: Optional[Union[str, os.PathLike]] = None,
     wasm_int_type: types.Int = types.Int(32),
     qir_format: QIRFormat = QIRFormat.BITCODE,
+    wasm_int_size: int = 32,
 ) -> Union[str, bytes]:
     """Return a pytket circuit as QIR."""
     wasm_handler = None
@@ -433,7 +434,7 @@ def write_qir_file(
     file_name: str,
     gateset: Optional[CustomGateSet] = None,
     wasm_path: Optional[Union[str, os.PathLike]] = None,
-    wasm_int_type: types.Int = types.Int(32),
+    wasm_int_size: int = 32,
 ) -> None:
     """A method to generate a qir file from a tket circuit."""
     _, ext = os.path.splitext(os.path.basename(file_name))
@@ -449,7 +450,7 @@ def write_qir_file(
         circ=circ,
         gateset=gateset,
         wasm_path=wasm_path,
-        wasm_int_type=wasm_int_type,
+        wasm_int_size=wasm_int_size,
         qir_format=qir_format,
     )
     with open(file_name, file_param) as out:
