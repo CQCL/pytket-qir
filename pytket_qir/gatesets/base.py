@@ -11,6 +11,7 @@ class OpNat(Enum):
     QIS = "qis"
     CIS = "cis"
     HYBRID = "hybrid"
+    RT = "rt"
 
 
 class OpName(Enum):
@@ -35,6 +36,9 @@ class OpName(Enum):
     AND = "and"
     OR = "or"
     XOR = "xor"
+    INT = "integer"
+    BOOL = "bool"
+    RES = "result"
 
 
 class OpSpec(Enum):
@@ -42,6 +46,7 @@ class OpSpec(Enum):
     ADJ = "adj"
     CTL = "ctl"
     CTLADJ = "ctladj"
+    REC_OUT = "record_output"
 
 
 @dataclass(frozen=True)
@@ -53,8 +58,8 @@ class QirGate:
 
 @dataclass(frozen=True)
 class CustomQirGate(QirGate):
-    function_signature: List[PyQirParameterType]
-    return_type: PyQirReturnType
+    function_signature: List[Type]
+    return_type: Type
 
 
 CustomGateSet = NamedTuple(
