@@ -323,14 +323,15 @@ class QirGenerator:
                 get_gate = getattr(module, gate.opname.value)
                 module.builder.call(get_gate, ssa_args)
             elif isinstance(op, ClassicalExpBox):
-                inputs, _ = self._get_c_regs_from_com(command)
-
+                inputs, outputs = self._get_c_regs_from_com(command)
                 ssa_vars: List = []
                 for inp in inputs:
                     bit_reg = circ.get_c_register(inp)
                     ssa_vars.append(self._reg2ssa_var(bit_reg, self.qir_int_type.width))
-
-                _TK_CLOPS_TO_PYQIR[type(op.get_exp())](module.builder)(*ssa_vars)
+                output_instr = _TK_CLOPS_TO_PYQIR[type(op.get_exp())](module.builder)(
+                    *ssa_vars
+                )
+                self.ssa_vars[outputs[0]] = output_instr
             elif isinstance(op, SetBitsOp):
                 _, outputs = self._get_c_regs_from_com(command)
                 for out in outputs:
