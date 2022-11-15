@@ -186,6 +186,28 @@ class TestQirToPytketGateTranslation:
         assert barriers[3].qubits == []
         assert barriers[3].bits[0].index[0] == 1
 
+    def test_read_result(self) -> None:
+        read_result_function_file_path = qir_files_dir / "ReadResult.bc"
+        circuit = circuit_from_qir(read_result_function_file_path)
+
+        coms = circuit.get_commands()
+        com0 = coms[0]
+        assert com0.op.type == OpType.CopyBits
+        arg0 = com0.args[0]
+        assert arg0.reg_name == "c"
+        assert arg0.index[0] == 0
+        arg1 = com0.args[1]
+        assert arg1.reg_name == "%0"
+        assert arg1.index[0] == 0
+        com1 = coms[1]
+        assert com1.op.type == OpType.CopyBits
+        arg0 = com1.args[0]
+        assert arg0.reg_name == "c"
+        assert arg0.index[0] == 1
+        arg1 = com1.args[1]
+        assert arg1.reg_name == "%1"
+        assert arg1.index[0] == 1
+
     def test_select(self) -> None:
         select_function_file_path = qir_files_dir / "select.bc"
 
