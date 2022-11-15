@@ -47,7 +47,9 @@ class Module:
     ) -> None:
         if module is None:
             if any([name, num_qubits, num_results]) == None:
-                raise ValueError("Arguments are not provided correctly for the input module.")
+                raise ValueError(
+                    "Arguments are not provided correctly for the input module."
+                )
             name = cast(str, name)
             num_qubits = cast(int, num_qubits)
             num_results = cast(int, num_results)

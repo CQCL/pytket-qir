@@ -344,7 +344,9 @@ class QirGenerator:
                 func_name = cast(str, data["name"])
                 matched_str = re.search("__quantum__(.+?)__(.+?)__(.+)", func_name)
                 if not matched_str:
-                    raise BarrierError("The runtime function name is not properly defined.") 
+                    raise BarrierError(
+                        "The runtime function name is not properly defined."
+                    )
                 if matched_str.group(2) == "result":
                     res_index = data["index"]
                     ssa_var = self.module.module.results[res_index]
