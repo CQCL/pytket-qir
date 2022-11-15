@@ -58,6 +58,7 @@ from pyqir.parser import (  # type: ignore
     QirCondBrTerminator,
     QirModule,
     QirInstr,
+    QirQisCallInstr,
     QirResultConstant,
     QirRtCallInstr,
     QirSelectInstr,
