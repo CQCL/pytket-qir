@@ -33,6 +33,7 @@ from pytket.circuit import (  # type: ignore
     ClassicalExpBox,
     Command,
     Conditional,
+    CopyBitsOp,
     Op,
     MetaOp,
     SetBitsOp,
