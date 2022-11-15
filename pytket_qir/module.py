@@ -21,7 +21,7 @@ Pytket circuits.
 from typing import cast, Optional
 from pytket.wasm import WasmFileHandler  # type: ignore
 
-from pyqir import (
+from pyqir import (  # type: ignore
     BasicQisBuilder,
     SimpleModule,
 )

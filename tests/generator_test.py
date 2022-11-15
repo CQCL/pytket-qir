@@ -21,7 +21,7 @@ import pytest  # type: ignore
 from pytket import Circuit, OpType  # type: ignore
 from pytket.wasm import WasmFileHandler  # type: ignore
 
-from pyqir import Module, SimpleModule
+from pyqir import Module, SimpleModule  # type: ignore
 
 from pytket_qir.gatesets.base import OpName, OpNat, OpSpec, QirGate  # type: ignore
 
