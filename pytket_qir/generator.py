@@ -355,6 +355,16 @@ class QirGenerator:
                     ssa_var_name = data["arg"]
                     ssa_var = self.ssa_vars[ssa_var_name]
                 module.builder.call(get_gate, [ssa_var])
+            elif isinstance(op, CopyBitsOp):
+                input_reg = command.args[0]
+                output_reg = command.args[1]
+                output_name = output_reg.reg_name
+                optype, _ = self._get_optype_and_params(op)
+                gate = module.gateset.tk_to_gateset(optype)
+                ssa_var = self.module.module.results[input_reg.index[0]]
+                get_gate = getattr(module, gate.opname.value)
+                output_instr = module.builder.call(get_gate, [ssa_var])
+                self.ssa_vars[output_name] = output_instr
             else:
                 rebased_circ = self._rebase_to_gateset(
                     command
