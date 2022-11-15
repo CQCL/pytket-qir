@@ -338,7 +338,51 @@ class TestPytketToQirGateTranslation:
 
         assert ll == exp_data
 
-    
+    def test_generate_read_result(self) -> None:
+        read_result_file_path = qir_files_dir / "ReadResult.ll"
+
+        with open(read_result_file_path, "r") as f:
+            exp_data = f.read()
+
+        mod = SimpleModule("test", 0, 2)
+        types = mod.types
+
+        circuit = Circuit(0, 2)
+        result_register = circuit.get_c_register("c")
+        target_register = circuit.add_c_register("%0", result_register.size)
+
+        circuit.add_c_copybits([result_register[0]], [target_register[0]])
+        circuit.add_c_copybits([result_register[1]], [target_register[1]])
+
+        # Extend PyQir base gateset to account for Barrier.
+        # qir_gate = _TK_TO_PYQIR[OpType.CopyBits]
+
+        # _TK_TO_PYQIR[OpType.Barrier] = qir_gate
+
+        qis_read_result = CustomQirGate(
+            opnat=OpNat.QIS,
+            opname=OpName.READ_RES,
+            opspec=OpSpec.BODY,
+            function_signature=[types.result],
+            return_type=types.int(1),
+        )
+
+        _PYQIR_TO_TK = {v: k for k, v in _TK_TO_PYQIR.items()}
+
+        ext_pyqir_gates = CustomGateSet(
+            name="ExtPyQir",
+            template=Template("__quantum__${opnat}__${opname}__${opspec}"),
+            base_gateset=set(_TK_TO_PYQIR.keys()),
+            gateset={"read_result": qis_read_result},
+            tk_to_gateset=lambda optype: _TK_TO_PYQIR[optype],
+            gateset_to_tk=lambda gate: _PYQIR_TO_TK[gate],
+        )
+
+        ir = cast(bytes, circuit_to_qir(circuit, module=mod, gateset=ext_pyqir_gates))
+
+        ll = str(Module.from_bitcode(ir))
+
+        assert ll == exp_data
 
     @pytest.mark.skip
     def test_generate_wasmop_with_nonempty_inputs(self) -> None:
