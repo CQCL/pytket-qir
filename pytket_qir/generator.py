@@ -138,7 +138,7 @@ class QirGenerator:
                 optype = BitWiseOp.OR
             elif op.get_name() == "XOR":
                 optype = BitWiseOp.XOR
-        elif optype == OpType.Barrier:
+        elif optype in [OpType.Barrier, OpType.CopyBits]:
             pass
         else:
             params = op.params
