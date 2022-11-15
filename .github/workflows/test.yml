@@ -36,4 +36,5 @@ jobs:
         working-directory: ./tests
         run: |
           # poetry run pytest parser_test.py generator_test.py
+          poetry show pyqir
           python -c "from pyqir import Builder"
