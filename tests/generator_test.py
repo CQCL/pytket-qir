@@ -338,6 +338,8 @@ class TestPytketToQirGateTranslation:
 
         assert ll == exp_data
 
+    
+
     @pytest.mark.skip
     def test_generate_wasmop_with_nonempty_inputs(self) -> None:
         wasm_file_path = qir_files_dir / "wasm_adder.wasm"
