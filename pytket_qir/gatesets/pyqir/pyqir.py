@@ -29,6 +29,9 @@ _TK_TO_PYQIR = {
     OpType.Rx: QirGate(opnat=OpNat.QIS, opname=OpName.Rx, opspec=OpSpec.BODY),
     OpType.Ry: QirGate(opnat=OpNat.QIS, opname=OpName.Ry, opspec=OpSpec.BODY),
     OpType.Rz: QirGate(opnat=OpNat.QIS, opname=OpName.Rz, opspec=OpSpec.BODY),
+    OpType.CopyBits: QirGate(
+        opnat=OpNat.QIS, opname=OpName.READ_RES, opspec=OpSpec.BODY
+    ),
 }
 
 

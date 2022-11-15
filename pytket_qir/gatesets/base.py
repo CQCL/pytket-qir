@@ -39,6 +39,7 @@ class OpName(Enum):
     INT = "integer"
     BOOL = "bool"
     RES = "result"
+    READ_RES = "read_result"
 
 
 class OpSpec(Enum):
