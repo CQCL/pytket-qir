@@ -165,15 +165,16 @@ class QirGenerator:
         ):  # Check if the register has been previously set.
             reg2var = self.module.module.add_external_function(
                 "reg2var",
-                self.types.function(
-                    self.types.int(int_size), [self.types.bool] * int_size
+                types.Function(
+                    [types.BOOL] * int_size,
+                    types.Int(int_size),
                 ),
             )
             # Check if the register has been previously set. If not, initialise to 0.
             if reg_value := self.set_cregs.get(reg_name):
                 bit_reg = reg_value
                 value = sum([n * 2**k for k, n in enumerate(reg_value)])
-                return const(self.types.int(64), value)
+                return const(types.Int(64), value)
             else:
                 bit_reg = [False] * len(bit_reg)
             if (size := len(bit_reg)) <= int_size:  # Widening by zero-padding.
