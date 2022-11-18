@@ -455,6 +455,7 @@ class TestPytketToQirConditional:
 
         assert data == exp_data
 
+
 class TestIrAndBcFileGeneration:
     """A class to test the generation of .ll and .bc files and their equivalence."""
 
