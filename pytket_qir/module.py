@@ -21,10 +21,7 @@ Pytket circuits.
 from typing import cast, Optional
 from pytket.wasm import WasmFileHandler  # type: ignore
 
-from pyqir import (  # type: ignore
-    BasicQisBuilder,
-    SimpleModule,
-)
+from pyqir.generator import SimpleModule, BasicQisBuilder, types  # type: ignore
 
 from pytket_qir.gatesets.base import CustomGateSet
 from pytket_qir.gatesets.pyqir import PYQIR_GATES  # type: ignore
@@ -79,6 +76,6 @@ class Module:
                         opname=v.opname.value,
                         opspec=v.opspec.value,
                     ),
-                    self.module.types.function(v.return_type, v.function_signature),
+                    types.Function(v.function_signature, v.return_type),
                 ),
             )
