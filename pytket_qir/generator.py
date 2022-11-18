@@ -24,7 +24,6 @@ import os
 import re
 from typing import cast, Dict, List, Optional, Sequence, Tuple, Union
 
-
 from pytket import Circuit, OpType, Bit, Qubit  # type: ignore
 from pytket.qasm.qasm import _retrieve_registers  # type: ignore
 from pytket.wasm import WasmFileHandler  # type: ignore
@@ -58,7 +57,9 @@ from pytket.circuit.logic_exp import (  # type: ignore
 )
 from pytket.passes import auto_rebase_pass  # type: ignore
 
-from pyqir import const, IntPredicate, IntType, SimpleModule, Type, Value  # type: ignore
+from pyqir.generator import const, IntPredicate, types, SimpleModule  # type: ignore
+from pyqir.generator.types import Qubit  # type: ignore
+from pyqir.generator._native import Value  # type: ignore
 
 from pytket_qir.gatesets.base import (
     CustomGateSet,
