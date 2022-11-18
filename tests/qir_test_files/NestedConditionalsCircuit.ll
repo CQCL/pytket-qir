@@ -20,7 +20,7 @@ then:                                             ; preds = %entry
 else:                                             ; preds = %entry
   br label %continue
 
-continue:                                         ; preds = %continue3, %else
+continue:                                         ; preds = %else, %continue3
   ret void
 
 then1:                                            ; preds = %then

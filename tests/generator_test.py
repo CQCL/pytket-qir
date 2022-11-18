@@ -21,7 +21,7 @@ import pytest  # type: ignore
 from pytket import Circuit, OpType  # type: ignore
 from pytket.wasm import WasmFileHandler  # type: ignore
 
-from pyqir import Module, SimpleModule  # type: ignore
+from pyqir.generator import bitcode_to_ir, types  # type: ignore
 
 from pytket_qir.gatesets.base import OpName, OpNat, OpSpec, QirGate  # type: ignore
 
@@ -142,13 +142,12 @@ class TestPytketToQirGateTranslation:
         self, circuit_classical_arithmetic: Circuit, operators: List
     ):
         with open("ClassicalCircuit.ll", "r") as input_file:
-            data = input_file.readlines()
+            data = input_file.read()
 
         with open(qir_files_dir / "ClassicalCircuit.ll", "r") as input_file:
-            exp_data = input_file.readlines()
+            exp_data = input_file.read()
 
-        for line in data:
-            assert line in exp_data
+        assert data == exp_data
 
     def test_classical_reg2const_arithmetic(
         self, circuit_classical_reg2const_arithmetic: Circuit
@@ -192,14 +191,15 @@ class TestPytketToQirGateTranslation:
         with open(rt_int_record_output, "r") as f:
             exp_data = f.read()
 
-        mod = SimpleModule("test", 0, 0)
-        types = mod.types
+        # mod = SimpleModule("test", 0, 0)
+        # types = mod.types
 
         circuit = Circuit()
         c_reg_1 = circuit.add_c_register("c_reg_1", 64)
         c_reg_2 = circuit.add_c_register("c_reg_2", 64)
         output_reg = circuit.add_c_register("output_reg", 64)
         circuit.add_c_setreg(1, c_reg_1)
+        circuit.add_c_setreg(2, c_reg_2)
         circuit.add_classicalexpbox_register(c_reg_1 + c_reg_2, output_reg)
 
         # Extend PyQir base gateset to account for Barrier.
@@ -215,8 +215,8 @@ class TestPytketToQirGateTranslation:
             opnat=OpNat.RT,
             opname=OpName.INT,
             opspec=OpSpec.REC_OUT,
-            function_signature=[types.int(64)],
-            return_type=types.void,
+            function_signature=[types.Int(64)],
+            return_type=types.VOID,
         )
 
         _PYQIR_TO_TK = {v: k for k, v in _TK_TO_PYQIR.items()}
@@ -233,8 +233,8 @@ class TestPytketToQirGateTranslation:
         data = {"name": "__quantum__rt__integer__record_output", "arg": "output_reg"}
         circuit.add_barrier(units=output_reg, data=json.dumps(data))
 
-        ir = cast(bytes, circuit_to_qir(circuit, module=mod, gateset=ext_pyqir_gates))
-        ll = str(Module.from_bitcode(ir))
+        ir_bytes = cast(bytes, circuit_to_qir(circuit, gateset=ext_pyqir_gates))
+        ll = str(bitcode_to_ir(ir_bytes))
 
         assert ll == exp_data
 
@@ -244,14 +244,15 @@ class TestPytketToQirGateTranslation:
         with open(rt_bool_record_output, "r") as f:
             exp_data = f.read()
 
-        mod = SimpleModule("test", 0, 0)
-        types = mod.types
+        # mod = SimpleModule("test", 0, 0)
+        # types = mod.types
 
         circuit = Circuit()
         c_reg_1 = circuit.add_c_register("c_reg_1", 64)
         c_reg_2 = circuit.add_c_register("c_reg_2", 64)
         output_reg = circuit.add_c_register("output_reg", 64)
         circuit.add_c_setreg(1, c_reg_1)
+        circuit.add_c_setreg(0, c_reg_2)
         circuit.add_classicalexpbox_register(c_reg_1 + c_reg_2, output_reg)
 
         # Extend PyQir base gateset to account for Barrier.
@@ -267,8 +268,8 @@ class TestPytketToQirGateTranslation:
             opnat=OpNat.RT,
             opname=OpName.BOOL,
             opspec=OpSpec.REC_OUT,
-            function_signature=[types.int(64)],
-            return_type=types.void,
+            function_signature=[types.Int(64)],
+            return_type=types.VOID,
         )
 
         _PYQIR_TO_TK = {v: k for k, v in _TK_TO_PYQIR.items()}
@@ -285,8 +286,8 @@ class TestPytketToQirGateTranslation:
         data = {"name": "__quantum__rt__bool__record_output", "arg": "output_reg"}
         circuit.add_barrier(units=output_reg, data=json.dumps(data))
 
-        ir = cast(bytes, circuit_to_qir(circuit, module=mod, gateset=ext_pyqir_gates))
-        ll = str(Module.from_bitcode(ir))
+        ir_bytes = cast(bytes, circuit_to_qir(circuit, gateset=ext_pyqir_gates))
+        ll = str(bitcode_to_ir(ir_bytes))
 
         assert ll == exp_data
 
@@ -296,8 +297,8 @@ class TestPytketToQirGateTranslation:
         with open(rt_result_record_output, "r") as f:
             exp_data = f.read()
 
-        mod = SimpleModule("test", 0, 1)
-        types = mod.types
+        # mod = SimpleModule("test", 0, 1)
+        # types = mod.types
 
         circuit = Circuit(0, 1)
         c_reg = circuit.get_c_register("c")
@@ -315,8 +316,8 @@ class TestPytketToQirGateTranslation:
             opnat=OpNat.RT,
             opname=OpName.RES,
             opspec=OpSpec.REC_OUT,
-            function_signature=[types.result],
-            return_type=types.void,
+            function_signature=[types.RESULT],
+            return_type=types.VOID,
         )
 
         _PYQIR_TO_TK = {v: k for k, v in _TK_TO_PYQIR.items()}
@@ -333,8 +334,8 @@ class TestPytketToQirGateTranslation:
         data = {"name": "__quantum__rt__result__record_output", "arg": "c", "index": 0}
         circuit.add_barrier(units=c_reg, data=json.dumps(data))
 
-        ir = cast(bytes, circuit_to_qir(circuit, module=mod, gateset=ext_pyqir_gates))
-        ll = str(Module.from_bitcode(ir))
+        ir_bytes = cast(bytes, circuit_to_qir(circuit, gateset=ext_pyqir_gates))
+        ll = str(bitcode_to_ir(ir_bytes))
 
         assert ll == exp_data
 
@@ -343,9 +344,6 @@ class TestPytketToQirGateTranslation:
 
         with open(read_result_file_path, "r") as f:
             exp_data = f.read()
-
-        mod = SimpleModule("test", 0, 2)
-        types = mod.types
 
         circuit = Circuit(0, 2)
         result_register = circuit.get_c_register("c")
@@ -357,14 +355,12 @@ class TestPytketToQirGateTranslation:
         # Extend PyQir base gateset to account for Barrier.
         # qir_gate = _TK_TO_PYQIR[OpType.CopyBits]
 
-        # _TK_TO_PYQIR[OpType.Barrier] = qir_gate
-
         qis_read_result = CustomQirGate(
             opnat=OpNat.QIS,
             opname=OpName.READ_RES,
             opspec=OpSpec.BODY,
-            function_signature=[types.result],
-            return_type=types.int(1),
+            function_signature=[types.RESULT],
+            return_type=types.BOOL,
         )
 
         _PYQIR_TO_TK = {v: k for k, v in _TK_TO_PYQIR.items()}
@@ -378,9 +374,8 @@ class TestPytketToQirGateTranslation:
             gateset_to_tk=lambda gate: _PYQIR_TO_TK[gate],
         )
 
-        ir = cast(bytes, circuit_to_qir(circuit, module=mod, gateset=ext_pyqir_gates))
-
-        ll = str(Module.from_bitcode(ir))
+        ir_bytes = cast(bytes, circuit_to_qir(circuit, gateset=ext_pyqir_gates))
+        ll = str(bitcode_to_ir(ir_bytes))
 
         assert ll == exp_data
 
@@ -397,9 +392,9 @@ class TestPytketToQirGateTranslation:
         c1 = circuit.add_c_register("c1", 64)
 
         circuit.add_wasm_to_reg("add_one", wasm_handler, [c0], [c1])
-        ir_bytes = cast(bytes, circuit_to_qir(circuit, wasm_path=wasm_file_path))
 
-        ll = str(Module.from_bitcode(ir_bytes))
+        ir_bytes = cast(bytes, circuit_to_qir(circuit))
+        ll = str(bitcode_to_ir(ir_bytes))
 
         assert ll in exp_data
 
@@ -418,8 +413,7 @@ class TestPytketToQirGateTranslation:
         ir = circuit_to_qir(circuit, wasm_path=wasm_file_path)
         ir_bytes = cast(bytes, ir)
 
-        # ll = bitcode_to_ir(ir_bytes)
-        ll = str(Module.from_bitcode(ir_bytes))
+        ll = bitcode_to_ir(ir_bytes)
 
         assert ll in exp_data
 
@@ -452,18 +446,14 @@ class TestPytketToQirConditional:
         pytket_nested_conditionals_file_name: str,
     ) -> None:
         with open(pytket_nested_conditionals_file_name, "r") as input_file:
-            data = input_file.readlines()
+            data = input_file.read()
 
         test_file_path = qir_files_dir / pytket_nested_conditionals_file_name
 
         with open(test_file_path, "r") as input_file:
-            exp_data = input_file.readlines()
+            exp_data = input_file.read()
 
-        for line in data:
-            assert (
-                line in exp_data
-            )  # Identical up to some ordering of the function declarations.
-
+        assert data == exp_data
 
 class TestIrAndBcFileGeneration:
     """A class to test the generation of .ll and .bc files and their equivalence."""
@@ -485,8 +475,7 @@ class TestIrAndBcFileGeneration:
         with open(bc_file_name, "rb") as input_file:
             bc_data = input_file.read()
 
-        # ll = bitcode_to_ir(bc_data)
-        ll = str(Module.from_bitcode(bc_data))
+        ll = bitcode_to_ir(bc_data)
 
         for line in data[1:]:  # Header info about module name is not contained.
             assert line in ll

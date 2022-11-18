@@ -1,6 +1,8 @@
-source_filename = "test"
+source_filename = "Generated from input pytket circuit"
 
 %Result = type opaque
+
+declare i1 @__quantum__qis__read_result__body(%Result*)
 
 define void @main() #0 {
 entry:
@@ -9,6 +11,4 @@ entry:
   ret void
 }
 
-declare i1 @__quantum__qis__read_result__body(%Result*)
-
-attributes #0 = { "EntryPoint" "requiredQubits"="0" "requiredResults"="2" }
+attributes #0 = { "EntryPoint" "requiredQubits"="0" "requiredResults"="4" }
