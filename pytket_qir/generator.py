@@ -284,7 +284,7 @@ class QirGenerator:
                 )
             elif isinstance(op, WASMOp):
                 inputs, _ = self._get_c_regs_from_com(command)
-                input_type_list: List[Type]
+                input_type_list: List
                 try:
                     bit_reg = circ.get_c_register(inputs[0])
                     input_type_list = [self.wasm_int_type]
