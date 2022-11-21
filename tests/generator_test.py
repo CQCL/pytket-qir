@@ -483,7 +483,3 @@ class TestIrAndBcFileGeneration:
 
         os.remove(ll_file_name)
         os.remove(bc_file_name)
-
-    @pytest.mark.skip
-    def test_roundtrip_teleport_chain(self):
-        pass
