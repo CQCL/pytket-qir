@@ -20,7 +20,9 @@ _TK_TO_PYQIR = {
     OpType.Sdg: QirGate(opnat=FuncNat.QIS, opname=FuncName.S, opspec=FuncSpec.ADJ),
     OpType.T: QirGate(opnat=FuncNat.QIS, opname=FuncName.T, opspec=FuncSpec.BODY),
     OpType.Tdg: QirGate(opnat=FuncNat.QIS, opname=FuncName.T, opspec=FuncSpec.ADJ),
-    OpType.Reset: QirGate(opnat=FuncNat.QIS, opname=FuncName.RESET, opspec=FuncSpec.BODY),
+    OpType.Reset: QirGate(
+        opnat=FuncNat.QIS, opname=FuncName.RESET, opspec=FuncSpec.BODY
+    ),
     OpType.CX: QirGate(opnat=FuncNat.QIS, opname=FuncName.CX, opspec=FuncSpec.BODY),
     OpType.CZ: QirGate(opnat=FuncNat.QIS, opname=FuncName.CZ, opspec=FuncSpec.BODY),
     OpType.Measure: QirGate(
