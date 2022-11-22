@@ -12,22 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 from pathlib import Path
-from typing import Generator, List, cast
 import pytest  # type: ignore
 from pytket import Circuit, OpType  # type: ignore
 from pytket.circuit import Conditional  # type: ignore
 from pytket.wasm import WasmFileHandler  # type: ignore
 
-from pyqir.generator import bitcode_to_ir  # type: ignore
-
-from pytket_qir.generator import (
-    circuit_to_qir,
-    write_qir_file,
-)
 from pytket_qir.parser import circuit_from_qir
-from pytket_qir.utils import ClassicalExpBoxError, InstructionError, SetBitsOpError
+from pytket_qir.utils import InstructionError
 
 
 qir_files_dir = Path("./qir_test_files")
@@ -193,6 +185,28 @@ class TestQirToPytketGateTranslation:
         )
         assert barriers[3].qubits == []
         assert barriers[3].bits[0].index[0] == 1
+
+    def test_read_result(self) -> None:
+        read_result_function_file_path = qir_files_dir / "ReadResult.bc"
+        circuit = circuit_from_qir(read_result_function_file_path)
+
+        coms = circuit.get_commands()
+        com0 = coms[0]
+        assert com0.op.type == OpType.CopyBits
+        arg0 = com0.args[0]
+        assert arg0.reg_name == "c"
+        assert arg0.index[0] == 0
+        arg1 = com0.args[1]
+        assert arg1.reg_name == "%0"
+        assert arg1.index[0] == 0
+        com1 = coms[1]
+        assert com1.op.type == OpType.CopyBits
+        arg0 = com1.args[0]
+        assert arg0.reg_name == "c"
+        assert arg0.index[0] == 1
+        arg1 = com1.args[1]
+        assert arg1.reg_name == "%1"
+        assert arg1.index[0] == 1
 
     def test_select(self) -> None:
         select_function_file_path = qir_files_dir / "select.bc"
@@ -750,253 +764,3 @@ class TestQirToPytketClassicalOps:
         not_supported_bc_file = qir_files_dir / "not_supported.bc"
         with pytest.raises(InstructionError):
             circuit_from_qir(not_supported_bc_file)
-
-
-class TestPytketToQirGateTranslation:
-    """A class to test the gate translation from a pytket circuit to a QIR program."""
-
-    def test_rebase_circuit(self) -> None:
-        rebased_circuit_file_name = "RebasedCircuit.ll"
-        c = Circuit(2)
-        c.CY(0, 1)
-        write_qir_file(c, rebased_circuit_file_name)
-
-        with open("RebasedCircuit.ll", "r") as input_file:
-            data = input_file.readlines()
-
-        with open(qir_files_dir / "RebasedCircuit.ll", "r") as input_file:
-            exp_data = input_file.readlines()
-
-        for line in data:
-            assert line in exp_data
-        os.remove(rebased_circuit_file_name)
-
-    def test_qir_from_pytket_circuit_and_pyqir_gateset(
-        self, circuit_pyqir_gateset: Generator
-    ) -> None:
-        with open("SimpleCircuit.ll", "r") as input_file:
-            data = input_file.read()
-        call_h = f"call void @__quantum__qis__h__body(%Qubit* null)"
-        call_x = (
-            f"call void @__quantum__qis__x__body(%Qubit* inttoptr (i64 1 to %Qubit*))"
-        )
-        call_y = f"call void @__quantum__qis__y__body(%Qubit* null)"
-        call_z = (
-            f"call void @__quantum__qis__z__body(%Qubit* inttoptr (i64 1 to %Qubit*))"
-        )
-        call_s = f"call void @__quantum__qis__s__body(%Qubit* null)"
-        call_s_adj = (
-            f"call void @__quantum__qis__s__adj(%Qubit* inttoptr (i64 1 to %Qubit*))"
-        )
-        call_t = f"call void @__quantum__qis__t__body(%Qubit* null)"
-        call_t_adj = (
-            f"call void @__quantum__qis__t__adj(%Qubit* inttoptr (i64 1 to %Qubit*))"
-        )
-        call_reset = f"call void @__quantum__qis__reset__body(%Qubit* null)"
-        call_cnot = (
-            f"call void @__quantum__qis__cnot__body("
-            "%Qubit* null, %Qubit* inttoptr (i64 1 to %Qubit*)"
-            ")"
-        )
-        call_cz = (
-            f"call void @__quantum__qis__cz__body("
-            "%Qubit* inttoptr (i64 1 to %Qubit*), %Qubit* null"
-            ")"
-        )
-        call_rx = (
-            f"call void @__quantum__qis__rx__body("
-            "double 0.000000e+00, %Qubit* inttoptr (i64 1 to %Qubit*)"
-            ")"
-        )
-        call_ry = (
-            f"call void @__quantum__qis__ry__body(double 1.000000e+00, %Qubit* null)"
-        )
-        call_rz = (
-            f"call void @__quantum__qis__rz__body("
-            "double 2.000000e+00, %Qubit* inttoptr (i64 1 to %Qubit*)"
-            ")"
-        )
-        call_m = (
-            f"call void @__quantum__qis__mz__body("
-            "%Qubit* inttoptr (i64 1 to %Qubit*),"
-            " %Result* inttoptr (i64 1 to %Result*)"
-            ")"
-        )
-        assert call_h in data
-        assert call_x in data
-        assert call_y in data
-        assert call_z in data
-        assert call_s in data
-        assert call_s_adj in data
-        assert call_t in data
-        assert call_t_adj in data
-        assert call_reset in data
-        assert call_cnot in data
-        assert call_cz in data
-        assert call_m in data
-        assert call_rx in data
-        assert call_ry in data
-        assert call_rz in data
-
-    def test_raises_empty_setbit_error(self) -> None:
-        c = Circuit(0)
-        a = c.add_c_register("a", 0)
-        c.add_c_setreg(0, a)  # Only value assignable to empty register.
-        with pytest.raises(SetBitsOpError):
-            write_qir_file(c, "empty_setbit_circuit.ll")
-
-    def test_raises_empty_classicalexpbox_error(self) -> None:
-        c = Circuit(0)
-        a = c.add_c_register("a", 0)
-        b = c.add_c_register("b", 0)
-        c.add_classicalexpbox_register(a ^ b, b)
-        with pytest.raises(ClassicalExpBoxError):
-            write_qir_file(c, "empty_classicalexpbox_circuit.ll")
-
-    def test_classical_arithmetic(
-        self, circuit_classical_arithmetic: Circuit, operators: List
-    ):
-        with open("ClassicalCircuit.ll", "r") as input_file:
-            data = input_file.readlines()
-
-        with open(qir_files_dir / "ClassicalCircuit.ll", "r") as input_file:
-            exp_data = input_file.readlines()
-
-        for line in data:
-            assert line in exp_data
-
-    def test_classical_reg2const_arithmetic(
-        self, circuit_classical_reg2const_arithmetic: Circuit
-    ):
-        with open("ClassicalReg2ConstCircuit.ll", "r") as input_file:
-            data = input_file.readlines()
-
-        with open(qir_files_dir / "ClassicalReg2ConstCircuit.ll", "r") as input_file:
-            exp_data = input_file.readlines()
-
-        for line in data:
-            assert line in exp_data
-
-    @pytest.mark.skip(reason="Waiting for feature releases in pyqir.")
-    def test_bitwise_ops(self, circuit_bitwise_ops: Circuit) -> None:
-        with open("test_bitwise_ops.ll", "r") as input_file:
-            data = input_file.read()
-        call_and = (
-            f"call void @__quantum__cis__and__body("
-            "%Result* %zero, %Result* %zero1, %Result* %zero2"
-            ")"
-        )
-        call_or = (
-            f"call void @__quantum__cis__or__body("
-            "%Result* %zero3, %Result* %zero4, %Result* %zero5"
-            ")"
-        )
-        call_xor = (
-            f"call void @__quantum__cis__xor__body("
-            "%Result* %zero6, %Result* %zero7, %Result* %zero8"
-            ")"
-        )
-
-        assert call_and in data
-        assert call_or in data
-        assert call_xor in data
-
-    def test_generate_wasmop_with_nonempty_inputs(self) -> None:
-        wasm_file_path = qir_files_dir / "wasm_adder.wasm"
-        wasm_handler = WasmFileHandler(str(wasm_file_path))
-
-        with open(qir_files_dir / "WASM.ll", "r") as input_file:
-            exp_data = input_file.read()
-
-        circuit = Circuit()
-        c0 = circuit.add_c_register("c0", 64)
-        c1 = circuit.add_c_register("c1", 64)
-
-        circuit.add_wasm_to_reg("add_one", wasm_handler, [c0], [c1])
-        ir_bytes = cast(bytes, circuit_to_qir(circuit, wasm_path=wasm_file_path))
-
-        ll = bitcode_to_ir(ir_bytes)
-
-        assert ll in exp_data
-
-    def test_generate_wasmop_with_empty_inputs(self) -> None:
-        wasm_file_path = qir_files_dir / "wasm_empty_adder.wasm"
-        wasm_handler = WasmFileHandler(str(wasm_file_path))
-
-        with open(qir_files_dir / "WASM_noinputs.ll", "r") as input_file:
-            exp_data = input_file.read()
-
-        circuit = Circuit()
-        c1 = circuit.add_c_register("c1", 64)
-
-        circuit.add_wasm_to_reg("empty_add_one", wasm_handler, [], [c1])
-        circuit.add_wasm_to_reg("empty_add_one", wasm_handler, [], [c1])
-        ir_bytes = cast(bytes, circuit_to_qir(circuit, wasm_path=wasm_file_path))
-
-        ll = bitcode_to_ir(ir_bytes)
-
-        assert ll in exp_data
-
-
-class TestPytketToQirConditional:
-    """
-    A class to test the translation of pytket conditional
-    sub-circuits (CircBox) to QIR.
-    """
-
-    def test_simple_conditional(
-        self, simple_conditional_circuit: Generator, simple_conditional_file_name: str
-    ):
-        with open(simple_conditional_file_name, "r") as input_file:
-            data = input_file.readlines()
-
-        test_file_path = qir_files_dir / simple_conditional_file_name
-
-        with open(test_file_path, "r") as input_file:
-            exp_data = input_file.readlines()
-
-        for line in data:
-            assert (
-                line in exp_data
-            )  # Identical up to some ordering of the function declarations.
-
-    def test_nested_conditionals(
-        self,
-        pytket_nested_conditionals_circuit: Generator,
-        pytket_nested_conditionals_file_name: str,
-    ) -> None:
-        with open(pytket_nested_conditionals_file_name, "r") as input_file:
-            data = input_file.readlines()
-
-        test_file_path = qir_files_dir / pytket_nested_conditionals_file_name
-
-        with open(test_file_path, "r") as input_file:
-            exp_data = input_file.readlines()
-
-        for line in data:
-            assert (
-                line in exp_data
-            )  # Identical up to some ordering of the function declarations.
-
-
-class TestIrAndBcFileGeneration:
-    """A class to test the generation of .ll and .bc files and their equivalence."""
-
-    def test_generate_bell_circuit(self, bell_circuit) -> None:
-        ll_file_name = "BellTestCircuit.ll"
-        bc_file_name = "BellTestCircuit.bc"
-        write_qir_file(bell_circuit, ll_file_name)
-        write_qir_file(bell_circuit, bc_file_name)
-
-        with open(ll_file_name, "r") as input_file:
-            data = input_file.readlines()
-        with open(bc_file_name, "rb") as input_file:
-            bc_data = input_file.read()
-
-        ll = bitcode_to_ir(bc_data)
-
-        for line in data[1:]:  # Header info about module name is not contained.
-            assert line in ll
-
-        os.remove(ll_file_name)
-        os.remove(bc_file_name)

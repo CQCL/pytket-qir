@@ -1,7 +1,8 @@
 from pytket_qir.utils.utils import (
     ClassicalExpBoxError,
     InstructionError,
-    QIRFormat,
+    QirFormat,
     SetBitsOpError,
     WASMError,
+    BarrierError,
 )

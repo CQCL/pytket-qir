@@ -4,38 +4,43 @@ from pytket import OpType  # type: ignore
 
 from pytket_qir.gatesets.base import (
     CustomGateSet,
-    OpNat,
-    OpName,
-    OpSpec,
+    FuncNat,
+    FuncName,
+    FuncSpec,
     QirGate,
 )
 
 
 _TK_TO_PYQIR = {
-    OpType.H: QirGate(opnat=OpNat.QIS, opname=OpName.H, opspec=OpSpec.BODY),
-    OpType.X: QirGate(opnat=OpNat.QIS, opname=OpName.X, opspec=OpSpec.BODY),
-    OpType.Y: QirGate(opnat=OpNat.QIS, opname=OpName.Y, opspec=OpSpec.BODY),
-    OpType.Z: QirGate(opnat=OpNat.QIS, opname=OpName.Z, opspec=OpSpec.BODY),
-    OpType.S: QirGate(opnat=OpNat.QIS, opname=OpName.S, opspec=OpSpec.BODY),
-    OpType.Sdg: QirGate(opnat=OpNat.QIS, opname=OpName.S, opspec=OpSpec.ADJ),
-    OpType.T: QirGate(opnat=OpNat.QIS, opname=OpName.T, opspec=OpSpec.BODY),
-    OpType.Tdg: QirGate(opnat=OpNat.QIS, opname=OpName.T, opspec=OpSpec.ADJ),
-    OpType.Reset: QirGate(opnat=OpNat.QIS, opname=OpName.RESET, opspec=OpSpec.BODY),
-    OpType.CX: QirGate(opnat=OpNat.QIS, opname=OpName.CX, opspec=OpSpec.BODY),
-    OpType.CZ: QirGate(opnat=OpNat.QIS, opname=OpName.CZ, opspec=OpSpec.BODY),
-    OpType.Measure: QirGate(
-        opnat=OpNat.QIS, opname=OpName.MEASUREZ, opspec=OpSpec.BODY
+    OpType.H: QirGate(opnat=FuncNat.QIS, opname=FuncName.H, opspec=FuncSpec.BODY),
+    OpType.X: QirGate(opnat=FuncNat.QIS, opname=FuncName.X, opspec=FuncSpec.BODY),
+    OpType.Y: QirGate(opnat=FuncNat.QIS, opname=FuncName.Y, opspec=FuncSpec.BODY),
+    OpType.Z: QirGate(opnat=FuncNat.QIS, opname=FuncName.Z, opspec=FuncSpec.BODY),
+    OpType.S: QirGate(opnat=FuncNat.QIS, opname=FuncName.S, opspec=FuncSpec.BODY),
+    OpType.Sdg: QirGate(opnat=FuncNat.QIS, opname=FuncName.S, opspec=FuncSpec.ADJ),
+    OpType.T: QirGate(opnat=FuncNat.QIS, opname=FuncName.T, opspec=FuncSpec.BODY),
+    OpType.Tdg: QirGate(opnat=FuncNat.QIS, opname=FuncName.T, opspec=FuncSpec.ADJ),
+    OpType.Reset: QirGate(
+        opnat=FuncNat.QIS, opname=FuncName.RESET, opspec=FuncSpec.BODY
     ),
-    OpType.Rx: QirGate(opnat=OpNat.QIS, opname=OpName.Rx, opspec=OpSpec.BODY),
-    OpType.Ry: QirGate(opnat=OpNat.QIS, opname=OpName.Ry, opspec=OpSpec.BODY),
-    OpType.Rz: QirGate(opnat=OpNat.QIS, opname=OpName.Rz, opspec=OpSpec.BODY),
+    OpType.CX: QirGate(opnat=FuncNat.QIS, opname=FuncName.CX, opspec=FuncSpec.BODY),
+    OpType.CZ: QirGate(opnat=FuncNat.QIS, opname=FuncName.CZ, opspec=FuncSpec.BODY),
+    OpType.Measure: QirGate(
+        opnat=FuncNat.QIS, opname=FuncName.MEASUREZ, opspec=FuncSpec.BODY
+    ),
+    OpType.Rx: QirGate(opnat=FuncNat.QIS, opname=FuncName.Rx, opspec=FuncSpec.BODY),
+    OpType.Ry: QirGate(opnat=FuncNat.QIS, opname=FuncName.Ry, opspec=FuncSpec.BODY),
+    OpType.Rz: QirGate(opnat=FuncNat.QIS, opname=FuncName.Rz, opspec=FuncSpec.BODY),
+    OpType.CopyBits: QirGate(
+        opnat=FuncNat.QIS, opname=FuncName.READ_RES, opspec=FuncSpec.BODY
+    ),
 }
 
 
 _PYQIR_TO_TK = {v: k for k, v in _TK_TO_PYQIR.items()}
 # Resolve some naming ambiguities.
 _PYQIR_TO_TK[
-    QirGate(opnat=OpNat.QIS, opname=OpName.CNOT, opspec=OpSpec.BODY)
+    QirGate(opnat=FuncNat.QIS, opname=FuncName.CNOT, opspec=FuncSpec.BODY)
 ] = OpType.CX
 
 

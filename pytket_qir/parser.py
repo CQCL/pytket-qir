@@ -58,6 +58,7 @@ from pyqir.parser import (  # type: ignore
     QirCondBrTerminator,
     QirModule,
     QirInstr,
+    QirQisCallInstr,
     QirResultConstant,
     QirRtCallInstr,
     QirSelectInstr,
@@ -71,9 +72,9 @@ from pyqir.generator import ir_to_bitcode, types  # type: ignore
 
 from pytket_qir.gatesets.base import (
     CustomGateSet,
-    OpNat,
-    OpName,
-    OpSpec,
+    FuncNat,
+    FuncName,
+    FuncSpec,
     QirGate,
 )
 
@@ -148,9 +149,9 @@ class QirParser:
             matched_str = re.search("__quantum__(.+?)__(.+?)__(.+)", call_func_name)
             if not matched_str:
                 raise WASMError("The WASM function call name is not properly defined.")
-            opnat = OpNat(matched_str.group(1))
-            opname = OpName(matched_str.group(2))
-            opspec = OpSpec(matched_str.group(3))
+            opnat = FuncNat(matched_str.group(1))
+            opname = FuncName(matched_str.group(2))
+            opspec = FuncSpec(matched_str.group(3))
             pyqir_gate = QirGate(opnat=opnat, opname=opname, opspec=opspec)
             return self.gateset.gateset_to_tk(pyqir_gate)
 
@@ -282,9 +283,19 @@ class QirParser:
 
         for instr in instrs:
             if instr.instr.is_qis_call:  # Quantum gates.
-                op = self.get_operation(instr)
-                unitids = self.get_qubit_indices(instr.instr)
-                circuit.add_gate(op, unitids)
+                optype = self.get_optype(instr.instr)
+                if optype == OpType.CopyBits:
+                    instr = cast(QirQisCallInstr, instr)
+                    source_reg = circuit.get_c_register("c")
+                    func_arg = cast(QirResultConstant, instr.func_args[0])
+                    index = func_arg.value
+                    output_name = "%" + str(instr.output_name)
+                    target_reg = circuit.add_c_register(output_name, source_reg.size)
+                    circuit.add_c_copybits([source_reg[index]], [target_reg[index]])
+                else:
+                    op = self.get_operation(instr)
+                    unitids = self.get_qubit_indices(instr.instr)
+                    circuit.add_gate(op, unitids)
             elif instr.instr.is_qir_call:  # Setting the conditional bit for branching.
                 # Create and log register to hold the condition value.
                 output_name = "%" + str(instr.output_name)
