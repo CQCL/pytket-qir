@@ -387,35 +387,25 @@ class QirGenerator:
                     optype, params = self._get_optype_and_params(op)
                     qubits = self._to_qis_qubits(command.qubits)
                     results = self._to_qis_results(command.bits)
-                    if module.gateset.name == "PyQir":
-                        pyqir_gate = module.gateset.tk_to_gateset(optype)
-                        if not pyqir_gate.opspec == OpSpec.BODY:
-                            opname = (
-                                pyqir_gate.opname.value + "_" + pyqir_gate.opspec.value
-                            )
-                            get_gate = getattr(module.qis, opname)
-                        else:
-                            get_gate = getattr(module.qis, pyqir_gate.opname.value)
-                        if params:
-                            get_gate(*params, *qubits)
-                        elif results:
-                            get_gate(*qubits, results)
-                        else:
-                            get_gate(*qubits)
+                    bits: Optional[Sequence[Value]] = None
+                    if type(optype) == BitWiseOp:
+                        bits = self._to_qis_bits(command.args)
+                    gate = module.gateset.tk_to_gateset(optype)
+                    if not gate.opspec == OpSpec.BODY:
+                        opname = (
+                            gate.opname.value + "_" + gate.opspec.value
+                        )
+                        get_gate = getattr(module.qis, opname)
                     else:
-                        bits: Optional[Sequence[Value]] = None
-                        if type(optype) == BitWiseOp:
-                            bits = self._to_qis_bits(command.args)
-                        gate = module.gateset.tk_to_gateset(optype)
-                        get_gate = getattr(module, gate.opname.value)
-                        if bits:
-                            module.builder.call(get_gate, bits)  # type: ignore
-                        elif params:
-                            module.builder.call(get_gate, [*params, *qubits])
-                        elif results:
-                            module.builder.call(get_gate, [*qubits, results])  # type: ignore
-                        else:
-                            module.builder.call(get_gate, qubits)
+                        get_gate = getattr(module.qis, gate.opname.value)
+                    if bits:
+                        get_gate(*bits)
+                    elif params:
+                        get_gate(*params, *qubits)
+                    elif results:
+                        get_gate(*qubits, results)
+                    else:
+                        get_gate(*qubits)
         return module
 
 
