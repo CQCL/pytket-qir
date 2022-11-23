@@ -482,17 +482,13 @@ class QirParser:
             else_condition_circuit = self.block_to_circuit(
                 else_condition_block, Circuit(self.qubits, self.bits)
             )
-            else_condition_circuit.flatten_registers()
             circuit.append(else_condition_circuit)
 
         if isinstance(term, QirBrTerminator):
-            next_block = cast(
-                QirBlock, self.module.functions[0].get_block_by_name(term.dest)
-            )
-            next_circuit = self.block_to_circuit(
-                next_block, Circuit(self.qubits, self.bits)
-            )
-            circuit.append(next_circuit)
+            pass
+
+        if isinstance(term, QirRetTerminator):
+            pass
 
         return circuit
 
