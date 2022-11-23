@@ -258,7 +258,7 @@ def simple_conditional_circuit(simple_conditional_file_name: str) -> Generator:
     c = Circuit(2, 2)
 
     measure_reg = c.add_c_register("%0", 1)
-    source_reg  = c.get_c_register("c")
+    source_reg = c.get_c_register("c")
     c.add_c_copybits([source_reg[0]], [measure_reg[0]])
 
     c.X(0).X(1)
@@ -303,7 +303,7 @@ def simple_conditional_circuit(simple_conditional_file_name: str) -> Generator:
 
     with open(simple_conditional_file_name, "w") as output_file:
         output_file.write(ll)
-    
+
     yield
     os.remove(simple_conditional_file_name)
 

@@ -392,9 +392,7 @@ class QirGenerator:
                         bits = self._to_qis_bits(command.args)
                     gate = module.gateset.tk_to_gateset(optype)
                     if not gate.opspec == OpSpec.BODY:
-                        opname = (
-                            gate.opname.value + "_" + gate.opspec.value
-                        )
+                        opname = gate.opname.value + "_" + gate.opspec.value
                         get_gate = getattr(module.qis, opname)
                     else:
                         get_gate = getattr(module.qis, gate.opname.value)

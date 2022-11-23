@@ -24,41 +24,38 @@ class TestRoundTripValidation:
     """Test round trips from QIR to QIR by validating inputs and outputs."""
 
     def test_teleportchain_baseprofile(self) -> None:
-       bc_teleport_chain_file_path = qir_files_dir / "teleportchain_baseprofile.bc"
-       ll_teleport_chain_file_path = qir_files_dir / "teleportchain_baseprofile.ll"
+        bc_teleport_chain_file_path = qir_files_dir / "teleportchain_baseprofile.bc"
+        ll_teleport_chain_file_path = qir_files_dir / "teleportchain_baseprofile.ll"
 
-       with open(ll_teleport_chain_file_path, "r") as f:
-           exp_data = f.read()
-           
-       qis_read_result = CustomQirGate(
-           opnat=OpNat.QIS,
-           opname=OpName.READ_RES,
-           opspec=OpSpec.BODY,
-           function_signature=[types.RESULT],
-           return_type=types.BOOL,
-       )
+        with open(ll_teleport_chain_file_path, "r") as f:
+            exp_data = f.read()
 
-       _PYQIR_TO_TK = {v: k for k, v in _TK_TO_PYQIR.items()}
+        qis_read_result = CustomQirGate(
+            opnat=OpNat.QIS,
+            opname=OpName.READ_RES,
+            opspec=OpSpec.BODY,
+            function_signature=[types.RESULT],
+            return_type=types.BOOL,
+        )
 
-       ext_pyqir_gates = CustomGateSet(
-           name="ExtPyQir",
-           template=Template("__quantum__${opnat}__${opname}__${opspec}"),
-           base_gateset=set(_TK_TO_PYQIR.keys()),
-           gateset={"read_result": qis_read_result},
-           tk_to_gateset=lambda optype: _TK_TO_PYQIR[optype],
-           gateset_to_tk=lambda gate: _PYQIR_TO_TK[gate],
-       )
-       circuit = circuit_from_qir(bc_teleport_chain_file_path)
+        _PYQIR_TO_TK = {v: k for k, v in _TK_TO_PYQIR.items()}
 
-       ir_bytes = cast(bytes, circuit_to_qir(circuit, gateset=ext_pyqir_gates))
+        ext_pyqir_gates = CustomGateSet(
+            name="ExtPyQir",
+            template=Template("__quantum__${opnat}__${opname}__${opspec}"),
+            base_gateset=set(_TK_TO_PYQIR.keys()),
+            gateset={"read_result": qis_read_result},
+            tk_to_gateset=lambda optype: _TK_TO_PYQIR[optype],
+            gateset_to_tk=lambda gate: _PYQIR_TO_TK[gate],
+        )
+        circuit = circuit_from_qir(bc_teleport_chain_file_path)
 
-       ll = bitcode_to_ir(ir_bytes)
+        ir_bytes = cast(bytes, circuit_to_qir(circuit, gateset=ext_pyqir_gates))
 
-       # At least check that function calls exist in the expected file
-       # up to some ordering.
-       for line in ll.splitlines():
-           if line.startswith("call"):
-               assert line in exp_data
+        ll = bitcode_to_ir(ir_bytes)
 
-       
-       
+        # At least check that function calls exist in the expected file
+        # up to some ordering.
+        for line in ll.splitlines():
+            if line.startswith("call"):
+                assert line in exp_data

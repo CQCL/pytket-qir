@@ -206,7 +206,7 @@ class TestQirToPytketGateTranslation:
         assert arg0.index[0] == 1
         arg1 = com1.args[1]
         assert arg1.reg_name == "%1"
-        assert arg1.index[0] == 0 
+        assert arg1.index[0] == 0
 
     def test_select(self) -> None:
         select_function_file_path = qir_files_dir / "select.bc"
@@ -377,7 +377,7 @@ class TestQirToPytketConditionals:
         assert com17.qubits[0].index[0] == 4
         com18 = coms[18]
         assert com18.op.type == OpType.Measure
-        assert com18.qubits[0].index[0] == 4 
+        assert com18.qubits[0].index[0] == 4
         assert com18.bits[0].index[0] == 2
         com19 = coms[19]
         assert com19.op.type == OpType.CopyBits
@@ -397,7 +397,7 @@ class TestQirToPytketConditionals:
         assert ccc0.qubits[0].index[0] == 5
         com22 = coms[22]
         assert com22.op.type == OpType.Measure
-        assert com22.qubits[0].index[0] == 3 
+        assert com22.qubits[0].index[0] == 3
         assert com22.bits[0].index[0] == 3
         com23 = coms[23]
         assert com23.op.type == OpType.CopyBits
@@ -417,11 +417,11 @@ class TestQirToPytketConditionals:
         assert ccc0.qubits[0].index[0] == 5
         com26 = coms[26]
         assert com26.op.type == OpType.Measure
-        assert com26.qubits[0].index[0] == 0 
+        assert com26.qubits[0].index[0] == 0
         assert com26.bits[0].index[0] == 4
         com27 = coms[27]
         assert com27.op.type == OpType.Measure
-        assert com27.qubits[0].index[0] == 5 
+        assert com27.qubits[0].index[0] == 5
         assert com27.bits[0].index[0] == 5
         com28 = coms[28]
         assert com28.op.type == OpType.Reset

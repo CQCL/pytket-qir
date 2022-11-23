@@ -463,7 +463,9 @@ class QirParser:
             circ_box = CircBox(if_true_condition_circuit)
             term_condition = cast(QirLocalOperand, term.condition)
             condition_name = "%" + str(term_condition.name)
-            condition_bit_index = 0  # Condition bit is always the first of the register.
+            condition_bit_index = (
+                0  # Condition bit is always the first of the register.
+            )
             if set_creg := self.set_cregs.get(condition_name):
                 condition_reg = set_creg
                 condition_bit = set_creg[condition_bit_index]
