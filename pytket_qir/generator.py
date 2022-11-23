@@ -258,8 +258,19 @@ class QirGenerator:
         for command in circ:
             op = command.op
             if isinstance(op, Conditional):
+                # Only supports measurements now as it searches through self.set_vars
+                # for SSA variables as conditions.
+                # These are set when parsing CopyBits for measurement conversion to i1.
+                # Conditions using other types (bools as results of classical arithmetic)
+                # can be supported by adding the variable appropriately.
                 conditional_circuit = op.op.get_circuit()
                 condition_bit_index = command.args[0].index[0]
+                condition_name = command.args[0].reg_name
+
+                if ssa_var := self.ssa_vars.get(condition_name):
+                    condition_ssa = ssa_var
+                else:
+                    condition_ssa = module.module.results[condition_bit_index]
 
                 def condition_one_block():
                     """
@@ -277,10 +288,10 @@ class QirGenerator:
                     if op.value == 0:
                         self.circuit_to_module(conditional_circuit, module)
 
-                module.qis.if_result(
-                    module.module.results[condition_bit_index],
-                    one=lambda: condition_one_block(),
-                    zero=lambda: condition_zero_block(),
+                module.module.builder.if_(
+                    condition_ssa,
+                    true=lambda: condition_one_block(),
+                    false=lambda: condition_zero_block(),
                 )
             elif isinstance(op, WASMOp):
                 inputs, _ = self._get_c_regs_from_com(command)
