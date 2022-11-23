@@ -2,7 +2,7 @@ from pathlib import Path
 from string import Template
 from typing import cast
 
-from pyqir.generator import bitcode_to_ir, types  # types: ignore
+from pyqir.generator import bitcode_to_ir, types  # type: ignore
 
 from pytket_qir.gatesets.base import (
     CustomGateSet,
