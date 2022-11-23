@@ -293,7 +293,9 @@ class QirParser:
                     index = func_arg.value
                     output_name = "%" + str(instr.output_name)
                     target_reg = circuit.add_c_register(output_name, source_reg.size)
-                    circuit.add_c_copybits([source_reg[index]], [target_reg[index]])
+                    self.set_cregs[output_name] = target_reg
+                    # Copy to the first bit of the target register.
+                    circuit.add_c_copybits([source_reg[index]], [target_reg[0]])
                 else:
                     op = self.get_operation(instr)
                     unitids = self.get_qubit_indices(instr.instr)
