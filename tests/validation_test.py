@@ -7,9 +7,9 @@ from pyqir.generator import bitcode_to_ir, types  # types: ignore
 from pytket_qir.gatesets.base import (
     CustomGateSet,
     CustomQirGate,
-    OpName,
-    OpNat,
-    OpSpec,
+    FuncName,
+    FuncNat,
+    FuncSpec,
 )
 from pytket_qir.gatesets.pyqir import _TK_TO_PYQIR
 from pytket_qir.generator import circuit_to_qir
@@ -30,9 +30,9 @@ class TestRoundTripValidation:
             exp_data = f.read()
 
         qis_read_result = CustomQirGate(
-            opnat=OpNat.QIS,
-            opname=OpName.READ_RES,
-            opspec=OpSpec.BODY,
+            opnat=FuncNat.QIS,
+            opname=FuncName.READ_RES,
+            opspec=FuncSpec.BODY,
             function_signature=[types.RESULT],
             return_type=types.BOOL,
         )
