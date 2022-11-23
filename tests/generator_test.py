@@ -376,7 +376,6 @@ class TestPytketToQirGateTranslation:
 
         ir_bytes = cast(bytes, circuit_to_qir(circuit, gateset=ext_pyqir_gates))
         ll = str(bitcode_to_ir(ir_bytes))
-
         assert ll == exp_data
 
     @pytest.mark.skip
@@ -433,13 +432,14 @@ class TestPytketToQirConditional:
         test_file_path = qir_files_dir / simple_conditional_file_name
 
         with open(test_file_path, "r") as input_file:
-            exp_data = input_file.readlines()
+            exp_data = input_file.read()
 
         for line in data:
             assert (
                 line in exp_data
             )  # Identical up to some ordering of the function declarations.
 
+    @pytest.mark.skip(reason="Disable work around non-simple circuits in CircBox.")
     def test_nested_conditionals(
         self,
         pytket_nested_conditionals_circuit: Generator,
