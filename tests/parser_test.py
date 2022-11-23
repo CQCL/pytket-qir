@@ -15,7 +15,6 @@
 from pathlib import Path
 import pytest  # type: ignore
 from pytket import Circuit, OpType  # type: ignore
-from pytket.circuit import Conditional  # type: ignore
 from pytket.wasm import WasmFileHandler  # type: ignore
 
 from pytket_qir.parser import circuit_from_qir

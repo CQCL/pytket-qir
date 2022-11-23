@@ -261,8 +261,8 @@ class QirGenerator:
                 # Only supports measurements now as it searches through self.set_vars
                 # for SSA variables as conditions.
                 # These are set when parsing CopyBits for measurement conversion to i1.
-                # Conditions using other types (bools as results of classical arithmetic)
-                # can be supported by adding the variable appropriately.
+                # Conditions using other types (bools as results of classical
+                # arithmetic) can be supported by adding the variable appropriately.
                 conditional_circuit = op.op.get_circuit()
                 condition_bit_index = command.args[0].index[0]
                 condition_name = command.args[0].reg_name

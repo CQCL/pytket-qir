@@ -2,7 +2,6 @@ from pathlib import Path
 from string import Template
 from typing import cast
 
-from pytket import OpType
 from pyqir.generator import bitcode_to_ir, types  # types: ignore
 
 from pytket_qir.gatesets.base import (

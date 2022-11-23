@@ -40,7 +40,7 @@ from pytket.circuit.logic_exp import (  # type: ignore
 
 from pytket_qir.generator import circuit_to_qir, write_qir_file  # type: ignore
 
-from pytket_qir.gatesets.base import OpName, OpNat, OpSpec, QirGate  # type: ignore
+from pytket_qir.gatesets.base import OpName, OpNat, OpSpec  # type: ignore
 
 from pytket_qir.gatesets.base import CustomGateSet, CustomQirGate
 from pytket_qir.gatesets.pyqir import _TK_TO_PYQIR
