@@ -11,14 +11,14 @@ PyQirParameterType = Union[Double, Int, Qubit, Result]
 PyQirReturnType = Union[Int, Result, Void]
 
 
-class OpNat(Enum):
+class FuncNat(Enum):
     QIS = "qis"
     CIS = "cis"
     HYBRID = "hybrid"
     RT = "rt"
 
 
-class OpName(Enum):
+class FuncName(Enum):
     H = "h"
     X = "x"
     Y = "y"
@@ -46,7 +46,7 @@ class OpName(Enum):
     READ_RES = "read_result"
 
 
-class OpSpec(Enum):
+class FuncSpec(Enum):
     BODY = "body"
     ADJ = "adj"
     CTL = "ctl"
@@ -56,9 +56,9 @@ class OpSpec(Enum):
 
 @dataclass(frozen=True)
 class QirGate:
-    opnat: OpNat
-    opname: Union[OpName, Enum]
-    opspec: OpSpec
+    opnat: FuncNat
+    opname: Union[FuncName, Enum]
+    opspec: FuncSpec
 
 
 @dataclass(frozen=True)

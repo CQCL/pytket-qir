@@ -64,8 +64,8 @@ from pyqir.generator._native import Value  # type: ignore
 from pytket_qir.gatesets.base import (
     CustomGateSet,
     CustomQirGate,
-    OpNat,
-    OpSpec,
+    FuncNat,
+    FuncSpec,
     QirGate,
 )
 from pytket_qir.gatesets.pyqir import PYQIR_GATES, _TK_TO_PYQIR  # type: ignore
@@ -310,15 +310,15 @@ class QirGenerator:
 
                 # Update translation dict.
                 _TK_TO_PYQIR[OpType.WASM] = QirGate(
-                    opnat=OpNat.HYBRID, opname=WasmName.WASM, opspec=OpSpec.BODY
+                    opnat=FuncNat.HYBRID, opname=WasmName.WASM, opspec=FuncSpec.BODY
                 )
 
                 # Update gateset.
                 gateset = PYQIR_GATES.gateset
                 gateset["wasm"] = CustomQirGate(
-                    opnat=OpNat.HYBRID,
+                    opnat=FuncNat.HYBRID,
                     opname=WasmName.WASM,
-                    opspec=OpSpec.BODY,
+                    opspec=FuncSpec.BODY,
                     function_signature=input_type_list,
                     return_type=self.wasm_int_type,
                 )
@@ -391,7 +391,7 @@ class QirGenerator:
                     if type(optype) == BitWiseOp:
                         bits = self._to_qis_bits(command.args)
                     gate = module.gateset.tk_to_gateset(optype)
-                    if not gate.opspec == OpSpec.BODY:
+                    if not gate.opspec == FuncSpec.BODY:
                         opname = gate.opname.value + "_" + gate.opspec.value
                         get_gate = getattr(module.qis, opname)
                     else:

@@ -73,9 +73,9 @@ from pyqir.generator import ir_to_bitcode, types  # type: ignore
 
 from pytket_qir.gatesets.base import (
     CustomGateSet,
-    OpNat,
-    OpName,
-    OpSpec,
+    FuncNat,
+    FuncName,
+    FuncSpec,
     QirGate,
 )
 
@@ -150,9 +150,9 @@ class QirParser:
             matched_str = re.search("__quantum__(.+?)__(.+?)__(.+)", call_func_name)
             if not matched_str:
                 raise WASMError("The WASM function call name is not properly defined.")
-            opnat = OpNat(matched_str.group(1))
-            opname = OpName(matched_str.group(2))
-            opspec = OpSpec(matched_str.group(3))
+            opnat = FuncNat(matched_str.group(1))
+            opname = FuncName(matched_str.group(2))
+            opspec = FuncSpec(matched_str.group(3))
             pyqir_gate = QirGate(opnat=opnat, opname=opname, opspec=opspec)
             return self.gateset.gateset_to_tk(pyqir_gate)
 

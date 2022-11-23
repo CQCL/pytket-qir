@@ -23,7 +23,7 @@ from pytket.wasm import WasmFileHandler  # type: ignore
 
 from pyqir.generator import bitcode_to_ir, types  # type: ignore
 
-from pytket_qir.gatesets.base import OpName, OpNat, OpSpec, QirGate  # type: ignore
+from pytket_qir.gatesets.base import FuncName, FuncNat, FuncSpec, QirGate  # type: ignore
 
 from pytket_qir.gatesets.base import CustomGateSet, CustomQirGate
 from pytket_qir.gatesets.pyqir import _TK_TO_PYQIR
@@ -204,17 +204,17 @@ class TestPytketToQirGateTranslation:
 
         # Extend PyQir base gateset to account for Barrier.
         qir_gate = QirGate(
-            opnat=OpNat.RT,
-            opname=OpName.INT,
-            opspec=OpSpec.REC_OUT,
+            opnat=FuncNat.RT,
+            opname=FuncName.INT,
+            opspec=FuncSpec.REC_OUT,
         )
 
         _TK_TO_PYQIR[OpType.Barrier] = qir_gate
 
         qir_barrier = CustomQirGate(
-            opnat=OpNat.RT,
-            opname=OpName.INT,
-            opspec=OpSpec.REC_OUT,
+            opnat=FuncNat.RT,
+            opname=FuncName.INT,
+            opspec=FuncSpec.REC_OUT,
             function_signature=[types.Int(64)],
             return_type=types.VOID,
         )
@@ -257,17 +257,17 @@ class TestPytketToQirGateTranslation:
 
         # Extend PyQir base gateset to account for Barrier.
         qir_gate = QirGate(
-            opnat=OpNat.RT,
-            opname=OpName.BOOL,
-            opspec=OpSpec.REC_OUT,
+            opnat=FuncNat.RT,
+            opname=FuncName.BOOL,
+            opspec=FuncSpec.REC_OUT,
         )
 
         _TK_TO_PYQIR[OpType.Barrier] = qir_gate
 
         qir_barrier = CustomQirGate(
-            opnat=OpNat.RT,
-            opname=OpName.BOOL,
-            opspec=OpSpec.REC_OUT,
+            opnat=FuncNat.RT,
+            opname=FuncName.BOOL,
+            opspec=FuncSpec.REC_OUT,
             function_signature=[types.Int(64)],
             return_type=types.VOID,
         )
@@ -305,17 +305,17 @@ class TestPytketToQirGateTranslation:
 
         # Extend PyQir base gateset to account for Barrier.
         qir_gate = QirGate(
-            opnat=OpNat.RT,
-            opname=OpName.RES,
-            opspec=OpSpec.REC_OUT,
+            opnat=FuncNat.RT,
+            opname=FuncName.RES,
+            opspec=FuncSpec.REC_OUT,
         )
 
         _TK_TO_PYQIR[OpType.Barrier] = qir_gate
 
         qir_barrier = CustomQirGate(
-            opnat=OpNat.RT,
-            opname=OpName.RES,
-            opspec=OpSpec.REC_OUT,
+            opnat=FuncNat.RT,
+            opname=FuncName.RES,
+            opspec=FuncSpec.REC_OUT,
             function_signature=[types.RESULT],
             return_type=types.VOID,
         )
@@ -356,9 +356,9 @@ class TestPytketToQirGateTranslation:
         # qir_gate = _TK_TO_PYQIR[OpType.CopyBits]
 
         qis_read_result = CustomQirGate(
-            opnat=OpNat.QIS,
-            opname=OpName.READ_RES,
-            opspec=OpSpec.BODY,
+            opnat=FuncNat.QIS,
+            opname=FuncName.READ_RES,
+            opspec=FuncSpec.BODY,
             function_signature=[types.RESULT],
             return_type=types.BOOL,
         )
@@ -376,6 +376,7 @@ class TestPytketToQirGateTranslation:
 
         ir_bytes = cast(bytes, circuit_to_qir(circuit, gateset=ext_pyqir_gates))
         ll = str(bitcode_to_ir(ir_bytes))
+
         assert ll == exp_data
 
     @pytest.mark.skip
