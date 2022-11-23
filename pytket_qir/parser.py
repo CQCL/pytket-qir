@@ -451,11 +451,11 @@ class QirParser:
                     )
 
         if isinstance(term, QirCondBrTerminator):
-            if_condition_block = cast(
+            if_true_condition_block = cast(
                 QirBlock, self.module.functions[0].get_block_by_name(term.true_dest)
             )
-            if_condition_circuit = self.block_to_circuit(
-                if_condition_block, Circuit(self.qubits, self.bits)
+            if_true_condition_circuit = self.block_to_circuit(
+                if_true_condition_block, Circuit(self.qubits, self.bits)
             )
             # Add registers created in the branch circuit to the main circuit.
             for reg in self.set_cregs.values():
