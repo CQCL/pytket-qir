@@ -42,6 +42,8 @@ from pytket.circuit.logic_exp import (  # type: ignore
     RegLsh,
     RegRsh,
     RegXor,
+    if_bit,
+    if_not_bit,
     reg_eq,
     reg_neq,
     reg_leq,
