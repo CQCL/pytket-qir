@@ -20,7 +20,6 @@ from typing import cast, Callable, Generator, List, Tuple
 
 from pytest import fixture  # type: ignore
 
-# from pyqir import Builder, IntPredicate, Value  # type: ignore
 from pyqir.generator import Builder, IntPredicate, Value  # type: ignore
 from pytket import Circuit  # type: ignore
 from pytket.circuit import (  # type: ignore
@@ -40,7 +39,7 @@ from pytket.circuit.logic_exp import (  # type: ignore
 
 from pytket_qir.generator import circuit_to_qir, write_qir_file  # type: ignore
 
-from pytket_qir.gatesets.base import OpName, OpNat, OpSpec  # type: ignore
+from pytket_qir.gatesets.base import FuncName, FuncNat, FuncSpec  # type: ignore
 
 from pytket_qir.gatesets.base import CustomGateSet, CustomQirGate
 from pytket_qir.gatesets.pyqir import _TK_TO_PYQIR
@@ -280,9 +279,9 @@ def simple_conditional_circuit(simple_conditional_file_name: str) -> Generator:
     c.Z(0).Z(1)
 
     qis_read_result = CustomQirGate(
-        opnat=OpNat.QIS,
-        opname=OpName.READ_RES,
-        opspec=OpSpec.BODY,
+        opnat=FuncNat.QIS,
+        opname=FuncName.READ_RES,
+        opspec=FuncSpec.BODY,
         function_signature=[types.RESULT],
         return_type=types.BOOL,
     )
