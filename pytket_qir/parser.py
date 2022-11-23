@@ -460,11 +460,7 @@ class QirParser:
             # Add registers created in the branch circuit to the main circuit.
             for reg in self.set_cregs.values():
                 circuit.add_c_register(reg)
-            # Flatten registers to avoid circuit being non-simple for Circbox.
-            if_condition_circuit.flatten_registers()
-            reg_map = circuit.flatten_registers()
-            circuit._reg_map = reg_map
-            circ_box = CircBox(if_condition_circuit)
+            circ_box = CircBox(if_true_condition_circuit)
             term_condition = cast(QirLocalOperand, term.condition)
             condition_name = "%" + str(term_condition.name)
             if set_creg := self.set_cregs.get(condition_name):
