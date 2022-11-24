@@ -126,10 +126,7 @@ class QirGenerator:
         args = command.args
         if optype not in self.module.gateset.base_gateset:
             circ = Circuit(self.circuit.n_qubits, self.circuit.n_bits)
-            if params:
-                circ.add_gate(optype, params, args)
-            else:
-                circ.add_gate(optype, args)
+            circ.add_gate(optype, params, args)
             self.rebase_to_gateset.apply(circ)
             return circ
         return None
