@@ -361,17 +361,17 @@ class QirGenerator:
                 get_gate = getattr(module, gate.opname.value)
                 data = json.loads(op.data)
                 func_name = cast(str, data["name"])
-                matched_str = re.search("__quantum__(.+?)__(.+?)__(.+)", func_name)
+                matched_str = re.search("__quantum__(.+?)__(.+?)_(.+)", func_name)
                 if not matched_str:
                     raise BarrierError(
                         "The runtime function name is not properly defined."
                     )
                 if matched_str.group(2) == "result":
                     res_index = data["index"]
-                    ssa_var = self.module.module.results[res_index]
+                    ssa_var = cast(Value, self.module.module.results[res_index])
                 else:
                     ssa_var_name = data["arg"]
-                    ssa_var = self.ssa_vars[ssa_var_name]
+                    ssa_var = cast(Value, self.ssa_vars[ssa_var_name])
                 module.builder.call(get_gate, [ssa_var])
             elif isinstance(op, CopyBitsOp):
                 input_reg = command.args[0]
