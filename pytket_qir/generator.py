@@ -379,7 +379,7 @@ class QirGenerator:
                 output_name = output_reg.reg_name
                 optype, _ = self._get_optype_and_params(op)
                 gate = module.gateset.tk_to_gateset(optype)
-                ssa_var = self.module.module.results[input_reg.index[0]]
+                ssa_var = cast(Value, self.module.module.results[input_reg.index[0]])
                 get_gate = getattr(module, gate.opname.value)
                 output_instr = module.builder.call(get_gate, [ssa_var])
                 self.ssa_vars[output_name] = output_instr
