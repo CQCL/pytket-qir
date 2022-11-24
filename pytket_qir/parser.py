@@ -80,7 +80,7 @@ from pytket_qir.gatesets.base import (
 )
 
 from pytket_qir.gatesets.pyqir.pyqir import PYQIR_GATES  # type: ignore
-from pytket_qir.utils import InstructionError, WASMError
+from pytket_qir.utils import InstructionError, WASMError, RtError
 
 
 _PYQIR_TO_TK_CLOPS: Dict[str, Union[type, Dict[str, Callable]]] = {
@@ -316,6 +316,7 @@ class QirParser:
                 arg, tag = self.get_arg_and_tag(instr)
                 # Create a JSON object for the data to be passed.
                 data = {"name": cast(str, instr.func_name), "arg": arg}
+                    raise RtError("Runtime function name is not properly defined.")
                 if tag is not None:
                     data["tag"] = tag
                 if bits:
