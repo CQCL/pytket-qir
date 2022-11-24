@@ -20,6 +20,7 @@ from typing import cast, Callable, Generator, List, Tuple
 
 from pytest import fixture  # type: ignore
 
+from pyqir.generator import bitcode_to_ir, types  # type: ignore
 from pyqir.generator import Builder, IntPredicate, Value  # type: ignore
 from pytket import Circuit  # type: ignore
 from pytket.circuit import (  # type: ignore
@@ -43,7 +44,6 @@ from pytket_qir.gatesets.base import FuncName, FuncNat, FuncSpec  # type: ignore
 
 from pytket_qir.gatesets.base import CustomGateSet, CustomQirGate
 from pytket_qir.gatesets.pyqir import _TK_TO_PYQIR
-from pyqir.generator import bitcode_to_ir, types  # type: ignore
 
 
 qir_files_dir = Path("./qir_test_files")
