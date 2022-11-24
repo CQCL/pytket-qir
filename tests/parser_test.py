@@ -134,14 +134,14 @@ class TestQirToPytketGateTranslation:
         assert barriers[2].op.type == OpType.Barrier
         assert (
             barriers[2].op.data
-            == '{"name": "__quantum__rt__result_record_output", "arg": 0}'
+            == '{"name": "__quantum__rt__result_record_output", "arg": 0, "index": 0}'
         )
         assert barriers[2].qubits == []
         assert barriers[2].bits[0].index[0] == 0
         assert barriers[3].op.type == OpType.Barrier
         assert (
             barriers[3].op.data
-            == '{"name": "__quantum__rt__result_record_output", "arg": 1}'
+            == '{"name": "__quantum__rt__result_record_output", "arg": 1, "index": 1}'
         )
         assert barriers[3].qubits == []
         assert barriers[3].bits[0].index[0] == 1
@@ -173,14 +173,14 @@ class TestQirToPytketGateTranslation:
         assert barriers[2].op.type == OpType.Barrier
         assert (
             barriers[2].op.data == '{"name": "__quantum__rt__result_record_output",'
-            ' "arg": 0, "tag": "0_t0\\u0000"}'
+            ' "arg": 0, "index": 0, "tag": "0_t0\\u0000"}'
         )
         assert barriers[2].qubits == []
         assert barriers[2].bits[0].index[0] == 0
         assert barriers[3].op.type == OpType.Barrier
         assert (
             barriers[3].op.data == '{"name": "__quantum__rt__result_record_output",'
-            ' "arg": 1, "tag": "0_t1\\u0000"}'
+            ' "arg": 1, "index": 1, "tag": "0_t1\\u0000"}'
         )
         assert barriers[3].qubits == []
         assert barriers[3].bits[0].index[0] == 1
