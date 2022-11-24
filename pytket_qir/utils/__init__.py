@@ -5,4 +5,5 @@ from pytket_qir.utils.utils import (
     SetBitsOpError,
     WASMError,
     BarrierError,
+    RtError,
 )

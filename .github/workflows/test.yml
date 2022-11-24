@@ -35,4 +35,4 @@ jobs:
       - name: Run tests
         working-directory: ./tests
         run: |
-          poetry run pytest parser_test.py generator_test.py
+          poetry run pytest parser_test.py generator_test.py validation_test.py

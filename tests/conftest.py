@@ -15,10 +15,12 @@
 from functools import partial
 import os
 from pathlib import Path
-from typing import Callable, Generator, List, Tuple
+from string import Template
+from typing import cast, Callable, Generator, List, Tuple
 
 from pytest import fixture  # type: ignore
 
+from pyqir.generator import bitcode_to_ir, types  # type: ignore
 from pyqir.generator import Builder, IntPredicate, Value  # type: ignore
 from pytket import Circuit  # type: ignore
 from pytket.circuit import (  # type: ignore
@@ -26,6 +28,8 @@ from pytket.circuit import (  # type: ignore
     OpType,
 )
 from pytket.circuit.logic_exp import (  # type: ignore
+    if_bit,
+    if_not_bit,
     reg_eq,
     reg_neq,
     reg_geq,
@@ -34,7 +38,12 @@ from pytket.circuit.logic_exp import (  # type: ignore
     reg_leq,
 )
 
-from pytket_qir.generator import write_qir_file  # type: ignore
+from pytket_qir.generator import circuit_to_qir, write_qir_file  # type: ignore
+
+from pytket_qir.gatesets.base import FuncName, FuncNat, FuncSpec  # type: ignore
+
+from pytket_qir.gatesets.base import CustomGateSet, CustomQirGate
+from pytket_qir.gatesets.pyqir import _TK_TO_PYQIR
 
 
 qir_files_dir = Path("./qir_test_files")
@@ -62,14 +71,14 @@ def grover_circuit() -> Circuit:
 
 @fixture
 def one_conditional_circuit() -> Circuit:
-    circuit = Circuit(5, 77)
+    circuit = Circuit(5, 13)
     circuit.CX(4, 3).CX(4, 2).CX(3, 2).CX(2, 1).CX(4, 0)
-    circuit.CX(3, 0).CX(1, 0).Measure(1, 64).add_gate(OpType.Reset, [1])
-    circuit.Measure(2, 65).add_gate(OpType.Reset, [2])
-    circuit.Measure(3, 66).add_gate(OpType.Reset, [3])
-    circuit.Measure(4, 67).add_gate(OpType.Reset, [4])
+    circuit.CX(3, 0).CX(1, 0).Measure(1, 0).add_gate(OpType.Reset, [1])
+    circuit.Measure(2, 1).add_gate(OpType.Reset, [2])
+    circuit.Measure(3, 2).add_gate(OpType.Reset, [3])
+    circuit.Measure(4, 3).add_gate(OpType.Reset, [4])
 
-    condition_circuit = Circuit(5, 77)
+    condition_circuit = Circuit(5, 13)
     condition_circuit.add_gate(OpType.Reset, [0])
     condition_circuit.Ry(0.9553166181245094, 0).Rz(-5.497787143782138, 0)
     condition_circuit.Ry(0.9553166181245094, 1).Rz(-5.497787143782138, 1)
@@ -81,81 +90,12 @@ def one_conditional_circuit() -> Circuit:
     condition_circuit.Measure(3, 10).add_gate(OpType.Reset, [3])
     condition_circuit.Measure(4, 11).add_gate(OpType.Reset, [4])
 
-    condition_circuit.H(0).Y(0).H(0)
-    condition_circuit.Measure(0, 12).add_gate(OpType.Reset, [0])
-
     circ_box = CircBox(condition_circuit)
     c_reg = circuit.get_c_register("c")
     args = list(circuit.qubits) + list(circuit.bits)
     circuit.add_circbox(circ_box, args, condition=c_reg[0])
 
     circuit.H(0).Y(0).H(0).Measure(0, 12).add_gate(OpType.Reset, [0])
-
-    return circuit
-
-
-@fixture
-def multiple_conditionals_circuit() -> Circuit:
-    circuit = Circuit(6, 262)
-    circuit.H(0).CX(0, 1).H(2).CX(2, 4).H(3).CX(3, 5).CX(1, 2).H(1)
-    circuit.Measure(1, 256).add_gate(OpType.Reset, [1])
-
-    condition_circuit_1 = Circuit(6, 262)
-    condition_circuit_1.Z(4)
-    condition_circuit_1.Measure(2, 257).add_gate(OpType.Reset, [2])
-
-    condition_circuit_1_1 = Circuit(6, 262)
-    condition_circuit_1_1.X(4)
-    condition_circuit_1_1.CX(4, 3).H(4)
-    condition_circuit_1_1.Measure(4, 258).add_gate(OpType.Reset, [4])
-
-    condition_circuit_1_1_1 = Circuit(6, 262)
-    condition_circuit_1_1_1.Z(5)
-    append_condition_circuit_1_1_1 = Circuit(6, 262)
-    append_condition_circuit_1_1_1.Measure(3, 259).add_gate(OpType.Reset, [3])
-    condition_circuit_1_1_1.append(append_condition_circuit_1_1_1)
-
-    condition_circuit_1_1_1_1 = Circuit(6, 262)
-    condition_circuit_1_1_1_1.X(5)
-    append_condition_circuit_1_1_1_1 = Circuit(6, 262)
-    append_condition_circuit_1_1_1_1.Measure(0, 4).add_gate(OpType.Reset, [0])
-    append_condition_circuit_1_1_1_1.Measure(5, 5).add_gate(OpType.Reset, [5])
-    condition_circuit_1_1_1_1.append(append_condition_circuit_1_1_1_1)
-
-    circ_box_1_1_1_1 = CircBox(condition_circuit_1_1_1_1)
-    c_reg = circuit.get_c_register("c")
-    args = list(circuit.qubits) + list(circuit.bits)
-    condition_circuit_1_1_1.add_circbox(circ_box_1_1_1_1, args, condition=c_reg[3])
-    condition_circuit_1_1_1.append(append_condition_circuit_1_1_1_1)
-
-    circ_box_1_1_1 = CircBox(condition_circuit_1_1_1)
-    c_reg = circuit.get_c_register("c")
-    condition_circuit_1_1.add_circbox(circ_box_1_1_1, args, condition=c_reg[2])
-    condition_circuit_1_1.Measure(3, 259).add_gate(OpType.Reset, [3])
-    condition_circuit_1_1.add_circbox(circ_box_1_1_1_1, args, condition=c_reg[3])
-    condition_circuit_1_1.append(append_condition_circuit_1_1_1_1)
-
-    circ_box_1_1 = CircBox(condition_circuit_1_1)
-    c_reg = circuit.get_c_register("c")
-    condition_circuit_1.add_circbox(circ_box_1_1, args, condition=c_reg[1])
-    condition_circuit_1.CX(4, 3).H(4)
-    condition_circuit_1.Measure(4, 258).add_gate(OpType.Reset, [4])
-    condition_circuit_1.add_circbox(circ_box_1_1_1, args, condition=c_reg[2])
-    condition_circuit_1.Measure(3, 259).add_gate(OpType.Reset, [3])
-    condition_circuit_1.add_circbox(circ_box_1_1_1_1, args, condition=c_reg[3])
-    condition_circuit_1.append(append_condition_circuit_1_1_1_1)
-
-    circ_box_1 = CircBox(condition_circuit_1)
-    c_reg = circuit.get_c_register("c")
-    circuit.add_circbox(circ_box_1, args, condition=c_reg[0])
-    circuit.Measure(2, 193).add_gate(OpType.Reset, [2])
-    circuit.add_circbox(circ_box_1_1, args, condition=c_reg[1])
-    circuit.CX(4, 3).H(4)
-    circuit.Measure(4, 258).add_gate(OpType.Reset, [4])
-    circuit.add_circbox(circ_box_1_1_1, args, condition=c_reg[2])
-    circuit.Measure(3, 3).add_gate(OpType.Reset, [3])
-    circuit.add_circbox(circ_box_1_1_1_1, args, condition=c_reg[3])
-    circuit.append(append_condition_circuit_1_1_1_1)
 
     return circuit
 
@@ -315,24 +255,54 @@ def simple_conditional_file_name() -> str:
 @fixture
 def simple_conditional_circuit(simple_conditional_file_name: str) -> Generator:
     c = Circuit(2, 2)
-    c.X(0).X(1)
 
+    measure_reg = c.add_c_register("%0", 1)
+    source_reg = c.get_c_register("c")
+    c.add_c_copybits([source_reg[0]], [measure_reg[0]])
+
+    c.X(0).X(1)
     # Sub-circuit for condition true
     c1 = Circuit(2)
     c1.H(0).H(1)
 
     cb1 = CircBox(c1)
     args1 = list(range(c1.n_qubits)) + list(range(len(c1.bits)))
-    c.add_circbox(cb1, args1, condition_bits=[0], condition_value=1)
+    c.add_circbox(cb1, args1, condition=if_bit(measure_reg[0]))
 
     c.Y(0).Y(1)
 
+    measure_reg = c.add_c_register("%1", 1)
+    c.add_c_copybits([source_reg[1]], [measure_reg[0]])
     # Sub-circuit for condition false
-    c.add_circbox(cb1, args1, condition_bits=[1], condition_value=0)
+    c.add_circbox(cb1, args1, condition=if_not_bit(measure_reg[0]))
 
     c.Z(0).Z(1)
 
-    write_qir_file(c, simple_conditional_file_name)
+    qis_read_result = CustomQirGate(
+        opnat=FuncNat.QIS,
+        opname=FuncName.READ_RES,
+        opspec=FuncSpec.BODY,
+        function_signature=[types.RESULT],
+        return_type=types.BOOL,
+    )
+
+    _PYQIR_TO_TK = {v: k for k, v in _TK_TO_PYQIR.items()}
+
+    ext_pyqir_gates = CustomGateSet(
+        name="ExtPyQir",
+        template=Template("__quantum__${opnat}__${opname}__${opspec}"),
+        base_gateset=set(_TK_TO_PYQIR.keys()),
+        gateset={"read_result": qis_read_result},
+        tk_to_gateset=lambda optype: _TK_TO_PYQIR[optype],
+        gateset_to_tk=lambda gate: _PYQIR_TO_TK[gate],
+    )
+
+    ir_bytes = cast(bytes, circuit_to_qir(c, gateset=ext_pyqir_gates))
+    ll = bitcode_to_ir(ir_bytes)
+
+    with open(simple_conditional_file_name, "w") as output_file:
+        output_file.write(ll)
+
     yield
     os.remove(simple_conditional_file_name)
 

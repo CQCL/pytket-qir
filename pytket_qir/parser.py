@@ -42,6 +42,7 @@ from pytket.circuit.logic_exp import (  # type: ignore
     RegLsh,
     RegRsh,
     RegXor,
+    if_bit,
     reg_eq,
     reg_neq,
     reg_leq,
@@ -66,7 +67,7 @@ from pyqir.parser import (  # type: ignore
 from pyqir.parser._native import PyQirInstruction  # type: ignore
 from pyqir.generator import ir_to_bitcode, types  # type: ignore
 from pyqir.parser._native import PyQirInstruction  # type: ignore
-from pyqir.parser._parser import QirIntConstant, QirICmpInstr, QirCallInstr, QirOpInstr, QirOperand, QirLocalOperand  # type: ignore
+from pyqir.parser._parser import QirIntConstant, QirICmpInstr, QirCallInstr, QirOpInstr, QirOperand, QirLocalOperand, QirRetTerminator  # type: ignore
 from pyqir.generator import ir_to_bitcode, types  # type: ignore
 
 
@@ -79,7 +80,7 @@ from pytket_qir.gatesets.base import (
 )
 
 from pytket_qir.gatesets.pyqir.pyqir import PYQIR_GATES  # type: ignore
-from pytket_qir.utils import InstructionError, WASMError
+from pytket_qir.utils import InstructionError, WASMError, RtError
 
 
 _PYQIR_TO_TK_CLOPS: Dict[str, Union[type, Dict[str, Callable]]] = {
@@ -291,7 +292,9 @@ class QirParser:
                     index = func_arg.value
                     output_name = "%" + str(instr.output_name)
                     target_reg = circuit.add_c_register(output_name, source_reg.size)
-                    circuit.add_c_copybits([source_reg[index]], [target_reg[index]])
+                    self.set_cregs[output_name] = target_reg
+                    # Copy to the first bit of the target register.
+                    circuit.add_c_copybits([source_reg[index]], [target_reg[0]])
                 else:
                     op = self.get_operation(instr)
                     unitids = self.get_qubit_indices(instr.instr)
@@ -312,7 +315,18 @@ class QirParser:
                 bits = self.get_qubit_indices(instr.instr)
                 arg, tag = self.get_arg_and_tag(instr)
                 # Create a JSON object for the data to be passed.
-                data = {"name": cast(str, instr.func_name), "arg": arg}
+                func_name = cast(str, instr.func_name)
+                matched_str = re.search("__quantum__(.+?)__(.+?)_(.+)", func_name)
+                if matched_str is None:
+                    raise RtError("Runtime function name is not properly defined.")
+                if matched_str.group(2) == "result":
+                    data = {
+                        "name": cast(str, instr.func_name),
+                        "arg": arg,
+                        "index": bits[0],
+                    }
+                else:
+                    data = {"name": cast(str, instr.func_name), "arg": arg}
                 if tag is not None:
                     data["tag"] = tag
                 if bits:
@@ -357,12 +371,6 @@ class QirParser:
                 if self.wasm_handler is None:
                     raise WASMError("A WASM file handler must be provided.")
                 func_name = cast(str, instr.func_name)
-                if func_name is None:
-                    raise InstructionError(
-                        "The function call for instruction {:} is not defined.".format(
-                            instr
-                        )
-                    )
                 if func_name.startswith("reg2var"):
                     register_name = "%" + cast(str, instr.output_name)
                     value = sum(
@@ -447,51 +455,46 @@ class QirParser:
                     )
 
         if isinstance(term, QirCondBrTerminator):
-            if_condition_block = cast(
+            if_true_condition_block = cast(
                 QirBlock, self.module.functions[0].get_block_by_name(term.true_dest)
             )
-            if_condition_circuit = self.block_to_circuit(
-                if_condition_block, Circuit(self.qubits, self.bits)
+            if_true_condition_circuit = self.block_to_circuit(
+                if_true_condition_block, Circuit(self.qubits, self.bits)
             )
             # Add registers created in the branch circuit to the main circuit.
             for reg in self.set_cregs.values():
                 circuit.add_c_register(reg)
-            # Flatten registers to avoid circuit being non-simple for Circbox.
-            if_condition_circuit.flatten_registers()
-            reg_map = circuit.flatten_registers()
-            circuit._reg_map = reg_map
-            circ_box = CircBox(if_condition_circuit)
+            circ_box = CircBox(if_true_condition_circuit)
             term_condition = cast(QirLocalOperand, term.condition)
             condition_name = "%" + str(term_condition.name)
+            condition_bit_index = (
+                0  # Condition bit is always the first of the register.
+            )
             if set_creg := self.set_cregs.get(condition_name):
                 condition_reg = set_creg
-                condition_bit = reg_map[condition_reg[c_reg_index]]
+                condition_bit = set_creg[condition_bit_index]
             else:
                 condition_reg = circuit.get_c_register("c")
-                condition_bit = condition_reg[c_reg_index]
+                condition_bit = condition_reg[condition_bit_index]
             arguments: List = [
-                qubit.index[0] for qubit in if_condition_circuit.qubits
+                qubit.index[0] for qubit in if_true_condition_circuit.qubits
             ] + [
-                bit.index[0] for bit in if_condition_circuit.bits
+                bit.index[0] for bit in if_true_condition_circuit.bits
             ]  # Order matters.
-            circuit.add_circbox(circ_box, arguments, condition=condition_bit)
+            circuit.add_circbox(circ_box, arguments, condition=if_bit(condition_bit))
             else_condition_block = cast(
                 QirBlock, self.module.functions[0].get_block_by_name(term.false_dest)
             )
             else_condition_circuit = self.block_to_circuit(
                 else_condition_block, Circuit(self.qubits, self.bits)
             )
-            else_condition_circuit.flatten_registers()
             circuit.append(else_condition_circuit)
 
         if isinstance(term, QirBrTerminator):
-            next_block = cast(
-                QirBlock, self.module.functions[0].get_block_by_name(term.dest)
-            )
-            next_circuit = self.block_to_circuit(
-                next_block, Circuit(self.qubits, self.bits)
-            )
-            circuit.append(next_circuit)
+            pass
+
+        if isinstance(term, QirRetTerminator):
+            pass
 
         return circuit
 

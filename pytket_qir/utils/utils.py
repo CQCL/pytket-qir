@@ -24,3 +24,7 @@ class WASMError(Exception):
 
 class BarrierError(Exception):
     pass
+
+
+class RtError(Exception):
+    pass

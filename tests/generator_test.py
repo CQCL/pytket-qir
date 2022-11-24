@@ -379,7 +379,9 @@ class TestPytketToQirGateTranslation:
 
         assert ll == exp_data
 
-    @pytest.mark.skip
+    @pytest.mark.skip(
+        reason="Disable work around non-simple circuits in CircBox. To be addressed in #18."
+    )
     def test_generate_wasmop_with_nonempty_inputs(self) -> None:
         wasm_file_path = qir_files_dir / "wasm_adder.wasm"
         wasm_handler = WasmFileHandler(str(wasm_file_path))
@@ -398,7 +400,9 @@ class TestPytketToQirGateTranslation:
 
         assert ll in exp_data
 
-    @pytest.mark.skip
+    @pytest.mark.skip(
+        reason="Disable work around non-simple circuits in CircBox. To be addressed in #18."
+    )
     def test_generate_wasmop_with_empty_inputs(self) -> None:
         wasm_file_path = qir_files_dir / "wasm_empty_adder.wasm"
         wasm_handler = WasmFileHandler(str(wasm_file_path))
@@ -433,13 +437,16 @@ class TestPytketToQirConditional:
         test_file_path = qir_files_dir / simple_conditional_file_name
 
         with open(test_file_path, "r") as input_file:
-            exp_data = input_file.readlines()
+            exp_data = input_file.read()
 
         for line in data:
             assert (
                 line in exp_data
             )  # Identical up to some ordering of the function declarations.
 
+    @pytest.mark.skip(
+        reason="Disable work around non-simple circuits in CircBox. To be addressed in #18."
+    )
     def test_nested_conditionals(
         self,
         pytket_nested_conditionals_circuit: Generator,
@@ -483,7 +490,3 @@ class TestIrAndBcFileGeneration:
 
         os.remove(ll_file_name)
         os.remove(bc_file_name)
-
-    @pytest.mark.skip
-    def test_roundtrip_teleport_chain(self):
-        pass

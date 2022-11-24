@@ -121,9 +121,12 @@ class QirGenerator:
 
     def _rebase_to_gateset(self, command: Command) -> Optional[Circuit]:
         """Rebase to the target gateset if needed."""
-        if command.op.type not in self.module.gateset.base_gateset:
+        optype = command.op.type
+        params = command.op.params
+        args = command.args
+        if optype not in self.module.gateset.base_gateset:
             circ = Circuit(self.circuit.n_qubits, self.circuit.n_bits)
-            circ.add_gate(command.op.type, command.args)
+            circ.add_gate(optype, params, args)
             self.rebase_to_gateset.apply(circ)
             return circ
         return None
@@ -258,8 +261,19 @@ class QirGenerator:
         for command in circ:
             op = command.op
             if isinstance(op, Conditional):
+                # Only supports measurements now as it searches through self.set_vars
+                # for SSA variables as conditions.
+                # These are set when parsing CopyBits for measurement conversion to i1.
+                # Conditions using other types (bools as results of classical
+                # arithmetic) can be supported by adding the variable appropriately.
                 conditional_circuit = op.op.get_circuit()
                 condition_bit_index = command.args[0].index[0]
+                condition_name = command.args[0].reg_name
+
+                if ssa_var := self.ssa_vars.get(condition_name):
+                    condition_ssa = ssa_var
+                else:
+                    condition_ssa = module.module.results[condition_bit_index]
 
                 def condition_one_block():
                     """
@@ -277,10 +291,10 @@ class QirGenerator:
                     if op.value == 0:
                         self.circuit_to_module(conditional_circuit, module)
 
-                module.qis.if_result(
-                    module.module.results[condition_bit_index],
-                    one=lambda: condition_one_block(),
-                    zero=lambda: condition_zero_block(),
+                module.module.builder.if_(
+                    condition_ssa,
+                    true=lambda: condition_one_block(),
+                    false=lambda: condition_zero_block(),
                 )
             elif isinstance(op, WASMOp):
                 inputs, _ = self._get_c_regs_from_com(command)
@@ -344,17 +358,17 @@ class QirGenerator:
                 get_gate = getattr(module, gate.opname.value)
                 data = json.loads(op.data)
                 func_name = cast(str, data["name"])
-                matched_str = re.search("__quantum__(.+?)__(.+?)__(.+)", func_name)
+                matched_str = re.search("__quantum__(.+?)__(.+?)_(.+)", func_name)
                 if not matched_str:
                     raise BarrierError(
                         "The runtime function name is not properly defined."
                     )
                 if matched_str.group(2) == "result":
                     res_index = data["index"]
-                    ssa_var = self.module.module.results[res_index]
+                    ssa_var = cast(Value, self.module.module.results[res_index])
                 else:
                     ssa_var_name = data["arg"]
-                    ssa_var = self.ssa_vars[ssa_var_name]
+                    ssa_var = cast(Value, self.ssa_vars[ssa_var_name])
                 module.builder.call(get_gate, [ssa_var])
             elif isinstance(op, CopyBitsOp):
                 input_reg = command.args[0]
@@ -362,7 +376,7 @@ class QirGenerator:
                 output_name = output_reg.reg_name
                 optype, _ = self._get_optype_and_params(op)
                 gate = module.gateset.tk_to_gateset(optype)
-                ssa_var = self.module.module.results[input_reg.index[0]]
+                ssa_var = cast(Value, self.module.module.results[input_reg.index[0]])
                 get_gate = getattr(module, gate.opname.value)
                 output_instr = module.builder.call(get_gate, [ssa_var])
                 self.ssa_vars[output_name] = output_instr
@@ -376,35 +390,23 @@ class QirGenerator:
                     optype, params = self._get_optype_and_params(op)
                     qubits = self._to_qis_qubits(command.qubits)
                     results = self._to_qis_results(command.bits)
-                    if module.gateset.name == "PyQir":
-                        pyqir_gate = module.gateset.tk_to_gateset(optype)
-                        if not pyqir_gate.opspec == FuncSpec.BODY:
-                            opname = (
-                                pyqir_gate.opname.value + "_" + pyqir_gate.opspec.value
-                            )
-                            get_gate = getattr(module.qis, opname)
-                        else:
-                            get_gate = getattr(module.qis, pyqir_gate.opname.value)
-                        if params:
-                            get_gate(*params, *qubits)
-                        elif results:
-                            get_gate(*qubits, results)
-                        else:
-                            get_gate(*qubits)
+                    bits: Optional[Sequence[Value]] = None
+                    if type(optype) == BitWiseOp:
+                        bits = self._to_qis_bits(command.args)
+                    gate = module.gateset.tk_to_gateset(optype)
+                    if not gate.opspec == FuncSpec.BODY:
+                        opname = gate.opname.value + "_" + gate.opspec.value
+                        get_gate = getattr(module.qis, opname)
                     else:
-                        bits: Optional[Sequence[Value]] = None
-                        if type(optype) == BitWiseOp:
-                            bits = self._to_qis_bits(command.args)
-                        gate = module.gateset.tk_to_gateset(optype)
-                        get_gate = getattr(module, gate.opname.value)
-                        if bits:
-                            module.builder.call(get_gate, bits)  # type: ignore
-                        elif params:
-                            module.builder.call(get_gate, [*params, *qubits])
-                        elif results:
-                            module.builder.call(get_gate, [*qubits, results])  # type: ignore
-                        else:
-                            module.builder.call(get_gate, qubits)
+                        get_gate = getattr(module.qis, gate.opname.value)
+                    if bits:
+                        get_gate(*bits)
+                    elif params:
+                        get_gate(*params, *qubits)
+                    elif results:
+                        get_gate(*qubits, results)
+                    else:
+                        get_gate(*qubits)
         return module
 
 
