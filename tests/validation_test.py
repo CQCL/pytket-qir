@@ -3,7 +3,7 @@ from string import Template
 from typing import cast
 
 from pyqir.generator import bitcode_to_ir, types  # type: ignore
-from pytket import OpType
+from pytket import OpType  # type: ignore
 from pytket.passes import FullPeepholeOptimise  # type: ignore
 
 from pytket_qir.gatesets.base import (
