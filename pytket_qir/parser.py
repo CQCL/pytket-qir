@@ -316,12 +316,6 @@ class QirParser:
                 arg, tag = self.get_arg_and_tag(instr)
                 # Create a JSON object for the data to be passed.
                 func_name = cast(str, instr.func_name)
-                if func_name is None:
-                    raise InstructionError(
-                        "The function call for instruction {:} is not defined.".format(
-                            instr
-                        )
-                    )
                 matched_str = re.search("__quantum__(.+?)__(.+?)_(.+)", func_name)
                 if matched_str is None:
                     raise RtError("Runtime function name is not properly defined.")
@@ -377,12 +371,6 @@ class QirParser:
                 if self.wasm_handler is None:
                     raise WASMError("A WASM file handler must be provided.")
                 func_name = cast(str, instr.func_name)
-                if func_name is None:
-                    raise InstructionError(
-                        "The function call for instruction {:} is not defined.".format(
-                            instr
-                        )
-                    )
                 if func_name.startswith("reg2var"):
                     register_name = "%" + cast(str, instr.output_name)
                     value = sum(
