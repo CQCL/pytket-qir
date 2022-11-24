@@ -315,8 +315,24 @@ class QirParser:
                 bits = self.get_qubit_indices(instr.instr)
                 arg, tag = self.get_arg_and_tag(instr)
                 # Create a JSON object for the data to be passed.
-                data = {"name": cast(str, instr.func_name), "arg": arg}
+                func_name = cast(str, instr.func_name)
+                if func_name is None:
+                    raise InstructionError(
+                        "The function call for instruction {:} is not defined.".format(
+                            instr
+                        )
+                    )
+                matched_str = re.search("__quantum__(.+?)__(.+?)_(.+)", func_name)
+                if matched_str is None:
                     raise RtError("Runtime function name is not properly defined.")
+                if matched_str.group(2) == "result":
+                    data = {
+                        "name": cast(str, instr.func_name),
+                        "arg": arg,
+                        "index": bits[0],
+                    }
+                else:
+                    data = {"name": cast(str, instr.func_name), "arg": arg}
                 if tag is not None:
                     data["tag"] = tag
                 if bits:
