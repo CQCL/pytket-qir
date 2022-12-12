@@ -81,7 +81,7 @@ from pytket_qir.gatesets.base import (
 )
 
 from pytket_qir.gatesets.pyqir.pyqir import PYQIR_GATES  # type: ignore
-from pytket_qir.utils import InstructionError, WASMError, RtError
+from pytket_qir.utils import CircuitError, InstructionError, WASMError, RtError
 
 
 _PYQIR_TO_TK_CLOPS: Dict[str, Union[type, Dict[str, Callable]]] = {
@@ -292,10 +292,8 @@ class QirParser:
                     func_arg = cast(QirResultConstant, instr.func_args[0])
                     index = func_arg.value
                     output_name = "%" + str(instr.output_name)
-                    target_reg = circuit.add_c_register(output_name, source_reg.size)
-                    self.set_cregs[output_name] = target_reg
-                    # Copy to the first bit of the target register.
-                    circuit.add_c_copybits([source_reg[index]], [target_reg[0]])
+                    target_reg = BitRegister(output_name, 1)
+                    self.set_cregs[target_reg[0]] = source_reg[index]
                 else:
                     op = self.get_operation(instr)
                     unitids = self.get_qubit_indices(instr.instr)
