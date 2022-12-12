@@ -380,7 +380,8 @@ class TestPytketToQirGateTranslation:
         assert ll == exp_data
 
     @pytest.mark.skip(
-        reason="Disable work around non-simple circuits in CircBox. To be addressed in #18."
+        reason=
+        "Disable work around non-simple circuits in CircBox. To be addressed in #18."
     )
     def test_generate_wasmop_with_nonempty_inputs(self) -> None:
         wasm_file_path = qir_files_dir / "wasm_adder.wasm"
@@ -401,7 +402,8 @@ class TestPytketToQirGateTranslation:
         assert ll in exp_data
 
     @pytest.mark.skip(
-        reason="Disable work around non-simple circuits in CircBox. To be addressed in #18."
+        reason=
+        "Disable work around non-simple circuits in CircBox. To be addressed in #18."
     )
     def test_generate_wasmop_with_empty_inputs(self) -> None:
         wasm_file_path = qir_files_dir / "wasm_empty_adder.wasm"
@@ -445,7 +447,8 @@ class TestPytketToQirConditional:
             )  # Identical up to some ordering of the function declarations.
 
     @pytest.mark.skip(
-        reason="Disable work around non-simple circuits in CircBox. To be addressed in #18."
+        reason=
+        "Disable work around non-simple circuits in CircBox. To be addressed in #18."
     )
     def test_nested_conditionals(
         self,

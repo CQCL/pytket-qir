@@ -72,53 +72,75 @@ def grover_circuit() -> Circuit:
 @fixture
 def one_conditional_circuit() -> Circuit:
     circuit = Circuit(5, 13)
+
+    measure_reg = circuit.add_c_register("%0", 1)
+
     circuit.CX(4, 3).CX(4, 2).CX(3, 2).CX(2, 1).CX(4, 0)
     circuit.CX(3, 0).CX(1, 0).Measure(1, 0).add_gate(OpType.Reset, [1])
     circuit.Measure(2, 1).add_gate(OpType.Reset, [2])
     circuit.Measure(3, 2).add_gate(OpType.Reset, [3])
     circuit.Measure(4, 3).add_gate(OpType.Reset, [4])
 
-    condition_circuit = Circuit(5, 13)
-    condition_circuit.add_gate(OpType.Reset, [0])
-    condition_circuit.Ry(0.9553166181245094, 0).Rz(-5.497787143782138, 0)
-    condition_circuit.Ry(0.9553166181245094, 1).Rz(-5.497787143782138, 1)
-    condition_circuit.Ry(0.9553166181245094, 2).Rz(-5.497787143782138, 2)
-    condition_circuit.Ry(0.9553166181245094, 3).Rz(-5.497787143782138, 3)
-    condition_circuit.Ry(0.9553166181245094, 4).Rz(-5.497787143782138, 4)
-    condition_circuit.Measure(1, 8).add_gate(OpType.Reset, [1])
-    condition_circuit.Measure(2, 9).add_gate(OpType.Reset, [2])
-    condition_circuit.Measure(3, 10).add_gate(OpType.Reset, [3])
-    condition_circuit.Measure(4, 11).add_gate(OpType.Reset, [4])
+    true_condition_circuit = Circuit(5, 13)
+    true_condition_circuit.add_gate(OpType.Reset, [0])
+    true_condition_circuit.Ry(0.9553166181245094, 0).Rz(-5.497787143782138, 0)
+    true_condition_circuit.Ry(0.9553166181245094, 1).Rz(-5.497787143782138, 1)
+    true_condition_circuit.Ry(0.9553166181245094, 2).Rz(-5.497787143782138, 2)
+    true_condition_circuit.Ry(0.9553166181245094, 3).Rz(-5.497787143782138, 3)
+    true_condition_circuit.Ry(0.9553166181245094, 4).Rz(-5.497787143782138, 4)
+    true_condition_circuit.Measure(1, 8).add_gate(OpType.Reset, [1])
+    true_condition_circuit.Measure(2, 9).add_gate(OpType.Reset, [2])
+    true_condition_circuit.Measure(3, 10).add_gate(OpType.Reset, [3])
+    true_condition_circuit.Measure(4, 11).add_gate(OpType.Reset, [4])
+    true_condition_circuit.H(0).Y(0).H(0).Measure(0, 12).add_gate(OpType.Reset, [0])
 
-    circ_box = CircBox(condition_circuit)
-    c_reg = circuit.get_c_register("c")
-    args = list(circuit.qubits) + list(circuit.bits)
-    circuit.add_circbox(circ_box, args, condition=c_reg[0])
+    circ_box = CircBox(true_condition_circuit)
+    args = list(range(true_condition_circuit.n_qubits)) + list(
+        range(len(true_condition_circuit.bits))
+    )
+    circuit.add_circbox(circ_box, args, condition=if_bit(measure_reg[0]))
 
-    circuit.H(0).Y(0).H(0).Measure(0, 12).add_gate(OpType.Reset, [0])
+    false_condition_circuit = Circuit(5, 13)
+    false_condition_circuit.H(0).Y(0).H(0).Measure(0, 12).add_gate(OpType.Reset, [0])
+
+    circ_box = CircBox(false_condition_circuit)
+    args = list(range(false_condition_circuit.n_qubits)) + list(
+        range(len(false_condition_circuit.bits))
+    )
+    circuit.add_circbox(circ_box, args, condition=if_not_bit(measure_reg[0]))
 
     return circuit
 
 
 @fixture
 def nested_conditionals_circuit() -> Circuit:
-    circuit = Circuit(5, 205)
+    circuit = Circuit(5, 13)
+
     circuit.CX(4, 3).CX(4, 2).CX(3, 2).CX(2, 1).CX(4, 0)
     circuit.CX(3, 0).CX(1, 0)
-    circuit.Measure(1, 128).add_gate(OpType.Reset, [1])
-    circuit.Measure(2, 129).add_gate(OpType.Reset, [2])
-    circuit.Measure(3, 130).add_gate(OpType.Reset, [3])
-    circuit.Measure(4, 131).add_gate(OpType.Reset, [4])
+    circuit.Measure(1, 0).add_gate(OpType.Reset, [1])
+    circuit.Measure(2, 1).add_gate(OpType.Reset, [2])
+    circuit.Measure(3, 2).add_gate(OpType.Reset, [3])
+    circuit.Measure(4, 3).add_gate(OpType.Reset, [4])
 
-    condition_circuit_1 = Circuit(5, 205)
+    source_reg = circuit.get_c_register("c")
+
+    condition_circuit_1 = Circuit(5, 13)
     condition_circuit_1.CX(4, 3).CX(4, 2).CX(3, 2).CX(2, 1).CX(4, 0)
     condition_circuit_1.CX(3, 0).CX(1, 0)
-    condition_circuit_1.Measure(1, 128).add_gate(OpType.Reset, [1])
-    condition_circuit_1.Measure(2, 129).add_gate(OpType.Reset, [2])
-    condition_circuit_1.Measure(3, 130).add_gate(OpType.Reset, [3])
-    condition_circuit_1.Measure(4, 131).add_gate(OpType.Reset, [4])
+    condition_circuit_1.Measure(1, 0).add_gate(OpType.Reset, [1])
+    condition_circuit_1.Measure(2, 1).add_gate(OpType.Reset, [2])
+    condition_circuit_1.Measure(3, 2).add_gate(OpType.Reset, [3])
+    condition_circuit_1.Measure(4, 3).add_gate(OpType.Reset, [4])
 
-    nested_conditional_circuit_1 = Circuit(5, 205)
+    condition_circuit_2 = Circuit(5, 13)
+    condition_circuit_2.CX(4, 3).CX(4, 2).CX(3, 2).CX(2, 1).CX(4, 0)
+    condition_circuit_2.CX(3, 0).CX(1, 0).add_gate(OpType.Reset, [1])
+    condition_circuit_2.Measure(2, 1).add_gate(OpType.Reset, [2])
+    condition_circuit_2.Measure(3, 2).add_gate(OpType.Reset, [3])
+    condition_circuit_2.Measure(4, 3).add_gate(OpType.Reset, [4])
+
+    nested_conditional_circuit_1 = Circuit(5, 13)
     nested_conditional_circuit_1.add_gate(OpType.Reset, [0])
     nested_conditional_circuit_1.Ry(0.9553166181245094, 0)
     nested_conditional_circuit_1.Rz(-5.497787143782138, 0)
@@ -142,25 +164,39 @@ def nested_conditionals_circuit() -> Circuit:
     nested_conditional_circuit_1.Measure(0, 12).add_gate(OpType.Reset, [0])
 
     nested_circ_box_1 = CircBox(nested_conditional_circuit_1)
-    c_reg = condition_circuit_1.c_registers[0]
-    args = list(condition_circuit_1.qubits) + list(condition_circuit_1.bits)
-    condition_circuit_1.add_circbox(nested_circ_box_1, args, condition=c_reg[1])
+    args = list(nested_conditional_circuit_1.qubits) + list(
+        nested_conditional_circuit_1.bits
+    )
+    condition_circuit_1.add_circbox(
+        nested_circ_box_1, args, condition=if_bit(source_reg[1])
+    )
+    condition_circuit_2.add_circbox(
+        nested_circ_box_1, args, condition=if_bit(source_reg[2])
+    )
 
-    condition_circuit_1.H(0).Y(0).H(0)
-    condition_circuit_1.H(0).Y(0).H(0)
-    condition_circuit_1.Measure(0, 12).add_gate(OpType.Reset, [0])
+    nested_conditional_circuit_2 = Circuit(5, 13)
+    nested_conditional_circuit_2.H(0).Y(0).H(0)
+    nested_conditional_circuit_2.H(0).Y(0).H(0)
+    nested_conditional_circuit_2.Measure(0, 12).add_gate(OpType.Reset, [0])
+    nested_circ_box_2 = CircBox(nested_conditional_circuit_2)
+    args = list(nested_conditional_circuit_2.qubits) + list(
+        nested_conditional_circuit_2.bits
+    )
+    condition_circuit_2.add_circbox(
+        nested_circ_box_2, args, condition=if_not_bit(source_reg[2])
+    )
 
     circ_box_1 = CircBox(condition_circuit_1)
-    c_reg = circuit.get_c_register("c")
-    args = list(circuit.qubits) + list(circuit.bits)
-    circuit.add_circbox(circ_box_1, args, condition=c_reg[0])
+    args = list(range(condition_circuit_1.n_qubits)) + list(
+        range(len(condition_circuit_1.bits))
+    )
+    circuit.add_circbox(circ_box_1, args, condition=if_bit(source_reg[0]))
 
-    circuit.CX(4, 3).CX(4, 2).CX(3, 2).CX(2, 1).CX(4, 0).CX(3, 0).CX(1, 0)
-    circuit.add_gate(OpType.Reset, [1]).Measure(2, 193)
-    circuit.add_gate(OpType.Reset, [2]).Measure(3, 194)
-    circuit.add_gate(OpType.Reset, [3]).Measure(4, 195)
-    circuit.add_gate(OpType.Reset, [4])
-
+    circ_box_2 = CircBox(condition_circuit_2)
+    args = list(range(condition_circuit_2.n_qubits)) + list(
+        range(len(condition_circuit_2.bits))
+    )
+    circuit.add_circbox(circ_box_2, args, condition=if_not_bit(source_reg[0]))
     return circuit
 
 

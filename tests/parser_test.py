@@ -29,80 +29,80 @@ class TestQirToPytketGateTranslation:
 
     def test_h_only(self) -> None:
         h_only_bc_file_path = qir_files_dir / "h_only.bc"
-        circuit = circuit_from_qir(h_only_bc_file_path)
+        circuit, _ = circuit_from_qir(h_only_bc_file_path)
         expected_circuit = Circuit(1).H(0)
         assert circuit == expected_circuit
 
     def test_cx_only(self) -> None:
         cx_only_bc_file_path = qir_files_dir / "cx_only.bc"
-        circuit = circuit_from_qir(cx_only_bc_file_path)
+        circuit, _ = circuit_from_qir(cx_only_bc_file_path)
         expected_circuit = Circuit(2).CX(0, 1)
         assert circuit == expected_circuit
 
     def test_t_only(self) -> None:
         t_only_bc_file_path = qir_files_dir / "t_only.bc"
-        circuit = circuit_from_qir(t_only_bc_file_path)
+        circuit, _ = circuit_from_qir(t_only_bc_file_path)
         expected_circuit = Circuit(1).T(0)
         assert circuit == expected_circuit
 
     def test_tdg_only(self) -> None:
         tdg_only_bc_file_path = qir_files_dir / "tadj_only.bc"
-        circuit = circuit_from_qir(tdg_only_bc_file_path)
+        circuit, _ = circuit_from_qir(tdg_only_bc_file_path)
         expected_circuit = Circuit(1).Tdg(0)
         assert circuit == expected_circuit
 
     def test_x_only(self) -> None:
         x_only_bc_file_path = qir_files_dir / "x_only.bc"
-        circuit = circuit_from_qir(x_only_bc_file_path)
+        circuit, _ = circuit_from_qir(x_only_bc_file_path)
         expected_circuit = Circuit(1).X(0)
         assert circuit == expected_circuit
 
     def test_y_only(self) -> None:
         y_only_bc_file_path = qir_files_dir / "y_only.bc"
-        circuit = circuit_from_qir(y_only_bc_file_path)
+        circuit, _ = circuit_from_qir(y_only_bc_file_path)
         expected_circuit = Circuit(1).Y(0)
         assert circuit == expected_circuit
 
     def test_z_only(self) -> None:
         z_only_bc_file_path = qir_files_dir / "z_only.bc"
-        circuit = circuit_from_qir(z_only_bc_file_path)
+        circuit, _ = circuit_from_qir(z_only_bc_file_path)
         expected_circuit = Circuit(1).Z(0)
         assert circuit == expected_circuit
 
     def test_rx_only(self) -> None:
         rx_only_bc_file_path = qir_files_dir / "rx_only.bc"
-        circuit = circuit_from_qir(rx_only_bc_file_path)
+        circuit, _ = circuit_from_qir(rx_only_bc_file_path)
         expected_circuit = Circuit(1).Rx(-5.497787143782138, 0)
         assert circuit == expected_circuit
 
     def test_rz_only(self) -> None:
         rz_only_bc_file_path = qir_files_dir / "rz_only.bc"
-        circuit = circuit_from_qir(rz_only_bc_file_path)
+        circuit, _ = circuit_from_qir(rz_only_bc_file_path)
         expected_circuit = Circuit(1).Rz(-5.497787143782138, 0)
         assert circuit == expected_circuit
 
     def test_measure_only(self) -> None:
         measure_only_bc_file_path = qir_files_dir / "measure_only.bc"
-        circuit = circuit_from_qir(measure_only_bc_file_path)
+        circuit, _ = circuit_from_qir(measure_only_bc_file_path)
         expected_circuit = Circuit(1, 1).Measure(0, 0)
         assert circuit == expected_circuit
 
     def test_reset_only(self) -> None:
         reset_only_bc_file_path = qir_files_dir / "reset_only.bc"
-        circuit = circuit_from_qir(reset_only_bc_file_path)
+        circuit, _ = circuit_from_qir(reset_only_bc_file_path)
         expected_circuit = Circuit(1).add_gate(OpType.Reset, [0])
         assert circuit == expected_circuit
 
     def test_grover_circuit(self, grover_circuit: Circuit) -> None:
         grover_bc_file_path = qir_files_dir / "SimpleGroverBaseProfile.bc"
-        circuit = circuit_from_qir(grover_bc_file_path)
+        circuit, _ = circuit_from_qir(grover_bc_file_path)
         assert circuit == grover_circuit
 
     def test_wasm_only(self) -> None:
         wasm_only_bc_file_path = qir_files_dir / "wasm_only_test.bc"
         wasm_file_path = qir_files_dir / "wasm_adder.wasm"
         wasm_handler = WasmFileHandler(str(wasm_file_path))
-        circuit = circuit_from_qir(wasm_only_bc_file_path, wasm_handler=wasm_handler)
+        circuit, _ = circuit_from_qir(wasm_only_bc_file_path, wasm_handler=wasm_handler)
         com = circuit.get_commands()[0]
         assert com.op.type == OpType.WASM
         assert len(com.args) == 64
@@ -110,7 +110,7 @@ class TestQirToPytketGateTranslation:
 
     def test_untagged_rt_functions(self) -> None:
         rt_function_file_path = qir_files_dir / "untagged_rt_functions.bc"
-        circuit = circuit_from_qir(rt_function_file_path)
+        circuit, _ = circuit_from_qir(rt_function_file_path)
 
         barriers = circuit.commands_of_type(OpType.Barrier)
         assert barriers[0].op.type == OpType.Barrier
@@ -148,7 +148,7 @@ class TestQirToPytketGateTranslation:
 
     def test_tagged_rt_functions(self) -> None:
         rt_function_file_path = qir_files_dir / "tagged_rt_functions.bc"
-        circuit = circuit_from_qir(rt_function_file_path)
+        circuit, _ = circuit_from_qir(rt_function_file_path)
 
         barriers = circuit.commands_of_type(OpType.Barrier)
 
@@ -185,32 +185,10 @@ class TestQirToPytketGateTranslation:
         assert barriers[3].qubits == []
         assert barriers[3].bits[0].index[0] == 1
 
-    def test_read_result(self) -> None:
-        read_result_function_file_path = qir_files_dir / "ReadResult.bc"
-        circuit = circuit_from_qir(read_result_function_file_path)
-
-        coms = circuit.get_commands()
-        com0 = coms[0]
-        assert com0.op.type == OpType.CopyBits
-        arg0 = com0.args[0]
-        assert arg0.reg_name == "c"
-        assert arg0.index[0] == 0
-        arg1 = com0.args[1]
-        assert arg1.reg_name == "%0"
-        assert arg1.index[0] == 0
-        com1 = coms[1]
-        assert com1.op.type == OpType.CopyBits
-        arg0 = com1.args[0]
-        assert arg0.reg_name == "c"
-        assert arg0.index[0] == 1
-        arg1 = com1.args[1]
-        assert arg1.reg_name == "%1"
-        assert arg1.index[0] == 0
-
     def test_select(self) -> None:
         select_function_file_path = qir_files_dir / "select.bc"
 
-        circuit = circuit_from_qir(select_function_file_path)
+        circuit, _ = circuit_from_qir(select_function_file_path)
         output_register = circuit.get_c_register("%1")
 
         conditionals = []
@@ -236,7 +214,7 @@ class TestQirToPytketGateTranslation:
     def test_zext(self) -> None:
         zext_function_file_path = qir_files_dir / "zext.ll"
 
-        circuit = circuit_from_qir(zext_function_file_path)
+        circuit, _ = circuit_from_qir(zext_function_file_path)
         output_reg = circuit.get_c_register("%0")
 
         barrier = circuit.get_commands()[0]
@@ -250,43 +228,26 @@ class TestQirToPytketConditionals:
     def test_single_conditional(self, one_conditional_circuit: Circuit) -> None:
         one_conditional_bc_path = qir_files_dir / "one_conditional.bc"
 
-        circuit = circuit_from_qir(one_conditional_bc_path)
+        circuit, _ = circuit_from_qir(one_conditional_bc_path)
 
-        non_condition_circuit = Circuit(circuit.n_qubits, circuit.n_bits)
-        for com in circuit.get_commands()[:15]:
-            non_condition_circuit.add_gate(com.op, com.args)
-
-        exp_non_condition_circuit = Circuit(circuit.n_qubits, circuit.n_bits)
-        for com in one_conditional_circuit.get_commands()[:15]:
-            exp_non_condition_circuit.add_gate(com.op, com.args)
-
-        assert non_condition_circuit == exp_non_condition_circuit
-
-        condition_com = circuit.get_commands()[15]
-
-        assert condition_com.args[0].reg_name == "%0"
-
-        condition_circuit = condition_com.op.op.get_circuit()
-
-        exp_condition_com = one_conditional_circuit.get_commands()[15]
-        exp_condition_circuit = exp_condition_com.op.op.get_circuit()
-
-        # Comparing commands as I get a type error while comparing circuits.
-        # TypeError: unhashable type: 'instancemethod'.
         for com1, com2 in zip(
-            condition_circuit.get_commands(), exp_condition_circuit.get_commands()
+            circuit.get_commands()[:15], one_conditional_circuit.get_commands()[:15]
         ):
             assert com1 == com2
 
-        final_circuit = Circuit(5, 13)
-        for com in circuit.get_commands()[16:]:
-            final_circuit.add_gate(com.op, com.args)
+        true_condition_circuit = circuit.get_commands()[15].op.op.get_circuit()
+        exp_true_condition_circuit = one_conditional_circuit.get_commands()[
+            15
+        ].op.op.get_circuit()
 
-        exp_final_circuit = Circuit(5, 13)
-        for com in one_conditional_circuit.get_commands()[16:]:
-            exp_final_circuit.add_gate(com.op, com.args)
+        assert true_condition_circuit == exp_true_condition_circuit
 
-        assert final_circuit == exp_final_circuit
+        false_condition_circuit = circuit.get_commands()[16].op.op.get_circuit()
+        exp_false_condition_circuit = one_conditional_circuit.get_commands()[
+            16
+        ].op.op.get_circuit()
+
+        assert false_condition_circuit == exp_false_condition_circuit
 
     def test_multiple_successive_conditionals(
         self,
@@ -295,10 +256,11 @@ class TestQirToPytketConditionals:
             qir_files_dir / "teleportchain_baseprofile.bc"
         )
 
-        circuit = circuit_from_qir(multiple_conditionals_bc_file_path)
+        circuit, set_cregs = circuit_from_qir(multiple_conditionals_bc_file_path)
+
+        inv_reg_map = {v: k for k, v in set_cregs.items()}
 
         coms = circuit.get_commands()
-
         com0 = coms[0]
         assert com0.op.type == OpType.H
         assert com0.qubits[0].index[0] == 0
@@ -331,174 +293,166 @@ class TestQirToPytketConditionals:
         assert com8.op.type == OpType.Measure
         assert com8.qubits[0].index[0] == 1
         assert com8.bits[0].index[0] == 0
+        assert com8.bits[0].reg_name == "c"
         com9 = coms[9]
-        assert com9.op.type == OpType.CopyBits
-        assert com9.args[0].reg_name == "c"
-        assert com9.args[1].reg_name == "%0"
-        assert com9.args[0].index[0] == 0
-        assert com9.args[1].index[0] == 0
+        assert com9.op.type == OpType.Reset
+        assert com9.qubits[0].index[0] == 1
         com10 = coms[10]
-        assert com10.op.type == OpType.Reset
-        assert com10.qubits[0].index[0] == 1
-        com11 = coms[11]
-        assert com11.args[0].reg_name == "%0"
-        assert com11.args[0].index[0] == 0
-        condition_circuit_coms = com11.op.op.get_circuit().get_commands()
+        assert com10.args[0].reg_name == "c"
+        assert com10.args[0].index[0] == 0  # Equivalent to bit %0[0].
+        assert inv_reg_map[com10.args[0]].reg_name == "%0"
+        assert inv_reg_map[com10.args[0]].index[0] == 0
+        condition_circuit_coms = com10.op.op.get_circuit().get_commands()
         ccc0 = condition_circuit_coms[0]
-        assert ccc0.op.type == OpType.Z
-        assert ccc0.qubits[0].index[0] == 4
-        com12 = coms[12]
-        assert com12.op.type == OpType.Measure
-        assert com12.qubits[0].index[0] == 2
-        assert com12.bits[0].index[0] == 1
-        com13 = coms[13]
-        assert com13.op.type == OpType.CopyBits
-        assert com13.args[0].reg_name == "c"
-        assert com13.args[1].reg_name == "%1"
-        assert com13.args[0].index[0] == 1
-        assert com13.args[1].index[0] == 0
-        com14 = coms[14]
-        assert com14.op.type == OpType.Reset
-        assert com14.qubits[0].index[0] == 2
-        com15 = coms[15]
-        assert com15.args[0].reg_name == "%1"
-        assert com15.args[0].index[0] == 0
-        condition_circuit_coms = com15.op.op.get_circuit().get_commands()
-        ccc0 = condition_circuit_coms[0]
-        assert ccc0.op.type == OpType.X
-        assert ccc0.qubits[0].index[0] == 4
-        com16 = coms[16]
-        assert com16.op.type == OpType.CX
-        assert com16.qubits[0].index[0] == 4
-        assert com16.qubits[1].index[0] == 3
-        com17 = coms[17]
-        assert com17.op.type == OpType.H
-        assert com17.qubits[0].index[0] == 4
-        com18 = coms[18]
-        assert com18.op.type == OpType.Measure
-        assert com18.qubits[0].index[0] == 4
-        assert com18.bits[0].index[0] == 2
-        com19 = coms[19]
-        assert com19.op.type == OpType.CopyBits
-        assert com19.args[0].reg_name == "c"
-        assert com19.args[1].reg_name == "%2"
-        assert com19.args[0].index[0] == 2
-        assert com19.args[1].index[0] == 0
-        com20 = coms[20]
-        assert com20.op.type == OpType.Reset
-        assert com20.qubits[0].index[0] == 4
-        com21 = coms[21]
-        assert com21.args[0].reg_name == "%2"
-        assert com21.args[0].index[0] == 0
-        condition_circuit_coms = com21.op.op.get_circuit().get_commands()
-        ccc0 = condition_circuit_coms[0]
-        assert ccc0.op.type == OpType.Z
-        assert ccc0.qubits[0].index[0] == 5
-        com22 = coms[22]
-        assert com22.op.type == OpType.Measure
-        assert com22.qubits[0].index[0] == 3
-        assert com22.bits[0].index[0] == 3
-        com23 = coms[23]
-        assert com23.op.type == OpType.CopyBits
-        assert com23.args[0].reg_name == "c"
-        assert com23.args[1].reg_name == "%3"
-        assert com23.args[0].index[0] == 3
-        assert com23.args[1].index[0] == 0
-        com24 = coms[24]
-        assert com24.op.type == OpType.Reset
-        assert com24.qubits[0].index[0] == 3
-        com25 = coms[25]
-        assert com25.args[0].reg_name == "%3"
-        assert com25.args[0].index[0] == 0
-        condition_circuit_coms = com25.op.op.get_circuit().get_commands()
-        ccc0 = condition_circuit_coms[0]
-        assert ccc0.op.type == OpType.X
-        assert ccc0.qubits[0].index[0] == 5
-        com26 = coms[26]
-        assert com26.op.type == OpType.Measure
-        assert com26.qubits[0].index[0] == 0
-        assert com26.bits[0].index[0] == 4
-        com27 = coms[27]
-        assert com27.op.type == OpType.Measure
-        assert com27.qubits[0].index[0] == 5
-        assert com27.bits[0].index[0] == 5
-        com28 = coms[28]
-        assert com28.op.type == OpType.Reset
-        assert com28.qubits[0].index[0] == 0
+        assert ccc0.op.type == OpType.Measure
+        assert ccc0.qubits[0].index[0] == 2
+        assert ccc0.bits[0].index[0] == 1
+        ccc1 = condition_circuit_coms[1]
+        assert ccc1.op.type == OpType.Z
+        assert ccc1.qubits[0].index[0] == 4
+        ccc2 = condition_circuit_coms[2]
+        assert ccc2.op.type == OpType.Reset
+        assert ccc2.qubits[0].index[0] == 2
+        ccc3 = condition_circuit_coms[3]
+        assert ccc3.args[0].reg_name == "c"
+        assert ccc3.args[0].index[0] == 1  # Equivalent to bit %1[0].
+        assert inv_reg_map[ccc3.args[0]].reg_name == "%1"
+        assert inv_reg_map[ccc3.args[0]].index[0] == 0
 
-    @pytest.mark.skip(reason="Temporary disable non-simple circuits work around.")
+        cccc = ccc3.op.op.get_circuit().get_commands()
+        cccc0 = cccc[0]
+        assert cccc0.op.type == OpType.X
+        assert cccc0.qubits[0].index[0] == 4
+        cccc1 = cccc[1]
+        assert cccc1.op.type == OpType.CX
+        assert cccc1.qubits[0].index[0] == 4
+        assert cccc1.qubits[1].index[0] == 3
+        cccc2 = cccc[2]
+        assert cccc2.op.type == OpType.H
+        assert cccc2.qubits[0].index[0] == 4
+        cccc3 = cccc[3]
+        assert cccc3.op.type == OpType.Measure
+        assert cccc3.qubits[0].index[0] == 4
+        assert cccc3.bits[0].index[0] == 2
+        cccc4 = cccc[4]
+        assert cccc4.op.type == OpType.Reset
+        assert cccc4.qubits[0].index[0] == 4
+        cccc5 = cccc[5]
+        assert cccc5.args[0].reg_name == "c"
+        assert cccc5.args[0].index[0] == 2  # Equivalent to bit %2[0].
+        assert inv_reg_map[cccc5.args[0]].reg_name == "%2"
+        assert inv_reg_map[cccc5.args[0]].index[0] == 0
+        ccccc = cccc5.op.op.get_circuit().get_commands()
+
+        ccccc0 = ccccc[0]
+        assert ccccc0.op.type == OpType.Measure
+        assert ccccc0.qubits[0].index[0] == 3
+        assert ccccc0.bits[0].index[0] == 3
+        c1 = ccccc[1]
+        assert c1.op.type == OpType.Z
+        assert c1.qubits[0].index[0] == 5
+        c2 = ccccc[2]
+        assert c2.op.type == OpType.Reset
+        assert c2.qubits[0].index[0] == 3
+        c3 = ccccc[3]
+        assert c3.args[0].reg_name == "c"
+        assert c3.args[0].index[0] == 3  # Equivalent to bit %3[0].
+        assert inv_reg_map[c3.args[0]].reg_name == "%3"
+        assert inv_reg_map[c3.args[0]].index[0] == 0
+        cc = c3.op.op.get_circuit().get_commands()
+        cc0 = cc[0]
+        assert cc0.op.type == OpType.Measure
+        assert cc0.qubits[0].index[0] == 0
+        assert cc0.bits[0].index[0] == 4
+        cc1 = cc[1]
+        assert cc1.op.type == OpType.X
+        assert cc1.qubits[0].index[0] == 5
+        cc2 = cc[2]
+        assert cc2.op.type == OpType.Measure
+        assert cc2.qubits[0].index[0] == 5
+        assert cc2.bits[0].index[0] == 5
+        cc3 = cc[3]
+        assert cc3.op.type == OpType.Reset
+        assert cc3.qubits[0].index[0] == 0
+        cc4 = cc[4]
+        assert cc4.op.type == OpType.Reset
+        assert cc4.qubits[0].index[0] == 5
+
     def test_nested_conditionals(
         self,
         nested_conditionals_circuit: Circuit,
     ) -> None:
         nested_conditionals_bc_file_path = qir_files_dir / "nested_conditionals.bc"
-        circuit = circuit_from_qir(nested_conditionals_bc_file_path)
+        circuit, set_cregs = circuit_from_qir(nested_conditionals_bc_file_path)
 
-        non_condition_circuit = Circuit(5, 205)
-        for com in circuit.get_commands()[:15]:
-            non_condition_circuit.add_gate(com.op, com.args)
-
-        exp_non_condition_circuit = Circuit(5, 205)
-        for com in nested_conditionals_circuit.get_commands()[:15]:
-            exp_non_condition_circuit.add_gate(com.op, com.args)
-
-        assert non_condition_circuit == exp_non_condition_circuit
-
-        condition_circuit_1 = circuit.get_commands()[15].op.op.get_circuit()
-        exp_condition_circuit_1 = nested_conditionals_circuit.get_commands()[
-            15
-        ].op.op.get_circuit()
-
-        inverse_reg_map = {v: k for k, v in circuit._reg_map.items()}
-        assert inverse_reg_map[circuit.get_commands()[15].args[0]].reg_name == "%0"
-
-        non_condition_circuit_1 = Circuit(5, 205)
-        coms = condition_circuit_1.get_commands()
-        del coms[15]
-        for com in coms:
-            non_condition_circuit_1.add_gate(com.op, com.args)
-
-        exp_non_condition_circuit_1 = Circuit(5, 205)
-        coms = exp_condition_circuit_1.get_commands()
-        del coms[15]
-        for com in coms:
-            exp_non_condition_circuit_1.add_gate(com.op, com.args)
-
-        assert non_condition_circuit_1 == exp_non_condition_circuit_1
-
-        nested_conditional_circuit_1 = condition_circuit_1.get_commands()[
-            15
-        ].op.op.get_circuit()
-        exp_nested_conditional_circuit_1 = exp_condition_circuit_1.get_commands()[
-            15
-        ].op.op.get_circuit()
-
-        assert (
-            inverse_reg_map[condition_circuit_1.get_commands()[15].args[0]].reg_name
-            == "%1"
-        )
+        inv_reg_map = {v: k for k, v in set_cregs.items()}
 
         for com1, com2 in zip(
-            nested_conditional_circuit_1.get_commands(),
-            exp_nested_conditional_circuit_1.get_commands(),
+            circuit.get_commands()[:15], nested_conditionals_circuit.get_commands()[:15]
         ):
             assert com1 == com2
 
-        inter_circuit = Circuit(5, 205)
-        for com in circuit.get_commands()[16:30]:
-            inter_circuit.add_gate(com.op, com.args)
+        condition_com = circuit.get_commands()[15]
+        assert condition_com.args[0].reg_name == "c"
+        assert condition_com.args[0].index[0] == 0  # Equivalent to bit %0[0].
+        assert inv_reg_map[condition_com.args[0]].reg_name == "%0"
+        assert inv_reg_map[condition_com.args[0]].index[0] == 0
 
-        exp_inter_circuit = Circuit(5, 205)
-        for com in nested_conditionals_circuit.get_commands()[16:30]:
-            exp_inter_circuit.add_gate(com.op, com.args)
+        condition_circuit = condition_com.op.op.get_circuit()
+        exp_condition_circuit = nested_conditionals_circuit.get_commands()[
+            15
+        ].op.op.get_circuit()
 
         for com1, com2 in zip(
-            inter_circuit.get_commands(), exp_inter_circuit.get_commands()
+            condition_circuit.get_commands()[:15],
+            exp_condition_circuit.get_commands()[:15],
         ):
             assert com1 == com2
 
-        assert inverse_reg_map[circuit.get_commands()[30].args[0]].reg_name == "c"
-        assert inverse_reg_map[circuit.get_commands()[30].args[0]].index[0] == 2
+        condition_com = condition_circuit.get_commands()[15]
+        assert condition_com.args[0].reg_name == "c"
+        assert condition_com.args[0].index[0] == 1  # Equivalent to bit %1[0].
+        assert inv_reg_map[condition_com.args[0]].reg_name == "%1"
+        assert inv_reg_map[condition_com.args[0]].index[0] == 0
+
+        condition_circuit = condition_com.op.op.get_circuit()
+        exp_condition_circuit = exp_condition_circuit.get_commands()[
+            15
+        ].op.op.get_circuit()
+
+        assert condition_circuit == exp_condition_circuit
+
+        condition_com = circuit.get_commands()[16]
+        condition_circuit = condition_com.op.op.get_circuit()
+        exp_condition_circuit = nested_conditionals_circuit.get_commands()[
+            16
+        ].op.op.get_circuit()
+
+        for com1, com2 in zip(
+            condition_circuit.get_commands()[:14],
+            exp_condition_circuit.get_commands()[:14],
+        ):
+            assert com1 == com2
+
+        condition_com = condition_circuit.get_commands()[14]
+        assert condition_com.args[0].reg_name == "c"
+        assert condition_com.args[0].index[0] == 2  # Equivalent to bit %2[0].
+        assert inv_reg_map[condition_com.args[0]].reg_name == "%2"
+        assert inv_reg_map[condition_com.args[0]].index[0] == 0
+        condition_circuit_1 = condition_com.op.op.get_circuit()
+        exp_condition_circuit_1 = exp_condition_circuit.get_commands()[
+            14
+        ].op.op.get_circuit()
+
+        assert condition_circuit_1 == exp_condition_circuit_1
+
+        condition_com = condition_circuit.get_commands()[15]
+        condition_circuit_2 = condition_com.op.op.get_circuit()
+        exp_condition_circuit_2 = exp_condition_circuit.get_commands()[
+            15
+        ].op.op.get_circuit()
+
+        assert condition_circuit_2 == exp_condition_circuit_2
 
 
 class TestQirToPytketClassicalOps:
@@ -509,7 +463,7 @@ class TestQirToPytketClassicalOps:
 
     def test_add_only(self) -> None:
         add_only_bc_file = qir_files_dir / "add_only.bc"
-        circuit = circuit_from_qir(add_only_bc_file)
+        circuit, _ = circuit_from_qir(add_only_bc_file)
         c_reg_names = [reg.name for reg in circuit.c_registers]
         reconstructed_expr = "(" + c_reg_names[2] + " + " + c_reg_names[3] + ")"
         c_box = circuit.get_commands()[2]
@@ -517,7 +471,7 @@ class TestQirToPytketClassicalOps:
 
     def test_sub_only(self) -> None:
         sub_only_bc_file = qir_files_dir / "sub_only.bc"
-        circuit = circuit_from_qir(sub_only_bc_file)
+        circuit, _ = circuit_from_qir(sub_only_bc_file)
         c_reg_names = [reg.name for reg in circuit.c_registers]
         reconstructed_expr = "(" + c_reg_names[2] + " - " + c_reg_names[3] + ")"
         c_box = circuit.get_commands()[2]
@@ -525,7 +479,7 @@ class TestQirToPytketClassicalOps:
 
     def test_mul_only(self) -> None:
         mul_only_bc_file = qir_files_dir / "mul_only.bc"
-        circuit = circuit_from_qir(mul_only_bc_file)
+        circuit, _ = circuit_from_qir(mul_only_bc_file)
         c_reg_names = [reg.name for reg in circuit.c_registers]
         reconstructed_expr = "(" + c_reg_names[2] + " * " + c_reg_names[3] + ")"
         c_box = circuit.get_commands()[2]
@@ -533,7 +487,7 @@ class TestQirToPytketClassicalOps:
 
     def test_div_only(self) -> None:
         div_only_bc_file = qir_files_dir / "div_only.bc"
-        circuit = circuit_from_qir(div_only_bc_file)
+        circuit, _ = circuit_from_qir(div_only_bc_file)
         c_reg_names = [reg.name for reg in circuit.c_registers]
         reconstructed_expr = "(" + c_reg_names[2] + " / " + c_reg_names[3] + ")"
         c_box = circuit.get_commands()[2]
@@ -541,7 +495,7 @@ class TestQirToPytketClassicalOps:
 
     def test_shl_only(self) -> None:
         shl_only_bc_file = qir_files_dir / "shl_only.bc"
-        circuit = circuit_from_qir(shl_only_bc_file)
+        circuit, _ = circuit_from_qir(shl_only_bc_file)
         c_reg_names = [reg.name for reg in circuit.c_registers]
         reconstructed_expr = "(" + c_reg_names[2] + " << " + c_reg_names[3] + ")"
         c_box = circuit.get_commands()[2]
@@ -549,7 +503,7 @@ class TestQirToPytketClassicalOps:
 
     def test_lshr_only(self) -> None:
         lshr_only_bc_file = qir_files_dir / "lshr_only.bc"
-        circuit = circuit_from_qir(lshr_only_bc_file)
+        circuit, _ = circuit_from_qir(lshr_only_bc_file)
         c_reg_names = [reg.name for reg in circuit.c_registers]
         reconstructed_expr = "(" + c_reg_names[2] + " >> " + c_reg_names[3] + ")"
         c_box = circuit.get_commands()[2]
@@ -557,7 +511,7 @@ class TestQirToPytketClassicalOps:
 
     def test_eq_only(self) -> None:
         eq_only_bc_file = qir_files_dir / "eq_only.bc"
-        circuit = circuit_from_qir(eq_only_bc_file)
+        circuit, _ = circuit_from_qir(eq_only_bc_file)
         c_reg_names = [reg.name for reg in circuit.c_registers]
         reconstructed_expr = "(" + c_reg_names[2] + " == 3)"
         c_box = circuit.get_commands()[1]
@@ -565,7 +519,7 @@ class TestQirToPytketClassicalOps:
 
     def test_neq_only(self) -> None:
         neq_only_bc_file = qir_files_dir / "neq_only.bc"
-        circuit = circuit_from_qir(neq_only_bc_file)
+        circuit, _ = circuit_from_qir(neq_only_bc_file)
         c_reg_names = [reg.name for reg in circuit.c_registers]
         reconstructed_expr = "(" + c_reg_names[2] + " != 3)"
         c_box = circuit.get_commands()[1]
@@ -573,7 +527,7 @@ class TestQirToPytketClassicalOps:
 
     def test_ule_only(self) -> None:
         ule_only_bc_file = qir_files_dir / "ule_only.bc"
-        circuit = circuit_from_qir(ule_only_bc_file)
+        circuit, _ = circuit_from_qir(ule_only_bc_file)
         c_reg_names = [reg.name for reg in circuit.c_registers]
         reconstructed_expr = "(" + c_reg_names[2] + " <= 3)"
         c_box = circuit.get_commands()[1]
@@ -581,7 +535,7 @@ class TestQirToPytketClassicalOps:
 
     def test_uge_only(self) -> None:
         uge_only_bc_file = qir_files_dir / "uge_only.bc"
-        circuit = circuit_from_qir(uge_only_bc_file)
+        circuit, _ = circuit_from_qir(uge_only_bc_file)
         c_reg_names = [reg.name for reg in circuit.c_registers]
         reconstructed_expr = "(" + c_reg_names[2] + " >= 3)"
         c_box = circuit.get_commands()[1]
@@ -589,7 +543,7 @@ class TestQirToPytketClassicalOps:
 
     def test_ult_only(self) -> None:
         ult_only_bc_file = qir_files_dir / "ult_only.bc"
-        circuit = circuit_from_qir(ult_only_bc_file)
+        circuit, _ = circuit_from_qir(ult_only_bc_file)
         c_reg_names = [reg.name for reg in circuit.c_registers]
         reconstructed_expr = "(" + c_reg_names[2] + " < 3)"
         c_box = circuit.get_commands()[1]
@@ -597,7 +551,7 @@ class TestQirToPytketClassicalOps:
 
     def test_ugt_only(self) -> None:
         ugt_only_bc_file = qir_files_dir / "ugt_only.bc"
-        circuit = circuit_from_qir(ugt_only_bc_file)
+        circuit, _ = circuit_from_qir(ugt_only_bc_file)
         c_reg_names = [reg.name for reg in circuit.c_registers]
         reconstructed_expr = "(" + c_reg_names[2] + " > 3)"
         c_box = circuit.get_commands()[1]
@@ -605,13 +559,13 @@ class TestQirToPytketClassicalOps:
 
     def test_neg_only(self) -> None:
         neg_only_bc_file = qir_files_dir / "neg_only.bc"
-        circuit = circuit_from_qir(neg_only_bc_file)
+        circuit, _ = circuit_from_qir(neg_only_bc_file)
         c_box = circuit.get_commands()[0]
         assert str(c_box.op.get_exp()) == "(- 2)"
 
     def test_and_only(self) -> None:
         and_only_bc_file = qir_files_dir / "and_only.bc"
-        circuit = circuit_from_qir(and_only_bc_file)
+        circuit, _ = circuit_from_qir(and_only_bc_file)
         c_reg_names = [reg.name for reg in circuit.c_registers]
         reconstructed_expr = "(" + c_reg_names[2] + " & " + c_reg_names[3] + ")"
         c_box = circuit.get_commands()[2]
@@ -619,7 +573,7 @@ class TestQirToPytketClassicalOps:
 
     def test_or_only(self) -> None:
         or_only_bc_file = qir_files_dir / "or_only.bc"
-        circuit = circuit_from_qir(or_only_bc_file)
+        circuit, _ = circuit_from_qir(or_only_bc_file)
         c_reg_names = [reg.name for reg in circuit.c_registers]
         reconstructed_expr = "(" + c_reg_names[2] + " | " + c_reg_names[3] + ")"
         c_box = circuit.get_commands()[2]
@@ -627,7 +581,7 @@ class TestQirToPytketClassicalOps:
 
     def test_xor_only(self) -> None:
         xor_only_bc_file = qir_files_dir / "xor_only.bc"
-        circuit = circuit_from_qir(xor_only_bc_file)
+        circuit, _ = circuit_from_qir(xor_only_bc_file)
         c_reg_names = [reg.name for reg in circuit.c_registers]
         reconstructed_expr = "(" + c_reg_names[2] + " ^ " + c_reg_names[3] + ")"
         c_box = circuit.get_commands()[2]
@@ -635,7 +589,7 @@ class TestQirToPytketClassicalOps:
 
     def test_purely_classical(self) -> None:
         purely_classical_file = qir_files_dir / "purely_classical.bc"
-        circuit = circuit_from_qir(purely_classical_file)
+        circuit, _ = circuit_from_qir(purely_classical_file)
         coms = circuit.get_commands()
 
         c_reg_names = [reg.name for reg in circuit.c_registers]
@@ -660,7 +614,7 @@ class TestQirToPytketClassicalOps:
     @pytest.mark.skip(reason="Temporary disable non-simple circuits work around.")
     def test_classical_and_controlflow(self) -> None:
         classical_and_controlflow_file = qir_files_dir / "classical_and_controlflow.bc"
-        circuit = circuit_from_qir(classical_and_controlflow_file)
+        circuit, _ = circuit_from_qir(classical_and_controlflow_file)
         com0 = circuit.get_commands()[0]
         assert sum([n * 2**k for k, n in enumerate(com0.op.values)]) == 1
         com1 = circuit.get_commands()[1]
@@ -717,7 +671,9 @@ class TestQirToPytketClassicalOps:
         wasm_file_path = qir_files_dir / "wasm_adder.wasm"
         wasm_handler = WasmFileHandler(str(wasm_file_path))
         wasm_and_controlflow_file = qir_files_dir / "wasm_and_controlflow.bc"
-        circuit = circuit_from_qir(wasm_and_controlflow_file, wasm_handler=wasm_handler)
+        circuit, _ = circuit_from_qir(
+            wasm_and_controlflow_file, wasm_handler=wasm_handler
+        )
 
         coms = circuit.get_commands()
         com0 = coms[0]
