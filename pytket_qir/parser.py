@@ -461,35 +461,40 @@ class QirParser:
             if_true_circuit = self.block_to_circuit(
                 if_true_block, Circuit(self.qubits, self.bits)
             )
-            # Add registers created in the branch circuit to the main circuit.
-            for reg in self.set_cregs.values():
-                circuit.add_c_register(reg)
-            circ_box = CircBox(if_true_condition_circuit)
-            term_condition = cast(QirLocalOperand, term.condition)
-            condition_name = "%" + str(term_condition.name)
-            condition_bit_index = (
-                0  # Condition bit is always the first of the register.
-            )
-            if set_creg := self.set_cregs.get(condition_name):
-                condition_reg = set_creg
-                condition_bit = set_creg[condition_bit_index]
-            else:
-                condition_reg = circuit.get_c_register("c")
-                condition_bit = condition_reg[condition_bit_index]
-            arguments: List = [
-                qubit.index[0] for qubit in if_true_condition_circuit.qubits
-            ] + [
-                bit.index[0] for bit in if_true_condition_circuit.bits
-            ]  # Order matters.
-            circuit.add_circbox(circ_box, arguments, condition=if_bit(condition_bit))
-            else_condition_block = cast(
             else_block = cast(
                 QirBlock, self.module.functions[0].get_block_by_name(term.false_dest)
             )
             else_circuit = self.block_to_circuit(
                 else_block, Circuit(self.qubits, self.bits)
             )
-            circuit.append(else_condition_circuit)
+            term_condition = cast(QirLocalOperand, term.condition)
+            condition_name = "%" + str(term_condition.name)
+            # Retrieving the condition bit from the log.
+            condition_bit = BitRegister(condition_name, self.bits)
+            condition_bit = self.set_cregs[condition_bit[0]]
+            arguments: List = []
+            if if_true_circuit.is_simple:
+                circ_box = CircBox(if_true_circuit)
+                arguments = [
+                    qubit.index[0] for qubit in if_true_circuit.qubits
+                ] + [
+                    bit.index[0] for bit in if_true_circuit.bits
+                ]  # Order matters.
+                circuit.add_circbox(
+                    circ_box, arguments, condition=if_bit(condition_bit)
+                )
+            else:
+                raise CircuitError("Circuit for true condition is not simple.")
+            if else_circuit.is_simple:
+                circ_box = CircBox(else_circuit)
+                arguments = [qubit.index[0] for qubit in else_circuit.qubits] + [
+                    bit.index[0] for bit in else_circuit.bits
+                ]  # Order matters.
+                circuit.add_circbox(
+                    circ_box, arguments, condition=if_not_bit(condition_bit)
+                )
+            else:
+                raise CircuitError("Circuit for else condition is not simple.")
 
         if isinstance(term, QirBrTerminator):
             pass
