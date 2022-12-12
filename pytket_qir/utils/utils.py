@@ -28,3 +28,7 @@ class BarrierError(Exception):
 
 class RtError(Exception):
     pass
+
+
+class CircuitError(Exception):
+    pass
