@@ -483,10 +483,11 @@ class QirParser:
             ]  # Order matters.
             circuit.add_circbox(circ_box, arguments, condition=if_bit(condition_bit))
             else_condition_block = cast(
+            else_block = cast(
                 QirBlock, self.module.functions[0].get_block_by_name(term.false_dest)
             )
-            else_condition_circuit = self.block_to_circuit(
-                else_condition_block, Circuit(self.qubits, self.bits)
+            else_circuit = self.block_to_circuit(
+                else_block, Circuit(self.qubits, self.bits)
             )
             circuit.append(else_condition_circuit)
 
