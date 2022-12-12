@@ -530,4 +530,8 @@ def circuit_from_qir(
             o.write(ir_to_bitcode(data))
         input_file_str = output_bc_file
     parser = QirParser(input_file_str, gateset, wasm_handler, wasm_int_type)
-    return parser.circuit, parser.set_cregs
+    circuit = parser.circuit
+    set_cregs = parser.set_cregs
+    # Attach the set_cregs dict to the circuit before returning.
+    circuit.set_cregs = set_cregs
+    return circuit
