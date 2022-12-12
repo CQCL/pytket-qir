@@ -497,7 +497,13 @@ class QirParser:
                 raise CircuitError("Circuit for else condition is not simple.")
 
         if isinstance(term, QirBrTerminator):
-            pass
+            next_block = cast(
+                QirBlock, self.module.functions[0].get_block_by_name(term.dest)
+            )
+            next_circuit = self.block_to_circuit(
+                next_block, Circuit(self.qubits, self.bits)
+            )
+            circuit.append(next_circuit)
 
         if isinstance(term, QirRetTerminator):
             pass
