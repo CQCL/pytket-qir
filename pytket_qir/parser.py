@@ -529,4 +529,5 @@ def circuit_from_qir(
         with open(output_bc_file, "wb") as o:
             o.write(ir_to_bitcode(data))
         input_file_str = output_bc_file
-    return QirParser(input_file_str, gateset, wasm_handler, wasm_int_type).circuit
+    parser = QirParser(input_file_str, gateset, wasm_handler, wasm_int_type)
+    return parser.circuit, parser.set_cregs
