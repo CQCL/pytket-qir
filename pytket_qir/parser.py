@@ -28,6 +28,7 @@ from typing import cast, Callable, Dict, List, Optional, Tuple, Union
 from pytket import Circuit, OpType  # type: ignore
 from pytket.wasm import WasmFileHandler  # type: ignore
 from pytket.circuit import (  # type: ignore
+    Bit,
     BitRegister,
     CircBox,
     Op,
@@ -292,8 +293,14 @@ class QirParser:
                     func_arg = cast(QirResultConstant, instr.func_args[0])
                     index = func_arg.value
                     output_name = "%" + str(instr.output_name)
-                    target_reg = BitRegister(output_name, 1)
-                    self.set_cregs[target_reg[0]] = source_reg[index]
+                    # Extend the canonical c register with an extra bit
+                    # to hold the condition.
+                    target_bit = Bit("c", len(source_reg))
+                    self.set_cregs[output_name] = target_bit
+                    circuit.add_bit(target_bit)
+                    # Finally add a CopyBits op to hold the read_result
+                    # instruction.
+                    circuit.add_c_copybits([source_reg[index]], [target_bit])
                 else:
                     op = self.get_operation(instr)
                     unitids = self.get_qubit_indices(instr.instr)
