@@ -477,8 +477,7 @@ class QirParser:
             term_condition = cast(QirLocalOperand, term.condition)
             condition_name = "%" + str(term_condition.name)
             # Retrieving the condition bit from the log.
-            condition_bit = BitRegister(condition_name, self.bits)
-            condition_bit = self.set_cregs[condition_bit[0]]
+            condition_bit = self.set_cregs[condition_name]
             arguments: List = []
             if if_true_circuit.is_simple:
                 circ_box = CircBox(if_true_circuit)
