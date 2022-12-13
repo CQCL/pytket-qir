@@ -466,13 +466,13 @@ class QirParser:
             )
             # Create a fresh circuit.
             if_true_circuit = self.block_to_circuit(
-                if_true_block, Circuit(self.qubits, self.bits)
+                if_true_block, Circuit(self.qubits, len(circuit.bits))
             )
             else_block = cast(
                 QirBlock, self.module.functions[0].get_block_by_name(term.false_dest)
             )
             else_circuit = self.block_to_circuit(
-                else_block, Circuit(self.qubits, self.bits)
+                else_block, Circuit(self.qubits, len(circuit.bits))
             )
             term_condition = cast(QirLocalOperand, term.condition)
             condition_name = "%" + str(term_condition.name)
