@@ -512,7 +512,7 @@ class QirParser:
                 QirBlock, self.module.functions[0].get_block_by_name(term.dest)
             )
             next_circuit = self.block_to_circuit(
-                next_block, Circuit(self.qubits, self.bits)
+                next_block, Circuit(self.qubits, len(circuit.bits))
             )
             circuit.append(next_circuit)
 
