@@ -480,6 +480,10 @@ class QirParser:
             condition_bit = self.set_cregs[condition_name]
             arguments: List = []
             if if_true_circuit.is_simple:
+                # Add extra bits created in the sub-circuit to the main
+                # circuit
+                for bit in set(if_true_circuit.bits) - set(circuit.bits):
+                    circuit.add_bit(bit)
                 circ_box = CircBox(if_true_circuit)
                 arguments = [
                     qubit.index[0] for qubit in if_true_circuit.qubits
@@ -492,6 +496,9 @@ class QirParser:
             else:
                 raise CircuitError("Circuit for true condition is not simple.")
             if else_circuit.is_simple:
+                # Add extra bits created in the sub-circuit to the main
+                for bit in set(else_circuit.bits) - set(circuit.bits):
+                    circuit.add_bit(bit)
                 circ_box = CircBox(else_circuit)
                 arguments = [qubit.index[0] for qubit in else_circuit.qubits] + [
                     bit.index[0] for bit in else_circuit.bits
