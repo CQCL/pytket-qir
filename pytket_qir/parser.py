@@ -485,9 +485,7 @@ class QirParser:
                 for bit in set(if_true_circuit.bits) - set(circuit.bits):
                     circuit.add_bit(bit)
                 circ_box = CircBox(if_true_circuit)
-                arguments = [
-                    qubit.index[0] for qubit in if_true_circuit.qubits
-                ] + [
+                arguments = [qubit.index[0] for qubit in if_true_circuit.qubits] + [
                     bit.index[0] for bit in if_true_circuit.bits
                 ]  # Order matters.
                 circuit.add_circbox(
