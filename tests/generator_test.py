@@ -345,12 +345,13 @@ class TestPytketToQirGateTranslation:
         with open(read_result_file_path, "r") as f:
             exp_data = f.read()
 
-        circuit = Circuit(0, 2)
+        circuit = Circuit(0, 4)
         result_register = circuit.get_c_register("c")
-        target_register = circuit.add_c_register("%0", result_register.size)
 
-        circuit.add_c_copybits([result_register[0]], [target_register[0]])
-        circuit.add_c_copybits([result_register[1]], [target_register[1]])
+        circuit.add_c_copybits([result_register[0]], [result_register[2]])
+        circuit.add_c_copybits([result_register[1]], [result_register[3]])
+
+        circuit.ssa_vars = {"%0": result_register[2], "%1": result_register[3]}
 
         # Extend PyQir base gateset to account for Barrier.
         # qir_gate = _TK_TO_PYQIR[OpType.CopyBits]
@@ -380,8 +381,8 @@ class TestPytketToQirGateTranslation:
         assert ll == exp_data
 
     @pytest.mark.skip(
-        reason=
-        "Disable work around non-simple circuits in CircBox. To be addressed in #18."
+        reason="Disable work around non-simple circuits in CircBox.\
+        To be addressed in #18."
     )
     def test_generate_wasmop_with_nonempty_inputs(self) -> None:
         wasm_file_path = qir_files_dir / "wasm_adder.wasm"
@@ -402,8 +403,8 @@ class TestPytketToQirGateTranslation:
         assert ll in exp_data
 
     @pytest.mark.skip(
-        reason=
-        "Disable work around non-simple circuits in CircBox. To be addressed in #18."
+        reason="Disable work around non-simple circuits in CircBox.\
+        To be addressed in #18."
     )
     def test_generate_wasmop_with_empty_inputs(self) -> None:
         wasm_file_path = qir_files_dir / "wasm_empty_adder.wasm"
@@ -447,8 +448,8 @@ class TestPytketToQirConditional:
             )  # Identical up to some ordering of the function declarations.
 
     @pytest.mark.skip(
-        reason=
-        "Disable work around non-simple circuits in CircBox. To be addressed in #18."
+        reason="Disable work around non-simple circuits in CircBox.\
+        To be addressed in #18."
     )
     def test_nested_conditionals(
         self,
