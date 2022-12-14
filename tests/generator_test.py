@@ -204,17 +204,17 @@ class TestPytketToQirGateTranslation:
 
         # Extend PyQir base gateset to account for Barrier.
         qir_gate = QirGate(
-            opnat=FuncNat.RT,
-            opname=FuncName.INT,
-            opspec=FuncSpec.REC_OUT,
+            func_nat=FuncNat.RT,
+            func_name=FuncName.INT,
+            func_spec=FuncSpec.REC_OUT,
         )
 
         _TK_TO_PYQIR[OpType.Barrier] = qir_gate
 
         qir_barrier = CustomQirGate(
-            opnat=FuncNat.RT,
-            opname=FuncName.INT,
-            opspec=FuncSpec.REC_OUT,
+            func_nat=FuncNat.RT,
+            func_name=FuncName.INT,
+            func_spec=FuncSpec.REC_OUT,
             function_signature=[types.Int(64)],
             return_type=types.VOID,
         )
@@ -223,7 +223,7 @@ class TestPytketToQirGateTranslation:
 
         ext_pyqir_gates = CustomGateSet(
             name="ExtPyQir",
-            template=Template("__quantum__${opnat}__${opname}__${opspec}"),
+            template=Template("__quantum__${func_nat}__${func_name}__${func_spec}"),
             base_gateset=set(_TK_TO_PYQIR.keys()),
             gateset={"rt_int": qir_barrier},
             tk_to_gateset=lambda optype: _TK_TO_PYQIR[optype],
@@ -257,17 +257,17 @@ class TestPytketToQirGateTranslation:
 
         # Extend PyQir base gateset to account for Barrier.
         qir_gate = QirGate(
-            opnat=FuncNat.RT,
-            opname=FuncName.BOOL,
-            opspec=FuncSpec.REC_OUT,
+            func_nat=FuncNat.RT,
+            func_name=FuncName.BOOL,
+            func_spec=FuncSpec.REC_OUT,
         )
 
         _TK_TO_PYQIR[OpType.Barrier] = qir_gate
 
         qir_barrier = CustomQirGate(
-            opnat=FuncNat.RT,
-            opname=FuncName.BOOL,
-            opspec=FuncSpec.REC_OUT,
+            func_nat=FuncNat.RT,
+            func_name=FuncName.BOOL,
+            func_spec=FuncSpec.REC_OUT,
             function_signature=[types.Int(64)],
             return_type=types.VOID,
         )
@@ -276,7 +276,7 @@ class TestPytketToQirGateTranslation:
 
         ext_pyqir_gates = CustomGateSet(
             name="ExtPyQir",
-            template=Template("__quantum__${opnat}__${opname}__${opspec}"),
+            template=Template("__quantum__${func_nat}__${func_name}__${func_spec}"),
             base_gateset=set(_TK_TO_PYQIR.keys()),
             gateset={"rt_bool": qir_barrier},
             tk_to_gateset=lambda optype: _TK_TO_PYQIR[optype],
@@ -305,17 +305,17 @@ class TestPytketToQirGateTranslation:
 
         # Extend PyQir base gateset to account for Barrier.
         qir_gate = QirGate(
-            opnat=FuncNat.RT,
-            opname=FuncName.RES,
-            opspec=FuncSpec.REC_OUT,
+            func_nat=FuncNat.RT,
+            func_name=FuncName.RES,
+            func_spec=FuncSpec.REC_OUT,
         )
 
         _TK_TO_PYQIR[OpType.Barrier] = qir_gate
 
         qir_barrier = CustomQirGate(
-            opnat=FuncNat.RT,
-            opname=FuncName.RES,
-            opspec=FuncSpec.REC_OUT,
+            func_nat=FuncNat.RT,
+            func_name=FuncName.RES,
+            func_spec=FuncSpec.REC_OUT,
             function_signature=[types.RESULT],
             return_type=types.VOID,
         )
@@ -324,7 +324,7 @@ class TestPytketToQirGateTranslation:
 
         ext_pyqir_gates = CustomGateSet(
             name="ExtPyQir",
-            template=Template("__quantum__${opnat}__${opname}__${opspec}"),
+            template=Template("__quantum__${func_nat}__${func_name}__${func_spec}"),
             base_gateset=set(_TK_TO_PYQIR.keys()),
             gateset={"rt_bool": qir_barrier},
             tk_to_gateset=lambda optype: _TK_TO_PYQIR[optype],
@@ -356,9 +356,9 @@ class TestPytketToQirGateTranslation:
         # qir_gate = _TK_TO_PYQIR[OpType.CopyBits]
 
         qis_read_result = CustomQirGate(
-            opnat=FuncNat.QIS,
-            opname=FuncName.READ_RES,
-            opspec=FuncSpec.BODY,
+            func_nat=FuncNat.QIS,
+            func_name=FuncName.READ_RES,
+            func_spec=FuncSpec.BODY,
             function_signature=[types.RESULT],
             return_type=types.BOOL,
         )
@@ -367,7 +367,7 @@ class TestPytketToQirGateTranslation:
 
         ext_pyqir_gates = CustomGateSet(
             name="ExtPyQir",
-            template=Template("__quantum__${opnat}__${opname}__${opspec}"),
+            template=Template("__quantum__${func_nat}__${func_name}__${func_spec}"),
             base_gateset=set(_TK_TO_PYQIR.keys()),
             gateset={"read_result": qis_read_result},
             tk_to_gateset=lambda optype: _TK_TO_PYQIR[optype],

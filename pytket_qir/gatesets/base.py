@@ -56,9 +56,9 @@ class FuncSpec(Enum):
 
 @dataclass(frozen=True)
 class QirGate:
-    opnat: FuncNat
-    opname: Union[FuncName, Enum]
-    opspec: FuncSpec
+    func_nat: FuncNat
+    func_name: Union[FuncName, Enum]
+    func_spec: FuncSpec
 
 
 @dataclass(frozen=True)

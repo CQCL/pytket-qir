@@ -313,15 +313,17 @@ class QirGenerator:
 
                 # Update translation dict.
                 _TK_TO_PYQIR[OpType.WASM] = QirGate(
-                    opnat=FuncNat.HYBRID, opname=WasmName.WASM, opspec=FuncSpec.BODY
+                    func_nat=FuncNat.HYBRID,
+                    func_name=WasmName.WASM,
+                    func_spec=FuncSpec.BODY,
                 )
 
                 # Update gateset.
                 gateset = PYQIR_GATES.gateset
                 gateset["wasm"] = CustomQirGate(
-                    opnat=FuncNat.HYBRID,
-                    opname=WasmName.WASM,
-                    opspec=FuncSpec.BODY,
+                    func_nat=FuncNat.HYBRID,
+                    func_name=WasmName.WASM,
+                    func_spec=FuncSpec.BODY,
                     function_signature=input_type_list,
                     return_type=self.wasm_int_type,
                 )
@@ -336,7 +338,7 @@ class QirGenerator:
                     ssa_args = [self._reg2ssa_var(bit_reg, self.wasm_int_type.width)]
 
                 gate = module.gateset.tk_to_gateset(op.type)
-                get_gate = getattr(module, gate.opname.value)
+                get_gate = getattr(module, gate.func_name.value)
                 module.builder.call(get_gate, ssa_args)
             elif isinstance(op, ClassicalExpBox):
                 inputs, outputs = self._get_c_regs_from_com(command)
@@ -355,7 +357,7 @@ class QirGenerator:
             elif isinstance(op, MetaOp):
                 optype, _ = self._get_optype_and_params(op)
                 gate = module.gateset.tk_to_gateset(optype)
-                get_gate = getattr(module, gate.opname.value)
+                get_gate = getattr(module, gate.func_name.value)
                 data = json.loads(op.data)
                 func_name = cast(str, data["name"])
                 matched_str = re.search("__quantum__(.+?)__(.+?)_(.+)", func_name)
@@ -377,7 +379,7 @@ class QirGenerator:
                 optype, _ = self._get_optype_and_params(op)
                 gate = module.gateset.tk_to_gateset(optype)
                 ssa_var = cast(Value, self.module.module.results[input_reg.index[0]])
-                get_gate = getattr(module, gate.opname.value)
+                get_gate = getattr(module, gate.func_name.value)
                 output_instr = module.builder.call(get_gate, [ssa_var])
                 self.ssa_vars[output_name] = output_instr
             else:
@@ -394,11 +396,11 @@ class QirGenerator:
                     if type(optype) == BitWiseOp:
                         bits = self._to_qis_bits(command.args)
                     gate = module.gateset.tk_to_gateset(optype)
-                    if not gate.opspec == FuncSpec.BODY:
-                        opname = gate.opname.value + "_" + gate.opspec.value
-                        get_gate = getattr(module.qis, opname)
+                    if not gate.func_spec == FuncSpec.BODY:
+                        func_name = gate.func_name.value + "_" + gate.func_spec.value
+                        get_gate = getattr(module.qis, func_name)
                     else:
-                        get_gate = getattr(module.qis, gate.opname.value)
+                        get_gate = getattr(module.qis, gate.func_name.value)
                     if bits:
                         get_gate(*bits)
                     elif params:

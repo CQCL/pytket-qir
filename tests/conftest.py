@@ -315,9 +315,9 @@ def simple_conditional_circuit(simple_conditional_file_name: str) -> Generator:
     c.Z(0).Z(1)
 
     qis_read_result = CustomQirGate(
-        opnat=FuncNat.QIS,
-        opname=FuncName.READ_RES,
-        opspec=FuncSpec.BODY,
+        func_nat=FuncNat.QIS,
+        func_name=FuncName.READ_RES,
+        func_spec=FuncSpec.BODY,
         function_signature=[types.RESULT],
         return_type=types.BOOL,
     )
@@ -326,7 +326,7 @@ def simple_conditional_circuit(simple_conditional_file_name: str) -> Generator:
 
     ext_pyqir_gates = CustomGateSet(
         name="ExtPyQir",
-        template=Template("__quantum__${opnat}__${opname}__${opspec}"),
+        template=Template("__quantum__${func_nat}__${func_name}__${func_spec}"),
         base_gateset=set(_TK_TO_PYQIR.keys()),
         gateset={"read_result": qis_read_result},
         tk_to_gateset=lambda optype: _TK_TO_PYQIR[optype],
