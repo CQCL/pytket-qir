@@ -227,7 +227,7 @@ class QirParser:
                         c_regs.append(c_reg)
                     else:
                         register_name = "%" + operand.name  # Keep QIR syntax.
-                        if set_creg := self.set_cregs.get(register_name):
+                        if set_creg := self.ssa_vars.get(register_name):
                             c_reg = set_creg
                             circuit.add_c_register(c_reg)
                         else:
@@ -295,7 +295,7 @@ class QirParser:
                     # Extend the canonical c register with an extra bit
                     # to hold the condition.
                     target_bit = Bit("c", len(source_reg))
-                    self.set_cregs[output_name] = target_bit
+                    self.ssa_vars[output_name] = target_bit
                     circuit.add_bit(target_bit)
                     # Finally add a CopyBits op to hold the read_result
                     # instruction.
@@ -310,7 +310,7 @@ class QirParser:
                 output_reg = circuit.add_c_register(
                     output_name, self.qir_int_type.width
                 )
-                self.set_cregs[output_name] = output_reg
+                self.ssa_vars[output_name] = output_reg
                 params = cast(List, instr.instr.call_func_params)
                 param = params[0]
                 assert param.constant is not None
@@ -347,7 +347,7 @@ class QirParser:
                 output_reg = circuit.add_c_register(output_name, true_value.width)
                 condition = cast(QirLocalOperand, instr.condition)
                 condition_name = "%" + str(condition.name)
-                if c_reg := self.set_cregs.get(condition_name):
+                if c_reg := self.ssa_vars.get(condition_name):
                     condition_reg = c_reg
                     circuit.add_c_register(condition_reg)
                 else:
@@ -384,7 +384,7 @@ class QirParser:
                     c_reg = circuit.add_c_register(
                         register_name, self.wasm_int_type.width
                     )
-                    self.set_cregs[register_name] = c_reg
+                    self.ssa_vars[register_name] = c_reg
                     circuit.add_c_setreg(value, c_reg)
                 elif func_name.startswith("__quantum"):
                     matched_str = re.search("__quantum__(.+?)__(.+?)__(.+)", func_name)
@@ -401,7 +401,7 @@ class QirParser:
                     if instr_arg.op.is_local:
                         instr_arg = cast(QirLocalOperand, instr_arg)
                         input_reg_name = "%" + cast(str, instr_arg.name)
-                        c_reg = self.set_cregs.get(input_reg_name)
+                        c_reg = self.ssa_vars.get(input_reg_name)
                         circuit.add_c_register(c_reg)
                         param_regs.append(c_reg)
                     else:
@@ -419,7 +419,7 @@ class QirParser:
                     c_reg_output = circuit.add_c_register(
                         c_reg_output_name, self.wasm_int_type.width
                     )
-                    self.set_cregs[c_reg_output_name] = c_reg_output
+                    self.ssa_vars[c_reg_output_name] = c_reg_output
                     circuit.add_wasm_to_reg(
                         matched_str.group(2),
                         self.wasm_handler,
@@ -449,7 +449,7 @@ class QirParser:
                     c_reg3 = circuit.add_c_register(
                         c_reg_name3, self.qir_int_type.width
                     )  # Int64 supported in LLVM/QIR and L3.
-                    self.set_cregs[c_reg_name3] = c_reg3
+                    self.ssa_vars[c_reg_name3] = c_reg3
                     c_reg_map[3] = c_reg3
                     self.add_classical_op(matching, instr, circuit, c_reg_map)
                 else:
@@ -476,11 +476,10 @@ class QirParser:
             term_condition = cast(QirLocalOperand, term.condition)
             condition_name = "%" + str(term_condition.name)
             # Retrieving the condition bit from the log.
-            condition_bit = self.set_cregs[condition_name]
+            condition_bit = self.ssa_vars[condition_name]
             arguments: List = []
             if if_true_circuit.is_simple:
-                # Add extra bits created in the sub-circuit to the main
-                # circuit
+                # Add extra bits created in the sub-circuit to the main one.
                 for bit in set(if_true_circuit.bits) - set(circuit.bits):
                     circuit.add_bit(bit)
                 circ_box = CircBox(if_true_circuit)
@@ -541,7 +540,6 @@ def circuit_from_qir(
         input_file_str = output_bc_file
     parser = QirParser(input_file_str, gateset, wasm_handler, wasm_int_type)
     circuit = parser.circuit
-    set_cregs = parser.set_cregs
     # Attach the set_cregs dict to the circuit before returning.
-    circuit.set_cregs = set_cregs
+    circuit.ssa_vars = parser.ssa_vars
     return circuit
