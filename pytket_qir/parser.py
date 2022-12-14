@@ -155,7 +155,7 @@ class QirParser:
             opnat = FuncNat(matched_str.group(1))
             opname = FuncName(matched_str.group(2))
             opspec = FuncSpec(matched_str.group(3))
-            pyqir_gate = QirGate(opnat=opnat, opname=opname, opspec=opspec)
+            pyqir_gate = QirGate(func_nat=opnat, func_name=opname, func_spec=opspec)
             return self.gateset.gateset_to_tk(pyqir_gate)
 
     def get_params(self, instr: PyQirInstruction) -> List[float]:
