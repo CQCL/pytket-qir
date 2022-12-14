@@ -492,16 +492,12 @@ class QirParser:
             else:
                 raise CircuitError("Circuit for true condition is not simple.")
             if else_circuit.is_simple:
-                # Add extra bits created in the sub-circuit to the main
+                # Add extra bits created in the sub-circuit to the main one.
                 for bit in set(else_circuit.bits) - set(circuit.bits):
                     circuit.add_bit(bit)
-                circ_box = CircBox(else_circuit)
-                arguments = [qubit.index[0] for qubit in else_circuit.qubits] + [
-                    bit.index[0] for bit in else_circuit.bits
-                ]  # Order matters.
-                circuit.add_circbox(
-                    circ_box, arguments, condition=if_not_bit(condition_bit)
-                )
+                # Else condition is the fall-through and resumes the flow
+                # of the main circuit.
+                circuit.append(else_circuit)
             else:
                 raise CircuitError("Circuit for else condition is not simple.")
 
