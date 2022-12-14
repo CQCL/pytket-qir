@@ -123,7 +123,7 @@ class QirParser:
         self.qir_int_type = qir_int_type
         self.qubits = self.get_required_qubits()
         self.bits = self.get_required_results()
-        self.set_cregs: Dict[str, BitRegister] = {}  # Keep track of set registers.
+        self.ssa_vars: Dict[str, BitRegister] = {}  # Log of set ssa variables.
         entry_block = self.module.functions[0].get_block_by_name("entry")
         if entry_block is None:
             raise NotImplementedError("The QIR file does not contain an entry block.")
