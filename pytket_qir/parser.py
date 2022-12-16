@@ -24,7 +24,6 @@ import os
 import re
 from typing import cast, Callable, Dict, List, Optional, Tuple, Union
 
-
 from pytket import Circuit, OpType  # type: ignore
 from pytket.wasm import WasmFileHandler  # type: ignore
 from pytket.circuit import (  # type: ignore
@@ -103,6 +102,9 @@ _PYQIR_TO_TK_CLOPS: Dict[str, Union[type, Dict[str, Callable]]] = {
     "is_or": RegOr,
     "is_xor": RegXor,
 }
+
+
+_RUNTIME_FUNC = [FuncName.INT.value, FuncName.BOOL.value, FuncName.RES.value]
 
 
 class QirParser:
@@ -317,13 +319,15 @@ class QirParser:
                 c_reg_index = param.constant.result_static_id
             elif instr.instr.is_rt_call:  # Runtime function call.
                 instr = cast(QirRtCallInstr, instr)
-                bits = self.get_qubit_indices(instr.instr)
-                arg, tag = self.get_arg_and_tag(instr)
-                # Create a JSON object for the data to be passed.
                 func_name = cast(str, instr.func_name)
                 matched_str = re.search("__quantum__(.+?)__(.+?)_(.+)", func_name)
                 if matched_str is None:
                     raise RtError("Runtime function name is not properly defined.")
+                if matched_str.group(2) not in _RUNTIME_FUNC:
+                    raise RtError("Runtime function not supported.")
+                bits = self.get_qubit_indices(instr.instr)
+                arg, tag = self.get_arg_and_tag(instr)
+                # Create a JSON object for the data to be passed.
                 if matched_str.group(2) == "result":
                     data = {
                         "name": cast(str, instr.func_name),
