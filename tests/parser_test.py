@@ -312,93 +312,90 @@ class TestQirToPytketConditionals:
         assert inv_reg_map[com11.args[0]] == "%0"
         condition_circuit_coms = com11.op.op.get_circuit().get_commands()
         ccc0 = condition_circuit_coms[0]
-        assert ccc0.op.type == OpType.Measure
-        assert ccc0.qubits[0].index[0] == 2
-        assert ccc0.bits[0].index[0] == 1
-        ccc1 = condition_circuit_coms[1]
-        assert ccc1.op.type == OpType.Z
-        assert ccc1.qubits[0].index[0] == 4
-        ccc2 = condition_circuit_coms[2]
-        assert ccc2.op.type == OpType.CopyBits
-        assert ccc2.args[0].reg_name == "c"
-        assert ccc2.args[0].index[0] == 1
-        assert ccc2.args[1].reg_name == "c"
-        assert ccc2.args[1].index[0] == 7
-        ccc3 = condition_circuit_coms[3]
-        assert ccc3.op.type == OpType.Reset
-        assert ccc3.qubits[0].index[0] == 2
-        ccc4 = condition_circuit_coms[4]
-        assert ccc4.args[0].reg_name == "c"
-        assert ccc4.args[0].index[0] == 7  # Equivalent to bit %1[0].
-        assert inv_reg_map[ccc4.args[0]] == "%1"
-
-        cccc = ccc4.op.op.get_circuit().get_commands()
-        cccc0 = cccc[0]
-        assert cccc0.op.type == OpType.X
-        assert cccc0.qubits[0].index[0] == 4
-        cccc1 = cccc[1]
-        assert cccc1.op.type == OpType.CX
-        assert cccc1.qubits[0].index[0] == 4
-        assert cccc1.qubits[1].index[0] == 3
-        cccc2 = cccc[2]
-        assert cccc2.op.type == OpType.H
-        assert cccc2.qubits[0].index[0] == 4
-        cccc3 = cccc[3]
-        assert cccc3.op.type == OpType.Measure
-        assert cccc3.qubits[0].index[0] == 4
-        assert cccc3.bits[0].index[0] == 2
-        cccc4 = cccc[4]
-        assert cccc4.op.type == OpType.CopyBits
-        assert cccc4.args[0].reg_name == "c"
-        assert cccc4.args[0].index[0] == 2
-        assert cccc4.args[1].reg_name == "c"
-        assert cccc4.args[1].index[0] == 8
-        cccc5 = cccc[5]
-        assert cccc5.op.type == OpType.Reset
-        assert cccc5.qubits[0].index[0] == 4
-        cccc6 = cccc[6]
-        assert cccc6.args[0].reg_name == "c"
-        assert cccc6.args[0].index[0] == 8  # Equivalent to bit %2[0].
-        assert inv_reg_map[cccc6.args[0]] == "%2"
-        ccccc = cccc6.op.op.get_circuit().get_commands()
-        ccccc0 = ccccc[0]
-        assert ccccc0.op.type == OpType.Measure
-        assert ccccc0.qubits[0].index[0] == 3
-        assert ccccc0.bits[0].index[0] == 3
-        c1 = ccccc[1]
-        assert c1.op.type == OpType.Z
-        assert c1.qubits[0].index[0] == 5
-        c2 = ccccc[2]
-        assert c2.op.type == OpType.CopyBits
-        assert c2.args[0].reg_name == "c"
-        assert c2.args[0].index[0] == 3
-        assert c2.args[1].reg_name == "c"
-        assert c2.args[1].index[0] == 9
-        c3 = ccccc[3]
-        assert c3.op.type == OpType.Reset
-        assert c3.qubits[0].index[0] == 3
-        c4 = ccccc[4]
-        assert c4.args[0].reg_name == "c"
-        assert c4.args[0].index[0] == 9  # Equivalent to bit %3[0].
-        assert inv_reg_map[c4.args[0]] == "%3"
-        cc = c4.op.op.get_circuit().get_commands()
-        cc0 = cc[0]
-        assert cc0.op.type == OpType.Measure
-        assert cc0.qubits[0].index[0] == 0
-        assert cc0.bits[0].index[0] == 4
-        cc1 = cc[1]
-        assert cc1.op.type == OpType.X
-        assert cc1.qubits[0].index[0] == 5
-        cc2 = cc[2]
-        assert cc2.op.type == OpType.Measure
-        assert cc2.qubits[0].index[0] == 5
-        assert cc2.bits[0].index[0] == 5
-        cc3 = cc[3]
-        assert cc3.op.type == OpType.Reset
-        assert cc3.qubits[0].index[0] == 0
-        cc4 = cc[4]
-        assert cc4.op.type == OpType.Reset
-        assert cc4.qubits[0].index[0] == 5
+        assert ccc0.op.type == OpType.Z
+        assert ccc0.qubits[0].index[0] == 4
+        com12 = coms[12]
+        assert com12.op.type == OpType.Measure
+        assert com12.qubits[0].index[0] == 2
+        assert com12.bits[0].index[0] == 1
+        com13 = coms[13]
+        assert com13.op.type == OpType.CopyBits
+        assert com13.args[0].reg_name == "c"
+        assert com13.args[0].index[0] == 1
+        assert com13.args[1].reg_name == "c"
+        assert com13.args[1].index[0] == 7
+        com14 = coms[14]
+        assert com14.op.type == OpType.Reset
+        assert com14.qubits[0].index[0] == 2
+        com15 = coms[15]
+        assert com15.args[0].reg_name == "c"
+        assert com15.args[0].index[0] == 7  # Equivalent to bit %1[0].
+        assert inv_reg_map[com15.args[0]] == "%1"
+        condition_circuit_coms = com15.op.op.get_circuit().get_commands()
+        ccc0 = condition_circuit_coms[0]
+        assert ccc0.op.type == OpType.X
+        assert ccc0.qubits[0].index[0] == 4
+        com16 = coms[16]
+        assert com16.op.type == OpType.CX
+        assert com16.qubits[0].index[0] == 4
+        assert com16.qubits[1].index[0] == 3
+        com17 = coms[17]
+        assert com17.op.type == OpType.H
+        assert com17.qubits[0].index[0] == 4
+        com18 = coms[18]
+        assert com18.op.type == OpType.Measure
+        assert com18.qubits[0].index[0] == 4
+        assert com18.bits[0].index[0] == 2
+        com19 = coms[19]
+        assert com19.op.type == OpType.CopyBits
+        assert com19.args[0].reg_name == "c"
+        assert com19.args[0].index[0] == 2
+        assert com19.args[1].reg_name == "c"
+        assert com19.args[1].index[0] == 8
+        com20 = coms[20]
+        assert com20.op.type == OpType.Reset
+        assert com20.qubits[0].index[0] == 4
+        com21 = coms[21]
+        assert com21.args[0].reg_name == "c"
+        assert com21.args[0].index[0] == 8  # Equivalent to bit %2[0].
+        assert inv_reg_map[com21.args[0]] == "%2"
+        condition_circuit_coms = com21.op.op.get_circuit().get_commands()[0]
+        assert condition_circuit_coms.op.type == OpType.Z
+        assert condition_circuit_coms.qubits[0].index[0] == 5
+        com22 = coms[22]
+        assert com22.op.type == OpType.Measure
+        assert com22.qubits[0].index[0] == 3
+        assert com22.bits[0].index[0] == 3
+        com23 = coms[23]
+        assert com23.op.type == OpType.CopyBits
+        assert com23.args[0].reg_name == "c"
+        assert com23.args[0].index[0] == 3
+        assert com23.args[1].reg_name == "c"
+        assert com23.args[1].index[0] == 9
+        com24 = coms[24]
+        assert com24.op.type == OpType.Reset
+        assert com24.qubits[0].index[0] == 3
+        com25 = coms[25]
+        assert com25.args[0].reg_name == "c"
+        assert com25.args[0].index[0] == 9  # Equivalent to bit %3[0].
+        assert inv_reg_map[com25.args[0]] == "%3"
+        condition_circuit_coms = com25.op.op.get_circuit().get_commands()[0]
+        assert condition_circuit_coms.op.type == OpType.X
+        assert condition_circuit_coms.qubits[0].index[0] == 5
+        com26 = coms[26]
+        assert com26.op.type == OpType.Measure
+        assert com26.qubits[0].index[0] == 0
+        assert com26.bits[0].index[0] == 4
+        com27 = coms[27]
+        assert com27.op.type == OpType.Measure
+        assert com27.qubits[0].index[0] == 5
+        assert com27.bits[0].index[0] == 5
+        com28 = coms[28]
+        assert com28.op.type == OpType.Reset
+        assert com28.qubits[0].index[0] == 0
+        com29 = coms[29]
+        assert com29.op.type == OpType.Reset
+        assert com29.qubits[0].index[0] == 5
 
     def test_nested_conditionals(
         self,

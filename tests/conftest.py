@@ -93,7 +93,6 @@ def one_conditional_circuit() -> Circuit:
     true_condition_circuit.Measure(2, 9).add_gate(OpType.Reset, [2])
     true_condition_circuit.Measure(3, 10).add_gate(OpType.Reset, [3])
     true_condition_circuit.Measure(4, 11).add_gate(OpType.Reset, [4])
-    true_condition_circuit.H(0).Y(0).H(0).Measure(0, 12).add_gate(OpType.Reset, [0])
 
     circ_box = CircBox(true_condition_circuit)
     args = list(range(true_condition_circuit.n_qubits)) + list(
@@ -156,11 +155,6 @@ def nested_conditionals_circuit() -> Circuit:
     nested_conditional_circuit_1.Measure(2, 9).add_gate(OpType.Reset, [2])
     nested_conditional_circuit_1.Measure(3, 10).add_gate(OpType.Reset, [3])
     nested_conditional_circuit_1.Measure(4, 11).add_gate(OpType.Reset, [4])
-
-    nested_conditional_circuit_1.H(0).Y(0).H(0)
-    nested_conditional_circuit_1.H(0).Y(0).H(0)
-
-    nested_conditional_circuit_1.Measure(0, 12).add_gate(OpType.Reset, [0])
 
     nested_circ_box_1 = CircBox(nested_conditional_circuit_1)
     args = list(nested_conditional_circuit_1.qubits) + list(
