@@ -506,15 +506,19 @@ class QirParser:
                 raise CircuitError("Circuit for else condition is not simple.")
 
         if isinstance(term, QirBrTerminator):
-            next_block = cast(
-                QirBlock, self.module.functions[0].get_block_by_name(term.dest)
-            )
-            next_circuit = self.block_to_circuit(
-                next_block, Circuit(self.qubits, len(circuit.bits))
-            )
-            circuit.append(next_circuit)
+            # In this configuration, jump instructions are no-ops.
+            # Keeping here for future reference.
+            # next_block = cast(
+            #     QirBlock, self.module.functions[0].get_block_by_name(term.dest)
+            # )
+            # next_circuit = self.block_to_circuit(
+            #     next_block, Circuit(self.qubits, len(circuit.bits))
+            # )
+            # circuit.append(next_circuit)
+            pass
 
         if isinstance(term, QirRetTerminator):
+            # In this configuration, return instructions are no-ops.
             pass
 
         return circuit
