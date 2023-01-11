@@ -38,6 +38,7 @@ from pytket.circuit.logic_exp import (  # type: ignore
     reg_leq,
 )
 
+from pytket_qir.cfg import Block
 from pytket_qir.generator import circuit_to_qir, write_qir_file  # type: ignore
 
 from pytket_qir.gatesets.base import FuncName, FuncNat, FuncSpec  # type: ignore
@@ -386,3 +387,197 @@ _OPERATORS: List[Tuple[str, Callable[[Builder], Callable[[Value, Value], Value]]
 @fixture
 def operators() -> List:
     return _OPERATORS
+
+
+@fixture
+def simple_conditional_cfg() -> dict:
+    cfg = {
+        "entry": Block(
+            name="entry",
+            succs=["then0__2.i.i.i", "else"],
+            preds=[],
+            composition=["entry"],
+            visited=False,
+        ),
+        "then0__2.i.i.i": Block(
+            name="then0__2.i.i.i",
+            succs=[
+                "Microsoft__Quantum__Samples__MeasureDistilledTAtDepth3InX__body.1.exit"
+            ],
+            preds=["entry"],
+            composition=["then0__2.i.i.i"],
+            visited=False,
+        ),
+        "else": Block(
+            name="else",
+            succs=[
+                "Microsoft__Quantum__Samples__MeasureDistilledTAtDepth3InX__body.1.exit"
+            ],
+            preds=["entry"],
+            composition=["else"],
+            visited=False,
+        ),
+        "Microsoft__Quantum__Samples__MeasureDistilledTAtDepth3InX__body.1.exit": Block(
+            name=
+            "Microsoft__Quantum__Samples__MeasureDistilledTAtDepth3InX__body.1.exit",
+            succs=[],
+            preds=["else", "then0__2.i.i.i"],
+            composition=[
+                "Microsoft__Quantum__Samples__MeasureDistilledTAtDepth3InX__body.1.exit"
+            ],
+            visited=False,
+        ),
+    }
+    return cfg
+
+
+@fixture
+def collapsed_simple_chain_cfg() -> dict:
+    cfg = {
+        "entry": Block(
+            name="entry",
+            succs=[],
+            preds=[],
+            composition=[
+                "entry",
+                "continue1",
+                "continue2",
+                "continue3",
+                "continue4",
+                "continue5",
+                "continue6",
+                "continue7",
+                "continue8",
+                "exit1",
+                "exit2",
+            ],
+            visited=False,
+        )
+    }
+    return cfg
+
+
+@fixture
+def collapsed_jump_left_cfg() -> dict:
+    cfg = {
+        "entry": Block(
+            name="entry",
+            succs=["else0", "then0"],
+            preds=[],
+            composition=["entry"],
+            visited=False,
+        ),
+        "else0": Block(
+            name="else0",
+            succs=["continue0"],
+            preds=["entry"],
+            composition=["else0"],
+            visited=False,
+        ),
+        "then0": Block(
+            name="then0",
+            succs=["continue0"],
+            preds=["entry"],
+            composition=["then0", "then1", "then2"],
+            visited=False,
+        ),
+        "continue0": Block(
+            name="continue0",
+            succs=[],
+            preds=["then0", "else0"],
+            composition=["continue0"],
+            visited=False,
+        ),
+    }
+    return cfg
+
+
+@fixture
+def collapsed_jump_right_cfg() -> dict:
+    cfg = {
+        "entry": Block(
+            name="entry",
+            succs=["then0", "else0"],
+            preds=[],
+            composition=["entry"],
+            visited=False,
+        ),
+        "then0": Block(
+            name="then0",
+            succs=["continue0"],
+            preds=["entry"],
+            composition=["then0"],
+            visited=False,
+        ),
+        "else0": Block(
+            name="else0",
+            succs=["continue0"],
+            preds=["entry"],
+            composition=["else0", "then1", "then2"],
+            visited=False,
+        ),
+        "continue0": Block(
+            name="continue0",
+            succs=[],
+            preds=["else0", "then0"],
+            composition=["continue0"],
+            visited=False,
+        ),
+    }
+    return cfg
+
+
+@fixture
+def collapsed_complex_chain() -> dict:
+    cfg = {
+        "entry": Block(
+            name="entry",
+            succs=["else0", "then0"],
+            preds=[],
+            composition=["entry"],
+            visited=False,
+        ),
+        "else0": Block(
+            name="else0",
+            succs=["continue0"],
+            preds=["entry"],
+            composition=["else0"],
+            visited=False,
+        ),
+        "then0": Block(
+            name="then0",
+            succs=["continue0"],
+            preds=["entry"],
+            composition=["then0", "then1", "then2"],
+            visited=False,
+        ),
+        "continue0": Block(
+            name="continue0",
+            succs=["leftbr1", "rightbr1"],
+            preds=["then0", "else0"],
+            composition=["continue0", "continue1", "continue2"],
+            visited=False,
+        ),
+        "leftbr1": Block(
+            name="leftbr1",
+            succs=["exit1"],
+            preds=["continue0"],
+            composition=["leftbr1"],
+            visited=False,
+        ),
+        "rightbr1": Block(
+            name="rightbr1",
+            succs=["exit1"],
+            preds=["continue0"],
+            composition=["rightbr1", "rightbr2"],
+            visited=False,
+        ),
+        "exit1": Block(
+            name="exit1",
+            succs=[],
+            preds=["rightbr1", "leftbr1"],
+            composition=["exit1", "exit2"],
+            visited=False,
+        ),
+    }
+    return cfg
