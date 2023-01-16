@@ -159,3 +159,39 @@ class CfgAnalyser:
             self.cfg[block_name].visited = False
         self.rewritten_cfg = rewritten_cfg
         return rewritten_cfg
+
+    def insert_trivial_blocks(self) -> None:
+        """
+        Insert trivial blocks to conform the CFG to CircBox unique input and
+        output conditions.
+        """
+        trivial_blocks = {}
+        for block_name, curr_block in self.rewritten_cfg.items():
+            succs = curr_block.succs
+            for succ in succs:
+                next_succs = self.rewritten_cfg[succ].succs
+                if match_succ := list(set(next_succs).intersection(succs)):
+                    match_succ = match_succ[0]
+                    match_block = self.rewritten_cfg[match_succ]
+                    # Create a trivial block with a unique name.
+                    trivial_block_name = block_name + "_trivial_block"
+                    trivial_blocks[trivial_block_name] = Block(
+                        name=trivial_block_name,
+                        succs=[match_block.name],
+                        preds=[block_name],
+                        composition=[trivial_block_name],
+                        visited=False,
+                        condition=not self.rewritten_cfg[succ].condition,
+                    )
+                    # Update successor and predecessor.
+                    match_block.preds = [
+                        pred.replace(block_name, trivial_block_name)
+                        for pred in match_block.preds
+                    ]
+                    match_block.condition = None
+                    curr_block.succs = [
+                        succ.replace(match_block.name, trivial_block_name)
+                        for succ in curr_block.succs
+                    ]
+
+        self.rewritten_cfg.update(trivial_blocks)
