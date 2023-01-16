@@ -116,6 +116,7 @@ class CfgAnalyser:
             next_block = cast(
                 QirBlock, self.module.functions[0].get_block_by_name(term.dest)
             )
+            # A precondition to apply the rewrite rule.
             continue_next = len(self.cfg[next_block.name].preds) == 1
 
             if continue_next:  # Recurse through the chain of jumps.
@@ -132,6 +133,12 @@ class CfgAnalyser:
         return curr_block
 
     def collapse_blocks(self) -> None:
+        """
+        Detect and collapse chains of linear blocks.
+
+        Return a rewritten CFG where all blocks have in-degree exactly one
+        and out-degree greater or equal to two.
+        """
         rewritten_cfg = {}
         for block in self.module.functions[0].blocks:
             if not self.cfg[block.name].visited:
