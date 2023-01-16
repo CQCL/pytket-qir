@@ -1,6 +1,6 @@
 from collections import OrderedDict
 from dataclasses import dataclass
-from typing import cast, List
+from typing import Optional, cast, List
 
 from pyqir.parser import (
     QirBlock,
@@ -18,6 +18,7 @@ class Block:
     preds: List
     composition: List
     visited: bool = False
+    condition: Optional[bool] = None
 
 
 class CfgAnalyser:
@@ -40,11 +41,12 @@ class CfgAnalyser:
         for block in self.module.functions[0].blocks:
             term = block.terminator
             if isinstance(term, QirCondBrTerminator):
-                # self._successors[block.name] = [term.true_dest, term.false_dest]
                 f = lambda el: el.name == term.true_dest or el.name == term.false_dest
                 self._successors[block.name] = list(
                     map(lambda el: el.name, filter(f, self.module.functions[0].blocks))
                 )
+                self.conditions[term.true_dest] = True
+                self.conditions[term.false_dest] = False
             elif isinstance(term, QirBrTerminator):
                 self._successors[block.name] = [term.dest]
             elif isinstance(term, QirRetTerminator):
@@ -88,6 +90,7 @@ class CfgAnalyser:
 
     @cfg.setter
     def cfg(self, value) -> None:
+        self.conditions = {}
         self.successors = {}
         self.predecessors = {}
 
@@ -99,6 +102,7 @@ class CfgAnalyser:
                     succs=self.successors[block.name],
                     preds=self.predecessors[block.name],
                     composition=[block.name],
+                    condition=self.conditions.get(block.name),
                 )
                 self._cfg[block.name] = block_inst
 
