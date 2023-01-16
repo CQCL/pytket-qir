@@ -71,7 +71,7 @@ def grover_circuit() -> Circuit:
 
 
 @fixture
-def one_conditional_circuit() -> Circuit:
+def one_conditional_else_circuit() -> Circuit:
     circuit = Circuit(5, 14)
 
     c_reg = circuit.get_c_register("c")
@@ -101,10 +101,199 @@ def one_conditional_circuit() -> Circuit:
     )
     circuit.add_circbox(circ_box, args, condition=if_bit(c_reg[13]))
 
+    empty_circuit = Circuit(5, 14)
+    circ_box_2 = CircBox(empty_circuit)
+    args = list(range(empty_circuit.n_qubits)) + list(range(len(empty_circuit.bits)))
+    circuit.add_circbox(circ_box_2, args, condition=if_not_bit(c_reg[13]))
     else_condition_circuit = Circuit(5, 14)
     else_condition_circuit.H(0).Y(0).H(0).Measure(0, 12).add_gate(OpType.Reset, [0])
     circuit.append(else_condition_circuit)
 
+    return circuit
+
+
+@fixture
+def one_conditional_then_circuit() -> Circuit:
+    circuit = Circuit(5, 14)
+
+    c_reg = circuit.get_c_register("c")
+
+    circuit.CX(4, 3).CX(4, 2).CX(3, 2).CX(2, 1).CX(4, 0)
+    circuit.CX(3, 0).CX(1, 0).Measure(1, 0).add_gate(OpType.Reset, [1])
+    circuit.Measure(2, 1).add_gate(OpType.Reset, [2])
+    circuit.Measure(3, 2).add_gate(OpType.Reset, [3])
+    circuit.Measure(4, 3).add_gate(OpType.Reset, [4])
+    circuit.add_c_copybits([c_reg[0]], [c_reg[13]])
+
+    empty_circuit = Circuit(5, 14)
+    circ_box_2 = CircBox(empty_circuit)
+    args = list(range(empty_circuit.n_qubits)) + list(range(len(empty_circuit.bits)))
+    circuit.add_circbox(circ_box_2, args, condition=if_bit(c_reg[13]))
+
+    true_condition_circuit = Circuit(5, 14)
+    true_condition_circuit.add_gate(OpType.Reset, [0])
+    true_condition_circuit.Ry(0.9553166181245094, 0).Rz(-5.497787143782138, 0)
+    true_condition_circuit.Ry(0.9553166181245094, 1).Rz(-5.497787143782138, 1)
+    true_condition_circuit.Ry(0.9553166181245094, 2).Rz(-5.497787143782138, 2)
+    true_condition_circuit.Ry(0.9553166181245094, 3).Rz(-5.497787143782138, 3)
+    true_condition_circuit.Ry(0.9553166181245094, 4).Rz(-5.497787143782138, 4)
+    true_condition_circuit.Measure(1, 8).add_gate(OpType.Reset, [1])
+    true_condition_circuit.Measure(2, 9).add_gate(OpType.Reset, [2])
+    true_condition_circuit.Measure(3, 10).add_gate(OpType.Reset, [3])
+    true_condition_circuit.Measure(4, 11).add_gate(OpType.Reset, [4])
+
+    circ_box = CircBox(true_condition_circuit)
+    args = list(range(true_condition_circuit.n_qubits)) + list(
+        range(len(true_condition_circuit.bits))
+    )
+    circuit.add_circbox(circ_box, args, condition=if_not_bit(c_reg[13]))
+
+    then_condition_circuit = Circuit(5, 14)
+    then_condition_circuit.H(0).Y(0).H(0).Measure(0, 12).add_gate(OpType.Reset, [0])
+    circuit.append(then_condition_circuit)
+
+    return circuit
+
+
+@fixture
+def one_conditional_diamond_circuit() -> Circuit:
+    circuit = Circuit(5, 14)
+
+    c_reg = circuit.get_c_register("c")
+
+    circuit.CX(4, 3).CX(4, 2).CX(3, 2).CX(2, 1).CX(4, 0)
+    circuit.CX(3, 0).CX(1, 0).Measure(1, 0).add_gate(OpType.Reset, [1])
+    circuit.Measure(2, 1).add_gate(OpType.Reset, [2])
+    circuit.Measure(3, 2).add_gate(OpType.Reset, [3])
+    circuit.Measure(4, 3).add_gate(OpType.Reset, [4])
+    circuit.add_c_copybits([c_reg[0]], [c_reg[13]])
+
+    true_condition_circuit = Circuit(5, 14)
+    true_condition_circuit.add_gate(OpType.Reset, [0])
+    true_condition_circuit.Ry(0.9553166181245094, 0).Rz(-5.497787143782138, 0)
+    true_condition_circuit.Ry(0.9553166181245094, 1).Rz(-5.497787143782138, 1)
+    true_condition_circuit.Ry(0.9553166181245094, 2).Rz(-5.497787143782138, 2)
+    true_condition_circuit.Ry(0.9553166181245094, 3).Rz(-5.497787143782138, 3)
+    true_condition_circuit.Ry(0.9553166181245094, 4).Rz(-5.497787143782138, 4)
+    true_condition_circuit.Measure(1, 8).add_gate(OpType.Reset, [1])
+    true_condition_circuit.Measure(2, 9).add_gate(OpType.Reset, [2])
+    true_condition_circuit.Measure(3, 10).add_gate(OpType.Reset, [3])
+    true_condition_circuit.Measure(4, 11).add_gate(OpType.Reset, [4])
+
+    circ_box = CircBox(true_condition_circuit)
+    args = list(range(true_condition_circuit.n_qubits)) + list(
+        range(len(true_condition_circuit.bits))
+    )
+    circuit.add_circbox(circ_box, args, condition=if_not_bit(c_reg[13]))
+
+    false_condition_circuit = Circuit(5, 14)
+    false_condition_circuit.Measure(2, 8).add_gate(OpType.Reset, [2])
+    false_condition_circuit.Measure(3, 9).add_gate(OpType.Reset, [3])
+    false_condition_circuit.Measure(4, 10).add_gate(OpType.Reset, [4])
+    false_condition_circuit.Measure(1, 11).add_gate(OpType.Reset, [1])
+    circ_box_2 = CircBox(false_condition_circuit)
+    args = list(range(false_condition_circuit.n_qubits)) + list(
+        range(len(false_condition_circuit.bits))
+    )
+    circuit.add_circbox(circ_box_2, args, condition=if_bit(c_reg[13]))
+
+    diamond_condition_circuit = Circuit(5, 14)
+    diamond_condition_circuit.H(0).Y(0).H(0).Measure(0, 12).add_gate(OpType.Reset, [0])
+    circuit.append(diamond_condition_circuit)
+
+    return circuit
+
+
+@fixture
+def collapse_jump_instr() -> None:
+    circuit = Circuit(5, 15)
+    c_reg = circuit.get_c_register("c")
+    circuit.CX(4, 3).CX(4, 2).CX(3, 2).CX(2, 1)
+    circuit.add_c_copybits([c_reg[0]], [c_reg[13]])
+
+    else_circuit = Circuit(5, 15)
+    else_circuit.Z(2).Z(2).Z(2)
+
+    circ_box_2 = CircBox(else_circuit)
+    args = list(else_circuit.qubits) + list(else_circuit.bits)
+    circuit.add_circbox(circ_box_2, args, condition=if_not_bit(c_reg[13]))
+
+    then_circuit = Circuit(5, 15)
+    then_circuit.Ry(0.9553166181245094, 0)
+    then_circuit.Rz(-5.497787143782138, 0)
+    then_circuit.Ry(0.9553166181245094, 1)
+    then_circuit.Rz(-5.497787143782138, 1)
+    then_circuit.X(1).X(1).X(1)
+    then_circuit.Y(1).Y(1).Y(1)
+
+    circ_box_1 = CircBox(then_circuit)
+    args = list(then_circuit.qubits) + list(then_circuit.bits)
+    circuit.add_circbox(circ_box_1, args, condition=if_bit(c_reg[13]))
+
+    circuit.H(0).H(0).H(0)
+    circuit.add_c_copybits([c_reg[1]], [c_reg[14]])
+
+    leftbr1 = Circuit(5, 15)
+    leftbr1.Z(0).Z(0).Z(0)
+
+    circ_box_2 = CircBox(leftbr1)
+    args = list(leftbr1.qubits) + list(leftbr1.bits)
+    circuit.add_circbox(circ_box_2, args, condition=if_bit(c_reg[14]))
+
+    rightbr1 = Circuit(5, 15)
+    rightbr1.Y(2).Y(2).Y(2).X(2).X(2).X(2)
+
+    circ_box_3 = CircBox(rightbr1)
+    args = list(rightbr1.qubits) + list(rightbr1.bits)
+    circuit.add_circbox(circ_box_3, args, condition=if_not_bit(c_reg[14]))
+
+    circuit.H(2).H(2)
+
+    return circuit
+
+
+@fixture
+def nested_conditionals_then() -> None:
+    circuit = Circuit(5, 15)
+    c_reg = circuit.get_c_register("c")
+    circuit.CX(4, 3).CX(4, 2).CX(3, 2).CX(2, 1)
+    circuit.add_c_copybits([c_reg[0]], [c_reg[13]])
+
+    then_circuit = Circuit(5, 15)
+    then_circuit.add_c_copybits([c_reg[1]], [c_reg[14]])
+    then_circuit.Ry(0.9553166181245094, 0)
+    then_circuit.Rz(-5.497787143782138, 0)
+    then_circuit.Ry(0.9553166181245094, 1)
+    then_circuit.Rz(-5.497787143782138, 1)
+
+    then_circuit_1 = Circuit(5, 15)
+    then_circuit_1.X(1).X(1).X(1)
+
+    else_circuit_1 = Circuit(5, 15)
+    else_circuit_1.Y(1).Y(1).Y(1)
+
+    nested_circ_box_1 = CircBox(then_circuit_1)
+    args = list(then_circuit_1.qubits) + list(then_circuit_1.bits)
+    then_circuit.add_circbox(nested_circ_box_1, args, condition=if_bit(c_reg[14]))
+    nested_circ_box_2 = CircBox(else_circuit_1)
+    args = list(else_circuit_1.qubits) + list(else_circuit_1.bits)
+    then_circuit.add_circbox(nested_circ_box_2, args, condition=if_not_bit(c_reg[14]))
+
+    circ_box_1 = CircBox(then_circuit)
+    args = list(then_circuit.qubits) + list(then_circuit.bits)
+    circuit.add_circbox(circ_box_1, args, condition=if_bit(c_reg[13]))
+
+    else_circuit = Circuit(5, 15)
+    else_circuit.Z(2).Z(2).Z(2)
+
+    circ_box_2 = CircBox(else_circuit)
+    args = list(else_circuit.qubits) + list(else_circuit.bits)
+    circuit.add_circbox(circ_box_2, args, condition=if_not_bit(c_reg[13]))
+
+    exit_circuit = Circuit(5, 15)
+    exit_circuit.H(0).H(0).H(0)
+
+    circuit.append(exit_circuit)
     return circuit
 
 
@@ -398,6 +587,7 @@ def simple_conditional_cfg() -> dict:
             preds=[],
             composition=["entry"],
             visited=False,
+            condition=None,
         ),
         "then0__2.i.i.i": Block(
             name="then0__2.i.i.i",
@@ -407,6 +597,7 @@ def simple_conditional_cfg() -> dict:
             preds=["entry"],
             composition=["then0__2.i.i.i"],
             visited=False,
+            condition=True,
         ),
         "else": Block(
             name="else",
@@ -416,16 +607,17 @@ def simple_conditional_cfg() -> dict:
             preds=["entry"],
             composition=["else"],
             visited=False,
+            condition=False,
         ),
         "Microsoft__Quantum__Samples__MeasureDistilledTAtDepth3InX__body.1.exit": Block(
-            name=
-            "Microsoft__Quantum__Samples__MeasureDistilledTAtDepth3InX__body.1.exit",
+            name="Microsoft__Quantum__Samples__MeasureDistilledTAtDepth3InX__body.1.exit",
             succs=[],
             preds=["else", "then0__2.i.i.i"],
             composition=[
                 "Microsoft__Quantum__Samples__MeasureDistilledTAtDepth3InX__body.1.exit"
             ],
             visited=False,
+            condition=None,
         ),
     }
     return cfg
@@ -452,6 +644,7 @@ def collapsed_simple_chain_cfg() -> dict:
                 "exit2",
             ],
             visited=False,
+            condition=None,
         )
     }
     return cfg
@@ -466,6 +659,7 @@ def collapsed_jump_left_cfg() -> dict:
             preds=[],
             composition=["entry"],
             visited=False,
+            condition=None,
         ),
         "else0": Block(
             name="else0",
@@ -473,6 +667,7 @@ def collapsed_jump_left_cfg() -> dict:
             preds=["entry"],
             composition=["else0"],
             visited=False,
+            condition=False,
         ),
         "then0": Block(
             name="then0",
@@ -480,6 +675,7 @@ def collapsed_jump_left_cfg() -> dict:
             preds=["entry"],
             composition=["then0", "then1", "then2"],
             visited=False,
+            condition=True,
         ),
         "continue0": Block(
             name="continue0",
@@ -487,6 +683,7 @@ def collapsed_jump_left_cfg() -> dict:
             preds=["then0", "else0"],
             composition=["continue0"],
             visited=False,
+            condition=None,
         ),
     }
     return cfg
@@ -501,6 +698,7 @@ def collapsed_jump_right_cfg() -> dict:
             preds=[],
             composition=["entry"],
             visited=False,
+            condition=None,
         ),
         "then0": Block(
             name="then0",
@@ -508,6 +706,7 @@ def collapsed_jump_right_cfg() -> dict:
             preds=["entry"],
             composition=["then0"],
             visited=False,
+            condition=True,
         ),
         "else0": Block(
             name="else0",
@@ -515,6 +714,7 @@ def collapsed_jump_right_cfg() -> dict:
             preds=["entry"],
             composition=["else0", "then1", "then2"],
             visited=False,
+            condition=False,
         ),
         "continue0": Block(
             name="continue0",
@@ -522,6 +722,7 @@ def collapsed_jump_right_cfg() -> dict:
             preds=["else0", "then0"],
             composition=["continue0"],
             visited=False,
+            condition=None,
         ),
     }
     return cfg
@@ -536,6 +737,7 @@ def collapsed_complex_chain() -> dict:
             preds=[],
             composition=["entry"],
             visited=False,
+            condition=None,
         ),
         "else0": Block(
             name="else0",
@@ -543,6 +745,7 @@ def collapsed_complex_chain() -> dict:
             preds=["entry"],
             composition=["else0"],
             visited=False,
+            condition=False,
         ),
         "then0": Block(
             name="then0",
@@ -550,6 +753,7 @@ def collapsed_complex_chain() -> dict:
             preds=["entry"],
             composition=["then0", "then1", "then2"],
             visited=False,
+            condition=True,
         ),
         "continue0": Block(
             name="continue0",
@@ -557,6 +761,7 @@ def collapsed_complex_chain() -> dict:
             preds=["then0", "else0"],
             composition=["continue0", "continue1", "continue2"],
             visited=False,
+            condition=None,
         ),
         "leftbr1": Block(
             name="leftbr1",
@@ -564,6 +769,7 @@ def collapsed_complex_chain() -> dict:
             preds=["continue0"],
             composition=["leftbr1"],
             visited=False,
+            condition=True,
         ),
         "rightbr1": Block(
             name="rightbr1",
@@ -571,6 +777,7 @@ def collapsed_complex_chain() -> dict:
             preds=["continue0"],
             composition=["rightbr1", "rightbr2"],
             visited=False,
+            condition=False,
         ),
         "exit1": Block(
             name="exit1",
@@ -578,6 +785,305 @@ def collapsed_complex_chain() -> dict:
             preds=["rightbr1", "leftbr1"],
             composition=["exit1", "exit2"],
             visited=False,
+            condition=None,
+        ),
+    }
+    return cfg
+
+
+@fixture
+def collapsed_nested_chains() -> dict:
+    cfg = {
+        "entry": Block(
+            name="entry",
+            succs=["else0", "then0"],
+            preds=[],
+            composition=["entry"],
+            visited=False,
+            condition=None,
+        ),
+        "else0": Block(
+            name="else0",
+            succs=["continue0"],
+            preds=["entry"],
+            composition=["else0"],
+            visited=False,
+            condition=False,
+        ),
+        "then0": Block(
+            name="then0",
+            succs=["then11", "else11"],
+            preds=["entry"],
+            composition=["then0", "then1", "then2"],
+            visited=False,
+            condition=True,
+        ),
+        "then11": Block(
+            name="then11",
+            succs=["continue0"],
+            preds=["then0"],
+            composition=["then11", "then12", "then13"],
+            visited=False,
+            condition=True,
+        ),
+        "else11": Block(
+            name="else11",
+            succs=["continue0"],
+            preds=["then0"],
+            composition=["else11"],
+            visited=False,
+            condition=False,
+        ),
+        "continue0": Block(
+            name="continue0",
+            succs=["leftbr1", "rightbr1"],
+            preds=["else11", "then11", "else0"],
+            composition=["continue0", "continue1", "continue2"],
+            visited=False,
+            condition=None,
+        ),
+        "leftbr1": Block(
+            name="leftbr1",
+            succs=["exit1"],
+            preds=["continue0"],
+            composition=["leftbr1"],
+            visited=False,
+            condition=True,
+        ),
+        "rightbr1": Block(
+            name="rightbr1",
+            succs=["exit1"],
+            preds=["continue0"],
+            composition=["rightbr1", "rightbr2"],
+            visited=False,
+            condition=False,
+        ),
+        "exit1": Block(
+            name="exit1",
+            succs=[],
+            preds=["rightbr1", "leftbr1"],
+            composition=["exit1", "exit2"],
+            visited=False,
+            condition=None,
+        ),
+    }
+    return cfg
+
+
+@fixture
+def insert_block_right() -> dict:
+    cfg = {
+        "entry": Block(
+            name="entry",
+            succs=["then0__2.i.i.i", "entry_trivial_block"],
+            preds=[],
+            composition=["entry"],
+            visited=False,
+            condition=None,
+        ),
+        "then0__2.i.i.i": Block(
+            name="then0__2.i.i.i",
+            succs=[
+                "Microsoft__Quantum__Samples__MeasureDistilledTAtDepth3InX__body.1.exit"
+            ],
+            preds=["entry"],
+            composition=["then0__2.i.i.i"],
+            visited=False,
+            condition=True,
+        ),
+        "Microsoft__Quantum__Samples__MeasureDistilledTAtDepth3InX__body.1.exit": Block(
+            name="Microsoft__Quantum__Samples__MeasureDistilledTAtDepth3InX__body.1.exit",
+            succs=[],
+            preds=["then0__2.i.i.i", "entry_trivial_block"],
+            composition=[
+                "Microsoft__Quantum__Samples__MeasureDistilledTAtDepth3InX__body.1.exit"
+            ],
+            visited=False,
+            condition=None,
+        ),
+        "entry_trivial_block": Block(
+            name="entry_trivial_block",
+            succs=[
+                "Microsoft__Quantum__Samples__MeasureDistilledTAtDepth3InX__body.1.exit"
+            ],
+            preds=["entry"],
+            composition=["entry_trivial_block"],
+            visited=False,
+            condition=False,
+        ),
+    }
+    return cfg
+
+
+@fixture
+def insert_block_left() -> dict:
+    cfg = {
+        "entry": Block(
+            name="entry",
+            succs=["else", "entry_trivial_block"],
+            preds=[],
+            composition=["entry"],
+            visited=False,
+            condition=None,
+        ),
+        "else": Block(
+            name="else",
+            succs=["then"],
+            preds=["entry"],
+            composition=["else"],
+            visited=False,
+            condition=False,
+        ),
+        "then": Block(
+            name="then",
+            succs=[],
+            preds=["else", "entry_trivial_block"],
+            composition=["then"],
+            visited=False,
+            condition=None,
+        ),
+        "entry_trivial_block": Block(
+            name="entry_trivial_block",
+            succs=["then"],
+            preds=["entry"],
+            composition=["entry_trivial_block"],
+            visited=False,
+            condition=True,
+        ),
+    }
+    return cfg
+
+
+@fixture
+def insert_nested_blocks_right() -> dict:
+    cfg = {
+        "entry": Block(
+            name="entry",
+            succs=["then", "entry_trivial_block"],
+            preds=[],
+            composition=["entry"],
+            visited=False,
+            condition=None,
+        ),
+        "then": Block(
+            name="then",
+            succs=["continue"],
+            preds=["entry"],
+            composition=["then"],
+            visited=False,
+            condition=True,
+        ),
+        "continue": Block(
+            name="continue",
+            succs=["then1", "continue_trivial_block"],
+            preds=["then", "entry_trivial_block"],
+            composition=["continue"],
+            visited=False,
+            condition=None,
+        ),
+        "then1": Block(
+            name="then1",
+            succs=[
+                "TeleportChain__TeleportQubitUsingPresharedEntanglement__body.2.exit.i"
+            ],
+            preds=["continue"],
+            composition=["then1"],
+            visited=False,
+            condition=True,
+        ),
+        "TeleportChain__TeleportQubitUsingPresharedEntanglement__body.2.exit.i": Block(
+            name="TeleportChain__TeleportQubitUsingPresharedEntanglement__body.2.exit.i",
+            succs=[
+                "then2",
+                "TeleportChain__TeleportQubitUsingPresharedEntanglement__body.2.exit.i_trivial_block",
+            ],
+            preds=["then1", "continue_trivial_block"],
+            composition=[
+                "TeleportChain__TeleportQubitUsingPresharedEntanglement__body.2.exit.i"
+            ],
+            visited=False,
+            condition=None,
+        ),
+        "then2": Block(
+            name="then2",
+            succs=["continue2"],
+            preds=[
+                "TeleportChain__TeleportQubitUsingPresharedEntanglement__body.2.exit.i"
+            ],
+            composition=["then2"],
+            visited=False,
+            condition=True,
+        ),
+        "continue2": Block(
+            name="continue2",
+            succs=["then3", "continue2_trivial_block"],
+            preds=[
+                "then2",
+                "TeleportChain__TeleportQubitUsingPresharedEntanglement__body.2.exit.i_trivial_block",
+            ],
+            composition=["continue2"],
+            visited=False,
+            condition=None,
+        ),
+        "then3": Block(
+            name="then3",
+            succs=[
+                "TeleportChain__DemonstrateTeleportationUsingPresharedEntanglement__body.1.exit"
+            ],
+            preds=["continue2"],
+            composition=["then3"],
+            visited=False,
+            condition=True,
+        ),
+        "TeleportChain__DemonstrateTeleportationUsingPresharedEntanglement__body.1.exit": Block(
+            name="TeleportChain__DemonstrateTeleportationUsingPresharedEntanglement__body.1.exit",
+            succs=[],
+            preds=["then3", "continue2_trivial_block"],
+            composition=[
+                "TeleportChain__DemonstrateTeleportationUsingPresharedEntanglement__body.1.exit"
+            ],
+            visited=False,
+            condition=None,
+        ),
+        "entry_trivial_block": Block(
+            name="entry_trivial_block",
+            succs=["continue"],
+            preds=["entry"],
+            composition=["entry_trivial_block"],
+            visited=False,
+            condition=False,
+        ),
+        "continue_trivial_block": Block(
+            name="continue_trivial_block",
+            succs=[
+                "TeleportChain__TeleportQubitUsingPresharedEntanglement__body.2.exit.i"
+            ],
+            preds=["continue"],
+            composition=["continue_trivial_block"],
+            visited=False,
+            condition=False,
+        ),
+        "TeleportChain__TeleportQubitUsingPresharedEntanglement__body.2.exit.i_trivial_block": Block(
+            name="TeleportChain__TeleportQubitUsingPresharedEntanglement__body.2.exit.i_trivial_block",
+            succs=["continue2"],
+            preds=[
+                "TeleportChain__TeleportQubitUsingPresharedEntanglement__body.2.exit.i"
+            ],
+            composition=[
+                "TeleportChain__TeleportQubitUsingPresharedEntanglement__body.2.exit.i_trivial_block"
+            ],
+            visited=False,
+            condition=False,
+        ),
+        "continue2_trivial_block": Block(
+            name="continue2_trivial_block",
+            succs=[
+                "TeleportChain__DemonstrateTeleportationUsingPresharedEntanglement__body.1.exit"
+            ],
+            preds=["continue2"],
+            composition=["continue2_trivial_block"],
+            visited=False,
+            condition=False,
         ),
     }
     return cfg
