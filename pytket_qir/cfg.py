@@ -102,6 +102,7 @@ class CfgAnalyser:
                     succs=self.successors[block.name],
                     preds=self.predecessors[block.name],
                     composition=[block.name],
+                    visited=False,
                     condition=self.conditions.get(block.name),
                 )
                 self._cfg[block.name] = block_inst
