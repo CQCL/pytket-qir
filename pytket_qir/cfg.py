@@ -110,42 +110,26 @@ class CfgAnalyser:
     def apply_contraction(self, block) -> None:
         term = block.terminator
         has_jump = isinstance(term, QirBrTerminator)
-        print("     " + block.name + " " + str(has_jump))
+        curr_block = self.cfg[block.name]
+        curr_block.visited = True
         if has_jump:
             next_block = cast(
                 QirBlock, self.module.functions[0].get_block_by_name(term.dest)
             )
             continue_next = len(self.cfg[next_block.name].preds) == 1
-            is_next_return = isinstance(next_block.terminator, QirRetTerminator)
-            is_next_fork = isinstance(next_block.terminator, QirCondBrTerminator)
 
             if continue_next:  # Recurse through the chain of jumps.
                 next_block_inst = self.apply_contraction(next_block)
-                self.cfg[block.name].visited = True
-                self.cfg[next_block.name].preds
                 return Block(
-                    name=block.name,
+                    name=curr_block.name,
                     succs=next_block_inst.succs,
-                    preds=self.cfg[block.name].preds,
+                    preds=curr_block.preds,
                     composition=[block.name] + next_block_inst.composition,
+                    condition=curr_block.condition,
                 )
-            else:
-                if is_next_return:
-                    self.cfg[block.name].visited = True
-                    return self.cfg[block.name]
-                if is_next_fork:
-                    next_block_inst = self.apply_contraction(next_block)
-                    # import pdb; pdb.set_trace()
-                    self.cfg[block.name].visited = True
-                    self.cfg[next_block.name].visited = True
-                    return Block(
-                        name=block.name,
-                        succs=next_block_inst.succs,
-                        preds=self.cfg[block.name].preds,
-                        composition=[block.name] + next_block_inst.composition,
-                    )
-        self.cfg[block.name].visited = True
-        return self.cfg[block.name]
+            else:  # Return the current block.
+                return curr_block
+        return curr_block
 
     def collapse_blocks(self) -> None:
         rewritten_cfg = {}
