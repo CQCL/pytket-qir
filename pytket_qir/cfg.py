@@ -68,22 +68,6 @@ class CfgAnalyser:
                     predecessors.append(next_block_name)
             self._predecessors[curr_block_name] = predecessors
 
-    def _get_preds(self, succs: dict) -> dict:
-        """
-        Given a dict of successors, invert that mapping an return a dict
-        of predecessors.
-        """
-        preds = OrderedDict()
-        reversed_succs = reversed(succs)
-        reversed_succs_list = list(reversed_succs)
-        for curr_block_index, curr_block_name in enumerate(reversed_succs_list):
-            predecessors = []
-            for next_block_name in reversed_succs_list[curr_block_index + 1 :]:
-                if curr_block_name in self.successors[next_block_name]:
-                    predecessors.append(next_block_name)
-            preds[curr_block_name] = predecessors
-        return preds
-
     @property
     def cfg(self):
         return self._cfg
