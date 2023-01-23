@@ -13,8 +13,9 @@
 # limitations under the License.
 
 from pathlib import Path
-import pytest
 from typing import cast
+
+import pytest
 
 from pytket import Circuit  # type: ignore
 from pytket.circuit import OpType  # type: ignore
