@@ -28,6 +28,7 @@ from pytket.circuit import (  # type: ignore
     OpType,
 )
 from pytket.circuit.logic_exp import (  # type: ignore
+    BitNot,
     if_bit,
     if_not_bit,
     reg_eq,
@@ -157,18 +158,53 @@ def one_conditional_then_circuit() -> Circuit:
 
 @fixture
 def one_conditional_diamond_circuit() -> Circuit:
-    circuit = Circuit(5, 14)
+    circuit = Circuit(5, 16)
+    circuit.add_c_register("tk_SCRATCH_BIT", 4)
 
-    c_reg = circuit.get_c_register("c")
+    creg = circuit.get_c_register("c")
+    scratch_reg = circuit.get_c_register("tk_SCRATCH_BIT")
 
-    circuit.CX(4, 3).CX(4, 2).CX(3, 2).CX(2, 1).CX(4, 0)
-    circuit.CX(3, 0).CX(1, 0).Measure(1, 0).add_gate(OpType.Reset, [1])
-    circuit.Measure(2, 1).add_gate(OpType.Reset, [2])
-    circuit.Measure(3, 2).add_gate(OpType.Reset, [3])
-    circuit.Measure(4, 3).add_gate(OpType.Reset, [4])
-    circuit.add_c_copybits([c_reg[0]], [c_reg[13]])
+    circuit.add_c_setbits([1, 1], [13, 14])
+    exp_entry = creg[13] | (creg[13] & creg[14])
+    circuit.add_classicalexpbox_bit(exp_entry, [scratch_reg[0]])
 
-    true_condition_circuit = Circuit(5, 14)
+    entry_circuit = Circuit(5, 16)
+    creg = entry_circuit.get_c_register("c")
+    entry_circuit.add_c_setbits([1], [13])
+    entry_circuit.CX(4, 3).CX(4, 2).CX(3, 2).CX(2, 1).CX(4, 0)
+    entry_circuit.CX(3, 0).CX(1, 0).Measure(1, 0).add_gate(OpType.Reset, [1])
+    entry_circuit.Measure(2, 1).add_gate(OpType.Reset, [2])
+    entry_circuit.Measure(3, 2).add_gate(OpType.Reset, [3])
+    entry_circuit.Measure(4, 3).add_gate(OpType.Reset, [4])
+    entry_circuit.add_c_copybits([creg[0]], [creg[15]])
+
+    circ_box = CircBox(entry_circuit)
+    args = list(range(entry_circuit.n_qubits)) + list(range(len(entry_circuit.bits)))
+    circuit.add_circbox(circ_box, args, condition=if_bit(scratch_reg[0]))
+
+    false_condition_circuit = Circuit(5, 16)
+    creg = false_condition_circuit.get_c_register("c")
+    false_condition_circuit.add_c_setbits([1], [13])
+    exp_false = creg[13] | (exp_entry & BitNot(creg[15]))
+    circuit.add_classicalexpbox_bit(exp_false, [scratch_reg[1]])
+
+    false_condition_circuit.Measure(2, 8).add_gate(OpType.Reset, [2])
+    false_condition_circuit.Measure(3, 9).add_gate(OpType.Reset, [3])
+    false_condition_circuit.Measure(4, 10).add_gate(OpType.Reset, [4])
+    false_condition_circuit.Measure(1, 11).add_gate(OpType.Reset, [1])
+
+    circ_box = CircBox(false_condition_circuit)
+    args = list(range(false_condition_circuit.n_qubits)) + list(
+        range(len(false_condition_circuit.bits))
+    )
+    circuit.add_circbox(circ_box, args, condition=if_bit(scratch_reg[1]))
+
+    true_condition_circuit = Circuit(5, 16)
+    creg = true_condition_circuit.get_c_register("c")
+    true_condition_circuit.add_c_setbits([1], [13])
+    exp_true = creg[13] | (exp_entry & creg[15])
+    circuit.add_classicalexpbox_bit(exp_true, [scratch_reg[2]])
+
     true_condition_circuit.add_gate(OpType.Reset, [0])
     true_condition_circuit.Ry(0.9553166181245094, 0).Rz(-5.497787143782138, 0)
     true_condition_circuit.Ry(0.9553166181245094, 1).Rz(-5.497787143782138, 1)
@@ -184,22 +220,21 @@ def one_conditional_diamond_circuit() -> Circuit:
     args = list(range(true_condition_circuit.n_qubits)) + list(
         range(len(true_condition_circuit.bits))
     )
-    circuit.add_circbox(circ_box, args, condition=if_not_bit(c_reg[13]))
+    circuit.add_circbox(circ_box, args, condition=if_bit(scratch_reg[2]))
 
-    false_condition_circuit = Circuit(5, 14)
-    false_condition_circuit.Measure(2, 8).add_gate(OpType.Reset, [2])
-    false_condition_circuit.Measure(3, 9).add_gate(OpType.Reset, [3])
-    false_condition_circuit.Measure(4, 10).add_gate(OpType.Reset, [4])
-    false_condition_circuit.Measure(1, 11).add_gate(OpType.Reset, [1])
-    circ_box_2 = CircBox(false_condition_circuit)
-    args = list(range(false_condition_circuit.n_qubits)) + list(
-        range(len(false_condition_circuit.bits))
-    )
-    circuit.add_circbox(circ_box_2, args, condition=if_bit(c_reg[13]))
-
-    diamond_condition_circuit = Circuit(5, 14)
+    diamond_condition_circuit = Circuit(5, 16)
+    creg = diamond_condition_circuit.get_c_register("c")
+    diamond_condition_circuit.add_c_setbits([1], [13])
+    exp_diamond = (creg[13] | (exp_false & creg[13])) | (exp_true & creg[13])
+    circuit.add_classicalexpbox_bit(exp_diamond, [scratch_reg[3]])
     diamond_condition_circuit.H(0).Y(0).H(0).Measure(0, 12).add_gate(OpType.Reset, [0])
-    circuit.append(diamond_condition_circuit)
+    # circuit.append(diamond_condition_circuit)
+
+    circ_box_2 = CircBox(diamond_condition_circuit)
+    args = list(range(diamond_condition_circuit.n_qubits)) + list(
+        range(len(diamond_condition_circuit.bits))
+    )
+    circuit.add_circbox(circ_box_2, args, condition=if_bit(scratch_reg[3]))
 
     return circuit
 
@@ -587,7 +622,6 @@ def simple_conditional_cfg() -> dict:
             preds=[],
             composition=["entry"],
             visited=False,
-            condition=None,
         ),
         "then0__2.i.i.i": Block(
             name="then0__2.i.i.i",
@@ -597,7 +631,6 @@ def simple_conditional_cfg() -> dict:
             preds=["entry"],
             composition=["then0__2.i.i.i"],
             visited=False,
-            condition=True,
         ),
         "else": Block(
             name="else",
@@ -607,7 +640,6 @@ def simple_conditional_cfg() -> dict:
             preds=["entry"],
             composition=["else"],
             visited=False,
-            condition=False,
         ),
         "Microsoft__Quantum__Samples__MeasureDistilledTAtDepth3InX__body.1.exit": Block(
             name="Microsoft__Quantum__Samples__MeasureDistilledTAtDepth3InX__body.1.exit",
@@ -617,7 +649,6 @@ def simple_conditional_cfg() -> dict:
                 "Microsoft__Quantum__Samples__MeasureDistilledTAtDepth3InX__body.1.exit"
             ],
             visited=False,
-            condition=None,
         ),
     }
     return cfg
@@ -644,7 +675,6 @@ def collapsed_simple_chain_cfg() -> dict:
                 "exit2",
             ],
             visited=False,
-            condition=None,
         )
     }
     return cfg
@@ -659,7 +689,6 @@ def collapsed_jump_left_cfg() -> dict:
             preds=[],
             composition=["entry"],
             visited=False,
-            condition=None,
         ),
         "else0": Block(
             name="else0",
@@ -667,7 +696,6 @@ def collapsed_jump_left_cfg() -> dict:
             preds=["entry"],
             composition=["else0"],
             visited=False,
-            condition=False,
         ),
         "then0": Block(
             name="then0",
@@ -675,7 +703,6 @@ def collapsed_jump_left_cfg() -> dict:
             preds=["entry"],
             composition=["then0", "then1", "then2"],
             visited=False,
-            condition=True,
         ),
         "continue0": Block(
             name="continue0",
@@ -683,7 +710,6 @@ def collapsed_jump_left_cfg() -> dict:
             preds=["then0", "else0"],
             composition=["continue0"],
             visited=False,
-            condition=None,
         ),
     }
     return cfg
@@ -698,7 +724,6 @@ def collapsed_jump_right_cfg() -> dict:
             preds=[],
             composition=["entry"],
             visited=False,
-            condition=None,
         ),
         "then0": Block(
             name="then0",
@@ -706,7 +731,6 @@ def collapsed_jump_right_cfg() -> dict:
             preds=["entry"],
             composition=["then0"],
             visited=False,
-            condition=True,
         ),
         "else0": Block(
             name="else0",
@@ -714,7 +738,6 @@ def collapsed_jump_right_cfg() -> dict:
             preds=["entry"],
             composition=["else0", "then1", "then2"],
             visited=False,
-            condition=False,
         ),
         "continue0": Block(
             name="continue0",
@@ -722,7 +745,6 @@ def collapsed_jump_right_cfg() -> dict:
             preds=["else0", "then0"],
             composition=["continue0"],
             visited=False,
-            condition=None,
         ),
     }
     return cfg
@@ -737,7 +759,6 @@ def collapsed_complex_chain() -> dict:
             preds=[],
             composition=["entry"],
             visited=False,
-            condition=None,
         ),
         "else0": Block(
             name="else0",
@@ -745,7 +766,6 @@ def collapsed_complex_chain() -> dict:
             preds=["entry"],
             composition=["else0"],
             visited=False,
-            condition=False,
         ),
         "then0": Block(
             name="then0",
@@ -753,7 +773,6 @@ def collapsed_complex_chain() -> dict:
             preds=["entry"],
             composition=["then0", "then1", "then2"],
             visited=False,
-            condition=True,
         ),
         "continue0": Block(
             name="continue0",
@@ -761,7 +780,6 @@ def collapsed_complex_chain() -> dict:
             preds=["then0", "else0"],
             composition=["continue0", "continue1", "continue2"],
             visited=False,
-            condition=None,
         ),
         "leftbr1": Block(
             name="leftbr1",
@@ -769,7 +787,6 @@ def collapsed_complex_chain() -> dict:
             preds=["continue0"],
             composition=["leftbr1"],
             visited=False,
-            condition=True,
         ),
         "rightbr1": Block(
             name="rightbr1",
@@ -777,7 +794,6 @@ def collapsed_complex_chain() -> dict:
             preds=["continue0"],
             composition=["rightbr1", "rightbr2"],
             visited=False,
-            condition=False,
         ),
         "exit1": Block(
             name="exit1",
@@ -785,7 +801,6 @@ def collapsed_complex_chain() -> dict:
             preds=["rightbr1", "leftbr1"],
             composition=["exit1", "exit2"],
             visited=False,
-            condition=None,
         ),
     }
     return cfg
@@ -800,7 +815,6 @@ def collapsed_nested_chains() -> dict:
             preds=[],
             composition=["entry"],
             visited=False,
-            condition=None,
         ),
         "else0": Block(
             name="else0",
@@ -808,7 +822,6 @@ def collapsed_nested_chains() -> dict:
             preds=["entry"],
             composition=["else0"],
             visited=False,
-            condition=False,
         ),
         "then0": Block(
             name="then0",
@@ -816,7 +829,6 @@ def collapsed_nested_chains() -> dict:
             preds=["entry"],
             composition=["then0", "then1", "then2"],
             visited=False,
-            condition=True,
         ),
         "then11": Block(
             name="then11",
@@ -824,7 +836,6 @@ def collapsed_nested_chains() -> dict:
             preds=["then0"],
             composition=["then11", "then12", "then13"],
             visited=False,
-            condition=True,
         ),
         "else11": Block(
             name="else11",
@@ -832,7 +843,6 @@ def collapsed_nested_chains() -> dict:
             preds=["then0"],
             composition=["else11"],
             visited=False,
-            condition=False,
         ),
         "continue0": Block(
             name="continue0",
@@ -840,7 +850,6 @@ def collapsed_nested_chains() -> dict:
             preds=["else11", "then11", "else0"],
             composition=["continue0", "continue1", "continue2"],
             visited=False,
-            condition=None,
         ),
         "leftbr1": Block(
             name="leftbr1",
@@ -848,7 +857,6 @@ def collapsed_nested_chains() -> dict:
             preds=["continue0"],
             composition=["leftbr1"],
             visited=False,
-            condition=True,
         ),
         "rightbr1": Block(
             name="rightbr1",
@@ -856,7 +864,6 @@ def collapsed_nested_chains() -> dict:
             preds=["continue0"],
             composition=["rightbr1", "rightbr2"],
             visited=False,
-            condition=False,
         ),
         "exit1": Block(
             name="exit1",
@@ -864,7 +871,6 @@ def collapsed_nested_chains() -> dict:
             preds=["rightbr1", "leftbr1"],
             composition=["exit1", "exit2"],
             visited=False,
-            condition=None,
         ),
     }
     return cfg
@@ -879,7 +885,6 @@ def insert_block_right() -> dict:
             preds=[],
             composition=["entry"],
             visited=False,
-            condition=None,
         ),
         "then0__2.i.i.i": Block(
             name="then0__2.i.i.i",
@@ -889,7 +894,6 @@ def insert_block_right() -> dict:
             preds=["entry"],
             composition=["then0__2.i.i.i"],
             visited=False,
-            condition=True,
         ),
         "Microsoft__Quantum__Samples__MeasureDistilledTAtDepth3InX__body.1.exit": Block(
             name="Microsoft__Quantum__Samples__MeasureDistilledTAtDepth3InX__body.1.exit",
@@ -899,7 +903,6 @@ def insert_block_right() -> dict:
                 "Microsoft__Quantum__Samples__MeasureDistilledTAtDepth3InX__body.1.exit"
             ],
             visited=False,
-            condition=None,
         ),
         "entry_trivial_block": Block(
             name="entry_trivial_block",
@@ -909,7 +912,6 @@ def insert_block_right() -> dict:
             preds=["entry"],
             composition=["entry_trivial_block"],
             visited=False,
-            condition=False,
         ),
     }
     return cfg
@@ -924,7 +926,6 @@ def insert_block_left() -> dict:
             preds=[],
             composition=["entry"],
             visited=False,
-            condition=None,
         ),
         "else": Block(
             name="else",
@@ -932,7 +933,6 @@ def insert_block_left() -> dict:
             preds=["entry"],
             composition=["else"],
             visited=False,
-            condition=False,
         ),
         "then": Block(
             name="then",
@@ -940,7 +940,6 @@ def insert_block_left() -> dict:
             preds=["else", "entry_trivial_block"],
             composition=["then"],
             visited=False,
-            condition=None,
         ),
         "entry_trivial_block": Block(
             name="entry_trivial_block",
@@ -948,7 +947,6 @@ def insert_block_left() -> dict:
             preds=["entry"],
             composition=["entry_trivial_block"],
             visited=False,
-            condition=True,
         ),
     }
     return cfg
@@ -963,7 +961,6 @@ def insert_nested_blocks_right() -> dict:
             preds=[],
             composition=["entry"],
             visited=False,
-            condition=None,
         ),
         "then": Block(
             name="then",
@@ -971,7 +968,6 @@ def insert_nested_blocks_right() -> dict:
             preds=["entry"],
             composition=["then"],
             visited=False,
-            condition=True,
         ),
         "continue": Block(
             name="continue",
@@ -979,7 +975,6 @@ def insert_nested_blocks_right() -> dict:
             preds=["then", "entry_trivial_block"],
             composition=["continue"],
             visited=False,
-            condition=None,
         ),
         "then1": Block(
             name="then1",
@@ -989,20 +984,19 @@ def insert_nested_blocks_right() -> dict:
             preds=["continue"],
             composition=["then1"],
             visited=False,
-            condition=True,
         ),
         "TeleportChain__TeleportQubitUsingPresharedEntanglement__body.2.exit.i": Block(
             name="TeleportChain__TeleportQubitUsingPresharedEntanglement__body.2.exit.i",
             succs=[
                 "then2",
-                "TeleportChain__TeleportQubitUsingPresharedEntanglement__body.2.exit.i_trivial_block",
+                "TeleportChain__TeleportQubitUsingPresharedEntanglement__body.2.exit."
+                "i_trivial_block",
             ],
             preds=["then1", "continue_trivial_block"],
             composition=[
                 "TeleportChain__TeleportQubitUsingPresharedEntanglement__body.2.exit.i"
             ],
             visited=False,
-            condition=None,
         ),
         "then2": Block(
             name="then2",
@@ -1012,38 +1006,39 @@ def insert_nested_blocks_right() -> dict:
             ],
             composition=["then2"],
             visited=False,
-            condition=True,
         ),
         "continue2": Block(
             name="continue2",
             succs=["then3", "continue2_trivial_block"],
             preds=[
                 "then2",
-                "TeleportChain__TeleportQubitUsingPresharedEntanglement__body.2.exit.i_trivial_block",
+                "TeleportChain__TeleportQubitUsingPresharedEntanglement__body.2."
+                "exit.i_trivial_block",
             ],
             composition=["continue2"],
             visited=False,
-            condition=None,
         ),
         "then3": Block(
             name="then3",
             succs=[
-                "TeleportChain__DemonstrateTeleportationUsingPresharedEntanglement__body.1.exit"
+                "TeleportChain__DemonstrateTeleportationUsingPresharedEntanglement"
+                "__body.1.exit"
             ],
             preds=["continue2"],
             composition=["then3"],
             visited=False,
-            condition=True,
         ),
-        "TeleportChain__DemonstrateTeleportationUsingPresharedEntanglement__body.1.exit": Block(
-            name="TeleportChain__DemonstrateTeleportationUsingPresharedEntanglement__body.1.exit",
+        "TeleportChain__DemonstrateTeleportationUsingPresharedEntanglement__body."
+        "1.exit": Block(
+            name="TeleportChain__DemonstrateTeleportationUsingPresharedEntanglement"
+            "__body.1.exit",
             succs=[],
             preds=["then3", "continue2_trivial_block"],
             composition=[
-                "TeleportChain__DemonstrateTeleportationUsingPresharedEntanglement__body.1.exit"
+                "TeleportChain__DemonstrateTeleportationUsingPresharedEntanglement__"
+                "body.1.exit"
             ],
             visited=False,
-            condition=None,
         ),
         "entry_trivial_block": Block(
             name="entry_trivial_block",
@@ -1051,7 +1046,6 @@ def insert_nested_blocks_right() -> dict:
             preds=["entry"],
             composition=["entry_trivial_block"],
             visited=False,
-            condition=False,
         ),
         "continue_trivial_block": Block(
             name="continue_trivial_block",
@@ -1061,29 +1055,142 @@ def insert_nested_blocks_right() -> dict:
             preds=["continue"],
             composition=["continue_trivial_block"],
             visited=False,
-            condition=False,
         ),
-        "TeleportChain__TeleportQubitUsingPresharedEntanglement__body.2.exit.i_trivial_block": Block(
-            name="TeleportChain__TeleportQubitUsingPresharedEntanglement__body.2.exit.i_trivial_block",
+        "TeleportChain__TeleportQubitUsingPresharedEntanglement__body.2.exit."
+        "i_trivial_block": Block(
+            name="TeleportChain__TeleportQubitUsingPresharedEntanglement__body."
+            "2.exit.i_trivial_block",
             succs=["continue2"],
             preds=[
-                "TeleportChain__TeleportQubitUsingPresharedEntanglement__body.2.exit.i"
+                "TeleportChain__TeleportQubitUsingPresharedEntanglement__body.2."
+                "exit.i"
             ],
             composition=[
-                "TeleportChain__TeleportQubitUsingPresharedEntanglement__body.2.exit.i_trivial_block"
+                "TeleportChain__TeleportQubitUsingPresharedEntanglement__body.2."
+                "exit.i_trivial_block"
             ],
             visited=False,
-            condition=False,
         ),
         "continue2_trivial_block": Block(
             name="continue2_trivial_block",
             succs=[
-                "TeleportChain__DemonstrateTeleportationUsingPresharedEntanglement__body.1.exit"
+                "TeleportChain__DemonstrateTeleportationUsingPresharedEntanglement"
+                "__body.1.exit"
             ],
             preds=["continue2"],
             composition=["continue2_trivial_block"],
             visited=False,
-            condition=False,
         ),
     }
     return cfg
+
+
+@fixture
+def split_fork_left() -> dict:
+    cfg = {
+        "entry": Block(
+            name="entry",
+            succs=["then", "else"],
+            preds=[],
+            composition=["entry"],
+            visited=False,
+        ),
+        "then": Block(
+            name="then",
+            succs=["then1", "else1"],
+            preds=["entry"],
+            composition=["then"],
+            visited=False,
+        ),
+        "then1": Block(
+            name="then1",
+            succs=["exit_trivial_block"],
+            preds=["then"],
+            composition=["then1"],
+            visited=False,
+        ),
+        "else1": Block(
+            name="else1",
+            succs=["exit_trivial_block"],
+            preds=["then"],
+            composition=["else1"],
+            visited=False,
+        ),
+        "else": Block(
+            name="else",
+            succs=["exit"],
+            preds=["entry"],
+            composition=["else"],
+            visited=False,
+        ),
+        "exit": Block(
+            name="exit",
+            succs=[],
+            preds=["else", "exit_trivial_block"],
+            composition=["exit"],
+            visited=False,
+        ),
+        "exit_trivial_block": Block(
+            name="exit_trivial_block",
+            succs=["exit"],
+            preds=["else1", "then1"],
+            composition=["exit_trivial_block"],
+            visited=False,
+        ),
+    }
+    return cfg
+
+
+@fixture
+def split_fork_right() -> dict:
+    return {
+        "entry": Block(
+            name="entry",
+            succs=["then", "else"],
+            preds=[],
+            composition=["entry"],
+            visited=False,
+        ),
+        "then": Block(
+            name="then",
+            succs=["exit"],
+            preds=["entry"],
+            composition=["then"],
+            visited=False,
+        ),
+        "else": Block(
+            name="else",
+            succs=["then1", "else1"],
+            preds=["entry"],
+            composition=["else"],
+            visited=False,
+        ),
+        "then1": Block(
+            name="then1",
+            succs=["exit_trivial_block"],
+            preds=["else"],
+            composition=["then1"],
+            visited=False,
+        ),
+        "else1": Block(
+            name="else1",
+            succs=["exit_trivial_block"],
+            preds=["else"],
+            composition=["else1"],
+            visited=False,
+        ),
+        "exit": Block(
+            name="exit",
+            succs=[],
+            preds=["exit_trivial_block", "then"],
+            composition=["exit"],
+            visited=False,
+        ),
+        "exit_trivial_block": Block(
+            name="exit_trivial_block",
+            succs=["exit"],
+            preds=["else1", "then1"],
+            composition=["exit_trivial_block"],
+            visited=False,
+        ),
+    }

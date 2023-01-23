@@ -20,7 +20,6 @@ to and from pytket circuits.
 import functools
 import inspect
 import json
-import os
 import re
 from typing import cast, Callable, Dict, List, Optional, Tuple, Union
 
@@ -29,7 +28,6 @@ from pytket.wasm import WasmFileHandler  # type: ignore
 from pytket.circuit import (  # type: ignore
     Bit,
     BitRegister,
-    CircBox,
     Op,
 )
 from pytket.circuit.logic_exp import (  # type: ignore
@@ -42,7 +40,6 @@ from pytket.circuit.logic_exp import (  # type: ignore
     RegLsh,
     RegRsh,
     RegXor,
-    if_bit,
     reg_eq,
     reg_neq,
     reg_leq,
@@ -52,11 +49,8 @@ from pytket.circuit.logic_exp import (  # type: ignore
     RegNeg,
 )
 
-from pyqir.generator import ir_to_bitcode  # type: ignore
 from pyqir.parser import (  # type: ignore
     QirBlock,
-    QirBrTerminator,
-    QirCondBrTerminator,
     QirModule,
     QirInstr,
     QirQisCallInstr,
@@ -65,11 +59,9 @@ from pyqir.parser import (  # type: ignore
     QirSelectInstr,
 )
 from pyqir.parser._native import PyQirInstruction  # type: ignore
-from pyqir.generator import ir_to_bitcode, types  # type: ignore
+from pyqir.generator import types  # type: ignore
 from pyqir.parser._native import PyQirInstruction  # type: ignore
-from pyqir.parser._parser import QirIntConstant, QirICmpInstr, QirCallInstr, QirOpInstr, QirOperand, QirLocalOperand, QirRetTerminator  # type: ignore
-from pyqir.generator import ir_to_bitcode, types  # type: ignore
-
+from pyqir.parser._parser import QirIntConstant, QirICmpInstr, QirCallInstr, QirOpInstr, QirOperand, QirLocalOperand  # type: ignore
 
 from pytket_qir.gatesets.base import (
     CustomGateSet,
@@ -80,7 +72,7 @@ from pytket_qir.gatesets.base import (
 )
 
 from pytket_qir.gatesets.pyqir.pyqir import PYQIR_GATES  # type: ignore
-from pytket_qir.utils import CircuitError, InstructionError, WASMError, RtError
+from pytket_qir.utils import InstructionError, WASMError, RtError
 
 
 _PYQIR_TO_TK_CLOPS: Dict[str, Union[type, Dict[str, Callable]]] = {
@@ -112,13 +104,13 @@ class QirParser:
 
     def __init__(
         self,
-        file_path: str,
+        qir_module: QirModule,
         gateset: Optional[CustomGateSet] = None,
         wasm_handler: Optional[WasmFileHandler] = None,
         wasm_int_type: types.Int = types.Int(32),
         qir_int_type: types.Int = types.Int(64),
     ) -> None:
-        self.module = QirModule(file_path)
+        self.module: QirModule = qir_module
         self.gateset: CustomGateSet = gateset if gateset is not None else PYQIR_GATES
         self.wasm_handler = wasm_handler
         self.wasm_int_type = wasm_int_type
@@ -129,9 +121,6 @@ class QirParser:
         entry_block = self.module.functions[0].get_block_by_name("entry")
         if entry_block is None:
             raise NotImplementedError("The QIR file does not contain an entry block.")
-        self.circuit = self.block_to_circuit(
-            entry_block, Circuit(self.qubits, self.bits)
-        )
 
     def get_required_qubits(self) -> int:
         interop_funcs = self.module.get_funcs_by_attr("EntryPoint")
@@ -283,9 +272,9 @@ class QirParser:
 
     def block_to_circuit(self, block: QirBlock, circuit: Circuit) -> Circuit:
         instrs = block.instructions
-        term = block.terminator
 
         for instr in instrs:
+            # print(instr.instr.call_func_name)
             if instr.instr.is_qis_call:  # Quantum gates.
                 optype = self.get_optype(instr.instr)
                 if optype == OpType.CopyBits:
@@ -463,87 +452,4 @@ class QirParser:
                         )
                     )
 
-        if isinstance(term, QirCondBrTerminator):
-            if_true_block = cast(
-                QirBlock, self.module.functions[0].get_block_by_name(term.true_dest)
-            )
-            # Create a fresh circuit.
-            if_true_circuit = self.block_to_circuit(
-                if_true_block, Circuit(self.qubits, len(circuit.bits))
-            )
-            else_block = cast(
-                QirBlock, self.module.functions[0].get_block_by_name(term.false_dest)
-            )
-            else_circuit = self.block_to_circuit(
-                else_block, Circuit(self.qubits, len(circuit.bits))
-            )
-            term_condition = cast(QirLocalOperand, term.condition)
-            condition_name = "%" + str(term_condition.name)
-            # Retrieving the condition bit from the log.
-            condition_bit = self.ssa_vars[condition_name]
-            arguments: List = []
-            if if_true_circuit.is_simple:
-                # Add extra bits created in the sub-circuit to the main one.
-                for bit in set(if_true_circuit.bits) - set(circuit.bits):
-                    circuit.add_bit(bit)
-                circ_box = CircBox(if_true_circuit)
-                arguments = [qubit.index[0] for qubit in if_true_circuit.qubits] + [
-                    bit.index[0] for bit in if_true_circuit.bits
-                ]  # Order matters.
-                circuit.add_circbox(
-                    circ_box, arguments, condition=if_bit(condition_bit)
-                )
-            else:
-                raise CircuitError("Circuit for true condition is not simple.")
-            if else_circuit.is_simple:
-                # Add extra bits created in the sub-circuit to the main one.
-                for bit in set(else_circuit.bits) - set(circuit.bits):
-                    circuit.add_bit(bit)
-                # Else condition is the fall-through and resumes the flow
-                # of the main circuit.
-                circuit.append(else_circuit)
-            else:
-                raise CircuitError("Circuit for else condition is not simple.")
-
-        if isinstance(term, QirBrTerminator):
-            # In this configuration, jump instructions are no-ops.
-            # Keeping here for future reference.
-            # next_block = cast(
-            #     QirBlock, self.module.functions[0].get_block_by_name(term.dest)
-            # )
-            # next_circuit = self.block_to_circuit(
-            #     next_block, Circuit(self.qubits, len(circuit.bits))
-            # )
-            # circuit.append(next_circuit)
-            pass
-
-        if isinstance(term, QirRetTerminator):
-            # In this configuration, return instructions are no-ops.
-            pass
-
         return circuit
-
-
-def circuit_from_qir(
-    input_file: Union[str, os.PathLike],
-    gateset: Optional[CustomGateSet] = None,
-    wasm_handler: Optional[WasmFileHandler] = None,
-    wasm_int_type: types.Int = types.Int(32),
-) -> Circuit:
-    root, ext = os.path.splitext(os.path.basename(input_file))
-    input_file_str = str(input_file)
-    output_bc_file: str = ""
-    if ext not in [".ll", ".bc"]:
-        raise TypeError("Can only convert '.bc' or '.ll' files.")
-    if ext == ".ll":
-        with open(input_file_str, "r") as f:
-            data = f.read()
-        output_bc_file = root + ".bc"
-        with open(output_bc_file, "wb") as o:
-            o.write(ir_to_bitcode(data))
-        input_file_str = output_bc_file
-    parser = QirParser(input_file_str, gateset, wasm_handler, wasm_int_type)
-    circuit = parser.circuit
-    # Attach the set_cregs dict to the circuit before returning.
-    circuit.ssa_vars = parser.ssa_vars
-    return circuit
