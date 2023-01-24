@@ -32,3 +32,7 @@ class RtError(Exception):
 
 class CircuitError(Exception):
     pass
+
+
+class ConverterException(Exception):
+    pass
