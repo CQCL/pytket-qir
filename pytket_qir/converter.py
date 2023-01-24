@@ -78,7 +78,7 @@ class QirConverter:
         self.module = QirModule(file_path)
         self.module_function = self.module.functions[0]
         self.parser = QirParser(
-            file_path=file_path,
+            qir_module=self.module,
             gateset=gateset,
             wasm_handler=wasm_handler,
             wasm_int_type=wasm_int_type,
