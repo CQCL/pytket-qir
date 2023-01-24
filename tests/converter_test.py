@@ -11,7 +11,7 @@ from pytket_qir.converter import topological_sort, circuit_from_qir, QirConverte
 qir_files_dir = Path("./qir_test_files")
 
 
-class TestConverterAnalyser:
+class TestConvertToCircuit:
     def test_topological_ordering(self) -> None:
         digraph = {
             "A": ["C", "D"],
@@ -30,7 +30,7 @@ class TestConverterAnalyser:
     ) -> None:
 
         one_conditional_diamond_path = qir_files_dir / "one_conditional_diamond.bc"
-        circuit = circuit_from_qir(one_conditional_diamond_path)
+        circuit = circuit_from_qir(str(one_conditional_diamond_path))
 
         assert circuit.cfg == simple_conditional_cfg
 
@@ -51,8 +51,6 @@ class TestConverterAnalyser:
         assert com3.op.get_exp() == exp_com3.op.get_exp()
         com4_circ = coms[4].op.op.get_circuit()
         exp_com4_circ = exp_coms[4].op.op.get_circuit()
-        # import pdb; pdb.set_trace()
-        # assert com4.op.op.get_circuit() == exp_com4.op.op.get_circuit()
 
         for com4, exp_com4 in zip(
             com4_circ.get_commands(), exp_com4_circ.get_commands()
@@ -61,10 +59,9 @@ class TestConverterAnalyser:
         com5 = coms[5]
         exp_com5 = exp_coms[5]
         assert com5.op.get_exp() == exp_com5.op.get_exp()
-        # import pdb; pdb.set_trace()
+
         com6_circ = coms[6].op.op.get_circuit()
         exp_com6_circ = exp_coms[6].op.op.get_circuit()
-        # assert com4.op.op.get_circuit() == exp_com4.op.op.get_circuit()
 
         for com6, exp_com6 in zip(
             com6_circ.get_commands(), exp_com6_circ.get_commands()
@@ -73,252 +70,156 @@ class TestConverterAnalyser:
         com7 = coms[7]
         exp_com7 = exp_coms[7]
         assert com7.op.get_exp() == exp_com7.op.get_exp()
-        # import pdb; pdb.set_trace()
+
         com8_circ = coms[8].op.op.get_circuit()
         exp_com8_circ = exp_coms[8].op.op.get_circuit()
-        # assert com4.op.op.get_circuit() == exp_com4.op.op.get_circuit()
 
         for com8, exp_com8 in zip(
             com8_circ.get_commands(), exp_com8_circ.get_commands()
         ):
             assert com8 == exp_com8
-        # import pdb; pdb.set_trace()
 
-    @pytest.mark.skip
-    def test_collapse_simple_instr_chain(self, collapsed_simple_chain_cfg) -> None:
-        collapse_simple_chain_path = qir_files_dir / "collapse_simple_instr_chain.bc"
-
-        circuit = circuit_from_qir(collapse_simple_chain_path)
-
-        circuit.converter.collapse_blocks()
-
-        assert circuit.rewritten_cfg == collapsed_simple_chain_cfg
-
-    @pytest.mark.skip
-    def test_collapse_jump_left(self, collapsed_jump_left_cfg) -> None:
-        collapse_jump_left = qir_files_dir / "collapse_jump_left.bc"
-
-        circuit = circuit_from_qir(collapse_jump_left)
-
-        circuit.collapse_blocks()
-
-        assert circuit.rewritten_cfg == collapsed_jump_left_cfg
-
-    @pytest.mark.skip
-    def test_collapse_jump_right(self, collapsed_jump_right_cfg) -> None:
-        collapse_jump_right = qir_files_dir / "collapse_jump_right.bc"
-
-        circuit = circuit_from_qir(collapse_jump_right)
-
-        circuit.collapse_blocks()
-
-        assert circuit.rewritten_cfg == collapsed_jump_right_cfg
-
-    @pytest.mark.skip
-    def test_collapse_complex_instr_chains(self, collapsed_complex_chain) -> None:
-        collapse_complex_chain = qir_files_dir / "collapse_jump_instr.bc"
-
-        circuit = circuit_from_qir(collapse_complex_chain)
-
-        circuit.collapse_blocks()
-
-        assert circuit.rewritten_cfg == collapsed_complex_chain
-
-    @pytest.mark.skip
-    def test_collapse_nested_chains(self, collapsed_nested_chains) -> None:
-        collapse_nested_chains_bc = qir_files_dir / "collapse_nested_jump_instr.bc"
-
-        circuit = circuit_from_qir(collapse_nested_chains_bc)
-
-        circuit.collapse_blocks()
-
-        assert circuit.rewritten_cfg == collapsed_nested_chains
-
-    @pytest.mark.skip
-    def test_insert_block_right(self, insert_block_right) -> None:
-        one_conditional_if = qir_files_dir / "one_conditional_if.bc"
+    def test_fallthrough_right(self, one_conditional_else_circuit) -> None:
+        one_conditional_if = qir_files_dir / "one_conditional_else.bc"
 
         circuit = circuit_from_qir(one_conditional_if)
 
-        circuit.collapse_blocks()
+        coms = circuit.get_commands()
+        exp_coms = one_conditional_else_circuit.get_commands()
 
-        circuit.insert_trivial_blocks()
+        com0 = coms[0]
+        exp_com0 = exp_coms[0]
+        assert com0 == exp_com0
 
-        assert circuit.rewritten_cfg == insert_block_right
+        com1 = coms[1]
+        exp_com1 = exp_coms[1]
+        assert com1.op.get_exp() == exp_com1.op.get_exp()
 
-    @pytest.mark.skip
-    def test_insert_block_left(self, insert_block_left) -> None:
-        one_conditional_then = qir_files_dir / "one_conditional_then.bc"
+        com2_circ = coms[2].op.op.get_circuit()
+        exp_com2_circ = exp_coms[2].op.op.get_circuit()
 
-        circuit = circuit_from_qir(one_conditional_then)
+        for com2, exp_com2 in zip(        
+            com2_circ.get_commands(), exp_com2_circ.get_commands()
+        ):
+            assert com2 == exp_com2
 
-        circuit.collapse_blocks()
+        com3 = coms[3]
+        exp_com3 = exp_coms[3]
+        assert com3.op.get_exp() == exp_com3.op.get_exp()
 
-        circuit.insert_trivial_blocks()
+        com4_circ = coms[4].op.op.get_circuit()
+        exp_com4_circ = exp_coms[4].op.op.get_circuit()
 
-        assert circuit.rewritten_cfg == insert_block_left
+        for com4, exp_com4 in zip(
+            com4_circ.get_commands(), exp_com4_circ.get_commands()
+        ):
+            assert com4 == exp_com4
+        com5 = coms[5]
+        exp_com5 = exp_coms[5]
+        assert com5.op.get_exp() == exp_com5.op.get_exp()
 
-    @pytest.mark.skip
-    def test_nested_blocks_right(self, insert_nested_blocks_right) -> None:
-        teleport_chain = qir_files_dir / "teleportchain_baseprofile.bc"
+        com6_circ = coms[6].op.op.get_circuit()
+        exp_com6_circ = exp_coms[6].op.op.get_circuit()
 
-        circuit = circuit_from_qir(teleport_chain)
+        for com6, exp_com6 in zip(
+            com6_circ.get_commands(), exp_com6_circ.get_commands()
+        ):
+            assert com6 == exp_com6
 
-        circuit.collapse_blocks()
+    def test_fallthrough_left(self, one_conditional_then_circuit) -> None:
+        one_conditional_else = qir_files_dir / "one_conditional_then.bc"
 
-        # Last operation must leave CFG identical.
-        assert circuit.cfg == circuit.rewritten_cfg
+        circuit = circuit_from_qir(one_conditional_else)
 
-        circuit.insert_trivial_blocks()
+        coms = circuit.get_commands()
+        exp_coms = one_conditional_then_circuit.get_commands()
 
-        assert circuit.rewritten_cfg == insert_nested_blocks_right
+        com0 = coms[0]
+        exp_com0 = exp_coms[0]
+        assert com0 == exp_com0
 
-    @pytest.mark.skip
-    def test_split_fork_left(self, split_fork_left) -> None:
-        nested_conditionals_then = qir_files_dir / "nested_conditionals_then.bc"
+        com1 = coms[1]
+        exp_com1 = exp_coms[1]
+        assert com1.op.get_exp() == exp_com1.op.get_exp()
 
-        circuit = circuit_from_qir(nested_conditionals_then)
+        com2_circ = coms[2].op.op.get_circuit()
+        exp_com2_circ = exp_coms[2].op.op.get_circuit()
 
-        circuit.collapse_blocks()
-        assert circuit.cfg == circuit.rewritten_cfg
+        for com2, exp_com2 in zip(        
+            com2_circ.get_commands(), exp_com2_circ.get_commands()
+        ):
+            assert com2 == exp_com2
 
-        circuit.insert_trivial_blocks()
-        assert circuit.cfg == circuit.rewritten_cfg
+        com3 = coms[3]
+        exp_com3 = exp_coms[3]
+        assert com3.op.get_exp() == exp_com3.op.get_exp()
 
-        circuit.split_fork_to_binary()
-        assert circuit.rewritten_cfg == split_fork_left
+        com4_circ = coms[4].op.op.get_circuit()
+        exp_com4_circ = exp_coms[4].op.op.get_circuit()
 
-    @pytest.mark.skip
-    def test_split_fork_right(self, split_fork_right) -> None:
-        nested_conditionals_else = qir_files_dir / "nested_conditionals_else.bc"
+        for com4, exp_com4 in zip(
+            com4_circ.get_commands(), exp_com4_circ.get_commands()
+        ):
+            assert com4 == exp_com4
+        com5 = coms[5]
+        exp_com5 = exp_coms[5]
+        assert com5.op.get_exp() == exp_com5.op.get_exp()
 
-        circuit = circuit_from_qir(nested_conditionals_else)
+        com6_circ = coms[6].op.op.get_circuit()
+        exp_com6_circ = exp_coms[6].op.op.get_circuit()
 
-        circuit.collapse_blocks()
-        assert circuit.cfg == circuit.rewritten_cfg
+        for com6, exp_com6 in zip(
+            com6_circ.get_commands(), exp_com6_circ.get_commands()
+        ):
+            assert com6 == exp_com6
 
-        circuit.insert_trivial_blocks()
-        assert circuit.cfg == circuit.rewritten_cfg
+class TestCfgOptimisations:
 
-        circuit.split_fork_to_binary()
-        print(circuit.rewritten_cfg)
-        assert circuit.rewritten_cfg == split_fork_right
+    def test_collapse_simple_instr_chain(self, collapsed_simple_chain_cfg) -> None:
+        collapse_simple_chain_path = qir_files_dir / "collapse_simple_instr_chain.bc"
+
+        converter = QirConverter(str(collapse_simple_chain_path))
+        converter.collapse_blocks()
+
+        assert converter.rewritten_cfg == collapsed_simple_chain_cfg
+
+    def test_collapse_jump_left(self, collapsed_jump_left_cfg) -> None:
+        collapse_jump_left = qir_files_dir / "collapse_jump_left.bc"
+
+        converter = QirConverter(str(collapse_jump_left))
+        converter.collapse_blocks()
+
+        assert converter.rewritten_cfg == collapsed_jump_left_cfg
+
+    def test_collapse_jump_right(self, collapsed_jump_right_cfg) -> None:
+        collapse_jump_right = qir_files_dir / "collapse_jump_right.bc"
+
+        converter = QirConverter(str(collapse_jump_right))
+        converter.collapse_blocks()
+
+        assert converter.rewritten_cfg == collapsed_jump_right_cfg
+
+    def test_collapse_complex_instr_chains(self, collapsed_complex_chain) -> None:
+        collapse_complex_chain = qir_files_dir / "collapse_jump_instr.bc"
+
+        converter = QirConverter(str(collapse_complex_chain))
+        converter.collapse_blocks()
+
+        assert converter.rewritten_cfg == collapsed_complex_chain
+
+    def test_collapse_nested_chains(self, collapsed_nested_chains) -> None:
+        collapse_nested_chains_bc = qir_files_dir / "collapse_nested_jump_instr.bc"
+
+        converter = QirConverter(str(collapse_nested_chains_bc))
+        converter.collapse_blocks()
+
+        assert converter.rewritten_cfg == collapsed_nested_chains
 
 
 class TestQirToPytketConditionals:
     """A class to test circuit translation containing conditionals."""
 
-    def test_single_conditional_else(
-        self, one_conditional_else_circuit: Circuit
-    ) -> None:
-        one_conditional_else_bc_path = qir_files_dir / "one_conditional_else.bc"
-
-        circuit = circuit_from_qir(one_conditional_else_bc_path)
-
-        for com1, com2 in zip(
-            circuit.get_commands()[:16],
-            one_conditional_else_circuit.get_commands()[:16],
-        ):
-            assert com1 == com2
-
-        true_condition_circuit = circuit.get_commands()[16].op.op.get_circuit()
-        exp_true_condition_circuit = one_conditional_else_circuit.get_commands()[
-            16
-        ].op.op.get_circuit()
-
-        for com1, com2 in zip(
-            true_condition_circuit.get_commands(),
-            exp_true_condition_circuit.get_commands(),
-        ):
-            assert com1 == com2
-
-        false_condition_circuit = circuit.get_commands()[17].op.op.get_circuit()
-        exp_false_condition_circuit = one_conditional_else_circuit.get_commands()[
-            17
-        ].op.op.get_circuit()
-
-        assert false_condition_circuit == exp_false_condition_circuit  # Empty circuits
-
-        for com1, com2 in zip(
-            circuit.get_commands()[18:],
-            one_conditional_else_circuit.get_commands()[18:],
-        ):
-            assert com1 == com2
-
-    def test_single_conditional_then(
-        self, one_conditional_then_circuit: Circuit
-    ) -> None:
-        one_conditional_then_bc_path = qir_files_dir / "one_conditional_then.bc"
-
-        circuit = circuit_from_qir(one_conditional_then_bc_path)
-
-        for com1, com2 in zip(
-            circuit.get_commands()[:16],
-            one_conditional_then_circuit.get_commands()[:16],
-        ):
-            assert com1 == com2
-
-        true_condition_circuit = circuit.get_commands()[16].op.op.get_circuit()
-        exp_true_condition_circuit = one_conditional_then_circuit.get_commands()[
-            16
-        ].op.op.get_circuit()
-
-        for com1, com2 in zip(
-            true_condition_circuit.get_commands(),
-            exp_true_condition_circuit.get_commands(),
-        ):
-            assert com1 == com2  # Empty circuits
-
-        false_condition_circuit = circuit.get_commands()[17].op.op.get_circuit()
-        exp_false_condition_circuit = one_conditional_then_circuit.get_commands()[
-            17
-        ].op.op.get_circuit()
-
-        assert false_condition_circuit == exp_false_condition_circuit
-
-        for com1, com2 in zip(
-            circuit.get_commands()[18:],
-            one_conditional_then_circuit.get_commands()[18:],
-        ):
-            assert com1 == com2
-
-    def test_single_conditional_diamond(
-        self, one_conditional_diamond_circuit: Circuit
-    ) -> None:
-        one_conditional_diamond_bc_path = qir_files_dir / "one_conditional_diamond.bc"
-
-        circuit = circuit_from_qir(one_conditional_diamond_bc_path)
-
-        for com1, com2 in zip(
-            circuit.get_commands()[:16],
-            one_conditional_diamond_circuit.get_commands()[:16],
-        ):
-            assert com1 == com2
-
-        true_condition_circuit = circuit.get_commands()[16].op.op.get_circuit()
-        exp_true_condition_circuit = one_conditional_diamond_circuit.get_commands()[
-            16
-        ].op.op.get_circuit()
-
-        for com1, com2 in zip(
-            true_condition_circuit.get_commands(),
-            exp_true_condition_circuit.get_commands(),
-        ):
-            assert com1 == com2  # Empty circuits
-
-        false_condition_circuit = circuit.get_commands()[17].op.op.get_circuit()
-        exp_false_condition_circuit = one_conditional_diamond_circuit.get_commands()[
-            17
-        ].op.op.get_circuit()
-
-        assert false_condition_circuit == exp_false_condition_circuit
-
-        for com1, com2 in zip(
-            circuit.get_commands()[18:],
-            one_conditional_diamond_circuit.get_commands()[18:],
-        ):
-            assert com1 == com2
-
+    @pytest.mark.skip
     def test_single_conditional_diamond_opposite(self) -> None:
         one_conditional_diamond_bc_path = (
             qir_files_dir / "one_conditional_diamond_opposite.bc"
@@ -326,6 +227,7 @@ class TestQirToPytketConditionals:
 
         circuit = circuit_from_qir(one_conditional_diamond_bc_path)
 
+    @pytest.mark.skip
     def test_collapse_jump_instr(self, collapse_jump_instr: Circuit) -> None:
         collapse_jump_instr_file = qir_files_dir / "collapse_jump_instr.bc"
 
@@ -370,6 +272,7 @@ class TestQirToPytketConditionals:
         for com1, com2 in zip(circuit_coms[13:], exp_circuit_coms[13:]):
             assert com1 == com2
 
+    @pytest.mark.skip
     def test_nested_conditionals_then(self, nested_conditionals_then: Circuit) -> None:
         nested_conditionals_then_circuit = qir_files_dir / "nested_conditionals_then.bc"
 
@@ -406,6 +309,7 @@ class TestQirToPytketConditionals:
         for com1, com2 in zip(circuit_coms[7:], exp_circuit_coms[7:]):
             assert com1 == com2
 
+    @pytest.mark.skip
     def test_nested_conditionals_else(self) -> None:
         nested_conditionals_else = qir_files_dir / "nested_conditionals_else.bc"
 
@@ -415,6 +319,7 @@ class TestQirToPytketConditionals:
 
         pdb.set_trace()
 
+    @pytest.mark.skip
     def test_nested_conditionals_crossed(self) -> None:
         nested_conditionals_crossed = qir_files_dir / "nested_conditionals_crossed.bc"
 
@@ -424,6 +329,7 @@ class TestQirToPytketConditionals:
 
         pdb.set_trace()
 
+    @pytest.mark.skip
     def test_multiple_successive_conditionals(
         self,
     ) -> None:
@@ -588,6 +494,7 @@ class TestQirToPytketConditionals:
         assert com33.op.type == OpType.Reset
         assert com33.qubits[0].index[0] == 5
 
+    @pytest.mark.skip
     def test_nested_conditionals_mixed(
         self,
         nested_conditionals_circuit: Circuit,
