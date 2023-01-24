@@ -1,7 +1,11 @@
 from pathlib import Path
 import pytest
 
-from pytket_qir.converter import topological_sort, circuit_from_qir
+from pytket import Circuit  # type: ignore
+from pytket.circuit import OpType  # type: ignore
+from pytket.wasm import WasmFileHandler  # type: ignore
+
+from pytket_qir.converter import topological_sort, circuit_from_qir, QirConverter
 
 
 qir_files_dir = Path("./qir_test_files")
