@@ -39,7 +39,7 @@ from pytket.circuit.logic_exp import (  # type: ignore
     reg_leq,
 )
 
-from pytket_qir.cfg import Block
+from pytket_qir.converter import Block
 from pytket_qir.generator import circuit_to_qir, write_qir_file  # type: ignore
 
 from pytket_qir.gatesets.base import FuncName, FuncNat, FuncSpec  # type: ignore
@@ -73,18 +73,34 @@ def grover_circuit() -> Circuit:
 
 @fixture
 def one_conditional_else_circuit() -> Circuit:
-    circuit = Circuit(5, 14)
+    circuit = Circuit(5, 16)
+    circuit.add_c_register("tk_SCRATCH_BIT", 3)
 
     c_reg = circuit.get_c_register("c")
+    scratch_reg = circuit.get_c_register("tk_SCRATCH_BIT")
 
-    circuit.CX(4, 3).CX(4, 2).CX(3, 2).CX(2, 1).CX(4, 0)
-    circuit.CX(3, 0).CX(1, 0).Measure(1, 0).add_gate(OpType.Reset, [1])
-    circuit.Measure(2, 1).add_gate(OpType.Reset, [2])
-    circuit.Measure(3, 2).add_gate(OpType.Reset, [3])
-    circuit.Measure(4, 3).add_gate(OpType.Reset, [4])
-    circuit.add_c_copybits([c_reg[0]], [c_reg[13]])
+    circuit.add_c_setbits([1, 1], [13, 14])
+    exp_entry = c_reg[13] | (c_reg[13] & c_reg[14])
+    circuit.add_classicalexpbox_bit(exp_entry, [scratch_reg[0]])
 
-    true_condition_circuit = Circuit(5, 14)
+    entry_circuit = Circuit(5, 16)
+    entry_circuit.add_c_setbits([1], [13])
+    entry_circuit.CX(4, 3).CX(4, 2).CX(3, 2).CX(2, 1).CX(4, 0)
+    entry_circuit.CX(3, 0).CX(1, 0).Measure(1, 0).add_gate(OpType.Reset, [1])
+    entry_circuit.Measure(2, 1).add_gate(OpType.Reset, [2])
+    entry_circuit.Measure(3, 2).add_gate(OpType.Reset, [3])
+    entry_circuit.Measure(4, 3).add_gate(OpType.Reset, [4])
+    entry_circuit.add_c_copybits([c_reg[0]], [c_reg[15]])
+
+    circ_box = CircBox(entry_circuit)
+    args = list(range(entry_circuit.n_qubits)) + list(range(len(entry_circuit.bits)))
+    circuit.add_circbox(circ_box, args, condition=if_bit(scratch_reg[0]))
+
+    true_condition_circuit = Circuit(5, 16)
+    true_condition_circuit.add_c_setbits([1], [13])
+    exp_true = c_reg[13] | (exp_entry & c_reg[15])
+    circuit.add_classicalexpbox_bit(exp_true, [scratch_reg[1]])
+
     true_condition_circuit.add_gate(OpType.Reset, [0])
     true_condition_circuit.Ry(0.9553166181245094, 0).Rz(-5.497787143782138, 0)
     true_condition_circuit.Ry(0.9553166181245094, 1).Rz(-5.497787143782138, 1)
@@ -100,38 +116,54 @@ def one_conditional_else_circuit() -> Circuit:
     args = list(range(true_condition_circuit.n_qubits)) + list(
         range(len(true_condition_circuit.bits))
     )
-    circuit.add_circbox(circ_box, args, condition=if_bit(c_reg[13]))
+    circuit.add_circbox(circ_box, args, condition=if_bit(scratch_reg[1]))
 
-    empty_circuit = Circuit(5, 14)
-    circ_box_2 = CircBox(empty_circuit)
-    args = list(range(empty_circuit.n_qubits)) + list(range(len(empty_circuit.bits)))
-    circuit.add_circbox(circ_box_2, args, condition=if_not_bit(c_reg[13]))
-    else_condition_circuit = Circuit(5, 14)
-    else_condition_circuit.H(0).Y(0).H(0).Measure(0, 12).add_gate(OpType.Reset, [0])
-    circuit.append(else_condition_circuit)
+    then_condition_circuit = Circuit(5, 14)
+    then_condition_circuit.add_c_setbits([1], [13])
+    exp_then = (c_reg[13] | exp_true & c_reg[13]) | (exp_entry & BitNot(c_reg[15]))
+    circuit.add_classicalexpbox_bit(exp_then, [scratch_reg[2]])
+    
+    then_condition_circuit.H(0).Y(0).H(0).Measure(0, 12).add_gate(OpType.Reset, [0])
+
+    circ_box = CircBox(then_condition_circuit)
+    args = list(range(then_condition_circuit.n_qubits)) + list(
+        range(len(then_condition_circuit.bits))
+    )
+    circuit.add_circbox(circ_box, args, condition=if_bit(scratch_reg[2]))
 
     return circuit
 
 
 @fixture
 def one_conditional_then_circuit() -> Circuit:
-    circuit = Circuit(5, 14)
+    circuit = Circuit(5, 16)
+    circuit.add_c_register("tk_SCRATCH_BIT", 3)
 
     c_reg = circuit.get_c_register("c")
+    scratch_reg = circuit.get_c_register("tk_SCRATCH_BIT")
 
-    circuit.CX(4, 3).CX(4, 2).CX(3, 2).CX(2, 1).CX(4, 0)
-    circuit.CX(3, 0).CX(1, 0).Measure(1, 0).add_gate(OpType.Reset, [1])
-    circuit.Measure(2, 1).add_gate(OpType.Reset, [2])
-    circuit.Measure(3, 2).add_gate(OpType.Reset, [3])
-    circuit.Measure(4, 3).add_gate(OpType.Reset, [4])
-    circuit.add_c_copybits([c_reg[0]], [c_reg[13]])
+    circuit.add_c_setbits([1, 1], [13, 14])
+    exp_entry = c_reg[13] | (c_reg[13] & c_reg[14])
+    circuit.add_classicalexpbox_bit(exp_entry, [scratch_reg[0]])
 
-    empty_circuit = Circuit(5, 14)
-    circ_box_2 = CircBox(empty_circuit)
-    args = list(range(empty_circuit.n_qubits)) + list(range(len(empty_circuit.bits)))
-    circuit.add_circbox(circ_box_2, args, condition=if_bit(c_reg[13]))
+    entry_circuit = Circuit(5, 16)
+    entry_circuit.add_c_setbits([1], [13])
+    entry_circuit.CX(4, 3).CX(4, 2).CX(3, 2).CX(2, 1).CX(4, 0)
+    entry_circuit.CX(3, 0).CX(1, 0).Measure(1, 0).add_gate(OpType.Reset, [1])
+    entry_circuit.Measure(2, 1).add_gate(OpType.Reset, [2])
+    entry_circuit.Measure(3, 2).add_gate(OpType.Reset, [3])
+    entry_circuit.Measure(4, 3).add_gate(OpType.Reset, [4])
+    entry_circuit.add_c_copybits([c_reg[0]], [c_reg[15]])
 
-    true_condition_circuit = Circuit(5, 14)
+    circ_box = CircBox(entry_circuit)
+    args = list(range(entry_circuit.n_qubits)) + list(range(len(entry_circuit.bits)))
+    circuit.add_circbox(circ_box, args, condition=if_bit(scratch_reg[0]))
+
+    true_condition_circuit = Circuit(5, 16)
+    true_condition_circuit.add_c_setbits([1], [13])
+    exp_true = c_reg[13] | (exp_entry & BitNot(c_reg[15]))
+    circuit.add_classicalexpbox_bit(exp_true, [scratch_reg[1]])
+
     true_condition_circuit.add_gate(OpType.Reset, [0])
     true_condition_circuit.Ry(0.9553166181245094, 0).Rz(-5.497787143782138, 0)
     true_condition_circuit.Ry(0.9553166181245094, 1).Rz(-5.497787143782138, 1)
@@ -147,11 +179,20 @@ def one_conditional_then_circuit() -> Circuit:
     args = list(range(true_condition_circuit.n_qubits)) + list(
         range(len(true_condition_circuit.bits))
     )
-    circuit.add_circbox(circ_box, args, condition=if_not_bit(c_reg[13]))
+    circuit.add_circbox(circ_box, args, condition=if_bit(scratch_reg[1]))
 
     then_condition_circuit = Circuit(5, 14)
+    then_condition_circuit.add_c_setbits([1], [13])
+    exp_then = (c_reg[13] | exp_true & c_reg[13]) | (exp_entry & c_reg[15])
+    circuit.add_classicalexpbox_bit(exp_then, [scratch_reg[2]])
+    
     then_condition_circuit.H(0).Y(0).H(0).Measure(0, 12).add_gate(OpType.Reset, [0])
-    circuit.append(then_condition_circuit)
+
+    circ_box = CircBox(then_condition_circuit)
+    args = list(range(then_condition_circuit.n_qubits)) + list(
+        range(len(then_condition_circuit.bits))
+    )
+    circuit.add_circbox(circ_box, args, condition=if_bit(scratch_reg[2]))
 
     return circuit
 
