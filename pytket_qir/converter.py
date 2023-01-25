@@ -20,7 +20,7 @@ from pyqir.generator import ir_to_bitcode, types  # type: ignore
 
 from pytket_qir.gatesets.base import CustomGateSet
 from pytket_qir.parser import QirParser
-from pytket_qir.utils import CfgException
+from pytket_qir.utils import ConverterException
 
 
 @dataclass
@@ -32,8 +32,8 @@ class Block:
     visited: bool = False
 
 
-def topological_sort(digraph: dict):
-    """Topologically sort a digraph, a dict of <nodes, set of successors>."""
+def topological_sort(digraph: dict) -> dict:
+    """Topologically sort a digraph, a dict of <nodes, list of successors>."""
     # Mapping nodes to indegrees.
     indegrees = {node: 0 for node in digraph}
     for node in digraph:
@@ -45,10 +45,10 @@ def topological_sort(digraph: dict):
         if indegrees[node] == 0:
             nodes_with_empty_preds.append(node)
 
-    topological_ordering = []
+    topological_ordering = {}
     while len(nodes_with_empty_preds) > 0:
         node = nodes_with_empty_preds.pop()
-        topological_ordering.append(node)
+        topological_ordering[node] = digraph[node]
         for succ in digraph[node]:
             indegrees[succ] -= 1
             if indegrees[succ] == 0:
@@ -57,7 +57,7 @@ def topological_sort(digraph: dict):
     if len(topological_ordering) == len(digraph):
         return topological_ordering
     else:
-        raise CfgException(
+        raise ConverterException(
             "A cycle exists in the graph, there is no topological order to be found."
         )
 
@@ -70,6 +70,7 @@ class QirConverter:
     def __init__(
         self,
         file_path: str,
+        optimisation_level: int = 0,
         gateset: Optional[CustomGateSet] = None,
         wasm_handler: Optional[WasmFileHandler] = None,
         wasm_int_type: types.Int = types.Int(32),
@@ -85,6 +86,9 @@ class QirConverter:
             qir_int_type=qir_int_type,
         )
         self.cfg = OrderedDict()
+        self.rewritten_cfg = self.cfg
+        if optimisation_level == 1:
+            self.collapse_blocks()
         self.circuit = self.cfg_to_circuit()
 
     @property
@@ -119,6 +123,16 @@ class QirConverter:
             elif isinstance(term, QirRetTerminator):
                 self._successors[block_name] = []
                 self.edges[block_name] = {}
+        # Sort the DAG.
+        sorted_dag = topological_sort(self._successors)
+        # Update (sort) the list of successors.
+        for block, succs in sorted_dag.items():
+            if len(succs) > 1:
+                f = (
+                    lambda el: el == self._successors[block][0]
+                    or el == self._successors[block][1]
+                )
+                self._successors[block] = list(filter(f, self._successors))
 
     @property
     def predecessors(self):
@@ -172,23 +186,19 @@ class QirConverter:
         self.local_conditions = {}
         self.successors = {}
         self.predecessors = {}
-        # import pdb; pdb.set_trace()
-
-        sorted_dag = topological_sort(self.successors)
 
         self._cfg = value
         if not value:  # Checking for empty input dict.
-            for block_name in sorted_dag:
+            for block_name, succs in self.successors.items():
                 block_inst = Block(
                     name=block_name,
-                    succs=self.successors[block_name],
+                    succs=succs,
                     preds=self.predecessors[block_name],
                     composition=[block_name],
                     visited=False,
                 )
                 # f = lambda b: b if b.condition else None
                 self._cfg[block_name] = block_inst
-        # import pdb; pdb.set_trace()
 
     def cfg_to_circuit(self) -> Circuit:
         main_circuit = Circuit(self.parser.qubits, self.parser.bits + 2)
@@ -198,16 +208,26 @@ class QirConverter:
         condition_bit = main_circuit.get_c_register("c")[self.parser.bits]
         self.conditions["entry_pred"] = condition_bit
         local_condition_bit = main_circuit.get_c_register("c")[self.parser.bits + 1]
+
         self.local_conditions["entry_pred"] = local_condition_bit
-        for block_name in self.cfg:
-            block = cast(QirBlock, self.module_function.get_block_by_name(block_name))
-            new_circuit = Circuit(self.parser.qubits, self.parser.bits + 2)
+        for block_name, block in self.rewritten_cfg.items():
+            curr_qir_block = cast(
+                QirBlock, self.module_function.get_block_by_name(block_name)
+            )
+            circuit = Circuit(self.parser.qubits, self.parser.bits + 2)
             # Setting the condition True for each block.
-            new_circuit.add_c_setbits([1], [self.parser.bits])
-            condition_bit = new_circuit.get_c_register("c")[self.parser.bits]
+            circuit.add_c_setbits([1], [self.parser.bits])
+            condition_bit = circuit.get_c_register("c")[self.parser.bits]
             self.conditions[block_name] = condition_bit
-            circuit = self.parser.block_to_circuit(block, new_circuit)
-            term = block.terminator
+            for compo_block in block.composition:
+                qir_block = cast(
+                    QirBlock, self.module_function.get_block_by_name(compo_block)
+                )
+                new_circuit = self.parser.block_to_circuit(
+                    qir_block, Circuit(self.parser.qubits, self.parser.bits + 2)
+                )
+                circuit.append(new_circuit)
+            term = curr_qir_block.terminator
             if isinstance(term, QirCondBrTerminator):
                 term_condition = cast(QirLocalOperand, term.condition)
                 condition_name = "%" + str(term_condition.name)
@@ -216,13 +236,14 @@ class QirConverter:
             elif isinstance(term, (QirBrTerminator, QirRetTerminator)):
                 # Return is considered an unconditional branch.
                 self.local_conditions[block_name] = condition_bit
-            preds = self.predecessors[block_name]
+            preds = block.preds
             if not preds:  # Entry block.
                 expr = self.local_conditions["entry_pred"]
                 self.conditions[block_name] = self.conditions[block_name] | (
                     self.conditions["entry_pred"] & expr
                 )
             else:
+                # import pdb; pdb.set_trace()
                 for pred in preds:
                     if (
                         self.edges[pred][block_name] == None
@@ -271,14 +292,14 @@ class QirConverter:
                 return curr_block
         return curr_block
 
-    def collapse_blocks(self) -> dict:
+    def collapse_blocks(self) -> None:
         """
         Detect and collapse chains of linear blocks.
 
         Return a rewritten CFG where all blocks have in-degree exactly one
         and out-degree greater or equal to two.
         """
-        rewritten_cfg = {}
+        rewritten_cfg = OrderedDict()
         for block in self.module.functions[0].blocks:
             if not self.cfg[block.name].visited:
                 contracted_block = self.apply_contraction(block)
@@ -291,17 +312,25 @@ class QirConverter:
                             for pred in self.cfg[succ].preds
                         ]
                         self.cfg[succ].preds = preds
+                        # import pdb; pdb.set_trace()
+                    # Update the edges datastructure
+                    self.edges[contracted_block.name] = self.edges[
+                        contracted_block.composition[-1]
+                    ]
+                    for block in contracted_block.composition[1:]:
+                        del self.edges[block]
                 else:
                     rewritten_cfg[block.name] = self.cfg[block.name]
         # Reset values for later reuse.
         for block_name in self.cfg:
             self.cfg[block_name].visited = False
         self.rewritten_cfg = rewritten_cfg
-        return rewritten_cfg
+        # return rewritten_cfg
 
 
 def circuit_from_qir(
     input_file: Union[str, os.PathLike],
+    optimisation_level: int = 0,
     gateset: Optional[CustomGateSet] = None,
     wasm_handler: Optional[WasmFileHandler] = None,
     wasm_int_type: types.Int = types.Int(32),
@@ -318,9 +347,11 @@ def circuit_from_qir(
         with open(output_bc_file, "wb") as o:
             o.write(ir_to_bitcode(data))
         input_file_str = output_bc_file
-    converter = QirConverter(input_file_str, gateset, wasm_handler, wasm_int_type)
+    converter = QirConverter(
+        input_file_str, optimisation_level, gateset, wasm_handler, wasm_int_type
+    )
     circuit = converter.circuit
     # Attach few fields to the circuit.
-    circuit.cfg = converter.cfg
+    circuit.cfg = converter.rewritten_cfg
     circuit.ssa_vars = converter.parser.ssa_vars
     return circuit
