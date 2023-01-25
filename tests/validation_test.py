@@ -16,7 +16,7 @@ from pytket_qir.gatesets.base import (
 )
 from pytket_qir.gatesets.pyqir import _TK_TO_PYQIR
 from pytket_qir.generator import circuit_to_qir
-from pytket_qir.parser import circuit_from_qir
+from pytket_qir.converter import circuit_from_qir
 
 
 qir_files_dir = Path("./qir_test_files")
