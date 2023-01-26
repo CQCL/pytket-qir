@@ -3,12 +3,12 @@ from dataclasses import dataclass
 import os
 from typing import Optional, cast, List, Union
 
-from pytket import Circuit
+from pytket import Circuit  # type: ignore
 from pytket.circuit import CircBox  # type: ignore
-from pytket.circuit.logic_exp import BitNot, if_bit
-from pytket.wasm import WasmFileHandler
+from pytket.circuit.logic_exp import BitNot, if_bit  # type: ignore
+from pytket.wasm import WasmFileHandler  # type: ignore
 
-from pyqir.parser import (
+from pyqir.parser import (  # type: ignore
     QirBlock,
     QirBrTerminator,
     QirCondBrTerminator,

@@ -15,12 +15,12 @@
 from pathlib import Path
 from typing import cast
 
-import pytest
+import pytest  # type: ignore
 
 from pytket import Circuit  # type: ignore
 from pytket.circuit import OpType  # type: ignore
 from pytket.wasm import WasmFileHandler  # type: ignore
-from pyqir.parser import QirBlock, QirModule
+from pyqir.parser import QirBlock, QirModule  # type: ignore
 
 from pytket_qir.parser import QirParser
 from pytket_qir.utils import InstructionError
