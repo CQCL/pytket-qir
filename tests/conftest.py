@@ -873,7 +873,8 @@ def multiple_successive_conditionals_cfg() -> OrderedDict:
                     name="continue",
                     succs=[
                         "then1",
-                        "TeleportChain__TeleportQubitUsingPresharedEntanglement__body.2.exit.i",
+                        "TeleportChain__TeleportQubitUsingPresharedEntanglement"
+                        "__body.2.exit.i",
                     ],
                     preds=["then", "entry"],
                     composition=["continue"],
@@ -885,7 +886,8 @@ def multiple_successive_conditionals_cfg() -> OrderedDict:
                 Block(
                     name="then1",
                     succs=[
-                        "TeleportChain__TeleportQubitUsingPresharedEntanglement__body.2.exit.i"
+                        "TeleportChain__TeleportQubitUsingPresharedEntanglement"
+                        "__body.2.exit.i"
                     ],
                     preds=["continue"],
                     composition=["then1"],
@@ -893,13 +895,16 @@ def multiple_successive_conditionals_cfg() -> OrderedDict:
                 ),
             ),
             (
-                "TeleportChain__TeleportQubitUsingPresharedEntanglement__body.2.exit.i",
+                "TeleportChain__TeleportQubitUsingPresharedEntanglement"
+                "__body.2.exit.i",
                 Block(
-                    name="TeleportChain__TeleportQubitUsingPresharedEntanglement__body.2.exit.i",
+                    name="TeleportChain__TeleportQubitUsingPresharedEntanglement"
+                    "__body.2.exit.i",
                     succs=["then2", "continue2"],
                     preds=["then1", "continue"],
                     composition=[
-                        "TeleportChain__TeleportQubitUsingPresharedEntanglement__body.2.exit.i"
+                        "TeleportChain__TeleportQubitUsingPresharedEntanglement"
+                        "__body.2.exit.i"
                     ],
                     visited=False,
                 ),
@@ -910,7 +915,8 @@ def multiple_successive_conditionals_cfg() -> OrderedDict:
                     name="then2",
                     succs=["continue2"],
                     preds=[
-                        "TeleportChain__TeleportQubitUsingPresharedEntanglement__body.2.exit.i"
+                        "TeleportChain__TeleportQubitUsingPresharedEntanglement"
+                        "__body.2.exit.i"
                     ],
                     composition=["then2"],
                     visited=False,
@@ -922,11 +928,14 @@ def multiple_successive_conditionals_cfg() -> OrderedDict:
                     name="continue2",
                     succs=[
                         "then3",
-                        "TeleportChain__DemonstrateTeleportationUsingPresharedEntanglement__body.1.exit",
+                        "TeleportChain"
+                        "__DemonstrateTeleportationUsingPresharedEntanglement"
+                        "__body.1.exit",
                     ],
                     preds=[
                         "then2",
-                        "TeleportChain__TeleportQubitUsingPresharedEntanglement__body.2.exit.i",
+                        "TeleportChain__TeleportQubitUsingPresharedEntanglement"
+                        "__body.2.exit.i",
                     ],
                     composition=["continue2"],
                     visited=False,
@@ -937,7 +946,9 @@ def multiple_successive_conditionals_cfg() -> OrderedDict:
                 Block(
                     name="then3",
                     succs=[
-                        "TeleportChain__DemonstrateTeleportationUsingPresharedEntanglement__body.1.exit"
+                        "TeleportChain"
+                        "__DemonstrateTeleportationUsingPresharedEntanglement"
+                        "__body.1.exit"
                     ],
                     preds=["continue2"],
                     composition=["then3"],
@@ -945,13 +956,18 @@ def multiple_successive_conditionals_cfg() -> OrderedDict:
                 ),
             ),
             (
-                "TeleportChain__DemonstrateTeleportationUsingPresharedEntanglement__body.1.exit",
+                "TeleportChain__DemonstrateTeleportationUsingPresharedEntanglement"
+                "__body.1.exit",
                 Block(
-                    name="TeleportChain__DemonstrateTeleportationUsingPresharedEntanglement__body.1.exit",
+                    name="TeleportChain"
+                    "__DemonstrateTeleportationUsingPresharedEntanglement"
+                    "__body.1.exit",
                     succs=[],
                     preds=["then3", "continue2"],
                     composition=[
-                        "TeleportChain__DemonstrateTeleportationUsingPresharedEntanglement__body.1.exit"
+                        "TeleportChain"
+                        "__DemonstrateTeleportationUsingPresharedEntanglement"
+                        "__body.1.exit"
                     ],
                     visited=False,
                 ),
@@ -980,7 +996,8 @@ def nested_conditionals_mixed_cfg() -> OrderedDict:
                     name="cont_1",
                     succs=[
                         "then0__2.i.i.i",
-                        "Microsoft__Quantum__Samples__MeasureDistilledTAtDepth3InX__body.1.exit.1",
+                        "Microsoft__Quantum__Samples__MeasureDistilledTAtDepth3InX"
+                        "__body.1.exit.1",
                     ],
                     preds=["entry"],
                     composition=["cont_1"],
@@ -993,7 +1010,8 @@ def nested_conditionals_mixed_cfg() -> OrderedDict:
                     name="else_1",
                     succs=[
                         "then0__2.i.i.i",
-                        "Microsoft__Quantum__Samples__MeasureDistilledTAtDepth3InX__body.1.exit.1",
+                        "Microsoft__Quantum__Samples__MeasureDistilledTAtDepth3InX"
+                        "__body.1.exit.1",
                     ],
                     preds=["entry"],
                     composition=["else_1"],
@@ -1005,7 +1023,8 @@ def nested_conditionals_mixed_cfg() -> OrderedDict:
                 Block(
                     name="then0__2.i.i.i",
                     succs=[
-                        "Microsoft__Quantum__Samples__MeasureDistilledTAtDepth3InX__body.1.exit.1"
+                        "Microsoft__Quantum__Samples__MeasureDistilledTAtDepth3InX"
+                        "__body.1.exit.1"
                     ],
                     preds=["else_1", "cont_1"],
                     composition=["then0__2.i.i.i"],
@@ -1013,36 +1032,43 @@ def nested_conditionals_mixed_cfg() -> OrderedDict:
                 ),
             ),
             (
-                "Microsoft__Quantum__Samples__MeasureDistilledTAtDepth3InX__body.1.exit.1",
+                "Microsoft__Quantum__Samples__MeasureDistilledTAtDepth3InX"
+                "__body.1.exit.1",
                 Block(
-                    name="Microsoft__Quantum__Samples__MeasureDistilledTAtDepth3InX__body.1.exit.1",
+                    name="Microsoft__Quantum__Samples__MeasureDistilledTAtDepth3InX"
+                    "__body.1.exit.1",
                     succs=[
-                        "Microsoft__Quantum__Samples__MeasureDistilledTAtDepth3InX__body.1.exit"
+                        "Microsoft__Quantum__Samples__MeasureDistilledTAtDepth3InX"
+                        "__body.1.exit"
                     ],
                     preds=["then0__2.i.i.i", "else_1", "cont_1"],
                     composition=[
-                        "Microsoft__Quantum__Samples__MeasureDistilledTAtDepth3InX__body.1.exit.1"
+                        "Microsoft__Quantum__Samples__MeasureDistilledTAtDepth3InX"
+                        "__body.1.exit.1"
                     ],
                     visited=False,
                 ),
             ),
             (
-                "Microsoft__Quantum__Samples__MeasureDistilledTAtDepth3InX__body.1.exit",
+                "Microsoft__Quantum__Samples__MeasureDistilledTAtDepth3InX"
+                "__body.1.exit",
                 Block(
-                    name="Microsoft__Quantum__Samples__MeasureDistilledTAtDepth3InX__body.1.exit",
+                    name="Microsoft__Quantum__Samples__MeasureDistilledTAtDepth3InX"
+                    "__body.1.exit",
                     succs=[],
                     preds=[
-                        "Microsoft__Quantum__Samples__MeasureDistilledTAtDepth3InX__body.1.exit.1"
+                        "Microsoft__Quantum__Samples__MeasureDistilledTAtDepth3InX"
+                        "__body.1.exit.1"
                     ],
                     composition=[
-                        "Microsoft__Quantum__Samples__MeasureDistilledTAtDepth3InX__body.1.exit"
+                        "Microsoft__Quantum__Samples__MeasureDistilledTAtDepth3InX"
+                        "__body.1.exit"
                     ],
                     visited=False,
                 ),
             ),
         ]
     )
-
 
 
 @fixture
@@ -1228,7 +1254,8 @@ def simple_conditional_cfg() -> dict:
             visited=False,
         ),
         "Microsoft__Quantum__Samples__MeasureDistilledTAtDepth3InX__body.1.exit": Block(
-            name="Microsoft__Quantum__Samples__MeasureDistilledTAtDepth3InX__body.1.exit",
+            name="Microsoft__Quantum__Samples"
+            "__MeasureDistilledTAtDepth3InX__body.1.exit",
             succs=[],
             preds=["else", "then0__2.i.i.i"],
             composition=[
@@ -1269,7 +1296,8 @@ def simple_conditional_opposite_cfg() -> dict:
             visited=False,
         ),
         "Microsoft__Quantum__Samples__MeasureDistilledTAtDepth3InX__body.1.exit": Block(
-            name="Microsoft__Quantum__Samples__MeasureDistilledTAtDepth3InX__body.1.exit",
+            name="Microsoft__Quantum__Samples"
+            "__MeasureDistilledTAtDepth3InX__body.1.exit",
             succs=[],
             preds=["then0__2.i.i.i", "else"],
             composition=[
@@ -1523,7 +1551,8 @@ def insert_block_right() -> dict:
             visited=False,
         ),
         "Microsoft__Quantum__Samples__MeasureDistilledTAtDepth3InX__body.1.exit": Block(
-            name="Microsoft__Quantum__Samples__MeasureDistilledTAtDepth3InX__body.1.exit",
+            name="Microsoft__Quantum__Samples"
+            "__MeasureDistilledTAtDepth3InX__body.1.exit",
             succs=[],
             preds=["then0__2.i.i.i", "entry_trivial_block"],
             composition=[
@@ -1613,7 +1642,8 @@ def insert_nested_blocks_right() -> dict:
             visited=False,
         ),
         "TeleportChain__TeleportQubitUsingPresharedEntanglement__body.2.exit.i": Block(
-            name="TeleportChain__TeleportQubitUsingPresharedEntanglement__body.2.exit.i",
+            name="TeleportChain__TeleportQubitUsingPresharedEntanglement"
+            "__body.2.exit.i",
             succs=[
                 "then2",
                 "TeleportChain__TeleportQubitUsingPresharedEntanglement__body.2.exit."
