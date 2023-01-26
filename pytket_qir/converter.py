@@ -65,6 +65,13 @@ def topological_sort(digraph: dict) -> dict:
 class QirConverter:
     """
     A class to build and convert the QIR control-flow graph to a pytket circuit.
+
+    In more details, it works by following the next steps:
+    - Create a CFG from a topologically sort the sequence of blocks from the QIR program.
+    - Apply optimisation to the CFG if so.
+    - Iterate through each block in the CFG and call the QirParser to return the corresponding
+      circuit and compute the guard.
+    - Add previously generated circuits to the main one as properly conditioned CircBoxes.
     """
 
     def __init__(
@@ -97,6 +104,11 @@ class QirConverter:
 
     @successors.setter
     def successors(self, value):
+        """
+        Iterate through the sequence of blocks from the QIR program
+        to create a list of successors and store in the successors
+        class member.
+        """
         self._successors = OrderedDict()
         for block in self.module.functions[0].blocks:
             block_name = block.name
@@ -135,6 +147,10 @@ class QirConverter:
 
     @predecessors.setter
     def predecessors(self, value):
+        """
+        Iterate the successors data structure in reverse order to create a
+        list of predecessors and store it in the predecessors class member.
+        """
         self._predecessors = OrderedDict()
         reversed_succs = reversed(self.successors)
         reversed_succs_list = list(reversed_succs)
@@ -175,9 +191,17 @@ class QirConverter:
 
     @cfg.setter
     def cfg(self, value) -> None:
+        """
+        Create and store the CFG by iterating through the topologically
+        sorted list of blocks and instantiate the Block data structure
+        for each one of them.
+        """
+        # Following three class members are initialised to empty dicts.
         self.conditions = {}
         self.edges = {}
         self.local_conditions = {}
+        # Initliase to concrete CFG structure from the QIR program
+        #  by calling the setters.
         self.successors = {}
         self.predecessors = {}
 
