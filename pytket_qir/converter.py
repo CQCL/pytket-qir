@@ -284,7 +284,8 @@ class QirConverter:
             )
         return main_circuit
 
-    def apply_contraction(self, block) -> Block:
+    def apply_contraction(self, block: QirBlock) -> Block:
+        """Attempt to contract blocks recursively."""
         term = block.terminator
         has_jump = isinstance(term, QirBrTerminator)
         curr_block = self.cfg[block.name]
