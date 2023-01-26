@@ -309,36 +309,32 @@ class QirConverter:
         return curr_block
 
     def collapse_blocks(self) -> None:
-        """
-        Detect and collapse chains of linear blocks.
-
-        Return a rewritten CFG where all blocks have in-degree exactly one
-        and out-degree greater or equal to two.
-        """
+        """Detect and collapse chains of linear blocks."""
         rewritten_cfg = OrderedDict()
-        for block in self.module.functions[0].blocks:
-            if not self.cfg[block.name].visited:
-                contracted_block = self.apply_contraction(block)
-                if contracted_block is not self.cfg[block.name]:
+        for block_name, block in self.rewritten_cfg.items():
+            if not block.visited:
+                qir_block = self.module_function.get_block_by_name(block_name)
+                contracted_block = self.apply_contraction(qir_block)
+                if contracted_block is not block:  # Contractions have occured.
                     rewritten_cfg[block.name] = contracted_block
                     # Update successors's predecessors to contracted block.
                     for succ in contracted_block.succs:
                         preds = [
-                            pred.replace(contracted_block.composition[-1], block.name)
-                            for pred in self.cfg[succ].preds
+                            pred.replace(contracted_block.composition[-1], block_name)
+                            for pred in self.rewritten_cfg[succ].preds
                         ]
-                        self.cfg[succ].preds = preds
-                    # Update the edges datastructure
+                        self.rewritten_cfg[succ].preds = preds
+                    # Update the edges datastructure for later use.
                     self.edges[contracted_block.name] = self.edges[
                         contracted_block.composition[-1]
                     ]
                     for block in contracted_block.composition[1:]:
                         del self.edges[block]
                 else:
-                    rewritten_cfg[block.name] = self.cfg[block.name]
-        # Reset values for later reuse.
-        for block_name in self.cfg:
-            self.cfg[block_name].visited = False
+                    rewritten_cfg[block_name] = block
+        # Reset visited fields to false for later reuse.
+        for block in rewritten_cfg.values():
+            block.visited = False
         self.rewritten_cfg = rewritten_cfg
 
 
