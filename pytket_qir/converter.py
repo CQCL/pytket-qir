@@ -101,12 +101,7 @@ class QirConverter:
         for block in self.module.functions[0].blocks:
             block_name = block.name
             term = block.terminator
-            # self.conditions[block_name] = True
-
-            # import pdb; pdb.set_trace()
             if block_name == "entry":
-                # self.conditions["entry_pred"] = True
-                # self.local_conditions["entry_pred"] = True
                 self.edges[block_name] = {block_name: True}
             if isinstance(term, QirCondBrTerminator):
                 f = lambda el: el.name == term.true_dest or el.name == term.false_dest
@@ -180,7 +175,6 @@ class QirConverter:
 
     @cfg.setter
     def cfg(self, value) -> None:
-        # import pdb; pdb.set_trace()
         self.conditions = {}
         self.edges = {}
         self.local_conditions = {}
@@ -197,7 +191,6 @@ class QirConverter:
                     composition=[block_name],
                     visited=False,
                 )
-                # f = lambda b: b if b.condition else None
                 self._cfg[block_name] = block_inst
 
     def cfg_to_circuit(self) -> Circuit:
@@ -243,7 +236,6 @@ class QirConverter:
                     self.conditions["entry_pred"] & expr
                 )
             else:
-                # import pdb; pdb.set_trace()
                 for pred in preds:
                     if (
                         self.edges[pred][block_name] == None
@@ -312,7 +304,6 @@ class QirConverter:
                             for pred in self.cfg[succ].preds
                         ]
                         self.cfg[succ].preds = preds
-                        # import pdb; pdb.set_trace()
                     # Update the edges datastructure
                     self.edges[contracted_block.name] = self.edges[
                         contracted_block.composition[-1]
@@ -325,7 +316,6 @@ class QirConverter:
         for block_name in self.cfg:
             self.cfg[block_name].visited = False
         self.rewritten_cfg = rewritten_cfg
-        # return rewritten_cfg
 
 
 def circuit_from_qir(
