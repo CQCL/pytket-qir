@@ -40,8 +40,7 @@ from pytket.circuit.logic_exp import (  # type: ignore
     reg_leq,
 )
 
-from pytket_qir.converter import Block
-from pytket_qir.generator import circuit_to_qir, write_qir_file  # type: ignore
+from pytket_qir.converter import Block, circuit_to_qir, write_qir_file  # type: ignore
 
 from pytket_qir.gatesets.base import FuncName, FuncNat, FuncSpec  # type: ignore
 
@@ -392,7 +391,7 @@ def collapse_simple_chain_circuit() -> Circuit:
 
 @fixture
 def collapse_complex_chain_circuit() -> Circuit:
-    circuit = Circuit(5, 16)
+    circuit = Circuit(5, 17)
     circuit.add_c_register("tk_SCRATCH_BIT", 7)
 
     creg = circuit.get_c_register("c")
@@ -441,13 +440,13 @@ def collapse_complex_chain_circuit() -> Circuit:
     )
     circuit.add_circbox(circ_box, args, condition=if_bit(scratch_reg[2]))
 
-    diamond_condition_circuit = Circuit(5, 16)
+    diamond_condition_circuit = Circuit(5, 17)
     creg = diamond_condition_circuit.get_c_register("c")
     diamond_condition_circuit.add_c_setbits([1], [13])
     exp_diamond = (creg[13] | (exp_true & creg[13])) | (exp_false & creg[13])
     circuit.add_classicalexpbox_bit(exp_diamond, [scratch_reg[3]])
     diamond_condition_circuit.H(0).H(0).H(0)
-    diamond_condition_circuit.add_c_copybits([creg[1]], [creg[15]])
+    diamond_condition_circuit.add_c_copybits([creg[1]], [creg[16]])
 
     circ_box_2 = CircBox(diamond_condition_circuit)
     args = list(range(diamond_condition_circuit.n_qubits)) + list(

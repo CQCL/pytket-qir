@@ -23,14 +23,11 @@ from pytket.wasm import WasmFileHandler  # type: ignore
 
 from pyqir.generator import bitcode_to_ir, types  # type: ignore
 
+from pytket_qir.converter import circuit_to_qir, write_qir_file
 from pytket_qir.gatesets.base import FuncName, FuncNat, FuncSpec, QirGate  # type: ignore
 
 from pytket_qir.gatesets.base import CustomGateSet, CustomQirGate
 from pytket_qir.gatesets.pyqir import _TK_TO_PYQIR
-from pytket_qir.generator import (
-    circuit_to_qir,
-    write_qir_file,
-)
 from pytket_qir.utils import ClassicalExpBoxError, SetBitsOpError
 
 
@@ -430,7 +427,6 @@ class TestPytketToQirConditional:
     A class to test the translation of pytket conditional
     sub-circuits (CircBox) to QIR.
     """
-
     def test_simple_conditional(
         self, simple_conditional_circuit: Generator, simple_conditional_file_name: str
     ):

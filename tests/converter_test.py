@@ -1,9 +1,10 @@
 from collections import OrderedDict
 from pathlib import Path
+import pytest
 
 from pytket import Circuit  # type: ignore
 
-from pytket_qir.converter import topological_sort, circuit_from_qir
+from pytket_qir.converter import circuit_to_qir, topological_sort, circuit_from_qir
 
 
 qir_files_dir = Path("./qir_test_files")
@@ -423,7 +424,6 @@ class TestCfgOptimisations:
         assert coms[0] == exp_coms[0]
         assert str(coms[1].op.get_exp()) == str(exp_coms[1].op.get_exp())
         assert coms[2].op.op.get_circuit() == exp_coms[2].op.op.get_circuit()
-
         assert str(coms[3].op.get_exp()) == str(exp_coms[3].op.get_exp())
         com4 = coms[4].op.op.get_circuit().get_commands()
         exp_com4 = exp_coms[4].op.op.get_circuit().get_commands()
@@ -452,3 +452,15 @@ class TestCfgOptimisations:
         circuit = circuit_from_qir(collapse_nested_chains_bc, optimisation_level=1)
 
         assert circuit.cfg == collapsed_nested_chains
+
+
+class TestRoundTripForGuardedCircuits:
+    @pytest.mark.skip
+    def test_simple_chain_guarded_circuit(self) -> None:
+        collapse_simple_chain_path = qir_files_dir / "collapse_simple_instr_chain.bc"
+        circuit1 = circuit_from_qir(collapse_simple_chain_path, optimisation_level=1)
+
+        one_conditional_diamond_path = qir_files_dir / "one_conditional_diamond.bc"
+        circuit2 = circuit_from_qir(str(one_conditional_diamond_path))
+
+        qir = circuit_to_qir(circuit1)
