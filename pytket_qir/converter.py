@@ -359,6 +359,30 @@ class QirConverter:
             )
         return main_circuit
 
+    def circuit_to_module(self):
+        self.generator.circuit_to_module(self.generator.circuit, self.generator.module)
+        return self.generator.module
+        # for command in self.circuit:
+        #     op = command.op
+        #     if isinstance(op, ClassicalExpBox):
+        #         inputs, outputs = self.generator._get_c_regs_from_com(command)
+        #         ssa_vars: List = []
+        #         for inp in inputs:
+        #             bit_reg = self.circuit.get_c_register(inp)
+        #             ssa_vars.append(self.generator._reg2ssa_var(bit_reg, self.qir_int_type.width))
+        #         import pdb; pdb.set_trace()
+        #         output_instr = _TK_CLOPS_TO_PYQIR[type(op.get_exp())](module.builder)(
+        #             *ssa_vars
+        #         )
+        #         self.ssa_vars[outputs[0]] = output_instr
+        #     elif isinstance(op, SetBitsOp):
+        #         _, outputs = self.generator._get_c_regs_from_com(command)
+        #         for out in outputs:
+        #             self.generator.set_cregs[out] = command.op.values
+        #     else:
+        #         self.module = self.generator.command_to_module(command, self.module)
+        
+
     def apply_contraction(self, block: QirBlock) -> Block:
         """Attempt to contract blocks recursively."""
         term = block.terminator
