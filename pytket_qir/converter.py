@@ -4,7 +4,9 @@ import os
 from typing import Optional, cast, List, Union
 
 from pytket import Circuit  # type: ignore
-from pytket.circuit import CircBox  # type: ignore
+from pytket.circuit import (  # type: ignore
+    CircBox,
+)
 from pytket.circuit.logic_exp import BitNot, if_bit  # type: ignore
 from pytket.wasm import WasmFileHandler  # type: ignore
 
