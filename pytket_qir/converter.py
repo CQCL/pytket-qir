@@ -286,14 +286,19 @@ class QirConverter:
                 self._cfg[block_name] = block_inst
 
     def cfg_to_circuit(self) -> Circuit:
-        main_circuit = Circuit(self.parser.qubits, self.parser.bits + 2)
-        # Setting condition and local condition to True
-        # for the predecessor of the entry block.
+        """
+        Iterate through the CFG and convert each block to a corresponding
+        pytket circuit. Construct the main circuit by boxing each block circuit
+        into a properly conditioned CircBox.
+        """
+        # Extra bits nedded to set condition and local condition to True
+        # for the abstract predecessor of the entry block.
+        extra_bits = 2
+        main_circuit = Circuit(self.parser.qubits, self.parser.bits + extra_bits)
         main_circuit.add_c_setbits([1, 1], [self.parser.bits, self.parser.bits + 1])
         condition_bit = main_circuit.get_c_register("c")[self.parser.bits]
         self.conditions["entry_pred"] = condition_bit
         local_condition_bit = main_circuit.get_c_register("c")[self.parser.bits + 1]
-
         self.local_conditions["entry_pred"] = local_condition_bit
         for block_name, block in self.rewritten_cfg.items():
             curr_qir_block = cast(
@@ -309,7 +314,7 @@ class QirConverter:
                     QirBlock, self.module_function.get_block_by_name(compo_block)
                 )
                 new_circuit = self.parser.block_to_circuit(
-                    qir_block, Circuit(self.parser.qubits, self.parser.bits + 2)
+                    qir_block, Circuit(self.parser.qubits, self.parser.bits + extra_bits)
                 )
                 circuit.append(new_circuit)
             term = curr_qir_block.terminator
@@ -339,10 +344,12 @@ class QirConverter:
                     self.conditions[block_name] = self.conditions[block_name] | (
                         self.conditions[pred] & expr
                     )
-
             # Add extra bits created in the sub-circuit to the main one.
+            # Increment the counter by one to avoid the next circuit to reuse
+            # the same bits.
             for bit in set(circuit.bits) - set(main_circuit.bits):
                 main_circuit.add_bit(bit)
+                extra_bits += 1
             circ_box = CircBox(circuit)
             arguments = [qubit.index[0] for qubit in circuit.qubits] + [
                 bit.index[0] for bit in circuit.bits
@@ -412,8 +419,25 @@ def circuit_from_qir(
     optimisation_level: int = 0,
     gateset: Optional[CustomGateSet] = None,
     wasm_handler: Optional[WasmFileHandler] = None,
-    wasm_int_type: types.Int = types.Int(32),
+    wasm_int_size: int = 32,
 ) -> Circuit:
+    """
+    User entry point function to convert a QIR program into a
+    pytket circuit.
+
+    :param input_file: Path to the QIR input file.
+    :type input_file: str, os.PathLike
+    :param optimisation_level: User defined level of optimisation on the CFG.
+        Currently 0: no optimisation.
+                  1: Simplify linear chains of blocks.
+    :type optimisation_level: int
+    :param gateset: Custom type to define hardware supported gateset.
+    :type gateset: CustomGateSet, defaults to None.
+    :param wasm_handler: Pytket custom type to handle WASM binaries.
+    :type wasm_handler: WasmFileHandler, defaults to None.
+    :param wasm_int_size: Register size for the Int type for WASM.
+    :type wasm_int_size: int
+    """
     root, ext = os.path.splitext(os.path.basename(input_file))
     input_file_str = str(input_file)
     output_bc_file: str = ""
