@@ -475,10 +475,87 @@ def circuit_from_qir(
             o.write(ir_to_bitcode(data))
         input_file_str = output_bc_file
     converter = QirConverter(
-        input_file_str, optimisation_level, gateset, wasm_handler, wasm_int_type
+        file_path=input_file_str,
+        optimisation_level=optimisation_level,
+        gateset=gateset,
+        wasm_handler=wasm_handler,
+        wasm_int_size=wasm_int_size
     )
-    circuit = converter.circuit
+    circuit = converter.to_circuit()
     # Attach few fields to the circuit.
     circuit.cfg = converter.rewritten_cfg
+    circuit.edges = converter.edges
     circuit.ssa_vars = converter.parser.ssa_vars
     return circuit
+
+
+def circuit_to_qir(
+    circuit: Circuit,
+    gateset: Optional[CustomGateSet] = None,
+    module: Optional[SimpleModule] = None,
+    wasm_path: Optional[Union[str, os.PathLike]] = None,
+    wasm_int_size: int = 32,
+    qir_format: QirFormat = QirFormat.BITCODE,
+) -> Union[str, bytes]:
+    """Return a pytket circuit as QIR."""
+    wasm_handler = None
+    wasm_ext = ""
+    if wasm_path is not None:
+        try:
+            wasm_handler = WasmFileHandler(str(wasm_path))
+            wasm_file_name = os.path.basename(str(wasm_path))
+            wasm_ext = " and {} file.".format(wasm_file_name)
+        except ValueError as ve:
+            raise ve
+    if module is not None:
+        mod = Module(module=module, gateset=gateset, wasm_handler=wasm_handler)
+    else:
+        module_name = "Generated from {} pytket circuit".format(
+            circuit.name if circuit.name is not None else "input"
+        )
+        module_name = module_name + wasm_ext
+        mod = Module(
+            name=module_name,
+            num_qubits=circuit.n_qubits,
+            num_results=len(circuit.bits),
+            gateset=gateset,
+            wasm_handler=wasm_handler,
+        )
+    generator = QirConverter(
+        circuit=circuit,
+        module=mod,
+        wasm_int_size=wasm_int_size
+    )
+    populated_module = generator.to_module()
+    if qir_format == QirFormat.BITCODE:
+        return populated_module.module.bitcode()
+    else:
+        return populated_module.module.ir()
+
+
+def write_qir_file(
+    circuit: Circuit,
+    file_name: str,
+    gateset: Optional[CustomGateSet] = None,
+    wasm_path: Optional[Union[str, os.PathLike]] = None,
+    wasm_int_size: int = 32,
+) -> None:
+    """A method to generate a qir file from a tket circuit."""
+    _, ext = os.path.splitext(os.path.basename(file_name))
+    if ext == ".bc":
+        qir_format = QirFormat.BITCODE
+        file_param = "wb"
+    elif ext == ".ll":
+        qir_format = QirFormat.IR
+        file_param = "w"
+    else:
+        raise ValueError("The file extension must either be '.ll' or '.bc'.")
+    qir = circuit_to_qir(
+        circuit=circuit,
+        gateset=gateset,
+        wasm_path=wasm_path,
+        wasm_int_size=wasm_int_size,
+        qir_format=qir_format,
+    )
+    with open(file_name, file_param) as out:
+        out.write(qir)
