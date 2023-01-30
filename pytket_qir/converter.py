@@ -18,11 +18,16 @@ from pyqir.parser import (  # type: ignore
     QirModule,
     QirRetTerminator,
 )
-from pyqir.generator import ir_to_bitcode, types  # type: ignore
+from pyqir.generator import ir_to_bitcode, types, SimpleModule  # type: ignore
 
 from pytket_qir.gatesets.base import CustomGateSet
+from pytket_qir.generator import QirGenerator
+from pytket_qir.module import Module
 from pytket_qir.parser import QirParser
-from pytket_qir.utils import ConverterException
+from pytket_qir.utils import (
+    ConverterException,
+    QirFormat,
+)
 
 
 @dataclass
