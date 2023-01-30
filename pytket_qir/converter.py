@@ -83,27 +83,88 @@ class QirConverter:
 
     def __init__(
         self,
+        file_path: Optional[str] = None,
+        optimisation_level: int = 0,
+        gateset: Optional[CustomGateSet] = None,
+        wasm_handler: Optional[WasmFileHandler] = None,
+        wasm_int_size: int = 32,
+        qir_int_size: int = 64,
+        circuit: Optional[Circuit] = None,
+        module: Optional[SimpleModule] = None,
+        wasm_path: Optional[Union[str, os.PathLike]] = None,
+        qir_format: QirFormat = QirFormat.BITCODE,
+    ) -> None:
+        self.wasm_int_type = types.Int(wasm_int_size)
+        self.qir_int_type = types.Int(qir_int_size)
+        if file_path is not None:
+            self.module = QirModule(file_path)
+            self.module_function = self.module.functions[0]
+            self.parser = QirParser(
+                qir_module=self.module,
+                gateset=gateset,
+                wasm_handler=wasm_handler,
+                wasm_int_type=self.wasm_int_type,
+                qir_int_type=self.qir_int_type,
+            )
+            self.cfg = OrderedDict()
+            self.rewritten_cfg = self.cfg
+            if optimisation_level == 1:
+                self.collapse_blocks()
+        if circuit is not None:
+            self.circuit = circuit
+            self.module = module
+            self.generator = QirGenerator(
+                circuit=self.circuit,
+                module=self.module,
+                wasm_int_type=self.wasm_int_type,
+                qir_int_type=self.qir_int_type,
+            )
+        
+    @classmethod
+    def from_qir(
+        cls,
         file_path: str,
         optimisation_level: int = 0,
         gateset: Optional[CustomGateSet] = None,
         wasm_handler: Optional[WasmFileHandler] = None,
-        wasm_int_type: types.Int = types.Int(32),
-        qir_int_type: types.Int = types.Int(64),
-    ) -> None:
-        self.module = QirModule(file_path)
-        self.module_function = self.module.functions[0]
-        self.parser = QirParser(
-            qir_module=self.module,
+        wasm_int_size: int = 32,
+        qir_int_size: int = 64,
+    ):
+        return cls(
+            file_path=file_path,
+            optimisation_level=optimisation_level,
             gateset=gateset,
             wasm_handler=wasm_handler,
-            wasm_int_type=wasm_int_type,
-            qir_int_type=qir_int_type,
+            wasm_int_size=wasm_int_size,
+            qir_int_size=qir_int_size,
         )
-        self.cfg = OrderedDict()
-        self.rewritten_cfg = self.cfg
-        if optimisation_level == 1:
-            self.collapse_blocks()
-        self.circuit = self.cfg_to_circuit()
+
+    @classmethod
+    def from_circuit(
+        cls,
+        circuit: Circuit,
+        gateset: Optional[CustomGateSet] = None,
+        module: Optional[SimpleModule] = None,
+        wasm_path: Optional[Union[str, os.PathLike]] = None,
+        wasm_int_size: int = 32,
+        qir_format: QirFormat = QirFormat.BITCODE,
+    ):
+        return cls(
+            gateset=gateset,
+            circuit=circuit,
+            module=module,
+            wasm_path=wasm_path,
+            wasm_int_size=wasm_int_size,
+            qir_format=qir_format
+        )
+
+    def to_circuit(self) -> Circuit:
+        return self.cfg_to_circuit()
+
+    def to_module(self) -> Module:
+        # return self.generator.module 
+        return self.circuit_to_module()
+        # return self.module
 
     @property
     def successors(self):
