@@ -5,7 +5,7 @@ from string import Template
 from typing import cast
 
 from pyqir.generator import bitcode_to_ir, types  # type: ignore
-from pytket import Circuit
+from pytket import Circuit  # type: ignore
 from pytket.circuit.logic_exp import BitNot  # type: ignore
 
 from pytket_qir.converter import (
