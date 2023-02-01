@@ -35,9 +35,8 @@ else:                                             ; preds = %entry
 
 continue:                                         ; preds = %else, %then
   %1 = call i1 @source()
-  %2 = and i1 true, %1
-  %3 = or i1 %2, true
-  br i1 %3, label %then1, label %else2
+  %2 = or i1 true, %1
+  br i1 %2, label %then1, label %else2
 
 then1:                                            ; preds = %continue
   call void @__quantum__qis__reset__body(%Qubit* null)
@@ -65,10 +64,10 @@ else2:                                            ; preds = %continue
   br label %continue3
 
 continue3:                                        ; preds = %else2, %then1
-  %4 = call i1 @source()
-  %5 = xor i1 %4, true
-  %6 = or i1 %5, true
-  br i1 %6, label %then4, label %else5
+  %3 = call i1 @source()
+  %4 = xor i1 %3, true
+  %5 = or i1 true, %4
+  br i1 %5, label %then4, label %else5
 
 then4:                                            ; preds = %continue3
   call void @__quantum__qis__mz__body(%Qubit* inttoptr (i64 2 to %Qubit*), %Result* inttoptr (i64 8 to %Result*))
@@ -85,15 +84,16 @@ else5:                                            ; preds = %continue3
   br label %continue6
 
 continue6:                                        ; preds = %else5, %then4
-  %7 = call i1 @source()
-  %8 = xor i1 %7, true
-  %9 = or i1 %8, true
-  %10 = or i1 %9, true
+  %6 = call i1 @source()
+  %7 = xor i1 %6, true
+  %8 = or i1 true, %7
+  %9 = and i1 true, %8
+  %10 = or i1 true, %9
   %11 = call i1 @source()
-  %12 = and i1 true, %11
-  %13 = or i1 %12, true
+  %12 = or i1 true, %11
+  %13 = and i1 true, %12
   %14 = or i1 %10, %13
-  br i1 %13, label %then7, label %else8
+  br i1 %14, label %then7, label %else8
 
 then7:                                            ; preds = %continue6
   call void @__quantum__qis__h__body(%Qubit* null)
