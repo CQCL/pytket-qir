@@ -33,6 +33,13 @@ from pytket_qir.utils import (
 )
 
 
+_TK_TO_PYQIR_LOGIC = {
+    BitWiseOp.AND: ("and", lambda b: b.and_),
+    BitWiseOp.OR: ("or", lambda b: b.or_),
+    BitWiseOp.NOT: ("xor", lambda b: b.xor),
+}
+
+
 @dataclass
 class Block:
     name: str
