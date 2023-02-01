@@ -126,14 +126,14 @@ class QirConverter:
                 self.collapse_blocks()
         if circuit is not None:
             self.circuit = circuit
-            self.module = module
+            self.module = cast(Module, module)
             self.generator = QirGenerator(
                 circuit=self.circuit,
                 module=self.module,
                 wasm_int_type=self.wasm_int_type,
                 qir_int_type=self.qir_int_type,
             )
-        
+
     @classmethod
     def from_qir(
         cls,
@@ -176,9 +176,8 @@ class QirConverter:
         return self.cfg_to_circuit()
 
     def to_module(self) -> Module:
-        # return self.generator.module 
-        return self.circuit_to_module()
-        # return self.module
+        module = cast(Module, self.module)
+        return self.circuit_to_module(self.circuit, module)
 
     @property
     def successors(self):
@@ -427,7 +426,9 @@ class QirConverter:
         rewritten_cfg = OrderedDict()
         for block_name, block in self.rewritten_cfg.items():
             if not block.visited:
-                qir_block = self.module_function.get_block_by_name(block_name)
+                qir_block = cast(
+                    QirBlock, self.module_function.get_block_by_name(block_name)
+                )
                 contracted_block = self.apply_contraction(qir_block)
                 if contracted_block is not block:  # Contractions have occured.
                     rewritten_cfg[block.name] = contracted_block
