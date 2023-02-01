@@ -409,6 +409,18 @@ class QirConverter:
         ssa_var = build(module.builder)(x, const(types.BOOL, 1))
         return module, ssa_var
 
+    def _set_bit(self, exp, module, set_bits):
+        """
+        Source an SSA variable from a given bit.
+        """
+        if value := set_bits.get(exp):
+            x = const(types.BOOL, value)
+        else:
+            source = module.module.add_external_function(
+                "source", types.Function([], types.BOOL)
+            )
+            x = module.builder.call(source, [])
+        return module, x
     def apply_contraction(self, block: QirBlock) -> Block:
         """Attempt to contract blocks recursively."""
         term = block.terminator
