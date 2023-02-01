@@ -462,6 +462,7 @@ class QirConverter:
             ssa_vars[ssa_var_name] = ssa_var
             self.ssa_vars = ssa_vars
             return module, ssa_var
+
     def circuit_to_module(self, circuit: Circuit, module: Module) -> Module:
         """
         Iterate through the commands of a given circuit and generate
@@ -518,15 +519,16 @@ class QirConverter:
             else:
                 module = self.generator.command_to_module(command, circuit, module)
         return module
+
     def apply_contraction(self, block: QirBlock) -> Block:
         """Attempt to contract blocks recursively."""
-        term = block.terminator
-        has_jump = isinstance(term, QirBrTerminator)
+        has_jump = isinstance(block.terminator, QirBrTerminator)
         curr_block = self.cfg[block.name]
         curr_block.visited = True
         if has_jump:
+            term = cast(QirBrTerminator, block.terminator)
             next_block = cast(
-                QirBlock, self.module.functions[0].get_block_by_name(term.dest)
+                QirBlock, self.module_function.get_block_by_name(term.dest)
             )
             # A precondition to apply the rewrite rule.
             continue_next = len(self.cfg[next_block.name].preds) == 1
