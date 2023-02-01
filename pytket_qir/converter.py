@@ -103,12 +103,13 @@ class QirConverter:
         wasm_int_size: int = 32,
         qir_int_size: int = 64,
         circuit: Optional[Circuit] = None,
-        module: Optional[SimpleModule] = None,
+        module: Optional[Module] = None,
         wasm_path: Optional[Union[str, os.PathLike]] = None,
         qir_format: QirFormat = QirFormat.BITCODE,
     ) -> None:
         self.wasm_int_type = types.Int(wasm_int_size)
         self.qir_int_type = types.Int(qir_int_size)
+        self.module: Union[QirModule, Module]
         if file_path is not None:
             self.module = QirModule(file_path)
             self.module_function = self.module.functions[0]
