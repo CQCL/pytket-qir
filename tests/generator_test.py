@@ -427,6 +427,7 @@ class TestPytketToQirConditional:
     A class to test the translation of pytket conditional
     sub-circuits (CircBox) to QIR.
     """
+
     def test_simple_conditional(
         self, simple_conditional_circuit: Generator, simple_conditional_file_name: str
     ):

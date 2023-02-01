@@ -22,7 +22,7 @@ entry:
   call void @__quantum__qis__mz__body(%Qubit* nonnull inttoptr (i64 4 to %Qubit*), %Result* nonnull inttoptr (i64 3 to %Result*))
   call void @__quantum__qis__reset__body(%Qubit* nonnull inttoptr (i64 4 to %Qubit*))
   %0 = call i1 @__quantum__qis__read_result__body(%Result* null)
-  br i1 %0, label %then0__2.i.i.i, label %Microsoft__Quantum__Samples__MeasureDistilledTAtDepth3InX__body.1.exit
+  br i1 %0, label %then0__2.i.i.i, label %else
 
 then0__2.i.i.i:                                   ; preds = %entry
   call void @__quantum__qis__reset__body(%Qubit* null)
@@ -44,6 +44,17 @@ then0__2.i.i.i:                                   ; preds = %entry
   call void @__quantum__qis__reset__body(%Qubit* nonnull inttoptr (i64 3 to %Qubit*))
   call void @__quantum__qis__mz__body(%Qubit* nonnull inttoptr (i64 4 to %Qubit*), %Result* nonnull inttoptr (i64 11 to %Result*))
   call void @__quantum__qis__reset__body(%Qubit* nonnull inttoptr (i64 4 to %Qubit*))
+  br label %Microsoft__Quantum__Samples__MeasureDistilledTAtDepth3InX__body.1.exit
+
+else:
+  call void @__quantum__qis__mz__body(%Qubit* nonnull inttoptr (i64 2 to %Qubit*), %Result* nonnull inttoptr (i64 8 to %Result*))
+  call void @__quantum__qis__reset__body(%Qubit* nonnull inttoptr (i64 2 to %Qubit*))
+  call void @__quantum__qis__mz__body(%Qubit* nonnull inttoptr (i64 3 to %Qubit*), %Result* nonnull inttoptr (i64 9 to %Result*))
+  call void @__quantum__qis__reset__body(%Qubit* nonnull inttoptr (i64 3 to %Qubit*))
+  call void @__quantum__qis__mz__body(%Qubit* nonnull inttoptr (i64 4 to %Qubit*), %Result* nonnull inttoptr (i64 10 to %Result*))
+  call void @__quantum__qis__reset__body(%Qubit* nonnull inttoptr (i64 4 to %Qubit*))
+  call void @__quantum__qis__mz__body(%Qubit* nonnull inttoptr (i64 1 to %Qubit*), %Result* nonnull inttoptr (i64 11 to %Result*))
+  call void @__quantum__qis__reset__body(%Qubit* nonnull inttoptr (i64 1 to %Qubit*))
   br label %Microsoft__Quantum__Samples__MeasureDistilledTAtDepth3InX__body.1.exit
 
 Microsoft__Quantum__Samples__MeasureDistilledTAtDepth3InX__body.1.exit: ; preds = %then0__2.i.i.i, %entry

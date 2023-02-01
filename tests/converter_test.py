@@ -1,10 +1,21 @@
 from collections import OrderedDict
 from pathlib import Path
+from string import Template
+from typing import cast
 import pytest
 
+from pyqir.generator import bitcode_to_ir, types  # type: ignore
 from pytket import Circuit  # type: ignore
 
 from pytket_qir.converter import circuit_to_qir, topological_sort, circuit_from_qir
+from pytket_qir.gatesets.base import (
+    CustomGateSet,
+    CustomQirGate,
+    FuncName,
+    FuncNat,
+    FuncSpec,
+)
+from pytket_qir.gatesets.pyqir import _TK_TO_PYQIR
 
 
 qir_files_dir = Path("./qir_test_files")
@@ -455,12 +466,44 @@ class TestCfgOptimisations:
 
 
 class TestRoundTripForGuardedCircuits:
-    @pytest.mark.skip
     def test_simple_chain_guarded_circuit(self) -> None:
         collapse_simple_chain_path = qir_files_dir / "collapse_simple_instr_chain.bc"
-        circuit1 = circuit_from_qir(collapse_simple_chain_path, optimisation_level=1)
+        circuit = circuit_from_qir(collapse_simple_chain_path, optimisation_level=1)
+        qir_bytes = cast(bytes, circuit_to_qir(circuit))
+        ll = str(bitcode_to_ir(qir_bytes))
+        import pdb
 
+        pdb.set_trace()
+
+    def test_simple_diamond_conditional(self) -> None:
         one_conditional_diamond_path = qir_files_dir / "one_conditional_diamond.bc"
-        circuit2 = circuit_from_qir(str(one_conditional_diamond_path))
+        circuit = circuit_from_qir(str(one_conditional_diamond_path))
 
-        qir = circuit_to_qir(circuit1)
+        qis_read_result = CustomQirGate(
+            func_nat=FuncNat.QIS,
+            func_name=FuncName.READ_RES,
+            func_spec=FuncSpec.BODY,
+            function_signature=[types.RESULT],
+            return_type=types.BOOL,
+        )
+
+        _PYQIR_TO_TK = {v: k for k, v in _TK_TO_PYQIR.items()}
+
+        ext_pyqir_gates = CustomGateSet(
+            name="ExtPyQir",
+            template=Template("__quantum__${func_nat}__${func_name}__${func_spec}"),
+            base_gateset=set(_TK_TO_PYQIR.keys()),
+            gateset={"read_result": qis_read_result},
+            tk_to_gateset=lambda optype: _TK_TO_PYQIR[optype],
+            gateset_to_tk=lambda gate: _PYQIR_TO_TK[gate],
+        )
+
+        qir_bytes = cast(bytes, circuit_to_qir(circuit, gateset=ext_pyqir_gates))
+
+        ll = str(bitcode_to_ir(qir_bytes))
+
+        import pdb
+
+        pdb.set_trace()
+
+        print("YAY")
