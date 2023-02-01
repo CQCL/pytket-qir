@@ -8,7 +8,12 @@ from pyqir.generator import bitcode_to_ir, types  # type: ignore
 from pytket import Circuit
 from pytket.circuit.logic_exp import BitNot  # type: ignore
 
-from pytket_qir.converter import QirConverter, circuit_to_qir, topological_sort, circuit_from_qir
+from pytket_qir.converter import (
+    QirConverter,
+    circuit_to_qir,
+    topological_sort,
+    circuit_from_qir,
+)
 from pytket_qir.gatesets.base import (
     CustomGateSet,
     CustomQirGate,
@@ -468,21 +473,20 @@ class TestCfgOptimisations:
 
 
 class TestRoundTripForGuardedCircuits:
-
     @pytest.mark.skip(reason="Test parsing the logical expression.")
     def test_parse_logical_exp(self) -> None:
         mod = Module(name="test", num_qubits=0, num_results=10)
         circuit = Circuit(0, 10)
         creg = circuit.get_c_register("c")
 
-        exp = (creg[0] & creg [1]) & BitNot(creg[2])
+        exp = (creg[0] & creg[1]) & BitNot(creg[2])
 
         qir_converter = QirConverter()
 
         module, ssa = qir_converter._parse_logic_exp(exp, mod, {})
 
         print(module.module.ir())
-    
+
     def test_simple_chain_guarded_circuit(self) -> None:
         collapse_simple_chain_path = qir_files_dir / "collapse_simple_instr_chain.bc"
         circuit = circuit_from_qir(collapse_simple_chain_path, optimisation_level=1)
