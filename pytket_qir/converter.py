@@ -84,11 +84,14 @@ class QirConverter:
     A class to build and convert the QIR control-flow graph to a pytket circuit.
 
     In more details, it works by following the next steps:
-    - Create a CFG from a topologically sort the sequence of blocks from the QIR program.
+    - Create a CFG from a topologically sort the sequence of blocks
+      from the QIR program.
     - Apply optimisation to the CFG if so.
-    - Iterate through each block in the CFG and call the QirParser to return the corresponding
+    - Iterate through each block in the CFG and call the QirParser
+      to return the corresponding
       circuit and compute the guard.
-    - Add previously generated circuits to the main one as properly conditioned CircBoxes.
+    - Add previously generated circuits to the main one as properly
+      conditioned CircBoxes.
     """
 
     def __init__(
