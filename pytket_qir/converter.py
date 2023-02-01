@@ -169,7 +169,7 @@ class QirConverter:
             module=module,
             wasm_path=wasm_path,
             wasm_int_size=wasm_int_size,
-            qir_format=qir_format
+            qir_format=qir_format,
         )
 
     def to_circuit(self) -> Circuit:
