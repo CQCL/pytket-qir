@@ -522,7 +522,7 @@ class QirConverter:
                         self.circuit_to_module(conditional_circuit, module)
 
                 module.module.builder.if_(
-                    self.ssa_vars["%1"],
+                    self.ssa_vars["%last"],
                     true=lambda: condition_one_block(),
                     false=lambda: condition_zero_block(),
                 )
