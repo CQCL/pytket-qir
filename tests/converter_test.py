@@ -2,7 +2,6 @@ from collections import OrderedDict
 from pathlib import Path
 from string import Template
 from typing import cast
-import pytest
 
 from pyqir.generator import bitcode_to_ir, types  # type: ignore
 from pytket import Circuit  # type: ignore
@@ -469,15 +468,25 @@ class TestRoundTripForGuardedCircuits:
     def test_simple_chain_guarded_circuit(self) -> None:
         collapse_simple_chain_path = qir_files_dir / "collapse_simple_instr_chain.bc"
         circuit = circuit_from_qir(collapse_simple_chain_path, optimisation_level=1)
+
+        simple_chain_path = qir_files_dir / "RoundTripSimpleChain.ll"
+
+        with open(simple_chain_path, "r") as input_file:
+            exp_ll = input_file.read()
+
         qir_bytes = cast(bytes, circuit_to_qir(circuit))
         ll = str(bitcode_to_ir(qir_bytes))
-        import pdb
 
-        pdb.set_trace()
+        assert ll == exp_ll
 
     def test_simple_diamond_conditional(self) -> None:
         one_conditional_diamond_path = qir_files_dir / "one_conditional_diamond.bc"
         circuit = circuit_from_qir(str(one_conditional_diamond_path))
+
+        exp_ll_path = qir_files_dir / "RoundTripDiamondConditional.ll"
+
+        with open(exp_ll_path, "r") as input_file:
+            exp_ll = input_file.read()
 
         qis_read_result = CustomQirGate(
             func_nat=FuncNat.QIS,
@@ -502,8 +511,4 @@ class TestRoundTripForGuardedCircuits:
 
         ll = str(bitcode_to_ir(qir_bytes))
 
-        import pdb
-
-        pdb.set_trace()
-
-        print("YAY")
+        assert ll == exp_ll
