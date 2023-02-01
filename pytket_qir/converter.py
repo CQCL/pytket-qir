@@ -618,7 +618,7 @@ def circuit_from_qir(
         optimisation_level=optimisation_level,
         gateset=gateset,
         wasm_handler=wasm_handler,
-        wasm_int_size=wasm_int_size
+        wasm_int_size=wasm_int_size,
     )
     circuit = converter.to_circuit()
     # Attach few fields to the circuit.
@@ -660,11 +660,7 @@ def circuit_to_qir(
             gateset=gateset,
             wasm_handler=wasm_handler,
         )
-    generator = QirConverter(
-        circuit=circuit,
-        module=mod,
-        wasm_int_size=wasm_int_size
-    )
+    generator = QirConverter(circuit=circuit, module=mod, wasm_int_size=wasm_int_size)
     populated_module = generator.to_module()
     if qir_format == QirFormat.BITCODE:
         return populated_module.module.bitcode()
