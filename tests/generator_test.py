@@ -28,6 +28,8 @@ from pytket_qir.gatesets.base import FuncName, FuncNat, FuncSpec, QirGate  # typ
 
 from pytket_qir.gatesets.base import CustomGateSet, CustomQirGate
 from pytket_qir.gatesets.pyqir import _TK_TO_PYQIR
+from pytket_qir.generator import QirGenerator, types
+from pytket_qir.module import Module
 from pytket_qir.utils import ClassicalExpBoxError, SetBitsOpError
 
 
@@ -124,16 +126,38 @@ class TestPytketToQirGateTranslation:
         c = Circuit(0)
         a = c.add_c_register("a", 0)
         c.add_c_setreg(0, a)  # Only value assignable to empty register.
+
+        module = Module(name="test", num_qubits=0, num_results=0)
+        wasm_int_type = types.Int(32)
+        qir_int_type = types.Int(32)
+        qir_generator = QirGenerator(
+            circuit=c,
+            module=module,
+            wasm_int_type=wasm_int_type,
+            qir_int_type=qir_int_type,
+        )
+
         with pytest.raises(SetBitsOpError):
-            write_qir_file(c, "empty_setbit_circuit.ll")
+            qir_generator.circuit_to_module(qir_generator.circuit, qir_generator.module)
 
     def test_raises_empty_classicalexpbox_error(self) -> None:
         c = Circuit(0)
         a = c.add_c_register("a", 0)
         b = c.add_c_register("b", 0)
         c.add_classicalexpbox_register(a ^ b, b)
+
+        module = Module(name="test", num_qubits=0, num_results=0)
+        wasm_int_type = types.Int(32)
+        qir_int_type = types.Int(32)
+        qir_generator = QirGenerator(
+            circuit=c,
+            module=module,
+            wasm_int_type=wasm_int_type,
+            qir_int_type=qir_int_type,
+        )
+
         with pytest.raises(ClassicalExpBoxError):
-            write_qir_file(c, "empty_classicalexpbox_circuit.ll")
+            qir_generator.circuit_to_module(qir_generator.circuit, qir_generator.module)
 
     def test_classical_arithmetic(
         self, circuit_classical_arithmetic: Circuit, operators: List
@@ -230,7 +254,26 @@ class TestPytketToQirGateTranslation:
         data = {"name": "__quantum__rt__integer__record_output", "arg": "output_reg"}
         circuit.add_barrier(units=output_reg, data=json.dumps(data))
 
-        ir_bytes = cast(bytes, circuit_to_qir(circuit, gateset=ext_pyqir_gates))
+        module = Module(
+            name="Generated from input pytket circuit",
+            num_qubits=0,
+            num_results=192,
+            gateset=ext_pyqir_gates,
+        )
+        wasm_int_type = types.Int(32)
+        qir_int_type = types.Int(32)
+        qir_generator = QirGenerator(
+            circuit=circuit,
+            module=module,
+            wasm_int_type=wasm_int_type,
+            qir_int_type=qir_int_type,
+        )
+
+        populated_module = qir_generator.circuit_to_module(
+            qir_generator.circuit, qir_generator.module
+        )
+
+        ir_bytes = cast(bytes, populated_module.module.bitcode())
         ll = str(bitcode_to_ir(ir_bytes))
 
         assert ll == exp_data
@@ -283,7 +326,26 @@ class TestPytketToQirGateTranslation:
         data = {"name": "__quantum__rt__bool__record_output", "arg": "output_reg"}
         circuit.add_barrier(units=output_reg, data=json.dumps(data))
 
-        ir_bytes = cast(bytes, circuit_to_qir(circuit, gateset=ext_pyqir_gates))
+        module = Module(
+            name="Generated from input pytket circuit",
+            num_qubits=0,
+            num_results=192,
+            gateset=ext_pyqir_gates,
+        )
+        wasm_int_type = types.Int(32)
+        qir_int_type = types.Int(32)
+        qir_generator = QirGenerator(
+            circuit=circuit,
+            module=module,
+            wasm_int_type=wasm_int_type,
+            qir_int_type=qir_int_type,
+        )
+
+        populated_module = qir_generator.circuit_to_module(
+            qir_generator.circuit, qir_generator.module
+        )
+
+        ir_bytes = cast(bytes, populated_module.module.bitcode())
         ll = str(bitcode_to_ir(ir_bytes))
 
         assert ll == exp_data

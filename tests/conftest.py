@@ -46,6 +46,8 @@ from pytket_qir.gatesets.base import FuncName, FuncNat, FuncSpec  # type: ignore
 
 from pytket_qir.gatesets.base import CustomGateSet, CustomQirGate
 from pytket_qir.gatesets.pyqir import _TK_TO_PYQIR
+from pytket_qir.generator import QirGenerator
+from pytket_qir.module import Module
 
 
 qir_files_dir = Path("./qir_test_files")
@@ -1153,12 +1155,23 @@ def simple_conditional_circuit(simple_conditional_file_name: str) -> Generator:
         gateset_to_tk=lambda gate: _PYQIR_TO_TK[gate],
     )
 
-    ir_bytes = cast(bytes, circuit_to_qir(c, gateset=ext_pyqir_gates))
-    ll = bitcode_to_ir(ir_bytes)
+    module = Module(
+        name="Generated from input pytket circuit",
+        num_qubits=2,
+        num_results=4,
+        gateset=ext_pyqir_gates,
+    )
+    wasm_int_type = types.Int(32)
+    qir_int_type = types.Int(64)
+    qir_generator = QirGenerator(
+        circuit=c, module=module, wasm_int_type=wasm_int_type, qir_int_type=qir_int_type
+    )
+    populated_module = qir_generator.circuit_to_module(
+        qir_generator.circuit, qir_generator.module
+    )
 
     with open(simple_conditional_file_name, "w") as output_file:
-        output_file.write(ll)
-
+        output_file.write(populated_module.module.ir())
     yield
     os.remove(simple_conditional_file_name)
 
@@ -1873,7 +1886,24 @@ def circuit_classical_arithmetic() -> Circuit:
     circ.add_classicalexpbox_register(reg_geq(a, b), c)
     circ.add_classicalexpbox_register(reg_lt(a, b), c)
     circ.add_classicalexpbox_register(reg_leq(a, b), c)
-    write_qir_file(circ, "ClassicalCircuit.ll")
+
+    module = Module(
+        name="Generated from input pytket circuit", num_qubits=2, num_results=9
+    )
+    wasm_int_type = types.Int(32)
+    qir_int_type = types.Int(64)
+    qir_generator = QirGenerator(
+        circuit=circ,
+        module=module,
+        wasm_int_type=wasm_int_type,
+        qir_int_type=qir_int_type,
+    )
+    populated_module = qir_generator.circuit_to_module(
+        qir_generator.circuit, qir_generator.module
+    )
+
+    with open("ClassicalCircuit.ll", "w") as output_file:
+        output_file.write(populated_module.module.ir())
     yield
     os.remove("ClassicalCircuit.ll")
 
@@ -1897,6 +1927,23 @@ def circuit_classical_reg2const_arithmetic() -> Circuit:
     circ.add_classicalexpbox_register(reg_geq(a, b), c)
     circ.add_classicalexpbox_register(reg_lt(a, b), c)
     circ.add_classicalexpbox_register(reg_leq(a, b), c)
-    write_qir_file(circ, "ClassicalReg2ConstCircuit.ll")
+
+    module = Module(
+        name="Generated from input pytket circuit", num_qubits=2, num_results=9
+    )
+    wasm_int_type = types.Int(32)
+    qir_int_type = types.Int(64)
+    qir_generator = QirGenerator(
+        circuit=circ,
+        module=module,
+        wasm_int_type=wasm_int_type,
+        qir_int_type=qir_int_type,
+    )
+    populated_module = qir_generator.circuit_to_module(
+        qir_generator.circuit, qir_generator.module
+    )
+
+    with open("ClassicalReg2ConstCircuit.ll", "w") as output_file:
+        output_file.write(populated_module.module.ir())
     yield
     os.remove("ClassicalReg2ConstCircuit.ll")
