@@ -373,29 +373,6 @@ class QirConverter:
             )
         return main_circuit
 
-    def circuit_to_module(self):
-        self.generator.circuit_to_module(self.generator.circuit, self.generator.module)
-        return self.generator.module
-        # for command in self.circuit:
-        #     op = command.op
-        #     if isinstance(op, ClassicalExpBox):
-        #         inputs, outputs = self.generator._get_c_regs_from_com(command)
-        #         ssa_vars: List = []
-        #         for inp in inputs:
-        #             bit_reg = self.circuit.get_c_register(inp)
-        #             ssa_vars.append(self.generator._reg2ssa_var(bit_reg, self.qir_int_type.width))
-        #         import pdb; pdb.set_trace()
-        #         output_instr = _TK_CLOPS_TO_PYQIR[type(op.get_exp())](module.builder)(
-        #             *ssa_vars
-        #         )
-        #         self.ssa_vars[outputs[0]] = output_instr
-        #     elif isinstance(op, SetBitsOp):
-        #         _, outputs = self.generator._get_c_regs_from_com(command)
-        #         for out in outputs:
-        #             self.generator.set_cregs[out] = command.op.values
-        #     else:
-        #         self.module = self.generator.command_to_module(command, self.module)
-        
     def _set_bit_negation(self, exp, module):
         """
         Bit negation is represented as an XOR operation
@@ -421,6 +398,69 @@ class QirConverter:
             )
             x = module.builder.call(source, [])
         return module, x
+    def _parse_logic_exp(self, exp: LogicExp, module: Module, set_bits: dict):
+        """
+        Recursively parse the logical expression for block guards and generate
+        the appropriate LLVM instructions.
+
+        Specifically:
+        - BitNot -> LLVM xor with True operand.
+        - BitAnd -> LLVM and.
+        - BitOr  -> LLVM or.
+        """
+        ssa_vars: Dict[str, Any] = {}
+        arg0 = exp.args[0]
+        arg1 = exp.args[1]
+
+        # A set of predicates to determine the parser behaviour.
+        is_arg0_bit = isinstance(arg0, Bit)
+        is_arg1_bit = isinstance(arg1, Bit)
+        both_bits = is_arg0_bit and is_arg1_bit
+        is_arg0_exp = isinstance(arg0, LogicExp)
+        is_arg1_exp = isinstance(arg1, LogicExp)
+        both_exps = is_arg0_exp and is_arg1_exp
+        is_arg0_bitnot = isinstance(arg0, BitNot)
+        is_arg1_bitnot = isinstance(arg1, BitNot)
+        is_arg0_bitor = isinstance(arg0, BitOr)
+        is_arg0_bitand = isinstance(arg0, BitAnd)
+
+        bitwiseop = cast(BitWiseOp, exp.op)
+        if both_bits:  # Reaching the leaves of the AST where bits are set to True.
+            _, build = _TK_TO_PYQIR_LOGIC[bitwiseop]
+            ssa_var = build(module.builder)(const(types.BOOL, 1), const(types.BOOL, 1))
+            return module, ssa_var
+        elif both_exps:
+            bitnot_arg = arg0 if is_arg0_bitnot else arg1 if is_arg1_bitnot else None
+            bitor_arg = arg0 if is_arg0_bitor else arg1
+            bitor_arg = cast(LogicExp, bitor_arg)
+            bitand_arg = arg0 if is_arg0_bitand else arg1
+            bitand_arg = cast(LogicExp, bitand_arg)
+            if bitnot_arg is not None:
+                module, ssa_var1 = self._set_bit_negation(bitnot_arg, module)
+                other_exp = arg0 if not is_arg0_bitnot else arg1
+                other_exp = cast(LogicExp, other_exp)
+                module, ssa_var2 = self._parse_logic_exp(other_exp, module, set_bits)
+                _, build = _TK_TO_PYQIR_LOGIC[bitwiseop]
+                ssa_var = build(module.builder)(ssa_var1, ssa_var2)
+                return module, ssa_var
+            else:
+                module, ssa_var1 = self._parse_logic_exp(bitor_arg, module, set_bits)
+                module, ssa_var2 = self._parse_logic_exp(bitand_arg, module, set_bits)
+                _, build = _TK_TO_PYQIR_LOGIC[bitwiseop]
+                ssa_var = build(module.builder)(ssa_var1, ssa_var2)
+                return module, ssa_var
+        else:
+            exp_arg = exp.args[0] if is_arg0_exp else exp.args[1]
+            exp_arg = cast(LogicExp, exp_arg)
+            module, ssa_var1 = self._parse_logic_exp(exp_arg, module, set_bits)
+            bit_arg = exp.args[0] if is_arg0_bit else exp.args[1]
+            module, ssa_var2 = self._set_bit(bit_arg, module, set_bits)
+            _, build = _TK_TO_PYQIR_LOGIC[bitwiseop]
+            ssa_var = build(module.builder)(ssa_var1, ssa_var2)
+            ssa_var_name = "%" + str(len(ssa_vars) + 1)
+            ssa_vars[ssa_var_name] = ssa_var
+            self.ssa_vars = ssa_vars
+            return module, ssa_var
     def apply_contraction(self, block: QirBlock) -> Block:
         """Attempt to contract blocks recursively."""
         term = block.terminator
