@@ -1,13 +1,16 @@
 from collections import OrderedDict
 from dataclasses import dataclass
 import os
-from typing import Optional, cast, List, Union
+from typing import Any, Dict, Optional, cast, List, Union
 
-from pytket import Circuit  # type: ignore
+from pytket import Circuit, Bit  # type: ignore
 from pytket.circuit import (  # type: ignore
     CircBox,
+    ClassicalExpBox,
+    Conditional,
+    SetBitsOp,
 )
-from pytket.circuit.logic_exp import BitNot, if_bit  # type: ignore
+from pytket.circuit.logic_exp import BitAnd, BitOr, BitNot, BitWiseOp, LogicExp, if_bit  # type: ignore
 from pytket.wasm import WasmFileHandler  # type: ignore
 
 from pyqir.parser import (  # type: ignore
@@ -18,7 +21,7 @@ from pyqir.parser import (  # type: ignore
     QirModule,
     QirRetTerminator,
 )
-from pyqir.generator import ir_to_bitcode, types, SimpleModule  # type: ignore
+from pyqir.generator import const, ir_to_bitcode, types, SimpleModule  # type: ignore
 
 from pytket_qir.gatesets.base import CustomGateSet
 from pytket_qir.generator import QirGenerator
