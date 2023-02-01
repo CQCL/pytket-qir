@@ -157,7 +157,7 @@ class QirConverter:
         cls,
         circuit: Circuit,
         gateset: Optional[CustomGateSet] = None,
-        module: Optional[SimpleModule] = None,
+        module: Optional[Module] = None,
         wasm_path: Optional[Union[str, os.PathLike]] = None,
         wasm_int_size: int = 32,
         qir_format: QirFormat = QirFormat.BITCODE,
