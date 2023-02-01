@@ -125,6 +125,7 @@ class QirConverter:
             if optimisation_level == 1:
                 self.collapse_blocks()
         if circuit is not None:
+            self.ssa_vars = {}
             self.circuit = circuit
             self.module = cast(Module, module)
             self.generator = QirGenerator(
@@ -429,6 +430,7 @@ class QirConverter:
         if both_bits:  # Reaching the leaves of the AST where bits are set to True.
             _, build = _TK_TO_PYQIR_LOGIC[bitwiseop]
             ssa_var = build(module.builder)(const(types.BOOL, 1), const(types.BOOL, 1))
+            self.ssa_vars["%last"] = ssa_var
             return module, ssa_var
         elif both_exps:
             bitnot_arg = arg0 if is_arg0_bitnot else arg1 if is_arg1_bitnot else None
@@ -443,12 +445,16 @@ class QirConverter:
                 module, ssa_var2 = self._parse_logic_exp(other_exp, module, set_bits)
                 _, build = _TK_TO_PYQIR_LOGIC[bitwiseop]
                 ssa_var = build(module.builder)(ssa_var1, ssa_var2)
+                self.ssa_vars["%last"] = ssa_var
                 return module, ssa_var
+                    self.ssa_vars["%last"] = ssa_var
+                    self.ssa_vars["%last"] = ssa_var
             else:
                 module, ssa_var1 = self._parse_logic_exp(bitor_arg, module, set_bits)
                 module, ssa_var2 = self._parse_logic_exp(bitand_arg, module, set_bits)
                 _, build = _TK_TO_PYQIR_LOGIC[bitwiseop]
                 ssa_var = build(module.builder)(ssa_var1, ssa_var2)
+                self.ssa_vars["%last"] = ssa_var
                 return module, ssa_var
         else:
             exp_arg = exp.args[0] if is_arg0_exp else exp.args[1]
