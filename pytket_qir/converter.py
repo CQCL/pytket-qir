@@ -327,7 +327,8 @@ class QirConverter:
                     QirBlock, self.module_function.get_block_by_name(compo_block)
                 )
                 new_circuit = self.parser.block_to_circuit(
-                    qir_block, Circuit(self.parser.qubits, self.parser.bits + extra_bits)
+                    qir_block,
+                    Circuit(self.parser.qubits, self.parser.bits + extra_bits),
                 )
                 circuit.append(new_circuit)
             term = curr_qir_block.terminator
@@ -395,6 +396,18 @@ class QirConverter:
         #     else:
         #         self.module = self.generator.command_to_module(command, self.module)
         
+    def _set_bit_negation(self, exp, module):
+        """
+        Bit negation is represented as an XOR operation
+        with a True operand.
+        """
+        source = module.module.add_external_function(
+            "source", types.Function([], types.BOOL)
+        )
+        x = module.builder.call(source, [])
+        _, build = _TK_TO_PYQIR_LOGIC[exp.op]
+        ssa_var = build(module.builder)(x, const(types.BOOL, 1))
+        return module, ssa_var
 
     def apply_contraction(self, block: QirBlock) -> Block:
         """Attempt to contract blocks recursively."""
