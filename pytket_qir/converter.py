@@ -398,6 +398,7 @@ class QirConverter:
             )
             x = module.builder.call(source, [])
         return module, x
+
     def _parse_logic_exp(self, exp: LogicExp, module: Module, set_bits: dict):
         """
         Recursively parse the logical expression for block guards and generate
@@ -461,6 +462,62 @@ class QirConverter:
             ssa_vars[ssa_var_name] = ssa_var
             self.ssa_vars = ssa_vars
             return module, ssa_var
+    def circuit_to_module(self, circuit: Circuit, module: Module) -> Module:
+        """
+        Iterate through the commands of a given circuit and generate
+        corresponding QIR instructions.
+
+        It expects circuits to be composed of three Ops:
+        - SetBitOps: represents the conditions and local conditions
+          in the guarding expressions.
+        - ClassicalExpBox: to hold the guarding expression.
+        - Conditional: to hold the guarded circuit. Recursive call to
+          convert underlying circuit to corresponding sequence of
+          QIR instructions.
+        """
+        for command in circuit:
+            op = command.op
+            if isinstance(op, ClassicalExpBox):
+                module, _ = self._parse_logic_exp(
+                    op.get_exp(), module, self.generator.set_cregs
+                )
+            elif isinstance(op, SetBitsOp):
+                for bit, value in zip(command.args, command.op.values):
+                    self.generator.set_cregs[bit] = value
+            elif isinstance(op, Conditional):
+                # Only supports measurements now as it searches through self.set_vars
+                # for SSA variables as conditions.
+                # These are set when parsing CopyBits for measurement conversion to i1.
+                # Conditions using other types (bools as results of classical
+                # arithmetic) can be supported by adding the variable appropriately.
+                conditional_circuit = op.op.get_circuit()
+
+                def condition_one_block():
+                    """
+                    Populate recursively the module with the contents of the conditional
+                    sub-circuit when the condition is True.
+                    """
+                    if op.value == 1:
+                        self.circuit_to_module(conditional_circuit, module)
+
+                def condition_zero_block():
+                    """
+                    Populate recursively the module with the contents of the conditional
+                    sub-circuit when the condition is False. Under the current
+                    conditions this is an empty circuit therefore it must generate
+                    an empty block.
+                    """
+                    if op.value == 0:
+                        self.circuit_to_module(conditional_circuit, module)
+
+                module.module.builder.if_(
+                    self.ssa_vars["%1"],
+                    true=lambda: condition_one_block(),
+                    false=lambda: condition_zero_block(),
+                )
+            else:
+                module = self.generator.command_to_module(command, circuit, module)
+        return module
     def apply_contraction(self, block: QirBlock) -> Block:
         """Attempt to contract blocks recursively."""
         term = block.terminator
