@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pytket-qir"
-version = "0.1.4"
+version = "0.1.5"
 description = "Python module for interfacing QIR with the Quantinuum pytket library."
 readme = "README.md"
 license = "LICENSE"
@@ -9,7 +9,7 @@ authors = ["Roland Guichard <roland.guichard@cambridgequantum.com>"]
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"
-pytket = "^1.8.0"
+pytket = "^1.8.1"
 pyqir = "^0.6.2"
 pyqir-parser = "^0.6.2"
 pyqir-evaluator = "^0.6.2"

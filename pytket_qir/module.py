@@ -18,7 +18,7 @@ for the needs of parsing and generating QIR back and forth
 Pytket circuits.
 """
 
-from typing import Optional
+from typing import cast, Optional
 from pytket.wasm import WasmFileHandler  # type: ignore
 
 from pyqir.generator import SimpleModule, BasicQisBuilder, types  # type: ignore
@@ -35,13 +35,24 @@ class Module:
 
     def __init__(
         self,
-        name: str,
-        num_qubits: int,
-        num_results: int,
+        module: Optional[SimpleModule] = None,
+        name: Optional[str] = None,
+        num_qubits: Optional[int] = None,
+        num_results: Optional[int] = None,
         gateset: Optional[CustomGateSet] = None,
         wasm_handler: Optional[WasmFileHandler] = None,
     ) -> None:
-        self.module = SimpleModule(name, num_qubits, num_results)
+        if module is None:
+            if any([name, num_qubits, num_results]) == None:
+                raise ValueError(
+                    "Arguments are not provided correctly for the input module."
+                )
+            name = cast(str, name)
+            num_qubits = cast(int, num_qubits)
+            num_results = cast(int, num_results)
+            self.module = SimpleModule(name, num_qubits, num_results)
+        else:
+            self.module = module
         self.builder = self.module.builder
         self.qis = BasicQisBuilder(self.builder)
         self.gateset = gateset if gateset else PYQIR_GATES
@@ -58,12 +69,12 @@ class Module:
         self._gateset = new_gateset
         for v in self._gateset.gateset.values():
             self.__setattr__(
-                v.opname.value,
+                v.func_name.value,
                 self.module.add_external_function(
                     self._gateset.template.substitute(
-                        opnat=v.opnat.value,
-                        opname=v.opname.value,
-                        opspec=v.opspec.value,
+                        func_nat=v.func_nat.value,
+                        func_name=v.func_name.value,
+                        func_spec=v.func_spec.value,
                     ),
                     types.Function(v.function_signature, v.return_type),
                 ),

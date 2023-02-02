@@ -6,17 +6,19 @@ from typing import Callable, Dict, List, NamedTuple, Set, Union
 from pyqir.generator.types import Double, Int, Qubit, Result, Void  # type: ignore
 from pytket import OpType  # type: ignore
 
+
 PyQirParameterType = Union[Double, Int, Qubit, Result]
 PyQirReturnType = Union[Int, Result, Void]
 
 
-class OpNat(Enum):
+class FuncNat(Enum):
     QIS = "qis"
     CIS = "cis"
     HYBRID = "hybrid"
+    RT = "rt"
 
 
-class OpName(Enum):
+class FuncName(Enum):
     H = "h"
     X = "x"
     Y = "y"
@@ -38,20 +40,25 @@ class OpName(Enum):
     AND = "and"
     OR = "or"
     XOR = "xor"
+    INT = "integer"
+    BOOL = "bool"
+    RES = "result"
+    READ_RES = "read_result"
 
 
-class OpSpec(Enum):
+class FuncSpec(Enum):
     BODY = "body"
     ADJ = "adj"
     CTL = "ctl"
     CTLADJ = "ctladj"
+    REC_OUT = "record_output"
 
 
 @dataclass(frozen=True)
 class QirGate:
-    opnat: OpNat
-    opname: Union[OpName, Enum]
-    opspec: OpSpec
+    func_nat: FuncNat
+    func_name: Union[FuncName, Enum]
+    func_spec: FuncSpec
 
 
 @dataclass(frozen=True)

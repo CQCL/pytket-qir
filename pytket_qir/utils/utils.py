@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class QIRFormat(Enum):
+class QirFormat(Enum):
     IR: str = "ir"
     BITCODE: str = "bitcode"
 
@@ -19,4 +19,20 @@ class SetBitsOpError(Exception):
 
 
 class WASMError(Exception):
+    pass
+
+
+class BarrierError(Exception):
+    pass
+
+
+class RtError(Exception):
+    pass
+
+
+class CircuitError(Exception):
+    pass
+
+
+class ConverterException(Exception):
     pass

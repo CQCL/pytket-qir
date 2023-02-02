@@ -18,20 +18,21 @@ to and from pytket circuits.
 """
 
 from enum import Enum
+import json
 from functools import partial
-import os
-from typing import cast, Dict, List, Optional, Sequence, Tuple, Union
-
+import re
+from typing import cast, Dict, List, Optional, Sequence, Tuple
 
 from pytket import Circuit, OpType, Bit, Qubit  # type: ignore
 from pytket.qasm.qasm import _retrieve_registers  # type: ignore
-from pytket.wasm import WasmFileHandler  # type: ignore
 from pytket.circuit import (  # type: ignore
     BitRegister,
     ClassicalExpBox,
     Command,
     Conditional,
+    CopyBitsOp,
     Op,
+    MetaOp,
     SetBitsOp,
     WASMOp,
 )
@@ -54,25 +55,23 @@ from pytket.circuit.logic_exp import (  # type: ignore
 )
 from pytket.passes import auto_rebase_pass  # type: ignore
 
-from pyqir.generator import IntPredicate, types  # type: ignore
-from pyqir.generator.types import Qubit, Result  # type: ignore
+from pyqir.generator import const, IntPredicate, types  # type: ignore
+from pyqir.generator.types import Qubit  # type: ignore
 from pyqir.generator._native import Value  # type: ignore
 
 from pytket_qir.gatesets.base import (
-    CustomGateSet,
     CustomQirGate,
-    OpNat,
-    OpSpec,
-    PyQirParameterType,
+    FuncNat,
+    FuncSpec,
     QirGate,
 )
 from pytket_qir.gatesets.pyqir import PYQIR_GATES, _TK_TO_PYQIR  # type: ignore
 from pytket_qir.module import Module
 from pytket_qir.utils import (  # type: ignore
     ClassicalExpBoxError,
-    QIRFormat,
     SetBitsOpError,
     WASMError,
+    BarrierError,
 )
 
 
@@ -94,15 +93,15 @@ _TK_CLOPS_TO_PYQIR: Dict = {
 }
 
 
-class QIRGenerator:
+class QirGenerator:
     """Generate QIR from a pytket circuit."""
 
     def __init__(
         self,
         circuit: Circuit,
         module: Module,
-        wasm_int_type: types.Int = types.Int(32),
-        qir_int_type: types.Int = types.Int(64),
+        wasm_int_type: types.Int,
+        qir_int_type: types.Int,
     ) -> None:
         self.circuit = circuit
         self.module = module
@@ -114,15 +113,17 @@ class QIRGenerator:
         self.rebase_to_gateset = auto_rebase_pass(self.target_gateset)
         self.set_cregs: Dict[str, List] = {}  # Keep track of set registers.
         self.ssa_vars: Dict[str, Value] = {}  # Keep track of set ssa variables.
-        self.populated_module = self.circuit_to_module(circuit, self.module)
 
     def _rebase_to_gateset(self, command: Command) -> Optional[Circuit]:
         """Rebase to the target gateset if needed."""
-        if command.op.type not in self.module.gateset.base_gateset:
-            circ = Circuit(self.circuit.n_qubits)
-            circ.add_gate(command.op.type, command.args)
-            self.rebase_to_gateset.apply(circ)
-            return circ
+        optype = command.op.type
+        params = command.op.params
+        args = command.args
+        if optype not in self.module.gateset.base_gateset:
+            circuit = Circuit(self.circuit.n_qubits, self.circuit.n_bits)
+            circuit.add_gate(optype, params, args)
+            self.rebase_to_gateset.apply(circuit)
+            return circuit
         return None
 
     def _get_optype_and_params(self, op: Op) -> Tuple[OpType, Sequence[float]]:
@@ -135,6 +136,8 @@ class QIRGenerator:
                 optype = BitWiseOp.OR
             elif op.get_name() == "XOR":
                 optype = BitWiseOp.XOR
+        elif optype in [OpType.Barrier, OpType.CopyBits]:
+            pass
         else:
             params = op.params
         return (optype, params)
@@ -142,12 +145,12 @@ class QIRGenerator:
     def _to_qis_qubits(self, qubits: List[Qubit]) -> Sequence[Qubit]:
         return [self.module.module.qubits[qubit.index[0]] for qubit in qubits]
 
-    def _to_qis_results(self, bits: List[Bit]) -> Optional[Result]:
+    def _to_qis_results(self, bits: List[Bit]) -> Optional[Value]:
         if bits:
             return self.module.module.results[bits[0].index[0]]
         return None
 
-    def _to_qis_bits(self, args: List[Bit]) -> Sequence[Result]:
+    def _to_qis_bits(self, args: List[Bit]) -> Sequence[Value]:
         if args:
             return [self.module.module.results[bit.index[0]] for bit in args[:-1]]
         return []
@@ -160,11 +163,16 @@ class QIRGenerator:
         ):  # Check if the register has been previously set.
             reg2var = self.module.module.add_external_function(
                 "reg2var",
-                types.Function([types.BOOL] * int_size, types.Int(int_size)),
+                types.Function(
+                    [types.BOOL] * int_size,
+                    types.Int(int_size),
+                ),
             )
             # Check if the register has been previously set. If not, initialise to 0.
             if reg_value := self.set_cregs.get(reg_name):
                 bit_reg = reg_value
+                value = sum([n * 2**k for k, n in enumerate(reg_value)])
+                return const(types.Int(64), value)
             else:
                 bit_reg = [False] * len(bit_reg)
             if (size := len(bit_reg)) <= int_size:  # Widening by zero-padding.
@@ -243,13 +251,24 @@ class QIRGenerator:
                     reglist.append(regname)
         return inputs, outputs
 
-    def circuit_to_module(self, circ: Circuit, module: Module) -> Module:
+    def circuit_to_module(self, circuit: Circuit, module: Module) -> Module:
         """Populate a PyQir module from a pytket circuit."""
-        for command in circ:
+        for command in circuit:
             op = command.op
             if isinstance(op, Conditional):
+                # Only supports measurements now as it searches through self.set_vars
+                # for SSA variables as conditions.
+                # These are set when parsing CopyBits for measurement conversion to i1.
+                # Conditions using other types (bools as results of classical
+                # arithmetic) can be supported by adding the variable appropriately.
                 conditional_circuit = op.op.get_circuit()
                 condition_bit_index = command.args[0].index[0]
+                condition_name = command.args[0].reg_name
+
+                if ssa_var := self.ssa_vars.get(condition_name):
+                    condition_ssa = ssa_var
+                else:
+                    condition_ssa = module.module.results[condition_bit_index]
 
                 def condition_one_block():
                     """
@@ -267,18 +286,17 @@ class QIRGenerator:
                     if op.value == 0:
                         self.circuit_to_module(conditional_circuit, module)
 
-                module.qis.if_result(
-                    module.module.results[condition_bit_index],
-                    one=lambda: condition_one_block(),
-                    zero=lambda: condition_zero_block(),
+                module.module.builder.if_(
+                    condition_ssa,
+                    true=lambda: condition_one_block(),
+                    false=lambda: condition_zero_block(),
                 )
             elif isinstance(op, WASMOp):
-                wasm_int_size = self.wasm_int_type.width
                 inputs, _ = self._get_c_regs_from_com(command)
-                input_type_list: List[PyQirParameterType]
+                input_type_list: List
                 try:
-                    bit_reg = circ.get_c_register(inputs[0])
-                    input_type_list = [types.Int(wasm_int_size)]
+                    bit_reg = circuit.get_c_register(inputs[0])
+                    input_type_list = [self.wasm_int_type]
                 except IndexError:
                     input_type_list = []
 
@@ -290,17 +308,19 @@ class QIRGenerator:
 
                 # Update translation dict.
                 _TK_TO_PYQIR[OpType.WASM] = QirGate(
-                    opnat=OpNat.HYBRID, opname=WasmName.WASM, opspec=OpSpec.BODY
+                    func_nat=FuncNat.HYBRID,
+                    func_name=WasmName.WASM,
+                    func_spec=FuncSpec.BODY,
                 )
 
                 # Update gateset.
                 gateset = PYQIR_GATES.gateset
                 gateset["wasm"] = CustomQirGate(
-                    opnat=OpNat.HYBRID,
-                    opname=WasmName.WASM,
-                    opspec=OpSpec.BODY,
+                    func_nat=FuncNat.HYBRID,
+                    func_name=WasmName.WASM,
+                    func_spec=FuncSpec.BODY,
                     function_signature=input_type_list,
-                    return_type=types.Int(wasm_int_size),
+                    return_type=self.wasm_int_type,
                 )
 
                 # Update gateset in module.
@@ -310,24 +330,53 @@ class QIRGenerator:
                 if len(input_type_list) == 0:
                     ssa_args = []
                 else:
-                    ssa_args = [self._reg2ssa_var(bit_reg, wasm_int_size)]
+                    ssa_args = [self._reg2ssa_var(bit_reg, self.wasm_int_type.width)]
 
                 gate = module.gateset.tk_to_gateset(op.type)
-                get_gate = getattr(module, gate.opname.value)
+                get_gate = getattr(module, gate.func_name.value)
                 module.builder.call(get_gate, ssa_args)
             elif isinstance(op, ClassicalExpBox):
-                inputs, _ = self._get_c_regs_from_com(command)
-
+                inputs, outputs = self._get_c_regs_from_com(command)
                 ssa_vars: List = []
                 for inp in inputs:
-                    bit_reg = circ.get_c_register(inp)
+                    bit_reg = circuit.get_c_register(inp)
                     ssa_vars.append(self._reg2ssa_var(bit_reg, self.qir_int_type.width))
-
-                _TK_CLOPS_TO_PYQIR[type(op.get_exp())](module.builder)(*ssa_vars)
+                output_instr = _TK_CLOPS_TO_PYQIR[type(op.get_exp())](module.builder)(
+                    *ssa_vars
+                )
+                self.ssa_vars[outputs[0]] = output_instr
             elif isinstance(op, SetBitsOp):
                 _, outputs = self._get_c_regs_from_com(command)
                 for out in outputs:
                     self.set_cregs[out] = command.op.values
+            elif isinstance(op, MetaOp):
+                optype, _ = self._get_optype_and_params(op)
+                gate = module.gateset.tk_to_gateset(optype)
+                get_gate = getattr(module, gate.func_name.value)
+                data = json.loads(op.data)
+                func_name = cast(str, data["name"])
+                matched_str = re.search("__quantum__(.+?)__(.+?)_(.+)", func_name)
+                if not matched_str:
+                    raise BarrierError(
+                        "The runtime function name is not properly defined."
+                    )
+                if matched_str.group(2) == "result":
+                    res_index = data["index"]
+                    ssa_var = cast(Value, self.module.module.results[res_index])
+                else:
+                    ssa_var_name = data["arg"]
+                    ssa_var = cast(Value, self.ssa_vars[ssa_var_name])
+                module.builder.call(get_gate, [ssa_var])
+            elif isinstance(op, CopyBitsOp):
+                input_reg = command.args[0]
+                output_reg = command.args[1]
+                output_name = output_reg.reg_name
+                optype, _ = self._get_optype_and_params(op)
+                gate = module.gateset.tk_to_gateset(optype)
+                ssa_var = cast(Value, self.module.module.results[input_reg.index[0]])
+                get_gate = getattr(module, gate.func_name.value)
+                output_instr = module.builder.call(get_gate, [ssa_var])
+                self.ssa_vars[output_name] = output_instr
             else:
                 rebased_circ = self._rebase_to_gateset(
                     command
@@ -338,94 +387,125 @@ class QIRGenerator:
                     optype, params = self._get_optype_and_params(op)
                     qubits = self._to_qis_qubits(command.qubits)
                     results = self._to_qis_results(command.bits)
-                    if module.gateset.name == "PyQir":
-                        pyqir_gate = module.gateset.tk_to_gateset(optype)
-                        if not pyqir_gate.opspec == OpSpec.BODY:
-                            opname = (
-                                pyqir_gate.opname.value + "_" + pyqir_gate.opspec.value
-                            )
-                            get_gate = getattr(module.qis, opname)
-                        else:
-                            get_gate = getattr(module.qis, pyqir_gate.opname.value)
-                        if params:
-                            get_gate(*params, *qubits)
-                        elif results:
-                            get_gate(*qubits, results)
-                        else:
-                            get_gate(*qubits)
+                    bits: Optional[Sequence[Value]] = None
+                    if type(optype) == BitWiseOp:
+                        bits = self._to_qis_bits(command.args)
+                    gate = module.gateset.tk_to_gateset(optype)
+                    if not gate.func_spec == FuncSpec.BODY:
+                        func_name = gate.func_name.value + "_" + gate.func_spec.value
+                        get_gate = getattr(module.qis, func_name)
                     else:
-                        bits: Optional[Sequence[Result]] = None
-                        if type(optype) == BitWiseOp:
-                            bits = self._to_qis_bits(command.args)
-                        gate = module.gateset.tk_to_gateset(optype)
-                        get_gate = getattr(module, gate.opname.value)
-                        if bits:
-                            module.builder.call(get_gate, bits)  # type: ignore
-                        elif params:
-                            module.builder.call(get_gate, [*params, *qubits])
-                        elif results:
-                            module.builder.call(get_gate, [*qubits, results])  # type: ignore
-                        else:
-                            module.builder.call(get_gate, qubits)
+                        get_gate = getattr(module.qis, gate.func_name.value)
+                    if bits:
+                        get_gate(*bits)
+                    elif params:
+                        get_gate(*params, *qubits)
+                    elif results:
+                        get_gate(*qubits, results)
+                    else:
+                        get_gate(*qubits)
         return module
 
+    def command_to_module(
+        self, command: Command, circuit: Circuit, module: Module
+    ) -> Module:
+        """Populate a PyQir module from a pytket circuit command."""
+        op = command.op
+        if isinstance(op, WASMOp):
+            inputs, _ = self._get_c_regs_from_com(command)
+            input_type_list: List
+            try:
+                bit_reg = circuit.get_c_register(inputs[0])
+                input_type_list = [self.wasm_int_type]
+            except IndexError:
+                input_type_list = []
 
-def circuit_to_qir(
-    circ: Circuit,
-    gateset: Optional[CustomGateSet] = None,
-    wasm_path: Optional[Union[str, os.PathLike]] = None,
-    wasm_int_type: types.Int = types.Int(32),
-    qir_format: QIRFormat = QIRFormat.BITCODE,
-) -> Union[str, bytes]:
-    """Return a pytket circuit as QIR."""
-    wasm_handler = None
-    module_name = "Generated from {} pytket circuit".format(
-        circ.name if circ.name is not None else "input"
-    )
-    if wasm_path is not None:
-        try:
-            wasm_handler = WasmFileHandler(str(wasm_path))
-            wasm_file_name = os.path.basename(str(wasm_path))
-            module_name = module_name + " and {} file.".format(wasm_file_name)
-        except ValueError as ve:
-            raise ve
-    module = Module(
-        name=module_name,
-        num_qubits=circ.n_qubits,
-        num_results=len(circ.bits),
-        gateset=gateset,
-        wasm_handler=wasm_handler,
-    )
-    populated_module = QIRGenerator(circ, module, wasm_int_type).module
-    if qir_format == QIRFormat.BITCODE:
-        return populated_module.module.bitcode()
-    else:
-        return populated_module.module.ir()
+            # Need to create a singleton enum to hold the WASM function name.
+            WasmName = Enum("WasmName", [("WASM", op.func_name)])
 
+            # Update datastructures with WASM function name and
+            # appropriate definition.
 
-def write_qir_file(
-    circ: Circuit,
-    file_name: str,
-    gateset: Optional[CustomGateSet] = None,
-    wasm_path: Optional[Union[str, os.PathLike]] = None,
-    wasm_int_type: types.Int = types.Int(32),
-) -> None:
-    """A method to generate a qir file from a tket circuit."""
-    _, ext = os.path.splitext(os.path.basename(file_name))
-    if ext == ".bc":
-        qir_format = QIRFormat.BITCODE
-        file_param = "wb"
-    elif ext == ".ll":
-        qir_format = QIRFormat.IR
-        file_param = "w"
-    else:
-        raise ValueError("The file extension must either be '.ll' or '.bc'.")
-    qir = circuit_to_qir(
-        circ=circ,
-        gateset=gateset,
-        wasm_path=wasm_path,
-        wasm_int_type=wasm_int_type,
-        qir_format=qir_format,
-    )
-    with open(file_name, file_param) as out:
-        out.write(qir)
+            # Update translation dict.
+            _TK_TO_PYQIR[OpType.WASM] = QirGate(
+                func_nat=FuncNat.HYBRID,
+                func_name=WasmName.WASM,
+                func_spec=FuncSpec.BODY,
+            )
+
+            # Update gateset.
+            gateset = PYQIR_GATES.gateset
+            gateset["wasm"] = CustomQirGate(
+                func_nat=FuncNat.HYBRID,
+                func_name=WasmName.WASM,
+                func_spec=FuncSpec.BODY,
+                function_signature=input_type_list,
+                return_type=self.wasm_int_type,
+            )
+
+            # Update gateset in module.
+            module.gateset = PYQIR_GATES
+
+            # Create an ssa variable if there is an input to the WASMOp.
+            if len(input_type_list) == 0:
+                ssa_args = []
+            else:
+                ssa_args = [self._reg2ssa_var(bit_reg, self.wasm_int_type.width)]
+
+            gate = module.gateset.tk_to_gateset(op.type)
+            get_gate = getattr(module, gate.func_name.value)
+            module.builder.call(get_gate, ssa_args)
+        elif isinstance(op, MetaOp):
+            optype, _ = self._get_optype_and_params(op)
+            gate = module.gateset.tk_to_gateset(optype)
+            get_gate = getattr(module, gate.func_name.value)
+            data = json.loads(op.data)
+            func_name = cast(str, data["name"])
+            matched_str = re.search("__quantum__(.+?)__(.+?)_(.+)", func_name)
+            if not matched_str:
+                raise BarrierError("The runtime function name is not properly defined.")
+            if matched_str.group(2) == "result":
+                res_index = data["index"]
+                ssa_var = cast(Value, self.module.module.results[res_index])
+            else:
+                ssa_var_name = data["arg"]
+                ssa_var = cast(Value, self.ssa_vars[ssa_var_name])
+            module.builder.call(get_gate, [ssa_var])
+        elif isinstance(op, CopyBitsOp):
+            input_reg = command.args[0]
+            output_reg = command.args[1]
+            output_name = output_reg.reg_name
+            optype, _ = self._get_optype_and_params(op)
+            gate = module.gateset.tk_to_gateset(optype)
+            ssa_var = cast(Value, self.module.module.results[input_reg.index[0]])
+            get_gate = getattr(module, gate.func_name.value)
+            output_instr = cast(Value, module.builder.call(get_gate, [ssa_var]))
+            self.ssa_vars[output_name] = output_instr
+        else:
+            rebased_circ = self._rebase_to_gateset(
+                command
+            )  # Check if the command must be rebased.
+            if rebased_circ is not None:
+                self.circuit_to_module(rebased_circ, module)
+            else:
+                optype, params = self._get_optype_and_params(op)
+                qubits = self._to_qis_qubits(command.qubits)
+                results = self._to_qis_results(command.bits)
+                bits: Optional[Sequence[Value]] = None
+                if type(optype) == BitWiseOp:
+                    bits = self._to_qis_bits(command.args)
+                gate = module.gateset.tk_to_gateset(optype)
+                if not gate.func_spec == FuncSpec.BODY:
+                    func_name = gate.func_name.value + "_" + gate.func_spec.value
+                    get_gate = getattr(module.qis, func_name)
+                else:
+                    get_gate = getattr(module.qis, gate.func_name.value)
+                if bits:
+                    get_gate(*bits)
+                elif params:
+                    get_gate(*params, *qubits)
+                elif results:
+                    get_gate(*qubits, results)
+                else:
+                    get_gate(*qubits)
+        return module

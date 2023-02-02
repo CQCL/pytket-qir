@@ -20,16 +20,14 @@ to and from pytket circuits.
 import functools
 import inspect
 import json
-import os
 import re
 from typing import cast, Callable, Dict, List, Optional, Tuple, Union
-
 
 from pytket import Circuit, OpType  # type: ignore
 from pytket.wasm import WasmFileHandler  # type: ignore
 from pytket.circuit import (  # type: ignore
+    Bit,
     BitRegister,
-    CircBox,
     Op,
 )
 from pytket.circuit.logic_exp import (  # type: ignore
@@ -51,34 +49,30 @@ from pytket.circuit.logic_exp import (  # type: ignore
     RegNeg,
 )
 
-from pyqir.generator import ir_to_bitcode  # type: ignore
 from pyqir.parser import (  # type: ignore
     QirBlock,
-    QirBrTerminator,
-    QirCondBrTerminator,
     QirModule,
     QirInstr,
+    QirQisCallInstr,
     QirResultConstant,
     QirRtCallInstr,
     QirSelectInstr,
 )
 from pyqir.parser._native import PyQirInstruction  # type: ignore
-from pyqir.generator import ir_to_bitcode, types  # type: ignore
+from pyqir.generator import types  # type: ignore
 from pyqir.parser._native import PyQirInstruction  # type: ignore
 from pyqir.parser._parser import QirIntConstant, QirICmpInstr, QirCallInstr, QirOpInstr, QirOperand, QirLocalOperand  # type: ignore
-from pyqir.generator import ir_to_bitcode, types  # type: ignore
-
 
 from pytket_qir.gatesets.base import (
     CustomGateSet,
-    OpNat,
-    OpName,
-    OpSpec,
+    FuncNat,
+    FuncName,
+    FuncSpec,
     QirGate,
 )
 
 from pytket_qir.gatesets.pyqir.pyqir import PYQIR_GATES  # type: ignore
-from pytket_qir.utils import InstructionError, WASMError
+from pytket_qir.utils import InstructionError, WASMError, RtError
 
 
 _PYQIR_TO_TK_CLOPS: Dict[str, Union[type, Dict[str, Callable]]] = {
@@ -102,30 +96,31 @@ _PYQIR_TO_TK_CLOPS: Dict[str, Union[type, Dict[str, Callable]]] = {
 }
 
 
+_RUNTIME_FUNC = [FuncName.INT.value, FuncName.BOOL.value, FuncName.RES.value]
+
+
 class QirParser:
     """A parser class to return a pytket circuit from a QIR file."""
 
     def __init__(
         self,
-        file_path: str,
+        qir_module: QirModule,
         gateset: Optional[CustomGateSet] = None,
         wasm_handler: Optional[WasmFileHandler] = None,
         wasm_int_type: types.Int = types.Int(32),
         qir_int_type: types.Int = types.Int(64),
     ) -> None:
-        self.module = QirModule(file_path)
+        self.module: QirModule = qir_module
         self.gateset: CustomGateSet = gateset if gateset is not None else PYQIR_GATES
         self.wasm_handler = wasm_handler
         self.wasm_int_type = wasm_int_type
         self.qir_int_type = qir_int_type
         self.qubits = self.get_required_qubits()
         self.bits = self.get_required_results()
+        self.ssa_vars: Dict[str, BitRegister] = {}  # Log of set ssa variables.
         entry_block = self.module.functions[0].get_block_by_name("entry")
         if entry_block is None:
             raise NotImplementedError("The QIR file does not contain an entry block.")
-        self.circuit = self.block_to_circuit(
-            entry_block, Circuit(self.qubits, self.bits)
-        )
 
     def get_required_qubits(self) -> int:
         interop_funcs = self.module.get_funcs_by_attr("EntryPoint")
@@ -147,10 +142,10 @@ class QirParser:
             matched_str = re.search("__quantum__(.+?)__(.+?)__(.+)", call_func_name)
             if not matched_str:
                 raise WASMError("The WASM function call name is not properly defined.")
-            opnat = OpNat(matched_str.group(1))
-            opname = OpName(matched_str.group(2))
-            opspec = OpSpec(matched_str.group(3))
-            pyqir_gate = QirGate(opnat=opnat, opname=opname, opspec=opspec)
+            opnat = FuncNat(matched_str.group(1))
+            opname = FuncName(matched_str.group(2))
+            opspec = FuncSpec(matched_str.group(3))
+            pyqir_gate = QirGate(func_nat=opnat, func_name=opname, func_spec=opspec)
             return self.gateset.gateset_to_tk(pyqir_gate)
 
     def get_params(self, instr: PyQirInstruction) -> List[float]:
@@ -223,7 +218,11 @@ class QirParser:
                         c_regs.append(c_reg)
                     else:
                         register_name = "%" + operand.name  # Keep QIR syntax.
-                        c_reg = circuit.get_c_register(register_name)
+                        if set_creg := self.ssa_vars.get(register_name):
+                            c_reg = set_creg
+                            circuit.add_c_register(c_reg)
+                        else:
+                            c_reg = circuit.get_c_register(register_name)
                         c_regs.append(c_reg)
                 return c_regs
 
@@ -273,24 +272,59 @@ class QirParser:
 
     def block_to_circuit(self, block: QirBlock, circuit: Circuit) -> Circuit:
         instrs = block.instructions
-        term = block.terminator
 
         for instr in instrs:
+            # print(instr.instr.call_func_name)
             if instr.instr.is_qis_call:  # Quantum gates.
-                op = self.get_operation(instr)
-                unitids = self.get_qubit_indices(instr.instr)
-                circuit.add_gate(op, unitids)
+                optype = self.get_optype(instr.instr)
+                if optype == OpType.CopyBits:
+                    instr = cast(QirQisCallInstr, instr)
+                    source_reg = circuit.get_c_register("c")
+                    func_arg = cast(QirResultConstant, instr.func_args[0])
+                    index = func_arg.value
+                    output_name = "%" + str(instr.output_name)
+                    # Extend the canonical c register with an extra bit
+                    # to hold the condition.
+                    target_bit = Bit("c", len(source_reg))
+                    self.ssa_vars[output_name] = target_bit
+                    circuit.add_bit(target_bit)
+                    # Finally add a CopyBits op to hold the read_result
+                    # instruction.
+                    circuit.add_c_copybits([source_reg[index]], [target_bit])
+                else:
+                    op = self.get_operation(instr)
+                    unitids = self.get_qubit_indices(instr.instr)
+                    circuit.add_gate(op, unitids)
             elif instr.instr.is_qir_call:  # Setting the conditional bit for branching.
+                # Create and log register to hold the condition value.
+                output_name = "%" + str(instr.output_name)
+                output_reg = circuit.add_c_register(
+                    output_name, self.qir_int_type.width
+                )
+                self.ssa_vars[output_name] = output_reg
                 params = cast(List, instr.instr.call_func_params)
                 param = params[0]
                 assert param.constant is not None
                 c_reg_index = param.constant.result_static_id
             elif instr.instr.is_rt_call:  # Runtime function call.
                 instr = cast(QirRtCallInstr, instr)
+                func_name = cast(str, instr.func_name)
+                matched_str = re.search("__quantum__(.+?)__(.+?)_(.+)", func_name)
+                if matched_str is None:
+                    raise RtError("Runtime function name is not properly defined.")
+                if matched_str.group(2) not in _RUNTIME_FUNC:
+                    raise RtError("Runtime function not supported.")
                 bits = self.get_qubit_indices(instr.instr)
                 arg, tag = self.get_arg_and_tag(instr)
                 # Create a JSON object for the data to be passed.
-                data = {"name": cast(str, instr.func_name), "arg": arg}
+                if matched_str.group(2) == "result":
+                    data = {
+                        "name": cast(str, instr.func_name),
+                        "arg": arg,
+                        "index": bits[0],
+                    }
+                else:
+                    data = {"name": cast(str, instr.func_name), "arg": arg}
                 if tag is not None:
                     data["tag"] = tag
                 if bits:
@@ -306,7 +340,11 @@ class QirParser:
                 output_reg = circuit.add_c_register(output_name, true_value.width)
                 condition = cast(QirLocalOperand, instr.condition)
                 condition_name = "%" + str(condition.name)
-                condition_reg = circuit.get_c_register(condition_name)
+                if c_reg := self.ssa_vars.get(condition_name):
+                    condition_reg = c_reg
+                    circuit.add_c_register(condition_reg)
+                else:
+                    condition_reg = circuit.get_c_register(condition_name)
                 circuit.add_c_setreg(
                     true_value.value,
                     output_reg,
@@ -326,35 +364,61 @@ class QirParser:
                 )
                 data = {"name": "zext"}
                 circuit.add_barrier(units=output_reg, data=json.dumps(data))
-            elif instr.instr.is_call:  # WASM external call.
+            elif instr.instr.is_call:  # reg2var, WASM external calls.
                 instr = cast(QirCallInstr, instr)
                 if self.wasm_handler is None:
                     raise WASMError("A WASM file handler must be provided.")
                 func_name = cast(str, instr.func_name)
-                if func_name is None:
-                    raise WASMError("The WASM function call is not defined.")
-                matched_str = re.search("__quantum__(.+?)__(.+?)__(.+)", func_name)
-                if matched_str is None:
-                    raise WASMError(
-                        "The WASM function call name is not properly defined."
+                if func_name.startswith("reg2var"):
+                    register_name = "%" + cast(str, instr.output_name)
+                    value = sum(
+                        [n.value * 2**k for k, n in enumerate(instr.func_args)]  # type: ignore
                     )
-                # WASM function call parameters.
-                param_regs = []
-                for c_reg_index in range(len(instr.func_args)):
-                    c_reg_name = "c_reg_wasm" + str(c_reg_index)
-                    param_regs.append(
-                        circuit.add_c_register(c_reg_name, self.wasm_int_type.width)
+                    c_reg = circuit.add_c_register(
+                        register_name, self.wasm_int_type.width
                     )
+                    self.ssa_vars[register_name] = c_reg
+                    circuit.add_c_setreg(value, c_reg)
+                elif func_name.startswith("__quantum"):
+                    matched_str = re.search("__quantum__(.+?)__(.+?)__(.+)", func_name)
+                    if matched_str is None:
+                        raise WASMError(
+                            "The WASM function call name is not properly defined."
+                        )
+                    # WASM function call parameters.
+                    param_regs = []
+                    if not instr.func_args:
+                        raise WASMError("Instruction argument is empty.")
+                    else:
+                        instr_arg = instr.func_args[0]
+                    if instr_arg.op.is_local:
+                        instr_arg = cast(QirLocalOperand, instr_arg)
+                        input_reg_name = "%" + cast(str, instr_arg.name)
+                        c_reg = self.ssa_vars.get(input_reg_name)
+                        circuit.add_c_register(c_reg)
+                        param_regs.append(c_reg)
+                    else:
+                        for c_reg_index in range(len(instr.func_args)):
+                            c_reg_name = "c_reg_wasm" + str(c_reg_index)
+                            param_regs.append(
+                                circuit.add_c_register(
+                                    c_reg_name, self.wasm_int_type.width
+                                )
+                            )
 
-                # WASM function return  type.
-                output_name = cast(str, instr.output_name)
-                c_reg_output_name = "%" + output_name
-                c_reg_output = circuit.add_c_register(
-                    c_reg_output_name, self.wasm_int_type.width
-                )
-                circuit.add_wasm_to_reg(
-                    matched_str.group(2), self.wasm_handler, param_regs, [c_reg_output]
-                )
+                    # WASM function return type.
+                    output_name = cast(str, instr.output_name)
+                    c_reg_output_name = "%" + output_name
+                    c_reg_output = circuit.add_c_register(
+                        c_reg_output_name, self.wasm_int_type.width
+                    )
+                    self.ssa_vars[c_reg_output_name] = c_reg_output
+                    circuit.add_wasm_to_reg(
+                        matched_str.group(2),
+                        self.wasm_handler,
+                        param_regs,
+                        [c_reg_output],
+                    )
             else:  # Classical instruction.
                 # Create registers to hold classical constants.
                 c_reg_map = self._create_register_map(circuit)
@@ -378,6 +442,7 @@ class QirParser:
                     c_reg3 = circuit.add_c_register(
                         c_reg_name3, self.qir_int_type.width
                     )  # Int64 supported in LLVM/QIR and L3.
+                    self.ssa_vars[c_reg_name3] = c_reg3
                     c_reg_map[3] = c_reg3
                     self.add_classical_op(matching, instr, circuit, c_reg_map)
                 else:
@@ -387,54 +452,4 @@ class QirParser:
                         )
                     )
 
-        if isinstance(term, QirCondBrTerminator):
-            if_condition_block = cast(
-                QirBlock, self.module.functions[0].get_block_by_name(term.true_dest)
-            )
-            if_condition_circuit = self.block_to_circuit(
-                if_condition_block, Circuit(self.qubits, self.bits)
-            )
-            circ_box = CircBox(if_condition_circuit)
-            c_reg = circuit.get_c_register("c")
-            args = list(range(self.qubits)) + list(range(self.bits))  # Order matters.
-            circuit.add_circbox(circ_box, args, condition=c_reg[c_reg_index])
-
-            else_condition_block = cast(
-                QirBlock, self.module.functions[0].get_block_by_name(term.false_dest)
-            )
-            else_condition_circuit = self.block_to_circuit(
-                else_condition_block, Circuit(self.qubits, self.bits)
-            )
-            circuit.append(else_condition_circuit)
-
-        if isinstance(term, QirBrTerminator):
-            next_block = cast(
-                QirBlock, self.module.functions[0].get_block_by_name(term.dest)
-            )
-            next_circuit = self.block_to_circuit(
-                next_block, Circuit(self.qubits, self.bits)
-            )
-            circuit.append(next_circuit)
-
         return circuit
-
-
-def circuit_from_qir(
-    input_file: Union[str, os.PathLike],
-    gateset: Optional[CustomGateSet] = None,
-    wasm_handler: Optional[WasmFileHandler] = None,
-    wasm_int_type: types.Int = types.Int(32),
-) -> Circuit:
-    root, ext = os.path.splitext(os.path.basename(input_file))
-    input_file_str = str(input_file)
-    output_bc_file: str = ""
-    if ext not in [".ll", ".bc"]:
-        raise TypeError("Can only convert '.bc' or '.ll' files.")
-    if ext == ".ll":
-        with open(input_file_str, "r") as f:
-            data = f.read()
-        output_bc_file = root + ".bc"
-        with open(output_bc_file, "wb") as o:
-            o.write(ir_to_bitcode(data))
-        input_file_str = output_bc_file
-    return QirParser(input_file_str, gateset, wasm_handler, wasm_int_type).circuit
