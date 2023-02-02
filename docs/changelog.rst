@@ -1,8 +1,22 @@
 Changelog
 =========
 
-x.y.z (unreleased)
-------------------
+0.1.5 (February 2023)
+---------------------
+
+* Major new features
+  * A new `QirConverter` class to convert back and forth QIR and pytket circuits.
+    * In QIR to circuit mode:
+      * Create and optionally transform a CFG from the QIR program.
+      * Use a new `Block` custom type.
+      * Optimise by detecting linear chains of blocks and collapse them into
+        a single one.
+      * Call to the `QirParser` to 
+      * Compute a guarding logical expression to generate a circuit composed of conditioned
+        subcircuits from each of the QIR blocks.
+    * In circuit to QIR mode:
+      * Parse the logical expression and compute the corresponding LLVM one.
+      * Call to the `QirGenerator` to populate a `pyqir` module for QIR generation.
 
 0.1.4 (November 2022)
 ---------------------
