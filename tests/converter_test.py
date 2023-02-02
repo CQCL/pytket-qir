@@ -473,19 +473,84 @@ class TestCfgOptimisations:
 
 
 class TestRoundTripForGuardedCircuits:
-    @pytest.mark.skip(reason="Test parsing the logical expression.")
-    def test_parse_logical_exp(self) -> None:
+    # Parse few logical expressions and generate LLVM
+    # corresponding ones to illustrate pyqir/LLVM constant folding.
+    def test_parse_logical_exp_and_not(self) -> None:
+        # And Not is constant folded.
         mod = Module(name="test", num_qubits=0, num_results=10)
         circuit = Circuit(0, 10)
         creg = circuit.get_c_register("c")
 
-        exp = (creg[0] & creg[1]) & BitNot(creg[2])
+        qir_converter = QirConverter()
+        qir_converter.ssa_vars = {}
+
+        exp_and_not = (creg[0] & creg[1]) & BitNot(creg[2])
+        module, _ = qir_converter._parse_logic_exp(exp_and_not, mod, {})
+
+        ir_and_not_path = qir_files_dir / "GenerateXorAsBitNegation.ll"
+
+        with open(ir_and_not_path, "r") as input_file:
+            ir_and_not = input_file.read()
+
+        for line in module.module.ir():
+            assert line in ir_and_not
+
+    def test_parse_logical_exp_or_not(self) -> None:
+        mod = Module(name="test", num_qubits=0, num_results=10)
+        circuit = Circuit(0, 10)
+        creg = circuit.get_c_register("c")
 
         qir_converter = QirConverter()
+        qir_converter.ssa_vars = {}
 
-        module, ssa = qir_converter._parse_logic_exp(exp, mod, {})
+        exp_or_not = (creg[0] & creg[1]) | BitNot(creg[2])
+        module, _ = qir_converter._parse_logic_exp(exp_or_not, mod, {})
 
-        print(module.module.ir())
+        ir_or_not_path = qir_files_dir / "GenerateXorOr.ll"
+
+        with open(ir_or_not_path, "r") as input_file:
+            ir_and_not = input_file.read()
+
+        for line in module.module.ir():
+            assert line in ir_and_not
+
+    def test_parse_logical_exp_and(self) -> None:
+        mod = Module(name="test", num_qubits=0, num_results=10)
+        circuit = Circuit(0, 10)
+        creg = circuit.get_c_register("c")
+
+        qir_converter = QirConverter()
+        qir_converter.ssa_vars = {}
+
+        exp_and = (creg[0] & creg[1]) & creg[2]
+        module, _ = qir_converter._parse_logic_exp(exp_and, mod, {})
+
+        ir_and_path = qir_files_dir / "GenerateAnd.ll"
+
+        with open(ir_and_path, "r") as input_file:
+            ir_and = input_file.read()
+
+        for line in module.module.ir():
+            assert line in ir_and
+
+    def test_parse_logical_exp_or(self) -> None:
+        mod = Module(name="test", num_qubits=0, num_results=10)
+        circuit = Circuit(0, 10)
+        creg = circuit.get_c_register("c")
+
+        qir_converter = QirConverter()
+        qir_converter.ssa_vars = {}
+
+        exp_and = (creg[0] & creg[1]) | creg[2]
+        module, _ = qir_converter._parse_logic_exp(exp_and, mod, {})
+
+        ir_or_path = qir_files_dir / "GenerateOr.ll"
+
+        with open(ir_or_path, "r") as input_file:
+            ir_or = input_file.read()
+
+        for line in module.module.ir():
+            assert line in ir_or
 
     def test_simple_chain_guarded_circuit(self) -> None:
         collapse_simple_chain_path = qir_files_dir / "collapse_simple_instr_chain.bc"
