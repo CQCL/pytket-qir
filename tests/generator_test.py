@@ -23,14 +23,13 @@ from pytket.wasm import WasmFileHandler  # type: ignore
 
 from pyqir.generator import bitcode_to_ir, types  # type: ignore
 
+from pytket_qir.converter import circuit_to_qir, write_qir_file
 from pytket_qir.gatesets.base import FuncName, FuncNat, FuncSpec, QirGate  # type: ignore
 
 from pytket_qir.gatesets.base import CustomGateSet, CustomQirGate
 from pytket_qir.gatesets.pyqir import _TK_TO_PYQIR
-from pytket_qir.generator import (
-    circuit_to_qir,
-    write_qir_file,
-)
+from pytket_qir.generator import QirGenerator, types
+from pytket_qir.module import Module
 from pytket_qir.utils import ClassicalExpBoxError, SetBitsOpError
 
 
@@ -127,16 +126,38 @@ class TestPytketToQirGateTranslation:
         c = Circuit(0)
         a = c.add_c_register("a", 0)
         c.add_c_setreg(0, a)  # Only value assignable to empty register.
+
+        module = Module(name="test", num_qubits=0, num_results=0)
+        wasm_int_type = types.Int(32)
+        qir_int_type = types.Int(32)
+        qir_generator = QirGenerator(
+            circuit=c,
+            module=module,
+            wasm_int_type=wasm_int_type,
+            qir_int_type=qir_int_type,
+        )
+
         with pytest.raises(SetBitsOpError):
-            write_qir_file(c, "empty_setbit_circuit.ll")
+            qir_generator.circuit_to_module(qir_generator.circuit, qir_generator.module)
 
     def test_raises_empty_classicalexpbox_error(self) -> None:
         c = Circuit(0)
         a = c.add_c_register("a", 0)
         b = c.add_c_register("b", 0)
         c.add_classicalexpbox_register(a ^ b, b)
+
+        module = Module(name="test", num_qubits=0, num_results=0)
+        wasm_int_type = types.Int(32)
+        qir_int_type = types.Int(32)
+        qir_generator = QirGenerator(
+            circuit=c,
+            module=module,
+            wasm_int_type=wasm_int_type,
+            qir_int_type=qir_int_type,
+        )
+
         with pytest.raises(ClassicalExpBoxError):
-            write_qir_file(c, "empty_classicalexpbox_circuit.ll")
+            qir_generator.circuit_to_module(qir_generator.circuit, qir_generator.module)
 
     def test_classical_arithmetic(
         self, circuit_classical_arithmetic: Circuit, operators: List
@@ -204,17 +225,17 @@ class TestPytketToQirGateTranslation:
 
         # Extend PyQir base gateset to account for Barrier.
         qir_gate = QirGate(
-            opnat=FuncNat.RT,
-            opname=FuncName.INT,
-            opspec=FuncSpec.REC_OUT,
+            func_nat=FuncNat.RT,
+            func_name=FuncName.INT,
+            func_spec=FuncSpec.REC_OUT,
         )
 
         _TK_TO_PYQIR[OpType.Barrier] = qir_gate
 
         qir_barrier = CustomQirGate(
-            opnat=FuncNat.RT,
-            opname=FuncName.INT,
-            opspec=FuncSpec.REC_OUT,
+            func_nat=FuncNat.RT,
+            func_name=FuncName.INT,
+            func_spec=FuncSpec.REC_OUT,
             function_signature=[types.Int(64)],
             return_type=types.VOID,
         )
@@ -223,7 +244,7 @@ class TestPytketToQirGateTranslation:
 
         ext_pyqir_gates = CustomGateSet(
             name="ExtPyQir",
-            template=Template("__quantum__${opnat}__${opname}__${opspec}"),
+            template=Template("__quantum__${func_nat}__${func_name}__${func_spec}"),
             base_gateset=set(_TK_TO_PYQIR.keys()),
             gateset={"rt_int": qir_barrier},
             tk_to_gateset=lambda optype: _TK_TO_PYQIR[optype],
@@ -233,7 +254,26 @@ class TestPytketToQirGateTranslation:
         data = {"name": "__quantum__rt__integer__record_output", "arg": "output_reg"}
         circuit.add_barrier(units=output_reg, data=json.dumps(data))
 
-        ir_bytes = cast(bytes, circuit_to_qir(circuit, gateset=ext_pyqir_gates))
+        module = Module(
+            name="Generated from input pytket circuit",
+            num_qubits=0,
+            num_results=192,
+            gateset=ext_pyqir_gates,
+        )
+        wasm_int_type = types.Int(32)
+        qir_int_type = types.Int(32)
+        qir_generator = QirGenerator(
+            circuit=circuit,
+            module=module,
+            wasm_int_type=wasm_int_type,
+            qir_int_type=qir_int_type,
+        )
+
+        populated_module = qir_generator.circuit_to_module(
+            qir_generator.circuit, qir_generator.module
+        )
+
+        ir_bytes = cast(bytes, populated_module.module.bitcode())
         ll = str(bitcode_to_ir(ir_bytes))
 
         assert ll == exp_data
@@ -257,17 +297,17 @@ class TestPytketToQirGateTranslation:
 
         # Extend PyQir base gateset to account for Barrier.
         qir_gate = QirGate(
-            opnat=FuncNat.RT,
-            opname=FuncName.BOOL,
-            opspec=FuncSpec.REC_OUT,
+            func_nat=FuncNat.RT,
+            func_name=FuncName.BOOL,
+            func_spec=FuncSpec.REC_OUT,
         )
 
         _TK_TO_PYQIR[OpType.Barrier] = qir_gate
 
         qir_barrier = CustomQirGate(
-            opnat=FuncNat.RT,
-            opname=FuncName.BOOL,
-            opspec=FuncSpec.REC_OUT,
+            func_nat=FuncNat.RT,
+            func_name=FuncName.BOOL,
+            func_spec=FuncSpec.REC_OUT,
             function_signature=[types.Int(64)],
             return_type=types.VOID,
         )
@@ -276,7 +316,7 @@ class TestPytketToQirGateTranslation:
 
         ext_pyqir_gates = CustomGateSet(
             name="ExtPyQir",
-            template=Template("__quantum__${opnat}__${opname}__${opspec}"),
+            template=Template("__quantum__${func_nat}__${func_name}__${func_spec}"),
             base_gateset=set(_TK_TO_PYQIR.keys()),
             gateset={"rt_bool": qir_barrier},
             tk_to_gateset=lambda optype: _TK_TO_PYQIR[optype],
@@ -286,7 +326,26 @@ class TestPytketToQirGateTranslation:
         data = {"name": "__quantum__rt__bool__record_output", "arg": "output_reg"}
         circuit.add_barrier(units=output_reg, data=json.dumps(data))
 
-        ir_bytes = cast(bytes, circuit_to_qir(circuit, gateset=ext_pyqir_gates))
+        module = Module(
+            name="Generated from input pytket circuit",
+            num_qubits=0,
+            num_results=192,
+            gateset=ext_pyqir_gates,
+        )
+        wasm_int_type = types.Int(32)
+        qir_int_type = types.Int(32)
+        qir_generator = QirGenerator(
+            circuit=circuit,
+            module=module,
+            wasm_int_type=wasm_int_type,
+            qir_int_type=qir_int_type,
+        )
+
+        populated_module = qir_generator.circuit_to_module(
+            qir_generator.circuit, qir_generator.module
+        )
+
+        ir_bytes = cast(bytes, populated_module.module.bitcode())
         ll = str(bitcode_to_ir(ir_bytes))
 
         assert ll == exp_data
@@ -305,17 +364,17 @@ class TestPytketToQirGateTranslation:
 
         # Extend PyQir base gateset to account for Barrier.
         qir_gate = QirGate(
-            opnat=FuncNat.RT,
-            opname=FuncName.RES,
-            opspec=FuncSpec.REC_OUT,
+            func_nat=FuncNat.RT,
+            func_name=FuncName.RES,
+            func_spec=FuncSpec.REC_OUT,
         )
 
         _TK_TO_PYQIR[OpType.Barrier] = qir_gate
 
         qir_barrier = CustomQirGate(
-            opnat=FuncNat.RT,
-            opname=FuncName.RES,
-            opspec=FuncSpec.REC_OUT,
+            func_nat=FuncNat.RT,
+            func_name=FuncName.RES,
+            func_spec=FuncSpec.REC_OUT,
             function_signature=[types.RESULT],
             return_type=types.VOID,
         )
@@ -324,7 +383,7 @@ class TestPytketToQirGateTranslation:
 
         ext_pyqir_gates = CustomGateSet(
             name="ExtPyQir",
-            template=Template("__quantum__${opnat}__${opname}__${opspec}"),
+            template=Template("__quantum__${func_nat}__${func_name}__${func_spec}"),
             base_gateset=set(_TK_TO_PYQIR.keys()),
             gateset={"rt_bool": qir_barrier},
             tk_to_gateset=lambda optype: _TK_TO_PYQIR[optype],
@@ -345,20 +404,21 @@ class TestPytketToQirGateTranslation:
         with open(read_result_file_path, "r") as f:
             exp_data = f.read()
 
-        circuit = Circuit(0, 2)
+        circuit = Circuit(0, 4)
         result_register = circuit.get_c_register("c")
-        target_register = circuit.add_c_register("%0", result_register.size)
 
-        circuit.add_c_copybits([result_register[0]], [target_register[0]])
-        circuit.add_c_copybits([result_register[1]], [target_register[1]])
+        circuit.add_c_copybits([result_register[0]], [result_register[2]])
+        circuit.add_c_copybits([result_register[1]], [result_register[3]])
+
+        circuit.ssa_vars = {"%0": result_register[2], "%1": result_register[3]}
 
         # Extend PyQir base gateset to account for Barrier.
         # qir_gate = _TK_TO_PYQIR[OpType.CopyBits]
 
         qis_read_result = CustomQirGate(
-            opnat=FuncNat.QIS,
-            opname=FuncName.READ_RES,
-            opspec=FuncSpec.BODY,
+            func_nat=FuncNat.QIS,
+            func_name=FuncName.READ_RES,
+            func_spec=FuncSpec.BODY,
             function_signature=[types.RESULT],
             return_type=types.BOOL,
         )
@@ -367,7 +427,7 @@ class TestPytketToQirGateTranslation:
 
         ext_pyqir_gates = CustomGateSet(
             name="ExtPyQir",
-            template=Template("__quantum__${opnat}__${opname}__${opspec}"),
+            template=Template("__quantum__${func_nat}__${func_name}__${func_spec}"),
             base_gateset=set(_TK_TO_PYQIR.keys()),
             gateset={"read_result": qis_read_result},
             tk_to_gateset=lambda optype: _TK_TO_PYQIR[optype],
@@ -379,9 +439,6 @@ class TestPytketToQirGateTranslation:
 
         assert ll == exp_data
 
-    @pytest.mark.skip(
-        reason="Disable work around non-simple circuits in CircBox. To be addressed in #18."
-    )
     def test_generate_wasmop_with_nonempty_inputs(self) -> None:
         wasm_file_path = qir_files_dir / "wasm_adder.wasm"
         wasm_handler = WasmFileHandler(str(wasm_file_path))
@@ -400,9 +457,6 @@ class TestPytketToQirGateTranslation:
 
         assert ll in exp_data
 
-    @pytest.mark.skip(
-        reason="Disable work around non-simple circuits in CircBox. To be addressed in #18."
-    )
     def test_generate_wasmop_with_empty_inputs(self) -> None:
         wasm_file_path = qir_files_dir / "wasm_empty_adder.wasm"
         wasm_handler = WasmFileHandler(str(wasm_file_path))
@@ -443,24 +497,6 @@ class TestPytketToQirConditional:
             assert (
                 line in exp_data
             )  # Identical up to some ordering of the function declarations.
-
-    @pytest.mark.skip(
-        reason="Disable work around non-simple circuits in CircBox. To be addressed in #18."
-    )
-    def test_nested_conditionals(
-        self,
-        pytket_nested_conditionals_circuit: Generator,
-        pytket_nested_conditionals_file_name: str,
-    ) -> None:
-        with open(pytket_nested_conditionals_file_name, "r") as input_file:
-            data = input_file.read()
-
-        test_file_path = qir_files_dir / pytket_nested_conditionals_file_name
-
-        with open(test_file_path, "r") as input_file:
-            exp_data = input_file.read()
-
-        assert data == exp_data
 
 
 class TestIrAndBcFileGeneration:

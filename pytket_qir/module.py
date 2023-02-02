@@ -69,12 +69,12 @@ class Module:
         self._gateset = new_gateset
         for v in self._gateset.gateset.values():
             self.__setattr__(
-                v.opname.value,
+                v.func_name.value,
                 self.module.add_external_function(
                     self._gateset.template.substitute(
-                        opnat=v.opnat.value,
-                        opname=v.opname.value,
-                        opspec=v.opspec.value,
+                        func_nat=v.func_nat.value,
+                        func_name=v.func_name.value,
+                        func_spec=v.func_spec.value,
                     ),
                     types.Function(v.function_signature, v.return_type),
                 ),
