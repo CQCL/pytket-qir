@@ -23,6 +23,8 @@ from functools import partial
 import re
 from typing import cast, Dict, List, Optional, Sequence, Tuple
 
+from pyqir import BasicQisBuilder, SimpleModule
+
 from pytket import Circuit, OpType, Bit, Qubit  # type: ignore
 from pytket.qasm.qasm import _retrieve_registers  # type: ignore
 from pytket.circuit import (  # type: ignore
@@ -261,14 +263,15 @@ class QirGenerator:
                 # These are set when parsing CopyBits for measurement conversion to i1.
                 # Conditions using other types (bools as results of classical
                 # arithmetic) can be supported by adding the variable appropriately.
-                conditional_circuit = op.op.get_circuit()
+                # conditional_circuit = op.op.get_circuit()
+                conditional_circuit = Circuit(1).H(0)
                 condition_bit_index = command.args[0].index[0]
                 condition_name = command.args[0].reg_name
 
-                if ssa_var := self.ssa_vars.get(condition_name):
-                    condition_ssa = ssa_var
-                else:
-                    condition_ssa = module.module.results[condition_bit_index]
+                #if ssa_var := self.ssa_vars.get(condition_name):
+                #    condition_ssa = ssa_var
+                #else:
+                condition_ssa = module.module.results[condition_bit_index]
 
                 def condition_one_block():
                     """
@@ -286,11 +289,16 @@ class QirGenerator:
                     if op.value == 0:
                         self.circuit_to_module(conditional_circuit, module)
 
-                module.module.builder.if_(
-                    condition_ssa,
-                    true=lambda: condition_one_block(),
-                    false=lambda: condition_zero_block(),
-                )
+                qis = BasicQisBuilder(module.module.builder)
+                qis.if_result(module.module.results[0], lambda: qis.x(module.module.qubits[0]))
+                #module.module.builder.if_(
+                #    condition_ssa,
+                #    true=lambda: condition_one_block(),
+                #    false=lambda: condition_zero_block(),
+                #)
+
+                print("done something")
+
             elif isinstance(op, WASMOp):
                 inputs, _ = self._get_c_regs_from_com(command)
                 input_type_list: List

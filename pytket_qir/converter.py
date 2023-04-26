@@ -512,7 +512,9 @@ class QirConverter:
                 # These are set when parsing CopyBits for measurement conversion to i1.
                 # Conditions using other types (bools as results of classical
                 # arithmetic) can be supported by adding the variable appropriately.
-                conditional_circuit = op.op.get_circuit()
+                print("found conditional")
+                # conditional_circuit = op.op.get_circuit()
+                # throw logic_error("something has gone wrong, found unsupported conditional")
 
                 def condition_one_block():
                     """

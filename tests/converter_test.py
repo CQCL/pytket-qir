@@ -148,6 +148,8 @@ class TestConvertToCircuit:
         ):
             assert com6 == exp_com6
 
+        assert 1 == 1
+
     def test_fallthrough_left(self, one_conditional_then_circuit) -> None:
         one_conditional_else = qir_files_dir / "one_conditional_then.bc"
 
@@ -599,3 +601,4 @@ class TestRoundTripForGuardedCircuits:
         ll = str(bitcode_to_ir(qir_bytes))
 
         assert ll == exp_ll
+
