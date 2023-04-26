@@ -8,8 +8,6 @@ from typing import cast, Callable, Generator, List, Tuple
 
 from pytest import fixture  # type: ignore
 
-from pyqir import BasicQisBuilder, SimpleModule
-
 from pyqir.generator import bitcode_to_ir, types  # type: ignore
 from pyqir.generator import Builder, IntPredicate, Value  # type: ignore
 from pytket import Circuit  # type: ignore
@@ -68,7 +66,7 @@ circ.add_classicalexpbox_register(reg_gt(a, b), c)
 circ.add_classicalexpbox_register(reg_geq(a, b), c)
 circ.add_classicalexpbox_register(reg_lt(a, b), c)
 circ.add_classicalexpbox_register(reg_leq(a, b), c)
-module = SimpleModule(
+module = Module(
     name="Generated from input pytket circuit", num_qubits=2, num_results=9
 )
 wasm_int_type = types.Int(32)
@@ -181,7 +179,7 @@ print("""
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
-
+from pyqir import BasicQisBuilder, SimpleModule
 
 mod = SimpleModule("if_result", num_qubits=2, num_results=2)
 qis = BasicQisBuilder(mod.builder)
