@@ -289,8 +289,8 @@ class QirGenerator:
                     if op.value == 0:
                         self.circuit_to_module(conditional_circuit, module)
 
-                qis = BasicQisBuilder(module.module.builder)
-                qis.if_result(module.module.results[0], lambda: qis.x(module.module.qubits[0]))
+                # qis = BasicQisBuilder(module.module.builder)
+                module.qis.if_result(module.module.results[0], lambda: module.qis.x(module.module.qubits[0]))
                 #module.module.builder.if_(
                 #    condition_ssa,
                 #    true=lambda: condition_one_block(),
