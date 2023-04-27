@@ -264,16 +264,42 @@ class QirGenerator:
                 # Conditions using other types (bools as results of classical
                 # arithmetic) can be supported by adding the variable appropriately.
                 # conditional_circuit = op.op.get_circuit()
+                print("@@@@@@@@@")
+                print("op.op :")
+                print(op.op.get_name())
+                print(op.op.type)
+                print(op.op.is_gate())
+
+                print("op :")
+                print(op.get_name())
+                print(op.type)
+                print(op.is_gate())
+                print(op.value)
+                print(op.width)
+
+                print(dir(op.op))
+                print(dir(op))
+                print("@@@@@@@@@")
+
+                print(dir(command))
+
+                print(command.args)
+                print(command.qubits)
+                print(command.bits)
+                print(command.opgroup)
+
+
+                # exit()
                 conditional_circuit = Circuit(1).H(0)
                 condition_bit_index = command.args[0].index[0]
                 condition_name = command.args[0].reg_name
 
-                #if ssa_var := self.ssa_vars.get(condition_name):
-                #    condition_ssa = ssa_var
-                #else:
                 condition_ssa = module.module.results[condition_bit_index]
 
-                def condition_one_block():
+                #if ssa_var := self.ssa_vars.get(condition_name):
+                #    condition_ssa = ssa_var
+
+                def condition_block():
                     """
                     Populate recursively the module with the contents of the conditional
                     sub-circuit when the condition is True.
@@ -281,16 +307,17 @@ class QirGenerator:
                     if op.value == 1:
                         self.circuit_to_module(conditional_circuit, module)
 
-                def condition_zero_block():
-                    """
-                    Populate recursively the module with the contents of the conditional
-                    sub-circuit when the condition is False.
-                    """
-                    if op.value == 0:
-                        self.circuit_to_module(conditional_circuit, module)
+                #def condition_zero_block():
+                #    """
+                #    Populate recursively the module with the contents of the conditional
+                #    sub-circuit when the condition is False.
+                #    """
+                #    if op.value == 0:
+                #        self.circuit_to_module(conditional_circuit, module)
 
                 # qis = BasicQisBuilder(module.module.builder)
-                module.qis.if_result(module.module.results[0], lambda: module.qis.x(module.module.qubits[0]))
+                # module.qis.if_result(condition_ssa, lambda: module.qis.x(module.module.qubits[0]))
+                module.qis.if_result(condition_ssa, lambda: condition_block())
                 #module.module.builder.if_(
                 #    condition_ssa,
                 #    true=lambda: condition_one_block(),
