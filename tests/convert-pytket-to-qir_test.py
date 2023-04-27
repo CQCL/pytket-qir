@@ -1,4 +1,3 @@
-
 from collections import OrderedDict
 from functools import partial
 import os
@@ -11,11 +10,7 @@ from pytest import fixture  # type: ignore
 from pyqir.generator import bitcode_to_ir, types  # type: ignore
 from pyqir.generator import Builder, IntPredicate, Value  # type: ignore
 from pytket import Circuit  # type: ignore
-from pytket.circuit import (  # type: ignore
-    CircBox,
-    OpType,
-    Bit
-)
+from pytket.circuit import CircBox, OpType, Bit  # type: ignore
 from pytket.circuit.logic_exp import (  # type: ignore
     BitNot,
     if_bit,
@@ -36,7 +31,6 @@ from pytket_qir.gatesets.base import CustomGateSet, CustomQirGate
 from pytket_qir.gatesets.pyqir import _TK_TO_PYQIR
 from pytket_qir.generator import QirGenerator
 from pytket_qir.module import Module
-
 
 
 from pytket.circuit import Circuit
@@ -66,8 +60,15 @@ circ.add_classicalexpbox_register(reg_gt(a, b), c)
 circ.add_classicalexpbox_register(reg_geq(a, b), c)
 circ.add_classicalexpbox_register(reg_lt(a, b), c)
 circ.add_classicalexpbox_register(reg_leq(a, b), c)
+
+assert circ.n_qubits == 2
+assert circ.n_bits == 9
+
+
 module = Module(
-    name="Generated from input pytket circuit", num_qubits=2, num_results=9
+    name="Generated from input pytket circuit",
+    num_qubits=circ.n_qubits,
+    num_results=circ.n_bits,
 )
 wasm_int_type = types.Int(32)
 qir_int_type = types.Int(32)
@@ -104,7 +105,7 @@ circ.H(0, condition=Bit(0))
 circ.H(0)
 circ.Measure(qb[0], a[0])
 cbcirc = Circuit(3)
-cbcirc.H(0) # , condition=a[0]
+cbcirc.H(0)  # , condition=a[0]
 
 print(dir(circ))
 print(circ.bits)
@@ -114,9 +115,7 @@ circ_box = CircBox(cbcirc)
 # circ.add_circbox(circ_box, [0, 1, 2], condition=if_bit(a[0]))
 
 
-module = Module(
-    name="Generated from input pytket circuit", num_qubits=3, num_results=9
-)
+module = Module(name="Generated from input pytket circuit", num_qubits=3, num_results=9)
 wasm_int_type = types.Int(32)
 qir_int_type = types.Int(64)
 qir_generator = QirGenerator(
@@ -152,7 +151,8 @@ populated_module = qir_generator.circuit_to_module(
 #print(dir(x))
 #print(populated_module.module.ir())"""
 
-print("""
+print(
+    """
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
@@ -160,12 +160,14 @@ print("""
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-""")
+"""
+)
 
 
 print(populated_module.module.ir())
 
-print("""
+print(
+    """
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
@@ -173,7 +175,8 @@ print("""
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-""")
+"""
+)
 
 
 # Copyright (c) Microsoft Corporation.
@@ -220,5 +223,3 @@ qis.if_result(
 
 # if __name__ == "__main__":
 print(mod.ir())
-
-

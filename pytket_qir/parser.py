@@ -211,7 +211,6 @@ class QirParser:
 
             def add_register(operands: List) -> List:
                 for index, operand in enumerate(operands):
-
                     if isinstance(operand, QirIntConstant):
                         c_reg = c_reg_map[index + 1]
                         circuit.add_c_setreg(operand.value, c_reg)

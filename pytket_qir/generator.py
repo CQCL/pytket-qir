@@ -131,7 +131,7 @@ class QirGenerator:
     def _rebase_op_to_gateset(self, op, args) -> Optional[Circuit]:
         """Rebase an op to the target gateset if needed."""
         optype = op.type
-        params = op.params        
+        params = op.params
         circuit = Circuit(self.circuit.n_qubits, self.circuit.n_bits)
         circuit.add_gate(optype, params, args)
         self.rebase_to_gateset.apply(circuit)
@@ -297,18 +297,19 @@ class QirGenerator:
                 print(command.bits)
                 print(command.opgroup)
 
-                assert op.width == 1 # only ne conditional bit
-
+                assert op.width == 1  # only ne conditional bit
 
                 # exit()
                 # conditional_circuit = Circuit(1).H(0)
-                conditional_circuit = self._rebase_op_to_gateset(op.op, command.args[op.width:])
+                conditional_circuit = self._rebase_op_to_gateset(
+                    op.op, command.args[op.width :]
+                )
                 condition_bit_index = command.args[0].index[0]
                 condition_name = command.args[0].reg_name
 
                 condition_ssa = module.module.results[condition_bit_index]
 
-                #if ssa_var := self.ssa_vars.get(condition_name):
+                # if ssa_var := self.ssa_vars.get(condition_name):
                 #    condition_ssa = ssa_var
                 # this needs to be fixed
 
@@ -320,7 +321,7 @@ class QirGenerator:
                     if op.value == 1:
                         self.circuit_to_module(conditional_circuit, module)
 
-                #def condition_zero_block():
+                # def condition_zero_block():
                 #    """
                 #    Populate recursively the module with the contents of the conditional
                 #    sub-circuit when the condition is False.
@@ -331,11 +332,11 @@ class QirGenerator:
                 # qis = BasicQisBuilder(module.module.builder)
                 # module.qis.if_result(condition_ssa, lambda: module.qis.x(module.module.qubits[0]))
                 module.qis.if_result(condition_ssa, lambda: condition_one_block())
-                #module.module.builder.if_(
+                # module.module.builder.if_(
                 #    condition_ssa,
                 #    true=lambda: condition_one_block(),
                 #    false=lambda: condition_zero_block(),
-                #)
+                # )
 
                 print("done something")
 

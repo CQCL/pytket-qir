@@ -601,4 +601,3 @@ class TestRoundTripForGuardedCircuits:
         ll = str(bitcode_to_ir(qir_bytes))
 
         assert ll == exp_ll
-

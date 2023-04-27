@@ -503,7 +503,6 @@ class TestIrAndBcFileGeneration:
     """A class to test the generation of .ll and .bc files and their equivalence."""
 
     def test_bell_circuit(self) -> None:
-
         bell_circuit = Circuit(2, name="Bell Test")
         bell_circuit.H(0)
         bell_circuit.CX(0, 1)
