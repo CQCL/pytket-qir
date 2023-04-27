@@ -297,6 +297,14 @@ class QirGenerator:
                 print(command.bits)
                 print(command.opgroup)
 
+                print(self.ssa_vars)
+                print(command.args[0].index[0])
+                
+
+
+                print("\n\nERROR")
+                
+
                 assert op.width == 1  # only ne conditional bit
 
                 # exit()
@@ -308,9 +316,18 @@ class QirGenerator:
                 condition_name = command.args[0].reg_name
 
                 condition_ssa = module.module.results[condition_bit_index]
+                print(dir(module.module.results))
+                print(module.module.results)
+                print(self.ssa_vars.get(condition_name))
+                print(dir(self.ssa_vars.get(condition_name)))
+                print(self.ssa_vars.get(condition_name).__doc__)
 
-                # if ssa_var := self.ssa_vars.get(condition_name):
-                #    condition_ssa = ssa_var
+
+                # print(ssa_var[command.args[0].index[0]])
+
+
+                #if ssa_var := self.ssa_vars.get(condition_name):
+                #   condition_ssa = ssa_var # [command.args[0].index[0]]
                 # this needs to be fixed
 
                 def condition_one_block():
@@ -339,6 +356,7 @@ class QirGenerator:
                 # )
 
                 print("done something")
+                # exit(0)
 
             elif isinstance(op, WASMOp):
                 inputs, _ = self._get_c_regs_from_com(command)

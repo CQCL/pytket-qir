@@ -90,10 +90,10 @@ with open("ClassicalCircuit-1.ll", "w") as output_file:
 circ = Circuit(3)
 a = circ.add_c_register("a", 64)
 qb = circ.add_q_register("qb", 3)
-b = circ.add_c_register("b", 64)
+bb = circ.add_c_register("bb", 64)
 c = circ.add_c_register("c", 64)
-circ.add_classicalexpbox_register(a & b, c)
-circ.add_classicalexpbox_register(a | b, c)
+circ.add_classicalexpbox_register(a & bb, c)
+circ.add_classicalexpbox_register(a | bb, c)
 circ.H(0)
 circ.H(2)
 circ.H(1)
@@ -101,7 +101,18 @@ circ.H(1)
 circ.X(0)
 circ.Y(1)
 circ.Z(1)
-circ.H(0, condition=Bit(0))
+# circ.H(0, condition=Bit(0))
+circ.H(0, condition=c[11])
+#circ.H(0, condition=Bit(0))
+#circ.H(0, condition=Bit(0))
+
+circ.Y(1, condition=Bit(1))
+circ.Z(2, condition=c[1])
+
+circ.H(0)
+circ.H(1)
+circ.H(2)
+
 circ.H(0)
 circ.Measure(qb[0], a[0])
 cbcirc = Circuit(3)
@@ -115,7 +126,11 @@ circ_box = CircBox(cbcirc)
 # circ.add_circbox(circ_box, [0, 1, 2], condition=if_bit(a[0]))
 
 
-module = Module(name="Generated from input pytket circuit", num_qubits=3, num_results=9)
+module = Module(
+    name="Generated from input pytket circuit",
+    num_qubits=circ.n_qubits,
+    num_results=circ.n_bits,
+)
 wasm_int_type = types.Int(32)
 qir_int_type = types.Int(64)
 qir_generator = QirGenerator(
@@ -177,7 +192,7 @@ print(
 
 """
 )
-
+"""
 
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
@@ -194,7 +209,7 @@ qis.mz(mod.qubits[0], mod.results[0])
 qis.if_result(mod.results[0], lambda: qis.x(mod.qubits[0]))
 qis.h(mod.qubits[0])
 
-"""
+
 # Branches can be nested, for example, to execute an instruction only if both
 # results are one.
 for i in range(2):
@@ -222,4 +237,42 @@ qis.if_result(
 """
 
 # if __name__ == "__main__":
-print(mod.ir())
+# print(mod.ir())
+
+
+
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
+import pyqir
+
+mod = pyqir.SimpleModule("if_bool", num_qubits=2, num_results=2)
+qis = pyqir.BasicQisBuilder(mod.builder)
+
+# Use an external function to generate integers that we can compare with icmp.
+i32 = pyqir.IntType(mod.context, 32)
+get_int = mod.add_external_function("get_int", pyqir.FunctionType(i32, []))
+
+# Apply X to the qubit if 'a' is 7.
+a = mod.builder.call(get_int, [])
+assert a is not None
+a_eq_7 = mod.builder.icmp(pyqir.IntPredicate.EQ, a, pyqir.const(i32, 7))
+mod.builder.if_(a_eq_7, lambda: qis.x(mod.qubits[0]))
+
+# Multiple conditions can be combined with 'and' and 'or'.
+b = mod.builder.call(get_int, [])
+assert b is not None
+b_sgt_a = mod.builder.icmp(pyqir.IntPredicate.SGT, b, a)
+or_cond = mod.builder.or_(a_eq_7, b_sgt_a)
+
+# Both the true and false branches can be specified.
+b_ne_2 = mod.builder.icmp(pyqir.IntPredicate.NE, b, pyqir.const(i32, 2))
+and_cond = mod.builder.and_(or_cond, b_ne_2)
+mod.builder.if_(
+    and_cond,
+    true=lambda: qis.h(mod.qubits[1]),
+    false=lambda: qis.y(mod.qubits[1]),
+)
+
+if __name__ == "__main__":
+    print(mod.ir())
