@@ -50,8 +50,6 @@ circ.H(qb[0])
 circ.H(qb[1])
 circ.H(qb[2])
 
-
-
 assert circ.n_qubits == 8
 assert circ.n_bits == 2
 

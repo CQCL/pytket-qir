@@ -10,7 +10,7 @@ from pytest import fixture  # type: ignore
 from pyqir.generator import bitcode_to_ir, types  # type: ignore
 from pyqir.generator import Builder, IntPredicate, Value  # type: ignore
 from pytket import Circuit  # type: ignore
-from pytket.circuit import CircBox, OpType, Bit  # type: ignore
+from pytket.circuit import CircBox, OpType, Bit, Qubit  # type: ignore
 from pytket.circuit.logic_exp import (  # type: ignore
     BitNot,
     if_bit,
@@ -33,98 +33,114 @@ from pytket_qir.generator import QirGenerator
 from pytket_qir.module import Module
 
 
+from pytket.qasm import circuit_to_qasm_str
+
 from pytket.circuit import Circuit
 
-circ = Circuit(3)
-circ.CRz(0.5, 0, 1)
-circ.T(2)
-circ.CSWAP(2, 0, 1)
-
-
-circ = Circuit(2)
-a = circ.add_c_register("a", 3)
-b = circ.add_c_register("b", 3)
-c = circ.add_c_register("c", 3)
-circ.add_classicalexpbox_register(a & b, c)
-circ.add_classicalexpbox_register(a | b, c)
-circ.add_classicalexpbox_register(a ^ b, c)
-circ.add_classicalexpbox_register(a + b, c)
-circ.add_classicalexpbox_register(a - b, c)
-circ.add_classicalexpbox_register(a * b, c)
-# circ.add_classicalexpbox_register(a // b, c) No division yet.
-circ.add_classicalexpbox_register(a << b, c)
-circ.add_classicalexpbox_register(a >> b, c)
-circ.add_classicalexpbox_register(reg_eq(a, b), c)
-circ.add_classicalexpbox_register(reg_neq(a, b), c)
-circ.add_classicalexpbox_register(reg_gt(a, b), c)
-circ.add_classicalexpbox_register(reg_geq(a, b), c)
-circ.add_classicalexpbox_register(reg_lt(a, b), c)
-circ.add_classicalexpbox_register(reg_leq(a, b), c)
-
-assert circ.n_qubits == 2
-assert circ.n_bits == 9
-
-
-module = Module(
-    name="Generated from input pytket circuit",
-    num_qubits=circ.n_qubits,
-    num_results=circ.n_bits,
-)
-wasm_int_type = types.Int(32)
-qir_int_type = types.Int(32)
-qir_generator = QirGenerator(
-    circuit=circ,
-    module=module,
-    wasm_int_type=wasm_int_type,
-    qir_int_type=qir_int_type,
-)
-
-populated_module = qir_generator.circuit_to_module(
-    qir_generator.circuit, qir_generator.module
-)
-
-with open("ClassicalCircuit-1.ll", "w") as output_file:
-    output_file.write(populated_module.module.ir())
-
+from pytket.passes import FlattenRegisters, FlattenRelabelRegistersPass
 
 circ = Circuit(3)
-a = circ.add_c_register("a", 32)
+a = circ.add_c_register("a", 5)
 qb = circ.add_q_register("qb", 3)
-bb = circ.add_c_register("bb", 32)
-c = circ.add_c_register("c", 32)
-circ.add_classicalexpbox_register(a & bb, c)
-circ.add_classicalexpbox_register(a | bb, c)
-circ.H(0)
-circ.H(2)
-circ.H(1)
+bb = circ.add_c_register("bb", 5)
+c = circ.add_c_register("c", 5)
+#circ.add_classicalexpbox_register(a & bb, c)
+circ.add_classicalexpbox_register(a | c, bb)
+circ.H(qb[0])
+#circ.H(2)
+#circ.H(1)
 # circ.add_barrier([0, 1]) not working
 circ.X(0)
-circ.Y(1)
-circ.Z(1)
+#circ.Y(1)
+#circ.Z(1)
 # circ.H(0, condition=Bit(0))
-circ.H(0, condition=c[11])
+circ.Measure(Qubit(0), c[4])
+circ.H(0, condition=c[4])
 #circ.H(0, condition=Bit(0))
 #circ.H(0, condition=Bit(0))
 
-circ.Y(1, condition=Bit(1))
-circ.Z(2, condition=c[1])
+#circ.Y(1, condition=Bit(1))
+#circ.Z(2, condition=c[1])
 
 circ.H(0)
-circ.H(1)
-circ.H(2)
+#circ.H(1)
+#circ.H(2)
 
-circ.H(0)
-circ.Measure(qb[0], a[0])
-cbcirc = Circuit(3)
-cbcirc.H(0)  # , condition=a[0]
+#circ.H(0)
+#circ.Measure(qb[0], a[0])
+#cbcirc = Circuit(3)
+#cbcirc.H(0)  # , condition=a[0]
 
-print(dir(circ))
-print(circ.bits)
-print(len(circ.bits))
+#print(dir(circ))
+#print(circ.bits)
+#print(len(circ.bits))
 
-circ_box = CircBox(cbcirc)
+#circ_box = CircBox(cbcirc)
 # circ.add_circbox(circ_box, [0, 1, 2], condition=if_bit(a[0]))
 
+for g in circ:
+    print(g)
+
+print(circuit_to_qasm_str(circ, header="hqslib1"))
+
+FlattenRegisters().apply(circ)
+# FlattenRelabelRegistersPass("q").apply(circ)
+# FlattenRelabelRegistersPass
+
+print("START ###############################")
+
+circ = Circuit(3)
+a = circ.add_c_register("a", 5)
+b = circ.add_c_register("b", 5)
+c = circ.add_c_register("c", 5)
+circ.add_classicalexpbox_register(a | b, c)
+
+
+
+print(circ.to_dict())
+# FlattenRegisters().apply(circ)
+
+map = {
+    Bit("a", 0) : Bit("d", 0),
+    Bit("a", 1) : Bit("d", 1),
+    Bit("a", 2) : Bit("d", 2),
+    Bit("a", 3) : Bit("d", 3),
+    Bit("a", 4) : Bit("d", 4),
+}
+circ.rename_units(map)
+
+print(circ.to_dict())
+
+print("START ###############################")
+
+"""
+{'bits': [['c', [0]], ['c', [1]], ['c', [2]], ['c', [3]], ['c', [4]], ['c', [5]], ['c', [6]], ['c', [7]], ['c', [8]], ['c', [9]], ['c', [10]],
+        ['c', [11]], ['c', [12]], ['c', [13]], ['c', [14]]], 
+ 'commands': [{'args': [['c', [0]], ['c', [1]], ['c', [2]], ['c', [3]], ['c', [4]], ['c', [10]], ['c', [11]], ['c', [12]], ['c', [13]], ['c', [14]],
+                        ['c', [5]], ['c', [6]], ['c', [7]], ['c', [8]], ['c', [9]]],
+               'op': {'box': {'exp': {'args': [{'name': 'a', 'size': 5}, {'name': 'c', 'size': 5}], 'op': 'RegWiseOp.OR'},
+               'id': 'ee032f0b-4559-421b-b855-2d38d97c9b94', 'n_i': 10, 'n_io': 0, 'n_o': 5, 'type': 'ClassicalExpBox'}, 'type': 'ClassicalExpBox'}},
+                 {'args': [['q', [0]]], 'op': {'type': 'X'}}, 
+                 {'args': [['q', [3]]], 'op': {'type': 'H'}}, 
+                 {'args': [['q', [0]], ['c', [14]]], 'op': {'type': 'Measure'}}, 
+                 {'args': [['c', [14]], ['q', [0]]], 'op': {'conditional': {'op': {'type': 'H'}, 'value': 1, 'width': 1}, 'type': 'Conditional'}}, 
+                 {'args': [['q', [0]]], 'op': {'type': 'H'}}],
+                  
+                   
+                 'created_qubits': [], 'discarded_qubits': [],
+                   'implicit_permutation': [[['q', [0]], ['q', [0]]], [['q', [1]], ['q', [1]]], [['q', [2]], ['q', [2]]], [['q', [3]], ['q', [3]]],
+                                       [['q', [4]], ['q', [4]]], [['q', [5]], ['q', [5]]]],
+                   'phase': '0.0', 'qubits': [['q', [0]], ['q', [1]], ['q', [2]], ['q', [3]], ['q', [4]], ['q', [5]]]}
+
+
+"""
+
+for g in circ:
+    print(g)
+
+print(circ.to_dict())
+
+print(circuit_to_qasm_str(circ, header="hqslib1"))
 
 module = Module(
     name="Generated from input pytket circuit",
@@ -142,6 +158,10 @@ qir_generator = QirGenerator(
 populated_module = qir_generator.circuit_to_module(
     qir_generator.circuit, qir_generator.module
 )
+
+
+
+
 """
 #with open("ClassicalCircuit-cond.ll", "w") as output_file:
 #output_file.write(populated_module.module.ir())
