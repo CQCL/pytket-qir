@@ -88,10 +88,10 @@ with open("ClassicalCircuit-1.ll", "w") as output_file:
 
 
 circ = Circuit(3)
-a = circ.add_c_register("a", 64)
+a = circ.add_c_register("a", 32)
 qb = circ.add_q_register("qb", 3)
-bb = circ.add_c_register("bb", 64)
-c = circ.add_c_register("c", 64)
+bb = circ.add_c_register("bb", 32)
+c = circ.add_c_register("c", 32)
 circ.add_classicalexpbox_register(a & bb, c)
 circ.add_classicalexpbox_register(a | bb, c)
 circ.H(0)
@@ -251,6 +251,8 @@ qis = pyqir.BasicQisBuilder(mod.builder)
 
 # Use an external function to generate integers that we can compare with icmp.
 i32 = pyqir.IntType(mod.context, 32)
+
+
 get_int = mod.add_external_function("get_int", pyqir.FunctionType(i32, []))
 
 # Apply X to the qubit if 'a' is 7.
@@ -259,6 +261,8 @@ assert a is not None
 a_eq_7 = mod.builder.icmp(pyqir.IntPredicate.EQ, a, pyqir.const(i32, 7))
 mod.builder.if_(a_eq_7, lambda: qis.x(mod.qubits[0]))
 
+
+#"""
 # Multiple conditions can be combined with 'and' and 'or'.
 b = mod.builder.call(get_int, [])
 assert b is not None
@@ -273,6 +277,7 @@ mod.builder.if_(
     true=lambda: qis.h(mod.qubits[1]),
     false=lambda: qis.y(mod.qubits[1]),
 )
+#"""
 
 if __name__ == "__main__":
     print(mod.ir())

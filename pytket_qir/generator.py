@@ -77,6 +77,9 @@ from pytket_qir.utils import (  # type: ignore
 )
 
 
+import pyqir
+
+
 _TK_CLOPS_TO_PYQIR: Dict = {
     RegAnd: lambda b: b.and_,
     RegOr: lambda b: b.or_,
@@ -273,6 +276,18 @@ class QirGenerator:
                 # Conditions using other types (bools as results of classical
                 # arithmetic) can be supported by adding the variable appropriately.
                 # conditional_circuit = op.op.get_circuit()
+
+
+                # this should be working for all the simple on one classical bit dependend conditional:
+
+
+
+                # end # this should be working for all the simple on one classical bit dependend conditional:
+
+
+
+
+
                 print("@@@@@@@@@")
                 print("op.op :")
                 print(op.op.get_name())
@@ -299,8 +314,9 @@ class QirGenerator:
 
                 print(self.ssa_vars)
                 print(command.args[0].index[0])
-                
 
+                
+                
 
                 print("\n\nERROR")
                 
@@ -314,6 +330,24 @@ class QirGenerator:
                 )
                 condition_bit_index = command.args[0].index[0]
                 condition_name = command.args[0].reg_name
+
+                print(module.module)
+                print(dir(module.module))
+                print(type(module.module))
+
+                print("qweqweqwe \n\n")
+
+                # mod = cast(SimpleModule, module.module)
+
+                mod = SimpleModule("if_bool", num_qubits=2, num_results=2)
+
+                print(type(mod))
+
+                # exit()
+
+                i32 = pyqir.IntType(mod.context, 32)
+
+                # a_eq_7 = module.module.builder.icmp(pyqir.IntPredicate.EQ, self.ssa_vars.get(condition_name), pyqir.const(i32, 7))
 
                 condition_ssa = module.module.results[condition_bit_index]
                 print(dir(module.module.results))
@@ -349,6 +383,7 @@ class QirGenerator:
                 # qis = BasicQisBuilder(module.module.builder)
                 # module.qis.if_result(condition_ssa, lambda: module.qis.x(module.module.qubits[0]))
                 module.qis.if_result(condition_ssa, lambda: condition_one_block())
+
                 # module.module.builder.if_(
                 #    condition_ssa,
                 #    true=lambda: condition_one_block(),

@@ -51,8 +51,10 @@ class Module:
             num_qubits = cast(int, num_qubits)
             num_results = cast(int, num_results)
             self.module = SimpleModule(name, num_qubits, num_results)
+            self.module = SimpleModule("if_bool", num_qubits, num_results)
         else:
-            self.module = module
+            # self.module = module
+            self.module = SimpleModule("if_bool", num_qubits, num_results)
         self.builder = self.module.builder
         self.qis = BasicQisBuilder(self.builder)
         self.gateset = gateset if gateset else PYQIR_GATES
