@@ -43,6 +43,7 @@ circ = Circuit(3)
 a = circ.add_c_register("a", 5)
 b = circ.add_c_register("b", 5)
 c = circ.add_c_register("c", 5)
+d = circ.add_c_register("d", 5)
 circ.add_classicalexpbox_register(a | b, c)
 circ.H(2)
 circ.H(1)
@@ -57,7 +58,7 @@ print(circuit_to_qasm_str(circ, header="hqslib1"))
 # FlattenRelabelRegistersPass("q").apply(circ)
 
 assert circ.n_qubits == 3
-assert circ.n_bits == 15
+assert circ.n_bits == 20
 
 module = Module(
     name="Generated from input pytket circuit",

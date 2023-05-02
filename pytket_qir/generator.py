@@ -175,11 +175,14 @@ class QirGenerator:
         if (
             reg_name not in self.ssa_vars.keys()
         ):  # Check if the register has been previously set.
+            # melf
+            # booltype = self.module.module.context 
             reg2var = self.module.module.add_external_function(
                 "reg2var",
-                types.Function(
-                    [types.BOOL] * int_size,
-                    types.Int(int_size),
+                pyqir.FunctionType(
+                    pyqir.IntType(self.module.module.context, int_size),
+                    [pyqir.IntType(self.module.module.context, 1)] * int_size,
+                    # pyqir.IntType(self.module.module.context, int_size),                    
                 ),
             )
             # Check if the register has been previously set. If not, initialise to 0.
