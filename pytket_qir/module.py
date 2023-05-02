@@ -22,6 +22,8 @@ from typing import cast, Optional
 from pytket.wasm import WasmFileHandler  # type: ignore
 
 from pyqir.generator import SimpleModule, BasicQisBuilder, types  # type: ignore
+# from pyqir.generator import BasicQisBuilder, types  # type: ignore
+# from pyqir import SimpleModule  # type: ignore
 
 from pytket_qir.gatesets.base import CustomGateSet
 from pytket_qir.gatesets.pyqir import PYQIR_GATES  # type: ignore
@@ -51,11 +53,13 @@ class Module:
             num_qubits = cast(int, num_qubits)
             num_results = cast(int, num_results)
             self.module = SimpleModule(name, num_qubits, num_results)
-            self.module = SimpleModule("if_bool", num_qubits, num_results)
+            # self.module = SimpleModule("if_bool", num_qubits, num_results)
         else:
             # self.module = module
-            self.module = SimpleModule("if_bool", num_qubits, num_results)
+            self.module = SimpleModule(name, num_qubits, num_results)
+            
         self.builder = self.module.builder
+        self.context = self.module.context
         self.qis = BasicQisBuilder(self.builder)
         self.gateset = gateset if gateset else PYQIR_GATES
         self.wasm_handler = wasm_handler

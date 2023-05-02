@@ -284,85 +284,27 @@ class QirGenerator:
 
                 # end # this should be working for all the simple on one classical bit dependend conditional:
 
-
-
-
-
-                print("@@@@@@@@@")
-                print("op.op :")
-                print(op.op.get_name())
-                print(op.op.type)
-                print(op.op.is_gate())
-
-                print("op :")
-                print(op.get_name())
-                print(op.type)
-                print(op.is_gate())
-                print(op.value)
-                print(op.width)
-
-                print(dir(op.op))
-                print(dir(op))
-                print("@@@@@@@@@")
-
-                print(dir(command))
-
-                print(command.args)
-                print(command.qubits)
-                print(command.bits)
-                print(command.opgroup)
-
-                print(self.ssa_vars)
-                print(command.args[0].index[0])
-
-                
-                
-
-                print("\n\nERROR")
-                
-
                 assert op.width == 1  # only ne conditional bit
 
-                # exit()
-                # conditional_circuit = Circuit(1).H(0)
                 conditional_circuit = self._rebase_op_to_gateset(
                     op.op, command.args[op.width :]
                 )
                 condition_bit_index = command.args[0].index[0]
                 condition_name = command.args[0].reg_name
 
-                print(module.module)
-                print(dir(module.module))
-                print(type(module.module))
-
-                print("qweqweqwe \n\n")
-
-                # mod = cast(SimpleModule, module.module)
-
-                mod = SimpleModule("if_bool", num_qubits=2, num_results=2)
-
-                print(type(mod))
-
-                # exit()
-
-                i32 = pyqir.IntType(mod.context, 32)
-
-                # a_eq_7 = module.module.builder.icmp(pyqir.IntPredicate.EQ, self.ssa_vars.get(condition_name), pyqir.const(i32, 7))
 
                 condition_ssa = module.module.results[condition_bit_index]
-                print(dir(module.module.results))
-                print(module.module.results)
-                print(self.ssa_vars.get(condition_name))
-                print(dir(self.ssa_vars.get(condition_name)))
-                print(self.ssa_vars.get(condition_name).__doc__)
-
 
                 # print(ssa_var[command.args[0].index[0]])
-
 
                 #if ssa_var := self.ssa_vars.get(condition_name):
                 #   condition_ssa = ssa_var # [command.args[0].index[0]]
                 # this needs to be fixed
+
+                print(self.ssa_vars)
+                for x in self.ssa_vars:
+                    print(x)
+                    print(type(self.ssa_vars[x]))
 
                 def condition_one_block():
                     """
@@ -383,6 +325,24 @@ class QirGenerator:
                 # qis = BasicQisBuilder(module.module.builder)
                 # module.qis.if_result(condition_ssa, lambda: module.qis.x(module.module.qubits[0]))
                 module.qis.if_result(condition_ssa, lambda: condition_one_block())
+                if len(self.ssa_vars) == 3:
+                    # module.qis.if_result(self.ssa_vars["c"], lambda: condition_one_block())
+                    # module.qis.if_result(condition_ssa, lambda: condition_one_block())
+
+                    # melf
+                    
+                    # mod = SimpleModule("Generated from input pytket circuit", 3, 15)
+                    i64 = pyqir.IntType(module.context, 64)
+                    
+                    b_ne_2 = module.module.builder.icmp(pyqir.IntPredicate.NE, self.ssa_vars["c"], pyqir.const(i64, 2))
+                    module.module.builder.if_(
+                        b_ne_2, #self.ssa_vars["c"],
+                        true=lambda: condition_one_block(),
+                        # false=lambda: condition_zero_block(),
+                    )
+
+                else:
+                    module.qis.if_result(condition_ssa, lambda: condition_one_block())                    
 
                 # module.module.builder.if_(
                 #    condition_ssa,

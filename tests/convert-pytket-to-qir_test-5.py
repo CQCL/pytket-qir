@@ -56,6 +56,9 @@ print(circuit_to_qasm_str(circ, header="hqslib1"))
 # FlattenRegisters().apply(circ)
 # FlattenRelabelRegistersPass("q").apply(circ)
 
+assert circ.n_qubits == 3
+assert circ.n_bits == 15
+
 module = Module(
     name="Generated from input pytket circuit",
     num_qubits=circ.n_qubits,
@@ -122,5 +125,5 @@ mod.builder.if_(
 )
 #"""
 
-if __name__ == "__main__":
-    print(mod.ir())
+#if __name__ == "__main__":
+#    print(mod.ir())
