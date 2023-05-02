@@ -35,29 +35,25 @@ from pytket_qir.module import Module
 
 from pytket.circuit import Circuit
 
-circ = Circuit(2)
-a = circ.add_c_register("a", 3)
-b = circ.add_c_register("b", 3)
-c = circ.add_c_register("c", 3)
-d = circ.add_c_register("d", 3)
-circ.add_classicalexpbox_register(a & d, c)
-circ.add_classicalexpbox_register(a | b, c)
-circ.add_classicalexpbox_register(a ^ b, c)
-circ.add_classicalexpbox_register(a + b, c)
-circ.add_classicalexpbox_register(a - b, c)
-circ.add_classicalexpbox_register(a * b, c)
-# circ.add_classicalexpbox_register(a // b, c) No division yet.
-circ.add_classicalexpbox_register(a << b, c)
-circ.add_classicalexpbox_register(a >> b, c)
-circ.add_classicalexpbox_register(reg_eq(a, b), c)
-circ.add_classicalexpbox_register(reg_neq(a, b), c)
-circ.add_classicalexpbox_register(reg_gt(a, b), c)
-circ.add_classicalexpbox_register(reg_geq(a, b), c)
-circ.add_classicalexpbox_register(reg_lt(a, b), c)
-circ.add_classicalexpbox_register(reg_leq(a, b), c)
+circ = Circuit(2, 2)
+qa = circ.add_q_register("qa", 3)
+qb = circ.add_q_register("qb", 3)
 
-assert circ.n_qubits == 2
-assert circ.n_bits == 12
+circ.H(0)
+circ.H(1)
+
+circ.H(qa[0])
+circ.H(qa[1])
+circ.H(qa[2])
+
+circ.H(qb[0])
+circ.H(qb[1])
+circ.H(qb[2])
+
+
+
+assert circ.n_qubits == 8
+assert circ.n_bits == 2
 
 module = Module(
     name="Generated from input pytket circuit",
