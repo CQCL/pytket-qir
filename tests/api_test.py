@@ -32,13 +32,21 @@ from pytket.circuit.logic_exp import (  # type: ignore
 def test_pytket_qir() -> None:
     circ = Circuit(3)
     circ.H(0)
-    pytket_to_qir(circ)
+
+    result = pytket_to_qir(circ)
+
+    assert result == """<tket::Circuit, qubits=3, gates=1>"""
 
 
 def test_pytket_qir_ii() -> None:
-    circ = Circuit(3)
+    circ = Circuit(3, 3)
     circ.H(0)
-    print(pytket_to_qir(circ))
+    circ.H(1)
+    circ.H(2)
+
+    result = pytket_to_qir(circ)
+
+    assert result == """<tket::Circuit, qubits=3, gates=3>"""
 
 
 def test_pytket_qir_5() -> None:
@@ -60,7 +68,9 @@ def test_pytket_qir_5() -> None:
     assert circ.n_qubits == 3
     assert circ.n_bits == 20
 
-    print(pytket_to_qir(circ))
+    result = pytket_to_qir(circ)
+
+    assert result == """<tket::Circuit, qubits=3, gates=7>"""
 
 
 def test_pytket_qir_3() -> None:
@@ -89,7 +99,9 @@ def test_pytket_qir_3() -> None:
     assert circ.n_qubits == 2
     assert circ.n_bits == 12
 
-    print(pytket_to_qir(circ))
+    result = pytket_to_qir(circ)
+
+    assert result == """<tket::Circuit, qubits=2, gates=14>"""
 
 
 if __name__ == "__main__":
