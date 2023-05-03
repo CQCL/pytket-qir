@@ -1,4 +1,4 @@
-name: Lint pytket-qir
+name: Lint python projects
 
 on:
   pull_request:
@@ -6,32 +6,30 @@ on:
       - main
       - develop
 
+  push:
+    branches:
+      - develop
+      - 'wheel/**'
+      - 'runci/**'
+
 jobs:
-  many:
-    name: Lint pytket-qir
-    strategy:
-      matrix:
-        python-version: ['3.10']
-        os: ['macos-11']
-    runs-on: ${{ matrix.os }}
+  lint:
+
+    runs-on: ubuntu-22.04
+
     steps:
-      - name: Checkout codebase
-        uses: actions/checkout@v3
-
-      - name: Set up python ${{ matrix.python-version }}
-        uses: actions/setup-python@v3
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Pip install black and pylint
-        run: |
-          python -m pip install --upgrade pip
-          pip install poetry
-          pip install black~=22.3 pylint~=2.13,!=2.13.6
-          poetry install
-      - name: Run black check
-        run: |
-          black --check .
-      - name: Run pylint check
-        run: |
-          pylint .
+    - uses: actions/checkout@v3
+    - name: Set up Python 3.x
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+    - name: Update pip
+      run: pip install --upgrade pip
+    - name: Install black and pylint
+      run: pip install black~=22.3 pylint~=2.13,!=2.13.6
+    - name: Check files are formatted with black
+      run: |
+        black --check .
+    - name: Run pylint
+      run: |        
+        pylint */
