@@ -14,7 +14,19 @@
 
 from pytket.extensions.qir import pytket_to_qir
 
-from pytket.circuit import Circuit
+from pytket.circuit import Circuit, Qubit
+
+from pytket.circuit.logic_exp import (  # type: ignore
+    BitNot,
+    if_bit,
+    if_not_bit,
+    reg_eq,
+    reg_neq,
+    reg_geq,
+    reg_gt,
+    reg_lt,
+    reg_leq,
+)
 
 
 def test_pytket_qir() -> None:
@@ -27,3 +39,59 @@ def test_pytket_qir_ii() -> None:
     circ = Circuit(3)
     circ.H(0)
     print(pytket_to_qir(circ))
+
+
+def test_pytket_qir_5() -> None:
+    # test conditional handling
+
+    circ = Circuit(3)
+    a = circ.add_c_register("a", 5)
+    b = circ.add_c_register("b", 5)
+    c = circ.add_c_register("c", 5)
+    d = circ.add_c_register("d", 5)
+    circ.add_classicalexpbox_register(a | b, c)
+    circ.H(2)
+    circ.H(1)
+    circ.X(0)
+    circ.Measure(Qubit(0), c[4])
+    circ.Z(0, condition=c[4])
+    circ.H(0)
+
+    assert circ.n_qubits == 3
+    assert circ.n_bits == 20
+
+    print(pytket_to_qir(circ))
+
+
+def test_pytket_qir_3() -> None:
+    # test calssical exp box handling
+    circ = Circuit(2)
+    a = circ.add_c_register("a", 3)
+    b = circ.add_c_register("b", 3)
+    c = circ.add_c_register("c", 3)
+    d = circ.add_c_register("d", 3)
+    circ.add_classicalexpbox_register(a & d, c)
+    circ.add_classicalexpbox_register(a | b, c)
+    circ.add_classicalexpbox_register(a ^ b, c)
+    circ.add_classicalexpbox_register(a + b, c)
+    circ.add_classicalexpbox_register(a - b, c)
+    circ.add_classicalexpbox_register(a * b, c)
+    # circ.add_classicalexpbox_register(a // b, c) No division yet.
+    circ.add_classicalexpbox_register(a << b, c)
+    circ.add_classicalexpbox_register(a >> b, c)
+    circ.add_classicalexpbox_register(reg_eq(a, b), c)
+    circ.add_classicalexpbox_register(reg_neq(a, b), c)
+    circ.add_classicalexpbox_register(reg_gt(a, b), c)
+    circ.add_classicalexpbox_register(reg_geq(a, b), c)
+    circ.add_classicalexpbox_register(reg_lt(a, b), c)
+    circ.add_classicalexpbox_register(reg_leq(a, b), c)
+
+    assert circ.n_qubits == 2
+    assert circ.n_bits == 12
+
+    print(pytket_to_qir(circ))
+
+
+if __name__ == "__main__":
+    test_pytket_qir_5()
+    test_pytket_qir_3()
