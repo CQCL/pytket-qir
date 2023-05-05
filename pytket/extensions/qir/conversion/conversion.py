@@ -57,10 +57,11 @@ from pytket.circuit.logic_exp import (  # type: ignore
 )
 from pytket.passes import auto_rebase_pass  # type: ignore
 
-#from pyqir.generator import const, IntPredicate, types  # type: ignore
-#from pyqir.generator.types import Qubit  # type: ignore
-#from pyqir.generator._native import Value  # type: ignore
+# from pyqir.generator import const, IntPredicate, types  # type: ignore
+# from pyqir.generator.types import Qubit  # type: ignore
+# from pyqir.generator._native import Value  # type: ignore
 from pyqir import Value
+from pyqir import IntPredicate
 
 from .gatesets import (
     CustomQirGate,
@@ -68,17 +69,18 @@ from .gatesets import (
     FuncSpec,
     QirGate,
     PYQIR_GATES,
-    _TK_TO_PYQIR
+    _TK_TO_PYQIR,
 )
 
 # from pytket_qir.gatesets.pyqir import PYQIR_GATES, _TK_TO_PYQIR  # type: ignore
 from .module import Module
-#from pytket_qir.utils import (  # type: ignore
+
+# from pytket_qir.utils import (  # type: ignore
 #    ClassicalExpBoxError,
 #    SetBitsOpError,
 #    WASMError,
 #    BarrierError,
-#)
+# )
 
 
 import pyqir
@@ -183,13 +185,13 @@ class QirGenerator:
             reg_name not in self.ssa_vars.keys()
         ):  # Check if the register has been previously set.
             # melf
-            # booltype = self.module.module.context 
+            # booltype = self.module.module.context
             reg2var = self.module.module.add_external_function(
                 "reg2var",
                 pyqir.FunctionType(
                     pyqir.IntType(self.module.module.context, int_size),
                     [pyqir.IntType(self.module.module.context, 1)] * int_size,
-                    # pyqir.IntType(self.module.module.context, int_size),                    
+                    # pyqir.IntType(self.module.module.context, int_size),
                 ),
             )
             # Check if the register has been previously set. If not, initialise to 0.
@@ -287,10 +289,7 @@ class QirGenerator:
                 # arithmetic) can be supported by adding the variable appropriately.
                 # conditional_circuit = op.op.get_circuit()
 
-
                 # this should be working for all the simple on one classical bit dependend conditional:
-
-
 
                 # end # this should be working for all the simple on one classical bit dependend conditional:
 
@@ -302,15 +301,13 @@ class QirGenerator:
                 condition_bit_index = command.args[0].index[0]
                 condition_name = command.args[0].reg_name
 
-
                 condition_ssa = module.module.results[condition_bit_index]
 
                 # print(ssa_var[command.args[0].index[0]])
 
-                #if ssa_var := self.ssa_vars.get(condition_name):
+                # if ssa_var := self.ssa_vars.get(condition_name):
                 #   condition_ssa = ssa_var # [command.args[0].index[0]]
                 # this needs to be fixed
-
 
                 def condition_block():
                     """
@@ -336,20 +333,25 @@ class QirGenerator:
                     # module.qis.if_result(condition_ssa, lambda: condition_one_block())
 
                     # melf
-                    
+
                     # mod = SimpleModule("Generated from input pytket circuit", 3, 15)
                     i64 = pyqir.IntType(module.context, 64)
-                    
-                    b_ne_2 = module.module.builder.icmp(pyqir.IntPredicate.NE, self.ssa_vars["c"], pyqir.const(i64, 2))
+
+                    b_ne_2 = module.module.builder.icmp(
+                        pyqir.IntPredicate.NE, self.ssa_vars["c"], pyqir.const(i64, 2)
+                    )
                     module.module.builder.if_(
-                        b_ne_2, #self.ssa_vars["c"],
+                        b_ne_2,  # self.ssa_vars["c"],
                         true=lambda: condition_block(),
                         # false=lambda: condition_zero_block(),
                     )
 
                 else:
                     # dependend on a results bit
-                    module.qis.if_result(module.module.results[condition_bit_index], lambda: condition_block())                    
+                    module.qis.if_result(
+                        module.module.results[condition_bit_index],
+                        lambda: condition_block(),
+                    )
 
                 # module.module.builder.if_(
                 #    condition_ssa,

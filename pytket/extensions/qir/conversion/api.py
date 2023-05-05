@@ -21,6 +21,7 @@ from pytket.circuit import Circuit
 from .conversion import QirGenerator
 from .module import Module
 
+
 def pytket_to_qir(circ: Circuit) -> str:
     """converts give circ to qir string"""
     return str(circ)
@@ -43,8 +44,7 @@ def pytket_to_qir_2(circ: Circuit) -> str:
     )
 
     populated_module = qir_generator.circuit_to_module(
-    qir_generator.circuit, qir_generator.module
-)
+        qir_generator.circuit, qir_generator.module
+    )
 
     return populated_module.module.ir()
-

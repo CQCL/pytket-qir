@@ -45,7 +45,9 @@ def test_pytket_qir_2() -> None:
 
     result = pytket_to_qir_2(circ)
 
-    assert result == """; ModuleID = 'Generated from input pytket circuit'
+    assert (
+        result
+        == """; ModuleID = 'Generated from input pytket circuit'
 source_filename = "Generated from input pytket circuit"
 
 %Qubit = type opaque
@@ -67,6 +69,7 @@ attributes #0 = { "entry_point" "num_required_qubits"="3" "num_required_results"
 !2 = !{i32 1, !"dynamic_qubit_management", i1 false}
 !3 = !{i32 1, !"dynamic_result_management", i1 false}
 """
+    )
 
 
 def test_pytket_qir_ii() -> None:
@@ -79,7 +82,9 @@ def test_pytket_qir_ii() -> None:
 
     print(result)
 
-    assert result == """; ModuleID = 'Generated from input pytket circuit'
+    assert (
+        result
+        == """; ModuleID = 'Generated from input pytket circuit'
 source_filename = "Generated from input pytket circuit"
 
 %Qubit = type opaque
@@ -103,6 +108,7 @@ attributes #0 = { "entry_point" "num_required_qubits"="3" "num_required_results"
 !2 = !{i32 1, !"dynamic_qubit_management", i1 false}
 !3 = !{i32 1, !"dynamic_result_management", i1 false}
 """
+    )
 
 
 def test_pytket_qir_5() -> None:
@@ -128,7 +134,9 @@ def test_pytket_qir_5() -> None:
 
     # print(result)
 
-    assert result == """; ModuleID = 'Generated from input pytket circuit'
+    assert (
+        result
+        == """; ModuleID = 'Generated from input pytket circuit'
 source_filename = "Generated from input pytket circuit"
 
 %Qubit = type opaque
@@ -193,6 +201,7 @@ attributes #1 = { "irreversible" }
 !2 = !{i32 1, !"dynamic_qubit_management", i1 false}
 !3 = !{i32 1, !"dynamic_result_management", i1 false}
 """
+    )
 
 
 def test_pytket_qir_3() -> None:
@@ -221,9 +230,53 @@ def test_pytket_qir_3() -> None:
     assert circ.n_qubits == 2
     assert circ.n_bits == 12
 
-    result = pytket_to_qir(circ)
+    result = pytket_to_qir_2(circ)
 
-    assert result == """<tket::Circuit, qubits=2, gates=14>"""
+    print(result)
+
+    assert (
+        result
+        == """; ModuleID = 'Generated from input pytket circuit'
+source_filename = "Generated from input pytket circuit"
+
+define void @main() #0 {
+entry:
+  %0 = call i64 @reg2var(i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false)
+  %1 = call i64 @reg2var.1(i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false)
+  %2 = and i64 %0, %1
+  %3 = call i64 @reg2var.2(i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false)
+  %4 = or i64 %0, %3
+  %5 = xor i64 %0, %3
+  %6 = add i64 %0, %3
+  %7 = sub i64 %0, %3
+  %8 = mul i64 %0, %3
+  %9 = shl i64 %0, %3
+  %10 = lshr i64 %0, %3
+  %11 = icmp eq i64 %0, %3
+  %12 = icmp ne i64 %0, %3
+  %13 = icmp ugt i64 %0, %3
+  %14 = icmp uge i64 %0, %3
+  %15 = icmp ult i64 %0, %3
+  %16 = icmp ule i64 %0, %3
+  ret void
+}
+
+declare i64 @reg2var(i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1)
+
+declare i64 @reg2var.1(i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1)
+
+declare i64 @reg2var.2(i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1)
+
+attributes #0 = { "entry_point" "num_required_qubits"="2" "num_required_results"="12" "output_labeling_schema" "qir_profiles"="custom" }
+
+!llvm.module.flags = !{!0, !1, !2, !3}
+
+!0 = !{i32 1, !"qir_major_version", i32 1}
+!1 = !{i32 7, !"qir_minor_version", i32 0}
+!2 = !{i32 1, !"dynamic_qubit_management", i1 false}
+!3 = !{i32 1, !"dynamic_result_management", i1 false}
+"""
+    )
 
 
 if __name__ == "__main__":
