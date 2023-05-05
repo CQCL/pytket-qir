@@ -57,9 +57,6 @@ from pytket.circuit.logic_exp import (  # type: ignore
 )
 from pytket.passes import auto_rebase_pass  # type: ignore
 
-# from pyqir.generator import const, IntPredicate, types  # type: ignore
-# from pyqir.generator.types import Qubit  # type: ignore
-# from pyqir.generator._native import Value  # type: ignore
 from pyqir import Value
 from pyqir import IntPredicate
 
@@ -72,16 +69,7 @@ from .gatesets import (
     _TK_TO_PYQIR,
 )
 
-# from pytket_qir.gatesets.pyqir import PYQIR_GATES, _TK_TO_PYQIR  # type: ignore
 from .module import Module
-
-# from pytket_qir.utils import (  # type: ignore
-#    ClassicalExpBoxError,
-#    SetBitsOpError,
-#    WASMError,
-#    BarrierError,
-# )
-
 
 import pyqir
 
