@@ -146,7 +146,7 @@ class QirGenerator:
 
     def _to_qis_results(self, bits: List[Bit]) -> Optional[Value]:
         if bits:
-            return self.module.module.results[bits[0].index[0]]  # type : ignore
+            return self.module.module.results[bits[0].index[0]]  # type: ignore
         return None
 
     def _to_qis_bits(self, args: List[Bit]) -> Sequence[Value]:
@@ -209,8 +209,8 @@ class QirGenerator:
                 (
                     inputs,
                     list(
-                        map(  # type: ignore
-                            lambda obj: obj.size  # type : ignore
+                        map(
+                            lambda obj: obj.size  # type: ignore
                             if isinstance(obj, BitRegister)
                             else None,
                             op.get_exp().args,
