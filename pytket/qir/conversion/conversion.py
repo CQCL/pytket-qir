@@ -17,13 +17,11 @@ This module contains all functionality to parse and generate QIR files
 to and from pytket circuits.
 """
 
-from enum import Enum
-import json
 from functools import partial
-import re
 from typing import cast, Dict, List, Optional, Sequence, Tuple
 
-from pyqir import BasicQisBuilder, SimpleModule
+from pyqir import Value, IntPredicate
+import pyqir
 
 from pytket import Circuit, OpType, Bit, Qubit  # type: ignore
 from pytket.qasm.qasm import _retrieve_registers  # type: ignore
@@ -57,21 +55,11 @@ from pytket.circuit.logic_exp import (  # type: ignore
 )
 from pytket.passes import auto_rebase_pass  # type: ignore
 
-from pyqir import Value
-from pyqir import IntPredicate
-
 from .gatesets import (
-    CustomQirGate,
-    FuncNat,
     FuncSpec,
-    QirGate,
-    PYQIR_GATES,
-    _TK_TO_PYQIR,
 )
 
 from .module import Module
-
-import pyqir
 
 
 _TK_CLOPS_TO_PYQIR: Dict = {
@@ -183,7 +171,7 @@ class QirGenerator:
             if reg_value := self.set_cregs.get(reg_name):
                 bit_reg = reg_value
                 value = sum([n * 2**k for k, n in enumerate(reg_value)])
-                return const(types.Int(64), value)
+                return pyqir.const(self.qir_int_type, value)
             else:
                 bit_reg = [False] * len(bit_reg)
             if (size := len(bit_reg)) <= int_size:  # Widening by zero-padding.
@@ -214,7 +202,7 @@ class QirGenerator:
                     args = args[in_width:]
                     regname = com_bits[0].reg_name
                     if com_bits != list(self.cregs[regname]):
-                        WASMError("WASM ops must act on entire registers.")
+                        raise ValueError("WASM ops must act on entire registers.")
                     reglist.append(regname)
         elif isinstance(op, ClassicalExpBox):
             for reglist, sizes in [
@@ -233,7 +221,7 @@ class QirGenerator:
             ]:
                 for in_width in sizes:
                     if in_width == 0:
-                        raise ClassicalExpBoxError(
+                        raise ValueError(
                             "ClassicalExpBox op input or output \
                             registers have empty widths."
                         )
@@ -241,7 +229,7 @@ class QirGenerator:
                     args = args[in_width:]
                     regname = com_bits[0].reg_name
                     if com_bits != list(self.cregs[regname]):
-                        ClassicalExpBoxError(
+                        raise ValueError(
                             "ClassicalExpBox ops must act on entire registers."
                         )
                     reglist.append(regname)
@@ -251,14 +239,14 @@ class QirGenerator:
             ]:
                 for in_width in sizes:
                     if in_width == 0:
-                        raise SetBitsOpError(
+                        raise ValueError(
                             "A value is getting assigned to an empty register."
                         )
                     com_bits = args[:in_width]
                     args = args[in_width:]
                     regname = com_bits[0].reg_name
                     if com_bits != list(self.cregs[regname]):
-                        SetBitsOpError("SetBitOp must act on entire registers.")
+                        raise ValueError("SetBitOp must act on entire registers.")
                     reglist.append(regname)
         return inputs, outputs
 
@@ -275,7 +263,7 @@ class QirGenerator:
                 condition_bit_index = command.args[0].index[0]
                 condition_name = command.args[0].reg_name
 
-                condition_ssa = module.module.results[condition_bit_index]
+                # condition_ssa = module.module.results[condition_bit_index]
 
                 def condition_block():
                     """

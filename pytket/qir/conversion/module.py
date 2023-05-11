@@ -18,11 +18,11 @@ for the needs of generating QIR from Pytket circuits.
 """
 
 from typing import cast, Optional
-from pytket.wasm import WasmFileHandler
 
 from pyqir import SimpleModule, BasicQisBuilder  # type: ignore
 
-from .gatesets import CustomGateSet
+from pytket.wasm import WasmFileHandler
+
 from .gatesets import PYQIR_GATES
 
 

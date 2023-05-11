@@ -15,8 +15,6 @@
 
 from string import Template
 
-from pytket import OpType  # type: ignore
-
 from dataclasses import dataclass
 from enum import Enum
 from string import Template
@@ -24,8 +22,8 @@ from typing import Callable, Dict, List, NamedTuple, Set, Union
 
 from pytket import OpType  # type: ignore
 
-PyQirParameterType = any  # Union[Double, Int, Qubit, Result]
-PyQirReturnType = any  # Union[Int, Result, Void]
+PyQirParameterType = any  # Union[Double, Int, Qubit, Result] # todo
+PyQirReturnType = any  # Union[Int, Result, Void] # todo
 
 
 class FuncNat(Enum):
