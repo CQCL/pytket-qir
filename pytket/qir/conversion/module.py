@@ -39,9 +39,6 @@ class Module:
         num_results: int,
         wasm_handler: Optional[WasmFileHandler] = None,
     ) -> None:
-        name = cast(str, name)
-        num_qubits = cast(int, num_qubits)
-        num_results = cast(int, num_results)
         self.module = SimpleModule(name, num_qubits, num_results)
 
         self.builder = self.module.builder

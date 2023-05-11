@@ -22,8 +22,8 @@ from typing import Callable, Dict, List, NamedTuple, Set, Union
 
 from pytket import OpType  # type: ignore
 
-PyQirParameterType = any  # Union[Double, Int, Qubit, Result] # todo
-PyQirReturnType = any  # Union[Int, Result, Void] # todo
+# PyQirParameterType = any  # Union[Double, Int, Qubit, Result] # todo
+# PyQirReturnType = any  # Union[Int, Result, Void] # todo
 
 
 class FuncNat(Enum):
@@ -78,8 +78,8 @@ class QirGate:
 
 @dataclass(frozen=True)
 class CustomQirGate(QirGate):
-    function_signature: List[PyQirParameterType]
-    return_type: PyQirReturnType
+    function_signature: List
+    return_type: any
 
 
 CustomGateSet = NamedTuple(
