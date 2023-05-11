@@ -17,7 +17,7 @@ This module defines an extension for the PyQir SimpleModule
 for the needs of generating QIR from Pytket circuits.
 """
 
-from typing import cast, Optional
+from typing import Optional
 
 from pyqir import SimpleModule, BasicQisBuilder  # type: ignore
 
