@@ -116,7 +116,7 @@ class QirGenerator:
             return circuit
         return None
 
-    def _rebase_op_to_gateset(self, op, args) -> Optional[Circuit]:
+    def _rebase_op_to_gateset(self, op: OpType, args: List) -> Optional[Circuit]:
         """Rebase an op to the target gateset if needed."""
         optype = op.type
         params = op.params
@@ -210,7 +210,7 @@ class QirGenerator:
                     inputs,
                     list(
                         map(
-                            lambda obj: obj.size
+                            lambda obj: obj.size  # type : ignore
                             if isinstance(obj, BitRegister)
                             else None,
                             op.get_exp().args,
@@ -265,7 +265,7 @@ class QirGenerator:
 
                 # condition_ssa = module.module.results[condition_bit_index]
 
-                def condition_block():
+                def condition_block() -> None:
                     """
                     Populate recursively the module with the contents of the conditional
                     sub-circuit when the condition is True.
@@ -292,7 +292,7 @@ class QirGenerator:
 
                     module.module.builder.if_(
                         ssabool,
-                        true=lambda: condition_block(),
+                        true=lambda: condition_block(),  # type: ignore
                     )
 
                 else:

@@ -18,7 +18,7 @@ from string import Template
 from dataclasses import dataclass
 from enum import Enum
 from string import Template
-from typing import Callable, Dict, List, NamedTuple, Set, Union
+from typing import Callable, Dict, List, NamedTuple, Set, Union, Any
 
 from pytket import OpType  # type: ignore
 
@@ -79,7 +79,7 @@ class QirGate:
 @dataclass(frozen=True)
 class CustomQirGate(QirGate):
     function_signature: List
-    return_type: any
+    return_type: Any
 
 
 CustomGateSet = NamedTuple(

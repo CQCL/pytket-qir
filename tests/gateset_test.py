@@ -14,7 +14,7 @@
 
 from pytket.qir.conversion.gatesets import _TK_TO_PYQIR
 
-from pytket.circuit import OpType
+from pytket.circuit import OpType  # type: ignore
 
 
 def test_gateset() -> None:
