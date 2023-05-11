@@ -15,7 +15,7 @@
 from pytket.qir import pytket_to_qir
 from pytket.qir.conversion.api import pytket_to_qir_2
 
-from pytket.circuit import Circuit, Qubit, Bit, BitRegister
+from pytket.circuit import Circuit, Qubit, Bit, BitRegister  # type: ignore
 
 from pytket.circuit.logic_exp import (  # type: ignore
     reg_eq,

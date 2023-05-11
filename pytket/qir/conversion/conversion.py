@@ -146,7 +146,7 @@ class QirGenerator:
 
     def _to_qis_results(self, bits: List[Bit]) -> Optional[Value]:
         if bits:
-            return self.module.module.results[bits[0].index[0]]
+            return self.module.module.results[bits[0].index[0]]  # type : ignore
         return None
 
     def _to_qis_bits(self, args: List[Bit]) -> Sequence[Value]:
@@ -178,11 +178,11 @@ class QirGenerator:
                 bool_reg = bit_reg + [False] * (int_size - size)
             else:  # Narrowing by truncation.
                 bool_reg = bit_reg[:int_size]
-            ssa_var = cast(Value, self.module.builder.call(reg2var, [*bool_reg]))
+            ssa_var = cast(Value, self.module.builder.call(reg2var, [*bool_reg]))  # type: ignore
             self.ssa_vars[reg_name] = ssa_var
             return ssa_var
         else:
-            return cast(Value, self.ssa_vars[reg_name])
+            return cast(Value, self.ssa_vars[reg_name])  # type: ignore
 
     def _get_c_regs_from_com(self, command: Command) -> Tuple[List[str], List[str]]:
         """Get classical registers from command op types."""
@@ -209,7 +209,7 @@ class QirGenerator:
                 (
                     inputs,
                     list(
-                        map(
+                        map(  # type: ignore
                             lambda obj: obj.size  # type : ignore
                             if isinstance(obj, BitRegister)
                             else None,
