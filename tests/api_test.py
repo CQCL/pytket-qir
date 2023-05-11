@@ -18,9 +18,6 @@ from pytket.qir.conversion.api import pytket_to_qir_2
 from pytket.circuit import Circuit, Qubit, Bit, BitRegister
 
 from pytket.circuit.logic_exp import (  # type: ignore
-    BitNot,
-    if_bit,
-    if_not_bit,
     reg_eq,
     reg_neq,
     reg_geq,
@@ -178,7 +175,7 @@ def test_pytket_qir_5_iii() -> None:
     a = circ.add_c_register("a", 5)
     b = circ.add_c_register("b", 5)
     c = circ.add_c_register("c", 5)
-    d = circ.add_c_register("d", 5)
+    circ.add_c_register("d", 5)
     circ.add_classicalexpbox_register(a | b, c)
     circ.H(0)
     circ.H(0, condition=Bit(3))
@@ -250,7 +247,7 @@ def test_pytket_qir_5() -> None:
     a = circ.add_c_register("a", 5)
     b = circ.add_c_register("b", 5)
     c = circ.add_c_register("c", 5)
-    d = circ.add_c_register("d", 5)
+    circ.add_c_register("d", 5)
     circ.add_classicalexpbox_register(a | b, c)
     circ.H(2)
     circ.H(1)

@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from pytket.qir.conversion.module import Module
-
 import pyqir
+
+from pytket.qir.conversion.module import Module
 
 
 def test_module() -> None:
