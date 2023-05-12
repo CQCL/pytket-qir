@@ -10,4 +10,4 @@ dist
 obj
 docs/extensions
 .ipynb_checkpoints
-pytket/extensions/qir/_metadata.py
+pytket/qir/_metadata.py
