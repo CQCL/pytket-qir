@@ -12,13 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-public api for qir conversion from pytket
-"""
+import pyqir
 
-from pytket.circuit import Circuit
+from pytket.qir.conversion.module import tketqirModule
 
 
-def pytket_to_qir(circ: Circuit) -> str:
-    """converts give circ to qir string"""
-    return str(circ)
+def test_module() -> None:
+    m = tketqirModule("modulename", 3, 1)
+    pm = pyqir.SimpleModule("name", 1, 1)
+    assert type(m.module) == type(pm)
+    assert type(m.qis) == type(pyqir.BasicQisBuilder(pm.builder))
+
+
+if __name__ == "__main__":
+    test_module()
