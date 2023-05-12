@@ -14,11 +14,11 @@
 
 import pyqir
 
-from pytket.qir.conversion.module import Module
+from pytket.qir.conversion.module import tketqirModule
 
 
 def test_module() -> None:
-    m = Module("modulename", 3, 1)
+    m = tketqirModule("modulename", 3, 1)
     pm = pyqir.SimpleModule("name", 1, 1)
     assert type(m.module) == type(pm)
     assert type(m.qis) == type(pyqir.BasicQisBuilder(pm.builder))

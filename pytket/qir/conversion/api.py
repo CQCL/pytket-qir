@@ -19,18 +19,13 @@ public api for qir conversion from pytket
 from pytket.circuit import Circuit
 
 from .conversion import QirGenerator
-from .module import Module
+from .module import tketqirModule
 
 
 def pytket_to_qir(circ: Circuit) -> str:
     """converts give circ to qir string"""
-    return str(circ)
 
-
-def pytket_to_qir_2(circ: Circuit) -> str:
-    """converts give circ to qir string"""
-
-    m = Module(
+    m = tketqirModule(
         name="Generated from input pytket circuit",
         num_qubits=circ.n_qubits,
         num_results=circ.n_bits,

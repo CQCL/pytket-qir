@@ -59,7 +59,7 @@ from .gatesets import (
     FuncSpec,
 )
 
-from .module import Module
+from .module import tketqirModule
 
 
 _TK_CLOPS_TO_PYQIR: Dict = {
@@ -86,7 +86,7 @@ class QirGenerator:
     def __init__(
         self,
         circuit: Circuit,
-        module: Module,
+        module: tketqirModule,
         wasm_int_type: int,
         qir_int_type: int,
     ) -> None:
@@ -119,11 +119,29 @@ class QirGenerator:
     def _rebase_op_to_gateset(self, op: OpType, args: List) -> Optional[Circuit]:
         """Rebase an op to the target gateset if needed."""
         optype = op.type
-        params = op.params
-        circuit = Circuit(self.circuit.n_qubits, self.circuit.n_bits)
-        circuit.add_gate(optype, params, args)
-        self.rebase_to_gateset.apply(circuit)
-        return circuit
+        if op.type == OpType.ClassicalExpBox:
+            circuit = Circuit(self.circuit.n_qubits)
+            # print(dir(self.circuit))
+            # print("\n\n")
+            for cr in self.circuit.c_registers:
+                # print(dir(cr))
+                # print("\n\n")
+                circuit.add_c_register(cr.name, cr.size)
+
+            # print(args)
+            # print(dir(op))
+            # print(op.get_exp)
+            # print(dir(op.get_exp))
+
+            circuit.add_gate(op, args)
+            # exit()
+            return circuit
+        else:
+            params = op.params
+            circuit = Circuit(self.circuit.n_qubits, self.circuit.n_bits)
+            circuit.add_gate(optype, params, args)
+            self.rebase_to_gateset.apply(circuit)
+            return circuit
 
     def _get_optype_and_params(self, op: Op) -> Tuple[OpType, Sequence[float]]:
         optype = op.type
@@ -150,6 +168,8 @@ class QirGenerator:
         return None
 
     def _to_qis_bits(self, args: List[Bit]) -> Sequence[Value]:
+        for b in args:
+            assert b.name == "c"
         if args:
             return [self.module.module.results[bit.index[0]] for bit in args[:-1]]
         return []
@@ -250,13 +270,15 @@ class QirGenerator:
                     reglist.append(regname)
         return inputs, outputs
 
-    def circuit_to_module(self, circuit: Circuit, module: Module) -> Module:
+    def circuit_to_module(
+        self, circuit: Circuit, module: tketqirModule
+    ) -> tketqirModule:
         """Populate a PyQir module from a pytket circuit."""
         for command in circuit:
             op = command.op
             if isinstance(op, Conditional):
                 assert op.width == 1  # only one conditional bit
-
+                # if not op.op.is_gate
                 conditional_circuit = self._rebase_op_to_gateset(
                     op.op, command.args[op.width :]
                 )
@@ -274,8 +296,8 @@ class QirGenerator:
                         self.circuit_to_module(conditional_circuit, module)
 
                 if condition_name in self.ssa_vars:
-                    i64ssa2b = self.module.module.add_external_function(
-                        "i64ssa2b",
+                    extracti1fromi64 = self.module.module.add_external_function(
+                        "extracti1fromi64",
                         pyqir.FunctionType(
                             pyqir.IntType(self.module.module.context, 1),
                             [self.qir_int_type] * 2,
@@ -283,7 +305,7 @@ class QirGenerator:
                     )
 
                     ssabool = module.builder.call(
-                        i64ssa2b,
+                        extracti1fromi64,
                         [
                             self.ssa_vars[condition_name],
                             pyqir.const(self.qir_int_type, condition_bit_index),

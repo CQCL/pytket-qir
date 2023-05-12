@@ -26,7 +26,7 @@ from pytket.wasm import WasmFileHandler
 from .gatesets import PYQIR_GATES
 
 
-class Module:
+class tketqirModule:
     """
     PyQir module extension to account for custom defined input gate set
     and calls to WASM files.
