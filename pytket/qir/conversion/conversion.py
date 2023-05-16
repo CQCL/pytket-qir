@@ -35,6 +35,7 @@ from pytket.circuit import (  # type: ignore
     MetaOp,
     SetBitsOp,
     WASMOp,
+    OpType,
 )
 from pytket.circuit.logic_exp import (  # type: ignore
     BitWiseOp,
@@ -102,7 +103,8 @@ class QirGenerator:
         # Will throw an exception if the rebase can not handle the target gateset.
         self.rebase_to_gateset = auto_rebase_pass(self.target_gateset)
         self.set_cregs: Dict[str, List] = {}  # Keep track of set registers.
-        self.ssa_vars: Dict[str, Value] = {}  # Keep track of set ssa variables.
+        self.ssa_vars: Dict[str, List[Value]] = {}  # Keep track of set ssa variables.
+        self.notupdated = False
 
     def _rebase_command_to_gateset(self, command: Command) -> Optional[Circuit]:
         """Rebase to the target gateset if needed."""
@@ -199,10 +201,10 @@ class QirGenerator:
             else:  # Narrowing by truncation.
                 bool_reg = bit_reg[:int_size]
             ssa_var = cast(Value, self.module.builder.call(reg2var, [*bool_reg]))  # type: ignore
-            self.ssa_vars[reg_name] = ssa_var
+            self.ssa_vars[reg_name] = [ssa_var]
             return ssa_var
         else:
-            return cast(Value, self.ssa_vars[reg_name])  # type: ignore
+            return cast(Value, self.ssa_vars[reg_name][-1])  # type: ignore
 
     def _get_c_regs_from_com(self, command: Command) -> Tuple[List[str], List[str]]:
         """Get classical registers from command op types."""
@@ -287,6 +289,8 @@ class QirGenerator:
 
                 # condition_ssa = module.module.results[condition_bit_index]
 
+                self.notupdated = False
+
                 def condition_block() -> None:
                     """
                     Populate recursively the module with the contents of the conditional
@@ -307,7 +311,7 @@ class QirGenerator:
                     ssabool = module.builder.call(
                         extracti1fromi64,
                         [
-                            self.ssa_vars[condition_name],
+                            self.ssa_vars[condition_name][-1],
                             pyqir.const(self.qir_int_type, condition_bit_index),
                         ],
                     )
@@ -323,8 +327,38 @@ class QirGenerator:
                         lambda: condition_block(),
                     )
 
+                print(dir(module.module))
+                print(dir(module.module.ir()))
+                print(module.module.ir())
+                print(self.ssa_vars)
+
+                if self.notupdated:
+                    # this is the point where the PHI node needs to be added
+                    assert len(self.ssa_vars[self.lastupdatedreg]) > 1
+                    # print(module.module.functions)
+
+                    """tryphi = pyqir.Phi.incoming(
+                        [
+                            (self.ssa_vars[self.lastupdatedreg][-1], "%then"),
+                            (self.ssa_vars[self.lastupdatedreg][-2], "%entry"),
+                        ]
+                    )
+                    exit()"""
+
             elif isinstance(op, WASMOp):
                 raise ValueError("WASM not supported yet")
+                """#elif op.type == OpType.Measure:
+            #    # todo##
+
+                # raise ValueError("MEASURE not supported yet")
+
+                self.notupdated = True
+                self.lastupdatedreg = outputs[0]
+                if outputs[0] not in self.ssa_vars.keys():
+                    self.ssa_vars[outputs[0]] = [output_instr]
+                else:
+                    self.ssa_vars[outputs[0]].append(output_instr)"""
+
             elif isinstance(op, ClassicalExpBox):
                 inputs, outputs = self._get_c_regs_from_com(command)
                 ssa_vars: List = []
@@ -334,7 +368,12 @@ class QirGenerator:
                 output_instr = _TK_CLOPS_TO_PYQIR[type(op.get_exp())](module.builder)(
                     *ssa_vars
                 )
-                self.ssa_vars[outputs[0]] = output_instr
+                self.notupdated = True
+                self.lastupdatedreg = outputs[0]
+                if outputs[0] not in self.ssa_vars.keys():
+                    self.ssa_vars[outputs[0]] = [output_instr]
+                else:
+                    self.ssa_vars[outputs[0]].append(output_instr)
             elif isinstance(op, SetBitsOp):
                 _, outputs = self._get_c_regs_from_com(command)
                 for out in outputs:
@@ -351,7 +390,13 @@ class QirGenerator:
                 ssa_var = cast(Value, self.module.module.results[input_reg.index[0]])
                 get_gate = getattr(module, gate.func_name.value)
                 output_instr = module.builder.call(get_gate, [ssa_var])
-                self.ssa_vars[output_name] = output_instr
+                self.notupdated = True
+                self.lastupdatedreg = output_name
+                if output_name not in self.ssa_vars.keys():
+                    self.ssa_vars[output_name] = [output_instr]
+                else:
+                    self.ssa_vars[output_name].append(output_instr)
+
             else:
                 rebased_circ = self._rebase_command_to_gateset(
                     command
