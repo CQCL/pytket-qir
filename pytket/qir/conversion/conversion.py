@@ -23,8 +23,6 @@ from typing import cast, Dict, List, Optional, Sequence, Tuple
 from pyqir import Value, IntPredicate
 import pyqir
 
-import typing
-
 from pytket import Circuit, OpType, Bit, Qubit  # type: ignore
 from pytket.qasm.qasm import _retrieve_registers  # type: ignore
 from pytket.circuit import (  # type: ignore

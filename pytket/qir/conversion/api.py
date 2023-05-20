@@ -16,15 +16,13 @@
 public api for qir conversion from pytket
 """
 
+from enum import Enum
+from typing import Union
+
 from pytket.circuit import Circuit
 
 from .conversion import QirGenerator
 from .module import tketqirModule
-
-
-from enum import Enum
-
-from typing import Union
 
 
 class ReturnTypeQIR(Enum):
