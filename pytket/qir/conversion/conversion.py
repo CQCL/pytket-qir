@@ -1,4 +1,4 @@
-# Copyright 2019-2022 Cambridge Quantum Computing
+# Copyright 2019-2023 Cambridge Quantum Computing
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
 # limitations under the License.
 
 """
-This module contains all functionality to parse and generate QIR files
-to and from pytket circuits.
+This module contains all functionality to generate QIR files
+from pytket circuits.
 """
 
 from functools import partial
@@ -30,11 +30,13 @@ from pytket.circuit import (  # type: ignore
     ClassicalExpBox,
     Command,
     Conditional,
+    RangePredicateOp,
     CopyBitsOp,
     Op,
     MetaOp,
     SetBitsOp,
     WASMOp,
+    OpType,
 )
 from pytket.circuit.logic_exp import (  # type: ignore
     BitWiseOp,
@@ -99,10 +101,130 @@ class QirGenerator:
 
         self.cregs = _retrieve_registers(self.circuit.bits, BitRegister)
         self.target_gateset = self.module.gateset.base_gateset
+
         # Will throw an exception if the rebase can not handle the target gateset.
         self.rebase_to_gateset = auto_rebase_pass(self.target_gateset)
+
         self.set_cregs: Dict[str, List] = {}  # Keep track of set registers.
         self.ssa_vars: Dict[str, Value] = {}  # Keep track of set ssa variables.
+
+        # i1 read_bit_from_reg(i64 reg, i64 index)
+        self.read_bit_from_reg = self.module.module.add_external_function(
+            "read_bit_from_reg",
+            pyqir.FunctionType(
+                pyqir.IntType(self.module.module.context, 1),
+                [self.qir_int_type] * 2,
+            ),
+        )
+
+        # void set_one_bit_in_reg(i64 reg, i64 index, i1 value)
+        self.set_one_bit_in_reg = self.module.module.add_external_function(
+            "set_one_bit_in_reg",
+            pyqir.FunctionType(
+                pyqir.Type.void(self.module.module.context),
+                [
+                    self.qir_int_type,
+                    self.qir_int_type,
+                    pyqir.IntType(self.module.module.context, 1),
+                ],
+            ),
+        )
+
+        # void set_all_bits_in_reg(i64 reg, i64 value)
+        self.set_all_bits_in_reg = self.module.module.add_external_function(
+            "set_all_bits_in_reg",
+            pyqir.FunctionType(
+                pyqir.Type.void(self.module.module.context),
+                [
+                    self.qir_int_type,
+                    self.qir_int_type,
+                ],
+            ),
+        )
+
+        # __quantum__qis__read_result__body(result)
+        self.read_bit_from_result = self.module.module.add_external_function(
+            "__quantum__qis__read_result__body",
+            pyqir.FunctionType(
+                pyqir.IntType(self.module.module.context, 1),
+                [pyqir.result_type(self.module.module.context)],
+            ),
+        )
+
+        # i64 reg2var(i1, i1, i1, ...)
+        self.reg2var = self.module.module.add_external_function(
+            "reg2var",
+            pyqir.FunctionType(
+                pyqir.IntType(self.module.module.context, qir_int_type),
+                [pyqir.IntType(self.module.module.context, 1)] * qir_int_type,
+            ),
+        )
+
+        # void __quantum__rt__int_record_output(i64)
+        self.record_output = self.module.module.add_external_function(
+            "__quantum__rt__int_record_output",
+            pyqir.FunctionType(
+                pyqir.Type.void(self.module.module.context),
+                [pyqir.IntType(self.module.module.context, qir_int_type)],
+            ),
+        )
+
+        self.barrier: List[Optional[pyqir.Function]] = [None]
+        self.order: List[Optional[pyqir.Function]] = [None]
+        self.group: List[Optional[pyqir.Function]] = [None]
+        self.sleep: List[Optional[pyqir.Function]] = [None]
+
+        # __quantum__qis__barrier1__body()
+        for i in range(1, self.circuit.n_qubits):
+            print("add barrier for", end="")
+            print(i)
+            funcnameb = f"__quantum__qis__barrier{i}__body"
+            funcnameo = f"__quantum__qis__order{i}__body"
+            funcnameg = f"__quantum__qis__group{i}__body"
+            funcnames = f"__quantum__qis__sleep{i}__body"
+
+            self.barrier.append(
+                self.module.module.add_external_function(
+                    funcnameb,
+                    pyqir.FunctionType(
+                        pyqir.Type.void(self.module.module.context),
+                        [pyqir.qubit_type(self.module.module.context)] * i,
+                    ),
+                )
+            )
+
+            self.order.append(
+                self.module.module.add_external_function(
+                    funcnameo,
+                    pyqir.FunctionType(
+                        pyqir.Type.void(self.module.module.context),
+                        [pyqir.qubit_type(self.module.module.context)] * i,
+                    ),
+                )
+            )
+
+            self.group.append(
+                self.module.module.add_external_function(
+                    funcnameg,
+                    pyqir.FunctionType(
+                        pyqir.Type.void(self.module.module.context),
+                        [pyqir.qubit_type(self.module.module.context)] * i,
+                    ),
+                )
+            )
+
+            self.sleep.append(
+                self.module.module.add_external_function(
+                    funcnames,
+                    pyqir.FunctionType(
+                        pyqir.Type.void(self.module.module.context),
+                        [pyqir.qubit_type(self.module.module.context)] * i,
+                    ),
+                )
+            )
+
+        for creg in self.circuit.c_registers:
+            self._reg2ssa_var(creg, qir_int_type)
 
     def _rebase_command_to_gateset(self, command: Command) -> Optional[Circuit]:
         """Rebase to the target gateset if needed."""
@@ -121,20 +243,10 @@ class QirGenerator:
         optype = op.type
         if op.type == OpType.ClassicalExpBox:
             circuit = Circuit(self.circuit.n_qubits)
-            # print(dir(self.circuit))
-            # print("\n\n")
             for cr in self.circuit.c_registers:
-                # print(dir(cr))
-                # print("\n\n")
                 circuit.add_c_register(cr.name, cr.size)
 
-            # print(args)
-            # print(dir(op))
-            # print(op.get_exp)
-            # print(dir(op.get_exp))
-
             circuit.add_gate(op, args)
-            # exit()
             return circuit
         else:
             params = op.params
@@ -180,13 +292,6 @@ class QirGenerator:
         if (
             reg_name not in self.ssa_vars.keys()
         ):  # Check if the register has been previously set.
-            reg2var = self.module.module.add_external_function(
-                "reg2var",
-                pyqir.FunctionType(
-                    pyqir.IntType(self.module.module.context, int_size),
-                    [pyqir.IntType(self.module.module.context, 1)] * int_size,
-                ),
-            )
             # Check if the register has been previously set. If not, initialise to 0.
             if reg_value := self.set_cregs.get(reg_name):
                 bit_reg = reg_value
@@ -198,8 +303,9 @@ class QirGenerator:
                 bool_reg = bit_reg + [False] * (int_size - size)
             else:  # Narrowing by truncation.
                 bool_reg = bit_reg[:int_size]
-            ssa_var = cast(Value, self.module.builder.call(reg2var, [*bool_reg]))  # type: ignore
+            ssa_var = cast(Value, self.module.builder.call(self.reg2var, [*bool_reg]))  # type: ignore
             self.ssa_vars[reg_name] = ssa_var
+            # reg_name = bit_reg[0].reg_name
             return ssa_var
         else:
             return cast(Value, self.ssa_vars[reg_name])  # type: ignore
@@ -271,23 +377,49 @@ class QirGenerator:
         return inputs, outputs
 
     def circuit_to_module(
-        self, circuit: Circuit, module: tketqirModule
+        self, circuit: Circuit, module: tketqirModule, record_output: bool = False
     ) -> tketqirModule:
         """Populate a PyQir module from a pytket circuit."""
+
         for command in circuit:
             op = command.op
-            if isinstance(op, Conditional):
+
+            if isinstance(op, RangePredicateOp):
+                lower_qir = pyqir.const(self.qir_int_type, op.lower)
+                upper_qir = pyqir.const(self.qir_int_type, op.upper)
+
+                registername = command.args[0].reg_name
+
+                lower_cond = module.module.builder.icmp(
+                    pyqir.IntPredicate.SGT, lower_qir, self.ssa_vars[registername]
+                )
+                upper_cond = module.module.builder.icmp(
+                    pyqir.IntPredicate.SGT, self.ssa_vars[registername], upper_qir
+                )
+
+                result = module.module.builder.and_(lower_cond, upper_cond)
+
+                condition_bit_index = command.args[-1].index[0]
+                registername = command.args[-1].reg_name
+
+                self.module.builder.call(
+                    self.set_one_bit_in_reg,
+                    [
+                        self.ssa_vars[registername],
+                        pyqir.const(self.qir_int_type, condition_bit_index),
+                        result,
+                    ],
+                )
+
+            elif isinstance(op, Conditional):
                 assert op.width == 1  # only one conditional bit
-                # if not op.op.is_gate
                 conditional_circuit = self._rebase_op_to_gateset(
                     op.op, command.args[op.width :]
                 )
                 condition_bit_index = command.args[0].index[0]
                 condition_name = command.args[0].reg_name
 
-                # condition_ssa = module.module.results[condition_bit_index]
-
-                def condition_block() -> None:
+                def condition_block_true() -> None:
                     """
                     Populate recursively the module with the contents of the conditional
                     sub-circuit when the condition is True.
@@ -295,17 +427,18 @@ class QirGenerator:
                     if op.value == 1:
                         self.circuit_to_module(conditional_circuit, module)
 
+                def condition_block_false() -> None:
+                    """
+                    Populate recursively the module with the contents of the conditional
+                    sub-circuit when the condition is False.
+                    """
+                    if op.value == 0:
+                        self.circuit_to_module(conditional_circuit, module)
+
                 if condition_name in self.ssa_vars:
-                    extracti1fromi64 = self.module.module.add_external_function(
-                        "extracti1fromi64",
-                        pyqir.FunctionType(
-                            pyqir.IntType(self.module.module.context, 1),
-                            [self.qir_int_type] * 2,
-                        ),
-                    )
 
                     ssabool = module.builder.call(
-                        extracti1fromi64,
+                        self.read_bit_from_reg,
                         [
                             self.ssa_vars[condition_name],
                             pyqir.const(self.qir_int_type, condition_bit_index),
@@ -314,33 +447,155 @@ class QirGenerator:
 
                     module.module.builder.if_(
                         ssabool,
-                        true=lambda: condition_block(),  # type: ignore
+                        true=lambda: condition_block_true(),  # type: ignore
+                        false=lambda: condition_block_false(),  # type: ignore
                     )
 
                 else:
-                    module.qis.if_result(
-                        module.module.results[condition_bit_index],
-                        lambda: condition_block(),
+                    ValueError(
+                        "circuit contruction with special condition not yet supported"
                     )
+                    # this should be an assertion when working
 
             elif isinstance(op, WASMOp):
                 raise ValueError("WASM not supported yet")
+            elif op.type == OpType.Measure:
+
+                assert len(command.bits) == 1
+                assert len(command.qubits) == 1
+                assert command.qubits[0].reg_name == "q"
+
+                module.qis.mz(
+                    module.module.qubits[command.qubits[0].index[0]],
+                    module.module.results[command.qubits[0].index[0]],
+                )
+
+                ssa_measureresult = self.module.builder.call(
+                    self.read_bit_from_result,
+                    [
+                        module.module.results[command.qubits[0].index[0]],
+                    ],
+                )
+
+                self.module.builder.call(
+                    self.set_one_bit_in_reg,
+                    [
+                        self.ssa_vars[command.bits[0].reg_name],
+                        pyqir.const(self.qir_int_type, command.bits[0].index[0]),
+                        ssa_measureresult,
+                    ],
+                )
+
             elif isinstance(op, ClassicalExpBox):
                 inputs, outputs = self._get_c_regs_from_com(command)
                 ssa_vars: List = []
                 for inp in inputs:
                     bit_reg = circuit.get_c_register(inp)
                     ssa_vars.append(self._reg2ssa_var(bit_reg, self.qir_int_type.width))
-                output_instr = _TK_CLOPS_TO_PYQIR[type(op.get_exp())](module.builder)(
-                    *ssa_vars
-                )
-                self.ssa_vars[outputs[0]] = output_instr
+
+                returntypebool = False
+
+                if type(op.get_exp()) == RegAnd:
+                    otheroutput = module.builder.and_(*ssa_vars)
+                elif type(op.get_exp()) == RegOr:
+                    otheroutput = module.builder.or_(*ssa_vars)
+                elif type(op.get_exp()) == RegXor:
+                    otheroutput = module.builder.xor(*ssa_vars)
+                elif type(op.get_exp()) == RegAdd:
+                    otheroutput = module.builder.add(*ssa_vars)
+                elif type(op.get_exp()) == RegSub:
+                    otheroutput = module.builder.sub(*ssa_vars)
+                elif type(op.get_exp()) == RegMul:
+                    otheroutput = module.builder.mul(*ssa_vars)
+                elif type(op.get_exp()) == RegLsh:
+                    otheroutput = module.builder.shl(*ssa_vars)
+                elif type(op.get_exp()) == RegRsh:
+                    otheroutput = module.builder.lshr(*ssa_vars)
+                elif type(op.get_exp()) == RegEq:
+                    otheroutput = module.builder.icmp(
+                        IntPredicate.EQ, ssa_vars[0], ssa_vars[1]
+                    )
+                    returntypebool = True
+                elif type(op.get_exp()) == RegNeq:
+                    otheroutput = module.builder.icmp(
+                        IntPredicate.NE, ssa_vars[0], ssa_vars[1]
+                    )
+                    returntypebool = True
+                elif type(op.get_exp()) == RegGt:
+                    otheroutput = module.builder.icmp(
+                        IntPredicate.UGT, ssa_vars[0], ssa_vars[1]
+                    )
+                    returntypebool = True
+                elif type(op.get_exp()) == RegGeq:
+                    otheroutput = module.builder.icmp(
+                        IntPredicate.UGE, ssa_vars[0], ssa_vars[1]
+                    )
+                    returntypebool = True
+                elif type(op.get_exp()) == RegLt:
+                    otheroutput = module.builder.icmp(
+                        IntPredicate.ULT, ssa_vars[0], ssa_vars[1]
+                    )
+                    returntypebool = True
+                elif type(op.get_exp()) == RegLeq:
+                    otheroutput = module.builder.icmp(
+                        IntPredicate.ULE, ssa_vars[0], ssa_vars[1]
+                    )
+                    returntypebool = True
+                else:
+                    ValueError("classical op type not supported")
+
+                if returntypebool:
+                    # the return value of the some classical ops is bool in qir,
+                    # so the return value can only be written to one entry
+                    # of the register this implementation write the value
+                    # to the 0-th entry
+                    # of the register, this could be changed to a user given value
+                    self.module.builder.call(
+                        self.set_one_bit_in_reg,
+                        [
+                            self.ssa_vars[outputs[0]],
+                            pyqir.const(self.qir_int_type, 0),
+                            otheroutput,
+                        ],
+                    )
+                else:
+                    self.module.builder.call(
+                        self.set_all_bits_in_reg,
+                        [self.ssa_vars[outputs[0]], otheroutput],
+                    )
+
             elif isinstance(op, SetBitsOp):
                 _, outputs = self._get_c_regs_from_com(command)
                 for out in outputs:
                     self.set_cregs[out] = command.op.values
             elif isinstance(op, MetaOp):
-                raise ValueError("Meta op is not supported yet")
+
+                assert command.qubits[0].reg_name == "q"
+
+                qir_qubits = self._to_qis_qubits(command.qubits)
+
+                if command.op.data == "":
+                    self.module.builder.call(
+                        self.barrier[len(command.qubits)],  # type: ignore
+                        [*qir_qubits],
+                    )
+                elif command.op.data[0:5] == "order":
+                    self.module.builder.call(
+                        self.order[len(command.qubits)],  # type: ignore
+                        [*qir_qubits],
+                    )
+                elif command.op.data[0:5] == "group":
+                    self.module.builder.call(
+                        self.group[len(command.qubits)],  # type: ignore
+                        [*qir_qubits],
+                    )
+                elif command.op.data[0:5] == "sleep":
+                    self.module.builder.call(
+                        self.sleep[len(command.qubits)],  # type: ignore
+                        [*qir_qubits],
+                    )
+                else:
+                    raise ValueError("Meta op is not supported yet")
 
             elif isinstance(op, CopyBitsOp):
                 input_reg = command.args[0]
@@ -351,7 +606,9 @@ class QirGenerator:
                 ssa_var = cast(Value, self.module.module.results[input_reg.index[0]])
                 get_gate = getattr(module, gate.func_name.value)
                 output_instr = module.builder.call(get_gate, [ssa_var])
-                self.ssa_vars[output_name] = output_instr
+                ssa_var_result = output_instr
+                self.set_all_bits_in_reg(self.ssa_vars[output_name], ssa_var_result)  # type: ignore
+
             else:
                 rebased_circ = self._rebase_command_to_gateset(
                     command
@@ -379,4 +636,14 @@ class QirGenerator:
                         get_gate(*qubits, results)
                     else:
                         get_gate(*qubits)
+        if record_output:
+            for creg in self.circuit.c_registers:
+                reg_name = creg[0].reg_name
+                self.module.builder.call(
+                    self.record_output,
+                    [
+                        self.ssa_vars[reg_name],
+                    ],
+                )
+
         return module

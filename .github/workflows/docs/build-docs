@@ -18,7 +18,7 @@ MODULE = "qir"
 
 
 def get_module_version():
-    m = import_module(f"pytket.extensions.{MODULE}")
+    m = import_module(f"pytket.{MODULE}")
     return m._metadata.__extension_version__.split(".")
 
 
