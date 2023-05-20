@@ -34,7 +34,7 @@ def pytket_to_qir(
     circ: Circuit,
     name: str = "Generated from input pytket circuit",
     returntype: ReturnTypeQIR = ReturnTypeQIR.BINARY,
-) -> Union[str, bytes]:
+) -> Union[str, bytes, None]:
     """converts give pytket circuit to qir
     :param name: name for the qir module created
     :type name: str
