@@ -169,10 +169,10 @@ class QirGenerator:
             ),
         )
 
-        self.barrier = [0]
-        self.order = [0]
-        self.group = [0]
-        self.sleep = [0]
+        self.barrier: List[Optional[callable]] = [None]
+        self.order: List[Optional[callable]] = [None]
+        self.group: List[Optional[callable]] = [None]
+        self.sleep: List[Optional[callable]] = [None]
 
         # __quantum__qis__barrier1__body()
         for i in range(1, self.circuit.n_qubits):
@@ -377,7 +377,7 @@ class QirGenerator:
         return inputs, outputs
 
     def circuit_to_module(
-        self, circuit: Circuit, module: tketqirModule, record_output=False
+        self, circuit: Circuit, module: tketqirModule, record_output: bool = False
     ) -> tketqirModule:
         """Populate a PyQir module from a pytket circuit."""
 
@@ -575,7 +575,7 @@ class QirGenerator:
                 qir_qubits = self._to_qis_qubits(command.qubits)
 
                 if command.op.data == "":
-                    self.module.builder.call(
+                    self.module.builder.call(  # type: ignore
                         self.barrier[len(command.qubits)],
                         [*qir_qubits],
                     )
