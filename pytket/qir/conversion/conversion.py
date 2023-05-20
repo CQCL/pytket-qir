@@ -171,10 +171,10 @@ class QirGenerator:
             ),
         )
 
-        self.barrier: List[Optional[typing.Callable]] = [None]
-        self.order: List[Optional[typing.Callable]] = [None]
-        self.group: List[Optional[typing.Callable]] = [None]
-        self.sleep: List[Optional[typing.Callable]] = [None]
+        self.barrier: List[Optional[pyqir.Function]] = [None]
+        self.order: List[Optional[pyqir.Function]] = [None]
+        self.group: List[Optional[pyqir.Function]] = [None]
+        self.sleep: List[Optional[pyqir.Function]] = [None]
 
         # __quantum__qis__barrier1__body()
         for i in range(1, self.circuit.n_qubits):
@@ -576,24 +576,24 @@ class QirGenerator:
 
                 qir_qubits = self._to_qis_qubits(command.qubits)
 
-                if command.op.data == "":  # type: ignore
+                if command.op.data == "":
                     self.module.builder.call(
-                        self.barrier[len(command.qubits)],
+                        self.barrier[len(command.qubits)],  # type: ignore
                         [*qir_qubits],
                     )
-                elif command.op.data[0:5] == "order":  # type: ignore
+                elif command.op.data[0:5] == "order":
                     self.module.builder.call(
-                        self.order[len(command.qubits)],
+                        self.order[len(command.qubits)],  # type: ignore
                         [*qir_qubits],
                     )
-                elif command.op.data[0:5] == "group":  # type: ignore
+                elif command.op.data[0:5] == "group":
                     self.module.builder.call(
-                        self.group[len(command.qubits)],
+                        self.group[len(command.qubits)],  # type: ignore
                         [*qir_qubits],
                     )
-                elif command.op.data[0:5] == "sleep":  # type: ignore
+                elif command.op.data[0:5] == "sleep":
                     self.module.builder.call(
-                        self.sleep[len(command.qubits)],
+                        self.sleep[len(command.qubits)],  # type: ignore
                         [*qir_qubits],
                     )
                 else:
@@ -607,9 +607,9 @@ class QirGenerator:
                 gate = module.gateset.tk_to_gateset(optype)
                 ssa_var = cast(Value, self.module.module.results[input_reg.index[0]])
                 get_gate = getattr(module, gate.func_name.value)
-                output_instr = cast(Value, module.builder.call(get_gate, [ssa_var]))
-                ssa_var_result = cast(Value, output_instr)
-                self.set_all_bits_in_reg(self.ssa_vars[output_name], ssa_var_result)
+                output_instr = module.builder.call(get_gate, [ssa_var])
+                ssa_var_result = output_instr
+                self.set_all_bits_in_reg(self.ssa_vars[output_name], ssa_var_result)  # type: ignore
 
             else:
                 rebased_circ = self._rebase_command_to_gateset(
