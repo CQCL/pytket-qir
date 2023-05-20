@@ -24,7 +24,7 @@ from .module import tketqirModule
 
 from enum import Enum
 
-from typing import Union, binary
+from typing import Union
 
 
 class ReturnTypeQIR(Enum):
@@ -36,7 +36,7 @@ def pytket_to_qir(
     circ: Circuit,
     name: str = "Generated from input pytket circuit",
     returntype: ReturnTypeQIR = ReturnTypeQIR.BINARY,
-) -> Union[str, binary]:
+) -> Union[str, bytes]:
     """converts give pytket circuit to qir
     :param name: name for the qir module created
     :type name: str
