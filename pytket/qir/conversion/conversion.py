@@ -18,7 +18,7 @@ from pytket circuits.
 """
 
 from functools import partial
-from typing import cast, Dict, List, Optional, Sequence, Tuple
+from typing import cast, Dict, List, Optional, Sequence, Tuple, Union
 
 from pyqir import Value, IntPredicate
 import pyqir
@@ -38,6 +38,7 @@ from pytket.circuit import (  # type: ignore
     WASMOp,
     OpType,
 )
+
 from pytket.circuit.logic_exp import (  # type: ignore
     BitWiseOp,
     RegAdd,
@@ -54,7 +55,13 @@ from pytket.circuit.logic_exp import (  # type: ignore
     RegLsh,
     RegRsh,
     RegXor,
+    BitOr,
+    BitXor,
+    BitNeq,
+    BitEq,
+    BitAnd,
 )
+
 from pytket.passes import auto_rebase_pass  # type: ignore
 
 from .gatesets import (
@@ -64,7 +71,7 @@ from .gatesets import (
 from .module import tketqirModule
 
 
-_TK_CLOPS_TO_PYQIR: Dict = {
+_TK_CLOPS_TO_PYQIR_REG: Dict = {
     RegAnd: lambda b: b.and_,
     RegOr: lambda b: b.or_,
     RegXor: lambda b: b.xor,
@@ -73,12 +80,23 @@ _TK_CLOPS_TO_PYQIR: Dict = {
     RegMul: lambda b: b.mul,
     RegLsh: lambda b: b.shl,
     RegRsh: lambda b: b.lshr,
+}
+
+_TK_CLOPS_TO_PYQIR_REG_BOOL: Dict = {
     RegEq: lambda b: partial(b.icmp, IntPredicate.EQ),
     RegNeq: lambda b: partial(b.icmp, IntPredicate.NE),
     RegGt: lambda b: partial(b.icmp, IntPredicate.UGT),
     RegGeq: lambda b: partial(b.icmp, IntPredicate.UGE),
     RegLt: lambda b: partial(b.icmp, IntPredicate.ULT),
     RegLeq: lambda b: partial(b.icmp, IntPredicate.ULE),
+}
+
+_TK_CLOPS_TO_PYQIR_BIT: Dict = {
+    BitAnd: lambda b: b.and_,
+    BitOr: lambda b: b.or_,
+    BitXor: lambda b: b.xor,
+    BitNeq: lambda b: partial(b.icmp, IntPredicate.NE),
+    BitEq: lambda b: partial(b.icmp, IntPredicate.EQ),
 }
 
 
@@ -176,8 +194,6 @@ class QirGenerator:
 
         # __quantum__qis__barrier1__body()
         for i in range(1, self.circuit.n_qubits):
-            print("add barrier for", end="")
-            print(i)
             funcnameb = f"__quantum__qis__barrier{i}__body"
             funcnameo = f"__quantum__qis__order{i}__body"
             funcnameg = f"__quantum__qis__group{i}__body"
@@ -331,6 +347,7 @@ class QirGenerator:
                         raise ValueError("WASM ops must act on entire registers.")
                     reglist.append(regname)
         elif isinstance(op, ClassicalExpBox):
+            # remove this
             for reglist, sizes in [
                 (
                     inputs,
@@ -375,6 +392,57 @@ class QirGenerator:
                         raise ValueError("SetBitOp must act on entire registers.")
                     reglist.append(regname)
         return inputs, outputs
+
+    def _get_ssa_from_cl_reg_op(
+        self, reg: Union[BitRegister, RegAnd, RegOr, RegXor], module: tketqirModule
+    ) -> Value:
+
+        if type(reg) in _TK_CLOPS_TO_PYQIR_REG:
+            assert len(reg.args) == 2
+
+            ssa_left = self._get_ssa_from_cl_reg_op(reg.args[0], module)
+            ssa_right = self._get_ssa_from_cl_reg_op(reg.args[1], module)
+
+            # add function to module
+            output_instruction = _TK_CLOPS_TO_PYQIR_REG[type(reg)](module.builder)(
+                ssa_left, ssa_right
+            )
+            return output_instruction  # type: ignore
+        elif type(reg) == BitRegister:
+            return self.ssa_vars[reg.name]
+        else:
+            raise ValueError("unsupported classical register operaton")
+
+    def _get_ssa_from_cl_bit_op(
+        self, bit: Union[Bit, BitAnd, BitOr, BitXor], module: tketqirModule
+    ) -> Value:
+
+        if type(bit) == Bit:
+
+            result = module.builder.call(
+                self.read_bit_from_reg,
+                [
+                    self.ssa_vars[bit.reg_name],
+                    pyqir.const(self.qir_int_type, bit.index[0]),
+                ],
+            )
+
+            return result
+        elif type(bit) in _TK_CLOPS_TO_PYQIR_BIT:
+
+            assert len(bit.args) == 2
+
+            ssa_left = self._get_ssa_from_cl_bit_op(bit.args[0], module)
+            ssa_right = self._get_ssa_from_cl_bit_op(bit.args[1], module)
+
+            # add function to module
+            output_instruction = _TK_CLOPS_TO_PYQIR_BIT[type(bit)](module.builder)(
+                ssa_left, ssa_right
+            )
+
+            return output_instruction  # type: ignore
+        else:
+            raise ValueError("unsupported bisewise operation")
 
     def circuit_to_module(
         self, circuit: Circuit, module: tketqirModule, record_output: bool = False
@@ -487,62 +555,58 @@ class QirGenerator:
                 )
 
             elif isinstance(op, ClassicalExpBox):
-                inputs, outputs = self._get_c_regs_from_com(command)
-                ssa_vars: List = []
-                for inp in inputs:
-                    bit_reg = circuit.get_c_register(inp)
-                    ssa_vars.append(self._reg2ssa_var(bit_reg, self.qir_int_type.width))
 
                 returntypebool = False
+                result_index = 0
+                outputs = command.args[-1].reg_name
+                ssa_left = self.ssa_vars[list(self.ssa_vars)[0]]  # set default value
+                ssa_right = self.ssa_vars[list(self.ssa_vars)[0]]  # set default value
 
-                if type(op.get_exp()) == RegAnd:
-                    otheroutput = module.builder.and_(*ssa_vars)
-                elif type(op.get_exp()) == RegOr:
-                    otheroutput = module.builder.or_(*ssa_vars)
-                elif type(op.get_exp()) == RegXor:
-                    otheroutput = module.builder.xor(*ssa_vars)
-                elif type(op.get_exp()) == RegAdd:
-                    otheroutput = module.builder.add(*ssa_vars)
-                elif type(op.get_exp()) == RegSub:
-                    otheroutput = module.builder.sub(*ssa_vars)
-                elif type(op.get_exp()) == RegMul:
-                    otheroutput = module.builder.mul(*ssa_vars)
-                elif type(op.get_exp()) == RegLsh:
-                    otheroutput = module.builder.shl(*ssa_vars)
-                elif type(op.get_exp()) == RegRsh:
-                    otheroutput = module.builder.lshr(*ssa_vars)
-                elif type(op.get_exp()) == RegEq:
-                    otheroutput = module.builder.icmp(
-                        IntPredicate.EQ, ssa_vars[0], ssa_vars[1]
+                if type(op.get_exp()) in _TK_CLOPS_TO_PYQIR_REG:
+                    # do something with register things
+                    ssa_left = self._get_ssa_from_cl_reg_op(
+                        op.get_exp().args[0], module
                     )
-                    returntypebool = True
-                elif type(op.get_exp()) == RegNeq:
-                    otheroutput = module.builder.icmp(
-                        IntPredicate.NE, ssa_vars[0], ssa_vars[1]
+                    ssa_right = self._get_ssa_from_cl_reg_op(
+                        op.get_exp().args[1], module
                     )
-                    returntypebool = True
-                elif type(op.get_exp()) == RegGt:
-                    otheroutput = module.builder.icmp(
-                        IntPredicate.UGT, ssa_vars[0], ssa_vars[1]
+
+                    # add function to module
+                    output_instruction = _TK_CLOPS_TO_PYQIR_REG[type(op.get_exp())](
+                        module.builder
+                    )(ssa_left, ssa_right)
+
+                elif type(op.get_exp()) in _TK_CLOPS_TO_PYQIR_BIT:
+                    ssa_left = self._get_ssa_from_cl_bit_op(
+                        op.get_exp().args[0], module
                     )
-                    returntypebool = True
-                elif type(op.get_exp()) == RegGeq:
-                    otheroutput = module.builder.icmp(
-                        IntPredicate.UGE, ssa_vars[0], ssa_vars[1]
+                    ssa_right = self._get_ssa_from_cl_bit_op(
+                        op.get_exp().args[1], module
                     )
+
+                    # add function to module
                     returntypebool = True
-                elif type(op.get_exp()) == RegLt:
-                    otheroutput = module.builder.icmp(
-                        IntPredicate.ULT, ssa_vars[0], ssa_vars[1]
+                    result_index = command.args[-1].index[0]  # todo
+                    output_instruction = _TK_CLOPS_TO_PYQIR_BIT[type(op.get_exp())](
+                        module.builder
+                    )(ssa_left, ssa_right)
+
+                elif type(op.get_exp()) in _TK_CLOPS_TO_PYQIR_REG_BOOL:
+                    ssa_left = self._get_ssa_from_cl_reg_op(
+                        op.get_exp().args[0], module
                     )
-                    returntypebool = True
-                elif type(op.get_exp()) == RegLeq:
-                    otheroutput = module.builder.icmp(
-                        IntPredicate.ULE, ssa_vars[0], ssa_vars[1]
+                    ssa_right = self._get_ssa_from_cl_reg_op(
+                        op.get_exp().args[1], module
                     )
+
+                    # add function to module
                     returntypebool = True
+                    output_instruction = _TK_CLOPS_TO_PYQIR_REG_BOOL[
+                        type(op.get_exp())
+                    ](module.builder)(ssa_left, ssa_right)
+
                 else:
-                    ValueError("classical op type not supported")
+                    raise ValueError(" unexpected classical op")
 
                 if returntypebool:
                     # the return value of the some classical ops is bool in qir,
@@ -550,18 +614,19 @@ class QirGenerator:
                     # of the register this implementation write the value
                     # to the 0-th entry
                     # of the register, this could be changed to a user given value
+
                     self.module.builder.call(
                         self.set_one_bit_in_reg,
                         [
-                            self.ssa_vars[outputs[0]],
-                            pyqir.const(self.qir_int_type, 0),
-                            otheroutput,
+                            self.ssa_vars[outputs],
+                            pyqir.const(self.qir_int_type, result_index),
+                            output_instruction,
                         ],
                     )
                 else:
                     self.module.builder.call(
                         self.set_all_bits_in_reg,
-                        [self.ssa_vars[outputs[0]], otheroutput],
+                        [self.ssa_vars[outputs], output_instruction],
                     )
 
             elif isinstance(op, SetBitsOp):
