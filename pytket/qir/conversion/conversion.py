@@ -407,7 +407,7 @@ class QirGenerator:
             output_instruction = _TK_CLOPS_TO_PYQIR_REG[type(reg)](module.builder)(
                 ssa_left, ssa_right
             )
-            return output_instruction
+            return output_instruction  # type: ignore
         elif type(reg) == BitRegister:
             return self.ssa_vars[reg.name]
         else:
@@ -440,7 +440,7 @@ class QirGenerator:
                 ssa_left, ssa_right
             )
 
-            return output_instruction
+            return output_instruction  # type: ignore
         else:
             raise ValueError("unsupported bisewise operation")
 
