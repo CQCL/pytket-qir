@@ -194,8 +194,6 @@ class QirGenerator:
 
         # __quantum__qis__barrier1__body()
         for i in range(1, self.circuit.n_qubits):
-            print("add barrier for", end="")
-            print(i)
             funcnameb = f"__quantum__qis__barrier{i}__body"
             funcnameo = f"__quantum__qis__order{i}__body"
             funcnameg = f"__quantum__qis__group{i}__body"
@@ -349,10 +347,7 @@ class QirGenerator:
                         raise ValueError("WASM ops must act on entire registers.")
                     reglist.append(regname)
         elif isinstance(op, ClassicalExpBox):
-            print(command)
-            print(op)
-            print(op.get_exp())
-            print(op.get_exp().args)
+            # remove this
             for reglist, sizes in [
                 (
                     inputs,
@@ -377,8 +372,6 @@ class QirGenerator:
                     args = args[in_width:]
                     regname = com_bits[0].reg_name
                     if com_bits != list(self.cregs[regname]):
-                        print(com_bits)
-                        print(list(self.cregs[regname]))
                         raise ValueError(
                             "ClassicalExpBox ops must act on entire registers."
                         )
@@ -568,9 +561,6 @@ class QirGenerator:
 
                 if type(op.get_exp()) in _TK_CLOPS_TO_PYQIR_REG:
                     # do something with register things
-                    # assert type(op.get_exp().args[0]) == BitRegister or type(op.get_exp().args[0]) in _TK_CLOPS_TO_PYQIR_REG
-                    # assert type(op.get_exp().args[1]) == BitRegister or type(op.get_exp().args[1]) in _TK_CLOPS_TO_PYQIR_REG
-                    print("asd")
                     ssa_left = self._get_ssa_from_cl_reg_op(
                         op.get_exp().args[0], module
                     )
@@ -584,9 +574,6 @@ class QirGenerator:
                     )(ssa_left, ssa_right)
 
                 elif type(op.get_exp()) in _TK_CLOPS_TO_PYQIR_BIT:
-                    # assert type(op.get_exp().args[0]) == bit or type(op.get_exp().args[0]) in _TK_CLOPS_TO_PYQIR_BIT
-                    # assert type(op.get_exp().args[1]) == bit or type(op.get_exp().args[1]) in _TK_CLOPS_TO_PYQIR_BIT
-                    print("asd")
                     ssa_left = self._get_ssa_from_cl_bit_op(
                         op.get_exp().args[0], module
                     )
@@ -597,17 +584,11 @@ class QirGenerator:
                     # add function to module
                     returntypebool = True
                     result_index = command.args[-1].index[0]  # todo
-                    print(type(result_index))
-                    assert type(result_index) == type(0)
-                    print(type(result_index))
                     output_instruction = _TK_CLOPS_TO_PYQIR_BIT[type(op.get_exp())](
                         module.builder
                     )(ssa_left, ssa_right)
 
                 elif type(op.get_exp()) in _TK_CLOPS_TO_PYQIR_REG_BOOL:
-                    print("qwqwe")
-                    # assert type(op.get_exp().args[0]) == BitRegister or type(op.get_exp().args[0]) in _TK_CLOPS_TO_PYQIR_REG
-                    # assert type(op.get_exp().args[1]) == BitRegister or type(op.get_exp().args[1]) in _TK_CLOPS_TO_PYQIR_REG
                     ssa_left = self._get_ssa_from_cl_reg_op(
                         op.get_exp().args[0], module
                     )
@@ -639,7 +620,6 @@ class QirGenerator:
                             output_instruction,
                         ],
                     )
-                    print("bla")
                 else:
                     self.module.builder.call(
                         self.set_all_bits_in_reg,
