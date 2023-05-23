@@ -26,6 +26,10 @@ from .module import tketqirModule
 
 
 class ReturnTypeQIR(Enum):
+    """Return types qir, options are BINARY for a binary
+    output and STRING for a string output
+    """
+
     BINARY = 0
     STRING = 1
 
@@ -35,12 +39,27 @@ def pytket_to_qir(
     name: str = "Generated from input pytket circuit",
     returntype: ReturnTypeQIR = ReturnTypeQIR.BINARY,
 ) -> Union[str, bytes, None]:
-    """converts give pytket circuit to qir
+    """converts given pytket circuit to qir
+    :param circ: given circuit
+    :type circ: pytket circuit
     :param name: name for the qir module created
     :type name: str
     :param returntype: format of the generated qir, defaut value is binary
     :type returntype: ReturnTypeQIR
     """
+
+    if len(circ.q_registers) > 1:
+        raise ValueError(
+            """The circuit that should be converted should only have one
+            quantum register, you can convert it with using the pytket
+              compilerpass `FlattenRelabelRegistersPass`"""
+        )
+
+    for creg in circ.c_registers:
+        if creg.size > 64:
+            raise ValueError(
+                "each of the classical register must not have more than 64 bits"
+            )
 
     m = tketqirModule(
         name=name,
@@ -63,4 +82,4 @@ def pytket_to_qir(
     elif returntype == ReturnTypeQIR.STRING:
         return populated_module.module.ir()
     else:
-        ValueError("unsupported return type")
+        raise ValueError("unsupported return type")

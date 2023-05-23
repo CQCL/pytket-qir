@@ -104,22 +104,6 @@ declare i64 @reg2var(i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1,
 
 declare void @__quantum__rt__int_record_output(i64)
 
-declare void @__quantum__qis__barrier1__body(%Qubit*)
-
-declare void @__quantum__qis__order1__body(%Qubit*)
-
-declare void @__quantum__qis__group1__body(%Qubit*)
-
-declare void @__quantum__qis__sleep1__body(%Qubit*)
-
-declare void @__quantum__qis__barrier2__body(%Qubit*, %Qubit*)
-
-declare void @__quantum__qis__order2__body(%Qubit*, %Qubit*)
-
-declare void @__quantum__qis__group2__body(%Qubit*, %Qubit*)
-
-declare void @__quantum__qis__sleep2__body(%Qubit*, %Qubit*)
-
 declare void @__quantum__qis__h__body(%Qubit*)
 
 declare void @__quantum__qis__mz__body(%Qubit*, %Result* writeonly) #1
@@ -223,22 +207,6 @@ declare i1 @__quantum__qis__read_result__body(%Result*)
 declare i64 @reg2var(i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1)
 
 declare void @__quantum__rt__int_record_output(i64)
-
-declare void @__quantum__qis__barrier1__body(%Qubit*)
-
-declare void @__quantum__qis__order1__body(%Qubit*)
-
-declare void @__quantum__qis__group1__body(%Qubit*)
-
-declare void @__quantum__qis__sleep1__body(%Qubit*)
-
-declare void @__quantum__qis__barrier2__body(%Qubit*, %Qubit*)
-
-declare void @__quantum__qis__order2__body(%Qubit*, %Qubit*)
-
-declare void @__quantum__qis__group2__body(%Qubit*, %Qubit*)
-
-declare void @__quantum__qis__sleep2__body(%Qubit*, %Qubit*)
 
 declare void @__quantum__qis__h__body(%Qubit*)
 

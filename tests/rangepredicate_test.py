@@ -162,22 +162,6 @@ declare i64 @reg2var(i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1,
 
 declare void @__quantum__rt__int_record_output(i64)
 
-declare void @__quantum__qis__barrier1__body(%Qubit*)
-
-declare void @__quantum__qis__order1__body(%Qubit*)
-
-declare void @__quantum__qis__group1__body(%Qubit*)
-
-declare void @__quantum__qis__sleep1__body(%Qubit*)
-
-declare void @__quantum__qis__barrier2__body(%Qubit*, %Qubit*)
-
-declare void @__quantum__qis__order2__body(%Qubit*, %Qubit*)
-
-declare void @__quantum__qis__group2__body(%Qubit*, %Qubit*)
-
-declare void @__quantum__qis__sleep2__body(%Qubit*, %Qubit*)
-
 declare void @__quantum__qis__h__body(%Qubit*)
 
 attributes #0 = { "entry_point" "num_required_qubits"="3" "num_required_results"="3" "output_labeling_schema" "qir_profiles"="custom" }
