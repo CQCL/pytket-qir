@@ -204,7 +204,7 @@ class QirGenerator:
             self._reg2ssa_var(creg, qir_int_type)
 
     def _add_barrier_op(
-        self, module: tketqirModule, index: int, qir_qubits: list
+        self, module: tketqirModule, index: int, qir_qubits: Sequence
     ) -> None:
         # __quantum__qis__barrier1__body()
         if self.barrier[index] == None:
@@ -222,7 +222,7 @@ class QirGenerator:
         )
 
     def _add_group_op(
-        self, module: tketqirModule, index: int, qir_qubits: list
+        self, module: tketqirModule, index: int, qir_qubits: Sequence
     ) -> None:
         # __quantum__qis__group1__body()
         if self.group[index] == None:
@@ -240,7 +240,7 @@ class QirGenerator:
         )
 
     def _add_order_op(
-        self, module: tketqirModule, index: int, qir_qubits: list
+        self, module: tketqirModule, index: int, qir_qubits: Sequence
     ) -> None:
         # __quantum__qis__order1__body()
         if self.order[index] == None:
@@ -258,7 +258,7 @@ class QirGenerator:
         )
 
     def _add_sleep_op(
-        self, module: tketqirModule, index: int, qir_qubits: list, duration: float
+        self, module: tketqirModule, index: int, qir_qubits: Sequence, duration: float
     ) -> None:
         # __quantum__qis__sleep1__body()
         if self.sleep[index] == None:
