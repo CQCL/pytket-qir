@@ -103,7 +103,9 @@ def pytket_to_qir_optimised(
 
     initial_result = str(pytket_to_qir(circ, name, ReturnTypeQIR.STRING))  # type: ignore
 
-    result = initial_result.replace("entry_point", "EntryPoint")  # type: ignore
+    initial_result = initial_result.replace("entry_point", "EntryPoint")  # type: ignore
+    initial_result = initial_result.replace("num_required_qubits", "requiredQubits")  # type: ignore
+    result = initial_result.replace("num_required_results", "requiredResults")  # type: ignore
 
     bitcode = pyqir.Module.from_ir(pyqir.Context(), result).bitcode  # type: ignore
 
