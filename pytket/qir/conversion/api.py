@@ -19,6 +19,8 @@ public api for qir conversion from pytket
 from enum import Enum
 from typing import Union
 
+import pyqir
+
 from pytket.circuit import Circuit
 
 from .conversion import QirGenerator
@@ -81,5 +83,33 @@ def pytket_to_qir(
         return populated_module.module.bitcode()
     elif returntype == ReturnTypeQIR.STRING:
         return populated_module.module.ir()
+    else:
+        raise ValueError("unsupported return type")
+
+
+def pytket_to_qir_optimised(
+    circ: Circuit,
+    name: str = "Generated from input pytket circuit",
+    returntype: ReturnTypeQIR = ReturnTypeQIR.BINARY,
+) -> Union[str, bytes, None]:
+    """converts given pytket circuit to qir
+    :param circ: given circuit
+    :type circ: pytket circuit
+    :param name: name for the qir module created
+    :type name: str
+    :param returntype: format of the generated qir, defaut value is binary
+    :type returntype: ReturnTypeQIR
+    """
+
+    initial_result = pytket_to_qir(circ, name, ReturnTypeQIR.STRING)
+
+    result = initial_result.replace("entry_point", "EntryPoint")
+
+    bitcode = pyqir.Module.from_ir(pyqir.Context(), result)
+
+    if returntype == ReturnTypeQIR.BINARY:
+        return bitcode
+    elif returntype == ReturnTypeQIR.STRING:
+        return result
     else:
         raise ValueError("unsupported return type")
