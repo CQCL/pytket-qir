@@ -5,3 +5,5 @@ Changelog
 ----------------
 
 * add pytket to qir conversion
+* set pyqir version to 0.8.2
+* update pytket requirement to 1.15

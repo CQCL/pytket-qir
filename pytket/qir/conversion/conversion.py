@@ -260,14 +260,18 @@ class QirGenerator:
     def _add_sleep_op(
         self, module: tketqirModule, index: int, qir_qubits: Sequence, duration: float
     ) -> None:
-        # __quantum__qis__sleep1__body()
+        # __quantum__qis__sleep__body()
+
+        if index > 1:
+            raise ValueError("Sleep operation only allowed on one qubit")
+
         if self.sleep[index] == None:
             paramlist = [pyqir.qubit_type(self.module.module.context)] * index
             paramlist.append(
                 pyqir.Type.double(self.module.module.context)
             )  # add float parameter
             self.sleep[index] = self.module.module.add_external_function(
-                f"__quantum__qis__sleep{index}__body",
+                f"__quantum__qis__sleep__body",
                 pyqir.FunctionType(
                     pyqir.Type.void(self.module.module.context),
                     paramlist,
