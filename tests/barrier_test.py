@@ -32,7 +32,7 @@ def test_pytket_qir_barrier() -> None:
     circ.H(4)
 
     result = pytket_to_qir(
-        circ, name="test_pytket_qir_barrier", format=QIRFormat.STRING
+        circ, name="test_pytket_qir_barrier", qir_format=QIRFormat.STRING
     )
 
     print(result)
@@ -104,7 +104,7 @@ def test_pytket_qir_barrier_ii() -> None:
     circ.add_barrier([0], data="sleep(10000)")
 
     result = pytket_to_qir(
-        circ, name="test_pytket_qir_barrier_ii", format=QIRFormat.STRING
+        circ, name="test_pytket_qir_barrier_ii", qir_format=QIRFormat.STRING
     )
 
     print(result)

@@ -37,7 +37,7 @@ def test_pytket_qir_conditional() -> None:
     circ.Measure(Qubit(2), d[2])
 
     result = pytket_to_qir(
-        circ, name="test_pytket_qir_conditional", format=QIRFormat.STRING
+        circ, name="test_pytket_qir_conditional", qir_format=QIRFormat.STRING
     )
 
     print(result)
@@ -141,7 +141,7 @@ def test_pytket_qir_conditional_ii() -> None:
     circ.Measure(Qubit(2), d[2])
 
     result = pytket_to_qir(
-        circ, name="test_pytket_qir_conditional_ii", format=QIRFormat.STRING
+        circ, name="test_pytket_qir_conditional_ii", qir_format=QIRFormat.STRING
     )
 
     print(result)
@@ -245,7 +245,7 @@ def test_pytket_qir_conditional_iii() -> None:
     circ.add_classicalexpbox_register(a * b * d * c, e)
 
     result = pytket_to_qir(
-        circ, name="test_pytket_qir_conditional_iii", format=QIRFormat.STRING
+        circ, name="test_pytket_qir_conditional_iii", qir_format=QIRFormat.STRING
     )
 
     print(result)

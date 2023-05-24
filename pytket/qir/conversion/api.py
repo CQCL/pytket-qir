@@ -37,7 +37,7 @@ class QIRFormat(Enum):
 def pytket_to_qir(
     circ: Circuit,
     name: str = "Generated from input pytket circuit",
-    format: QIRFormat = QIRFormat.BINARY,
+    qir_format: QIRFormat = QIRFormat.BINARY,
 ) -> Union[str, bytes, None]:
     """converts given pytket circuit to qir
     :param circ: given circuit
@@ -75,9 +75,9 @@ def pytket_to_qir(
     populated_module = qir_generator.circuit_to_module(
         qir_generator.circuit, qir_generator.module, True
     )
-    if format == QIRFormat.BINARY:
+    if qir_format == QIRFormat.BINARY:
         return populated_module.module.bitcode()
-    elif format == QIRFormat.STRING:
+    elif qir_format == QIRFormat.STRING:
         return populated_module.module.ir()
     else:
         raise ValueError("unsupported return type")

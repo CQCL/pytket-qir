@@ -38,7 +38,7 @@ def test_pytket_qir_rangepredicate() -> None:
     circ.H(0, condition=reg_geq(a, 1))
 
     result = pytket_to_qir(
-        circ, name="test_pytket_qir_rangepredicate", format=QIRFormat.STRING
+        circ, name="test_pytket_qir_rangepredicate", qir_format=QIRFormat.STRING
     )
 
     print(result)
