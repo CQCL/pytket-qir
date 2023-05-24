@@ -29,7 +29,7 @@ def test_pytket_qir() -> None:
     circ = Circuit(3)
     circ.H(0)
 
-    result = pytket_to_qir(circ, name="test_pytket_qir", returntype=QIRFormat.STRING)
+    result = pytket_to_qir(circ, name="test_pytket_qir", format=QIRFormat.STRING)
 
     print(result)
 
@@ -77,7 +77,7 @@ def test_pytket_qir_2() -> None:
     circ = Circuit(3)
     circ.H(0)
 
-    result = pytket_to_qir(circ, name="test_pytket_qir_2", returntype=QIRFormat.STRING)
+    result = pytket_to_qir(circ, name="test_pytket_qir_2", format=QIRFormat.STRING)
 
     print(result)
 
@@ -127,7 +127,7 @@ def test_pytket_qir_3() -> None:
     circ.H(1)
     circ.H(2)
 
-    result = pytket_to_qir(circ, name="test_pytket_qir_3", returntype=QIRFormat.STRING)
+    result = pytket_to_qir(circ, name="test_pytket_qir_3", format=QIRFormat.STRING)
 
     print(result)
 
@@ -187,7 +187,7 @@ def test_pytket_qir_4() -> None:
     circ.H(0, condition=b[4])
     circ.H(0)
 
-    result = pytket_to_qir(circ, name="test_pytket_qir_4", returntype=QIRFormat.STRING)
+    result = pytket_to_qir(circ, name="test_pytket_qir_4", format=QIRFormat.STRING)
 
     print(result)
 
@@ -264,7 +264,7 @@ def test_pytket_qir_5() -> None:
     circ.H(0, condition=Bit(3))
     circ.H(0)
 
-    result = pytket_to_qir(circ, name="test_pytket_qir_5", returntype=QIRFormat.STRING)
+    result = pytket_to_qir(circ, name="test_pytket_qir_5", format=QIRFormat.STRING)
 
     print(result)
 
@@ -356,7 +356,7 @@ def test_pytket_qir_6() -> None:
     assert circ.n_qubits == 3
     assert circ.n_bits == 20
 
-    result = pytket_to_qir(circ, name="test_pytket_qir_6", returntype=QIRFormat.STRING)
+    result = pytket_to_qir(circ, name="test_pytket_qir_6", format=QIRFormat.STRING)
 
     print(result)
 
@@ -460,7 +460,7 @@ def test_pytket_qir_7() -> None:
     assert circ.n_qubits == 2
     assert circ.n_bits == 12
 
-    result = pytket_to_qir(circ, name="test_pytket_qir_7", returntype=QIRFormat.STRING)
+    result = pytket_to_qir(circ, name="test_pytket_qir_7", format=QIRFormat.STRING)
 
     print(result)
 

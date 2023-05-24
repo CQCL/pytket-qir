@@ -23,7 +23,7 @@ def test_pytket_qir_BINARY() -> None:
     circ = Circuit(3)
     circ.H(0)
 
-    result = pytket_to_qir(circ, name="test_pytket_qir", returntype=QIRFormat.BINARY)
+    result = pytket_to_qir(circ, name="test_pytket_qir", format=QIRFormat.BINARY)
 
     assert type(result) == bytes
 
@@ -32,7 +32,7 @@ def test_pytket_qir() -> None:
     circ = Circuit(3)
     circ.H(0)
 
-    result = pytket_to_qir(circ, name="test_pytket_qir", returntype=QIRFormat.STRING)
+    result = pytket_to_qir(circ, name="test_pytket_qir", format=QIRFormat.STRING)
 
     print(result)
 

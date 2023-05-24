@@ -22,7 +22,7 @@ def test_pytket_qir_quantum() -> None:
     circ.H(0)
 
     result = pytket_to_qir(
-        circ, name="test_pytket_qir_quantum", returntype=QIRFormat.STRING
+        circ, name="test_pytket_qir_quantum", format=QIRFormat.STRING
     )
 
     print(result)
@@ -81,7 +81,7 @@ def test_pytket_qir_quantum_ii() -> None:
     circ.Measure(1, 1)
 
     result = pytket_to_qir(
-        circ, name="test_pytket_qir_quantum", returntype=QIRFormat.STRING
+        circ, name="test_pytket_qir_quantum", format=QIRFormat.STRING
     )
 
     print(result)
@@ -91,7 +91,7 @@ def test_pytket_qir_quantum_iii() -> None:
     circ = Circuit(2).H(0).CX(0, 1).measure_all()
 
     result = pytket_to_qir(
-        circ, name="test_pytket_qir_quantum", returntype=QIRFormat.STRING
+        circ, name="test_pytket_qir_quantum", format=QIRFormat.STRING
     )
 
     print(result)
