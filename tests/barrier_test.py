@@ -100,8 +100,8 @@ def test_pytket_qir_barrier_ii() -> None:
     circ.add_barrier([0, 1], data="group2")
     circ.add_barrier([0, 1, 4], data="group3")
     circ.H(1)
-    circ.add_barrier([0, 1], data="sleep(5.1)")
-    circ.add_barrier([0, 1, 4], data="sleep(10000)")
+    circ.add_barrier([1], data="sleep(5.1)")
+    circ.add_barrier([0], data="sleep(10000)")
 
     result = pytket_to_qir(
         circ, name="test_pytket_qir_barrier_ii", returntype=ReturnTypeQIR.STRING
@@ -125,9 +125,9 @@ entry:
   call void @__quantum__qis__h__body(%Qubit* inttoptr (i64 1 to %Qubit*))
   call void @__quantum__qis__group2__body(%Qubit* null, %Qubit* inttoptr (i64 1 to %Qubit*))
   call void @__quantum__qis__group3__body(%Qubit* null, %Qubit* inttoptr (i64 1 to %Qubit*), %Qubit* inttoptr (i64 4 to %Qubit*))
+  call void @__quantum__qis__sleep__body(%Qubit* null, double 1.000000e+04)
   call void @__quantum__qis__h__body(%Qubit* inttoptr (i64 1 to %Qubit*))
-  call void @__quantum__qis__sleep2__body(%Qubit* null, %Qubit* inttoptr (i64 1 to %Qubit*), double 5.100000e+00)
-  call void @__quantum__qis__sleep3__body(%Qubit* null, %Qubit* inttoptr (i64 1 to %Qubit*), %Qubit* inttoptr (i64 4 to %Qubit*), double 1.000000e+04)
+  call void @__quantum__qis__sleep__body(%Qubit* inttoptr (i64 1 to %Qubit*), double 5.100000e+00)
   ret void
 }
 
@@ -153,9 +153,7 @@ declare void @__quantum__qis__group2__body(%Qubit*, %Qubit*)
 
 declare void @__quantum__qis__group3__body(%Qubit*, %Qubit*, %Qubit*)
 
-declare void @__quantum__qis__sleep2__body(%Qubit*, %Qubit*, double)
-
-declare void @__quantum__qis__sleep3__body(%Qubit*, %Qubit*, %Qubit*, double)
+declare void @__quantum__qis__sleep__body(%Qubit*, double)
 
 attributes #0 = { "entry_point" "num_required_qubits"="5" "num_required_results"="5" "output_labeling_schema" "qir_profiles"="custom" }
 
