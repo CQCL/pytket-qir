@@ -103,9 +103,9 @@ def pytket_to_qir_optimised(
 
     initial_result = pytket_to_qir(circ, name, ReturnTypeQIR.STRING)
 
-    result = initial_result.replace("entry_point", "EntryPoint")
+    result = initial_result.replace("entry_point", "EntryPoint")  # type: ignore
 
-    bitcode = pyqir.Module.from_ir(pyqir.Context(), result)
+    bitcode = pyqir.Module.from_ir(pyqir.Context(), result).bitcode
 
     if returntype == ReturnTypeQIR.BINARY:
         return bitcode
