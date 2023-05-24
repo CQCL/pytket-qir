@@ -502,16 +502,16 @@ class QirGenerator:
 
                     def condition_block_true() -> None:
                         """
-                        Populate recursively the module with the contents of the conditional
-                        sub-circuit when the condition is True.
+                        Populate recursively the module with the contents of the
+                        conditional sub-circuit when the condition is True.
                         """
                         if op.value == 1:
                             self.circuit_to_module(conditional_circuit, module)
 
                     def condition_block_false() -> None:
                         """
-                        Populate recursively the module with the contents of the conditional
-                        sub-circuit when the condition is False.
+                        Populate recursively the module with the contents of the
+                        conditional sub-circuit when the condition is False.
                         """
                         if op.value == 0:
                             self.circuit_to_module(conditional_circuit, module)
@@ -534,12 +534,11 @@ class QirGenerator:
 
                     else:
                         ValueError(
-                            "circuit contruction with special condition not yet supported"
+                            """circuit contruction with this condition
+                            not yet supported"""
                         )
                         # this should be an assertion when working
                 else:
-                    # assert 1 == 2
-                    # if op.width == 1:  # only one conditional bit
                     conditional_circuit = self._rebase_op_to_gateset(
                         op.op, command.args[op.width :]
                     )
@@ -548,24 +547,24 @@ class QirGenerator:
                     for i in range(op.width):
                         if command.args[i].reg_name != condition_name:
                             raise ValueError(
-                                "conditional can only work with one entire register "
+                                "conditional can only work with one entire register"
                             )
 
                     for i in range(op.width - 1):
                         if command.args[i].index[0] >= command.args[i + 1].index[0]:
                             raise ValueError(
-                                "conditional can only work with one entire register "
+                                "conditional can only work with one entire register"
                             )
 
                     if self.circuit.get_c_register(condition_name).size != op.width:
                         raise ValueError(
-                            "conditional can only work with one entire register "
+                            "conditional can only work with one entire register"
                         )
 
                     def condition_block() -> None:
                         """
-                        Populate recursively the module with the contents of the conditional
-                        sub-circuit when the condition is True.
+                        Populate recursively the module with the contents of the
+                        conditional sub-circuit when the condition is True.
                         """
                         self.circuit_to_module(conditional_circuit, module)
 
