@@ -90,6 +90,15 @@ def test_pytket_api_qreg() -> None:
         pytket_to_qir(circ)
 
 
+def test_pytket_api_qreg_ii() -> None:
+    circ = Circuit()
+
+    circ.add_q_register("q2", 3)
+
+    with pytest.raises(ValueError):
+        pytket_to_qir(circ)
+
+
 def test_pytket_api_creg() -> None:
     circ = Circuit(3)
     circ.H(0)
