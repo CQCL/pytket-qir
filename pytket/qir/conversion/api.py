@@ -48,14 +48,7 @@ def pytket_to_qir(
     :type returntype: ReturnTypeQIR
     """
 
-    if len(circ.q_registers) > 1:
-        raise ValueError(
-            """The circuit that should be converted should only have the default
-            quantum register, you can convert it with using the pytket
-              compilerpass `FlattenRelabelRegistersPass`"""
-        )
-
-    if circ.q_registers[0].name != "q":
+    if len(circ.q_registers) > 1 or circ.q_registers[0].name != "q":
         raise ValueError(
             """The circuit that should be converted should only have the default
             quantum register, you can convert it with using the pytket
