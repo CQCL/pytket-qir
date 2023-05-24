@@ -216,7 +216,7 @@ attributes #0 = { "entry_point" "num_required_qubits"="3" "num_required_results"
 """
     )
 
-    bitcode = pyqir.Module.from_ir(pyqir.Context(), result).bitcode
+    bitcode = pyqir.Module.from_ir(pyqir.Context(), result).bitcode  # type: ignore
 
     assert bitcode == result_2
 
