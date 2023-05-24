@@ -62,13 +62,6 @@ def pytket_to_qir(
               compilerpass `FlattenRelabelRegistersPass`"""
         )
 
-    if len(circ.q_registers) > 1:
-        raise ValueError(
-            """The circuit that should be converted should only have one
-            quantum register, you can convert it with using the pytket
-              compilerpass `FlattenRelabelRegistersPass`"""
-        )
-
     for creg in circ.c_registers:
         if creg.size > 64:
             raise ValueError(
