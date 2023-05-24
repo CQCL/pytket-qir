@@ -15,7 +15,6 @@
 from pytket.qir.conversion.api import pytket_to_qir, ReturnTypeQIR
 
 from pytket.circuit import Circuit, Qubit, if_not_bit, Bit, OpType  # type: ignore
-from pytket.qasm import circuit_to_qasm_str
 
 
 def test_pytket_qir_conditional() -> None:

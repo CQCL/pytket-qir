@@ -546,7 +546,7 @@ class QirGenerator:
                     condition_name = command.args[0].reg_name
 
                     for i in range(op.width):
-                        if command.args[i].reg_name == condition_name:
+                        if command.args[i].reg_name != condition_name:
                             raise ValueError(
                                 "conditional can only work with one entire register "
                             )
