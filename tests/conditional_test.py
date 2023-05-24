@@ -15,6 +15,7 @@
 from pytket.qir.conversion.api import pytket_to_qir, ReturnTypeQIR
 
 from pytket.circuit import Circuit, Qubit, if_not_bit, Bit, OpType  # type: ignore
+from pytket.qasm import circuit_to_qasm_str
 
 
 def test_pytket_qir_conditional() -> None:
@@ -338,15 +339,15 @@ def test_pytket_qir_conditional_iv() -> None:
     circ.add_gate(OpType.H, [0], condition_bits=[0, 1], condition_value=3)
 
     result = pytket_to_qir(
-        circ, name="test_pytket_qir_conditional_iii", returntype=ReturnTypeQIR.STRING
+        circ, name="test_pytket_qir_conditional_iv", returntype=ReturnTypeQIR.STRING
     )
 
     print(result)
 
     assert (
         result
-        == """; ModuleID = 'test_pytket_qir_conditional_iii'
-source_filename = "test_pytket_qir_conditional_iii"
+        == """; ModuleID = 'test_pytket_qir_conditional_iv'
+source_filename = "test_pytket_qir_conditional_iv"
 
 %Qubit = type opaque
 %Result = type opaque
@@ -354,27 +355,18 @@ source_filename = "test_pytket_qir_conditional_iii"
 define void @main() #0 {
 entry:
   %0 = call i64 @reg2var(i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false)
-  %1 = call i64 @reg2var(i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false)
-  %2 = call i64 @reg2var(i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false)
-  %3 = call i64 @reg2var(i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false)
-  %4 = call i64 @reg2var(i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false)
-  %5 = call i64 @reg2var(i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false)
   call void @__quantum__qis__h__body(%Qubit* null)
-  %6 = call i1 @read_bit_from_reg(i64 %2, i64 4)
-  %7 = call i1 @read_bit_from_reg(i64 %2, i64 5)
-  %8 = call i1 @read_bit_from_reg(i64 %2, i64 6)
-  %9 = xor i1 %7, %8
-  %10 = or i1 %6, %9
-  %11 = call i1 @read_bit_from_reg(i64 %2, i64 7)
-  %12 = call i1 @read_bit_from_reg(i64 %2, i64 8)
-  %13 = and i1 %11, %12
-  %14 = or i1 %10, %13
-  call void @set_one_bit_in_reg(i64 %5, i64 0, i1 %14)
-  %15 = add i64 %0, %1
-  %16 = sub i64 %15, %3
-  call void @set_all_bits_in_reg(i64 %2, i64 %16)
-  %17 = call i1 @read_bit_from_reg(i64 %5, i64 0)
-  br i1 %17, label %then, label %else
+  call void @__quantum__qis__h__body(%Qubit* inttoptr (i64 1 to %Qubit*))
+  call void @__quantum__qis__mz__body(%Qubit* null, %Result* null)
+  %1 = call i1 @__quantum__qis__read_result__body(%Result* null)
+  call void @set_one_bit_in_reg(i64 %0, i64 0, i1 %1)
+  call void @__quantum__qis__mz__body(%Qubit* inttoptr (i64 1 to %Qubit*), %Result* inttoptr (i64 1 to %Result*))
+  %2 = call i1 @__quantum__qis__read_result__body(%Result* inttoptr (i64 1 to %Result*))
+  call void @set_one_bit_in_reg(i64 %0, i64 1, i1 %2)
+  %3 = icmp sgt i64 3, %0
+  %4 = icmp sgt i64 %0, 3
+  %5 = and i1 %3, %4
+  br i1 %5, label %then, label %else
 
 then:                                             ; preds = %entry
   call void @__quantum__qis__h__body(%Qubit* null)
@@ -384,16 +376,7 @@ else:                                             ; preds = %entry
   br label %continue
 
 continue:                                         ; preds = %else, %then
-  %18 = mul i64 %0, %1
-  %19 = mul i64 %18, %3
-  %20 = mul i64 %19, %2
-  call void @set_all_bits_in_reg(i64 %4, i64 %20)
   call void @__quantum__rt__int_record_output(i64 %0)
-  call void @__quantum__rt__int_record_output(i64 %1)
-  call void @__quantum__rt__int_record_output(i64 %2)
-  call void @__quantum__rt__int_record_output(i64 %3)
-  call void @__quantum__rt__int_record_output(i64 %4)
-  call void @__quantum__rt__int_record_output(i64 %5)
   ret void
 }
 
@@ -411,7 +394,10 @@ declare void @__quantum__rt__int_record_output(i64)
 
 declare void @__quantum__qis__h__body(%Qubit*)
 
-attributes #0 = { "entry_point" "num_required_qubits"="1" "num_required_results"="1" "output_labeling_schema" "qir_profiles"="custom" }
+declare void @__quantum__qis__mz__body(%Qubit*, %Result* writeonly) #1
+
+attributes #0 = { "entry_point" "num_required_qubits"="2" "num_required_results"="2" "output_labeling_schema" "qir_profiles"="custom" }
+attributes #1 = { "irreversible" }
 
 !llvm.module.flags = !{!0, !1, !2, !3}
 
@@ -421,6 +407,93 @@ attributes #0 = { "entry_point" "num_required_qubits"="1" "num_required_results"
 !3 = !{i32 1, !"dynamic_result_management", i1 false}
 """
     )
+
+
+def test_pytket_qir_conditional_v() -> None:
+    # test complicated conditions and recursive classical op
+
+    circ = Circuit(2, 3).H(0).H(1).measure_all()
+
+    circ.add_gate(OpType.H, [0], condition_bits=[0, 1, 2], condition_value=3)
+
+    result = pytket_to_qir(
+        circ, name="test_pytket_qir_conditional_v", returntype=ReturnTypeQIR.STRING
+    )
+
+    circ = Circuit(2, 2).H(0).H(1).measure_all()
+
+    circ.add_gate(OpType.H, [0], condition_bits=[0, 1], condition_value=3)
+
+    result_2 = pytket_to_qir(
+        circ, name="test_pytket_qir_conditional_v", returntype=ReturnTypeQIR.STRING
+    )
+
+    print(result)
+
+    expected_result = """; ModuleID = 'test_pytket_qir_conditional_v'
+source_filename = "test_pytket_qir_conditional_v"
+
+%Qubit = type opaque
+%Result = type opaque
+
+define void @main() #0 {
+entry:
+  %0 = call i64 @reg2var(i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false)
+  call void @__quantum__qis__h__body(%Qubit* null)
+  call void @__quantum__qis__h__body(%Qubit* inttoptr (i64 1 to %Qubit*))
+  call void @__quantum__qis__mz__body(%Qubit* null, %Result* null)
+  %1 = call i1 @__quantum__qis__read_result__body(%Result* null)
+  call void @set_one_bit_in_reg(i64 %0, i64 0, i1 %1)
+  call void @__quantum__qis__mz__body(%Qubit* inttoptr (i64 1 to %Qubit*), %Result* inttoptr (i64 1 to %Result*))
+  %2 = call i1 @__quantum__qis__read_result__body(%Result* inttoptr (i64 1 to %Result*))
+  call void @set_one_bit_in_reg(i64 %0, i64 1, i1 %2)
+  %3 = icmp sgt i64 3, %0
+  %4 = icmp sgt i64 %0, 3
+  %5 = and i1 %3, %4
+  br i1 %5, label %then, label %else
+
+then:                                             ; preds = %entry
+  call void @__quantum__qis__h__body(%Qubit* null)
+  br label %continue
+
+else:                                             ; preds = %entry
+  br label %continue
+
+continue:                                         ; preds = %else, %then
+  call void @__quantum__rt__int_record_output(i64 %0)
+  ret void
+}
+
+declare i1 @read_bit_from_reg(i64, i64)
+
+declare void @set_one_bit_in_reg(i64, i64, i1)
+
+declare void @set_all_bits_in_reg(i64, i64)
+
+declare i1 @__quantum__qis__read_result__body(%Result*)
+
+declare i64 @reg2var(i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1)
+
+declare void @__quantum__rt__int_record_output(i64)
+
+declare void @__quantum__qis__h__body(%Qubit*)
+
+declare void @__quantum__qis__mz__body(%Qubit*, %Result* writeonly) #1
+
+attributes #0 = { "entry_point" "num_required_qubits"="2" "num_required_results"="2" "output_labeling_schema" "qir_profiles"="custom" }
+attributes #1 = { "irreversible" }
+
+!llvm.module.flags = !{!0, !1, !2, !3}
+
+!0 = !{i32 1, !"qir_major_version", i32 1}
+!1 = !{i32 7, !"qir_minor_version", i32 0}
+!2 = !{i32 1, !"dynamic_qubit_management", i1 false}
+!3 = !{i32 1, !"dynamic_result_management", i1 false}
+"""
+
+    assert result == expected_result
+
+    assert result_2 == expected_result
 
 
 if __name__ == "__main__":

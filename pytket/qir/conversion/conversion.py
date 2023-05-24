@@ -493,50 +493,99 @@ class QirGenerator:
                 )
 
             elif isinstance(op, Conditional):
-                assert op.width == 1  # only one conditional bit
-                conditional_circuit = self._rebase_op_to_gateset(
-                    op.op, command.args[op.width :]
-                )
-                condition_bit_index = command.args[0].index[0]
-                condition_name = command.args[0].reg_name
-
-                def condition_block_true() -> None:
-                    """
-                    Populate recursively the module with the contents of the conditional
-                    sub-circuit when the condition is True.
-                    """
-                    if op.value == 1:
-                        self.circuit_to_module(conditional_circuit, module)
-
-                def condition_block_false() -> None:
-                    """
-                    Populate recursively the module with the contents of the conditional
-                    sub-circuit when the condition is False.
-                    """
-                    if op.value == 0:
-                        self.circuit_to_module(conditional_circuit, module)
-
-                if condition_name in self.ssa_vars:
-
-                    ssabool = module.builder.call(
-                        self.read_bit_from_reg,
-                        [
-                            self.ssa_vars[condition_name],
-                            pyqir.const(self.qir_int_type, condition_bit_index),
-                        ],
+                if op.width == 1:  # only one conditional bit
+                    conditional_circuit = self._rebase_op_to_gateset(
+                        op.op, command.args[op.width :]
                     )
+                    condition_bit_index = command.args[0].index[0]
+                    condition_name = command.args[0].reg_name
+
+                    def condition_block_true() -> None:
+                        """
+                        Populate recursively the module with the contents of the conditional
+                        sub-circuit when the condition is True.
+                        """
+                        if op.value == 1:
+                            self.circuit_to_module(conditional_circuit, module)
+
+                    def condition_block_false() -> None:
+                        """
+                        Populate recursively the module with the contents of the conditional
+                        sub-circuit when the condition is False.
+                        """
+                        if op.value == 0:
+                            self.circuit_to_module(conditional_circuit, module)
+
+                    if condition_name in self.ssa_vars:
+
+                        ssabool = module.builder.call(
+                            self.read_bit_from_reg,
+                            [
+                                self.ssa_vars[condition_name],
+                                pyqir.const(self.qir_int_type, condition_bit_index),
+                            ],
+                        )
+
+                        module.module.builder.if_(
+                            ssabool,
+                            true=lambda: condition_block_true(),  # type: ignore
+                            false=lambda: condition_block_false(),  # type: ignore
+                        )
+
+                    else:
+                        ValueError(
+                            "circuit contruction with special condition not yet supported"
+                        )
+                        # this should be an assertion when working
+                else:
+                    # assert 1 == 2
+                    # if op.width == 1:  # only one conditional bit
+                    conditional_circuit = self._rebase_op_to_gateset(
+                        op.op, command.args[op.width :]
+                    )
+                    condition_name = command.args[0].reg_name
+
+                    for i in range(op.width):
+                        if command.args[i].reg_name == condition_name:
+                            raise ValueError(
+                                "conditional can only work with one entire register "
+                            )
+
+                    for i in range(op.width - 1):
+                        if command.args[i].index[0] >= command.args[i + 1].index[0]:
+                            raise ValueError(
+                                "conditional can only work with one entire register "
+                            )
+
+                    if self.circuit.get_c_register(condition_name).size != op.width:
+                        raise ValueError(
+                            "conditional can only work with one entire register "
+                        )
+
+                    def condition_block() -> None:
+                        """
+                        Populate recursively the module with the contents of the conditional
+                        sub-circuit when the condition is True.
+                        """
+                        self.circuit_to_module(conditional_circuit, module)
+
+                    lower_cond = module.module.builder.icmp(
+                        pyqir.IntPredicate.SGT,
+                        pyqir.const(self.qir_int_type, op.value),
+                        self.ssa_vars[condition_name],
+                    )
+                    upper_cond = module.module.builder.icmp(
+                        pyqir.IntPredicate.SGT,
+                        self.ssa_vars[condition_name],
+                        pyqir.const(self.qir_int_type, op.value),
+                    )
+
+                    ssabool = module.module.builder.and_(lower_cond, upper_cond)
 
                     module.module.builder.if_(
                         ssabool,
-                        true=lambda: condition_block_true(),  # type: ignore
-                        false=lambda: condition_block_false(),  # type: ignore
+                        true=lambda: condition_block(),  # type: ignore
                     )
-
-                else:
-                    ValueError(
-                        "circuit contruction with special condition not yet supported"
-                    )
-                    # this should be an assertion when working
 
             elif isinstance(op, WASMOp):
                 raise ValueError(
