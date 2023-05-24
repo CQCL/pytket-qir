@@ -87,7 +87,6 @@ def pytket_to_qir(
         raise ValueError("unsupported return type")
 
 
-
 def pytket_to_qir_optimised(
     circ: Circuit,
     name: str = "Generated from input pytket circuit",
@@ -104,7 +103,7 @@ def pytket_to_qir_optimised(
 
     initial_result = pytket_to_qir(circ, name, ReturnTypeQIR.STRING)
 
-    result = initial_result.replace("entry_point", "EntryPoint" )
+    result = initial_result.replace("entry_point", "EntryPoint")
 
     bitcode = pyqir.Module.from_ir(pyqir.Context(), result)
 

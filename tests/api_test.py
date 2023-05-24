@@ -17,7 +17,11 @@ import pytest
 
 import pyqir
 
-from pytket.qir.conversion.api import pytket_to_qir, pytket_to_qir_optimised, ReturnTypeQIR
+from pytket.qir.conversion.api import (
+    pytket_to_qir,
+    pytket_to_qir_optimised,
+    ReturnTypeQIR,
+)
 from pytket.circuit import Circuit  # type: ignore
 
 
@@ -130,7 +134,6 @@ attributes #0 = { "EntryPoint" "num_required_qubits"="3" "num_required_results"=
 !3 = !{i32 1, !"dynamic_result_management", i1 false}
 """
     )
-
 
 
 def test_pytket_api_qreg() -> None:
