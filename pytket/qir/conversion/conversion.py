@@ -533,7 +533,7 @@ class QirGenerator:
                     )
 
                 else:
-                    ValueError(
+                    raise ValueError(
                         "circuit contruction with special condition not yet supported"
                     )
                     # this should be an assertion when working

@@ -2,7 +2,7 @@
 
 # # QIR generation from a pytket circuit
 
-# For this you should install pytket, pytket-quantinuum and pytket-qir in the newest avialble version
+# For this you should install pytket-quantinuum and pytket-qir in the newest available versions.
 
 from pytket.qir import pytket_to_qir, ReturnTypeQIR
 
