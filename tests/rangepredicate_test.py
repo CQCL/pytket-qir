@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from pytket.qir.conversion.api import pytket_to_qir, ReturnTypeQIR
+from pytket.qir.conversion.api import pytket_to_qir, QIRFormat
 
 from pytket.circuit import (
     Circuit,
@@ -38,7 +38,7 @@ def test_pytket_qir_rangepredicate() -> None:
     circ.H(0, condition=reg_geq(a, 1))
 
     result = pytket_to_qir(
-        circ, name="test_pytket_qir_rangepredicate", returntype=ReturnTypeQIR.STRING
+        circ, name="test_pytket_qir_rangepredicate", returntype=QIRFormat.STRING
     )
 
     print(result)

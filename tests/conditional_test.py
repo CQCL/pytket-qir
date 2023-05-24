@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from pytket.qir.conversion.api import pytket_to_qir, ReturnTypeQIR
+from pytket.qir.conversion.api import pytket_to_qir, QIRFormat
 
 from pytket.circuit import Circuit, Qubit, if_not_bit, Bit  # type: ignore
 
@@ -37,7 +37,7 @@ def test_pytket_qir_conditional() -> None:
     circ.Measure(Qubit(2), d[2])
 
     result = pytket_to_qir(
-        circ, name="test_pytket_qir_conditional", returntype=ReturnTypeQIR.STRING
+        circ, name="test_pytket_qir_conditional", returntype=QIRFormat.STRING
     )
 
     print(result)
@@ -141,7 +141,7 @@ def test_pytket_qir_conditional_ii() -> None:
     circ.Measure(Qubit(2), d[2])
 
     result = pytket_to_qir(
-        circ, name="test_pytket_qir_conditional_ii", returntype=ReturnTypeQIR.STRING
+        circ, name="test_pytket_qir_conditional_ii", returntype=QIRFormat.STRING
     )
 
     print(result)
@@ -245,7 +245,7 @@ def test_pytket_qir_conditional_iii() -> None:
     circ.add_classicalexpbox_register(a * b * d * c, e)
 
     result = pytket_to_qir(
-        circ, name="test_pytket_qir_conditional_iii", returntype=ReturnTypeQIR.STRING
+        circ, name="test_pytket_qir_conditional_iii", returntype=QIRFormat.STRING
     )
 
     print(result)

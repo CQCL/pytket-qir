@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from pytket.qir.conversion.api import pytket_to_qir, ReturnTypeQIR
+from pytket.qir.conversion.api import pytket_to_qir, QIRFormat
 
 from pytket.circuit import (
     Circuit,
@@ -32,7 +32,7 @@ def test_pytket_qir_barrier() -> None:
     circ.H(4)
 
     result = pytket_to_qir(
-        circ, name="test_pytket_qir_barrier", returntype=ReturnTypeQIR.STRING
+        circ, name="test_pytket_qir_barrier", returntype=QIRFormat.STRING
     )
 
     print(result)
@@ -104,7 +104,7 @@ def test_pytket_qir_barrier_ii() -> None:
     circ.add_barrier([0], data="sleep(10000)")
 
     result = pytket_to_qir(
-        circ, name="test_pytket_qir_barrier_ii", returntype=ReturnTypeQIR.STRING
+        circ, name="test_pytket_qir_barrier_ii", returntype=QIRFormat.STRING
     )
 
     print(result)

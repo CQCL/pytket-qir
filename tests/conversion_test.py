@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-from pytket.qir.conversion.api import pytket_to_qir, ReturnTypeQIR
+from pytket.qir.conversion.api import pytket_to_qir, QIRFormat
 from pytket.circuit import Circuit, Qubit, Bit, BitRegister  # type: ignore
 from pytket.circuit.logic_exp import (  # type: ignore
     reg_eq,
@@ -29,9 +29,7 @@ def test_pytket_qir() -> None:
     circ = Circuit(3)
     circ.H(0)
 
-    result = pytket_to_qir(
-        circ, name="test_pytket_qir", returntype=ReturnTypeQIR.STRING
-    )
+    result = pytket_to_qir(circ, name="test_pytket_qir", returntype=QIRFormat.STRING)
 
     print(result)
 
@@ -79,9 +77,7 @@ def test_pytket_qir_2() -> None:
     circ = Circuit(3)
     circ.H(0)
 
-    result = pytket_to_qir(
-        circ, name="test_pytket_qir_2", returntype=ReturnTypeQIR.STRING
-    )
+    result = pytket_to_qir(circ, name="test_pytket_qir_2", returntype=QIRFormat.STRING)
 
     print(result)
 
@@ -131,9 +127,7 @@ def test_pytket_qir_3() -> None:
     circ.H(1)
     circ.H(2)
 
-    result = pytket_to_qir(
-        circ, name="test_pytket_qir_3", returntype=ReturnTypeQIR.STRING
-    )
+    result = pytket_to_qir(circ, name="test_pytket_qir_3", returntype=QIRFormat.STRING)
 
     print(result)
 
@@ -193,9 +187,7 @@ def test_pytket_qir_4() -> None:
     circ.H(0, condition=b[4])
     circ.H(0)
 
-    result = pytket_to_qir(
-        circ, name="test_pytket_qir_4", returntype=ReturnTypeQIR.STRING
-    )
+    result = pytket_to_qir(circ, name="test_pytket_qir_4", returntype=QIRFormat.STRING)
 
     print(result)
 
@@ -272,9 +264,7 @@ def test_pytket_qir_5() -> None:
     circ.H(0, condition=Bit(3))
     circ.H(0)
 
-    result = pytket_to_qir(
-        circ, name="test_pytket_qir_5", returntype=ReturnTypeQIR.STRING
-    )
+    result = pytket_to_qir(circ, name="test_pytket_qir_5", returntype=QIRFormat.STRING)
 
     print(result)
 
@@ -366,9 +356,7 @@ def test_pytket_qir_6() -> None:
     assert circ.n_qubits == 3
     assert circ.n_bits == 20
 
-    result = pytket_to_qir(
-        circ, name="test_pytket_qir_6", returntype=ReturnTypeQIR.STRING
-    )
+    result = pytket_to_qir(circ, name="test_pytket_qir_6", returntype=QIRFormat.STRING)
 
     print(result)
 
@@ -472,9 +460,7 @@ def test_pytket_qir_7() -> None:
     assert circ.n_qubits == 2
     assert circ.n_bits == 12
 
-    result = pytket_to_qir(
-        circ, name="test_pytket_qir_7", returntype=ReturnTypeQIR.STRING
-    )
+    result = pytket_to_qir(circ, name="test_pytket_qir_7", returntype=QIRFormat.STRING)
 
     print(result)
 
