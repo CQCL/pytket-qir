@@ -165,16 +165,6 @@ def test_pytket_api_creg() -> None:
         pytket_to_qir(circ)
 
 
-def test_pytket_api_creg() -> None:
-    circ = Circuit(3)
-    circ.H(0)
-
-    circ.add_c_register("c2", 100)
-
-    with pytest.raises(ValueError):
-        pytket_to_qir(circ)
-
-
 def test_pytket_qir_module() -> None:
     circ = Circuit(3)
     circ.H(0)
