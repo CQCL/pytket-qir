@@ -103,13 +103,13 @@ def pytket_to_qir_optimised(
 
     initial_result = str(pytket_to_qir(circ, name, ReturnTypeQIR.STRING))  # type: ignore
 
-    result = initial_result.replace("entry_point", "EntryPoint")
+    result = initial_result.replace("entry_point", "EntryPoint")  # type: ignore
 
-    bitcode = pyqir.Module.from_ir(pyqir.Context(), result).bitcode
+    bitcode = pyqir.Module.from_ir(pyqir.Context(), result).bitcode  # type: ignore
 
     if returntype == ReturnTypeQIR.BINARY:
-        return bitcode
+        return bitcode  # type: ignore
     elif returntype == ReturnTypeQIR.STRING:
-        return result
+        return result  # type: ignore
     else:
         raise ValueError("unsupported return type")
