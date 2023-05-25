@@ -88,7 +88,7 @@ def test_pytket_qir_optimised() -> None:
     result = pytket_to_qir(
         circ,
         name="test_pytket_qir",
-        returntype=ReturnTypeQIR.STRING,
+        qir_format=QIRFormat.STRING,
         pyqir_0_7_compatibility=True,
     )
 
@@ -167,9 +167,7 @@ def test_pytket_qir_module() -> None:
     circ = Circuit(3)
     circ.H(0)
 
-    result = pytket_to_qir(
-        circ, name="test_pytket_qir", returntype=ReturnTypeQIR.STRING
-    )
+    result = pytket_to_qir(circ, name="test_pytket_qir", qir_format=QIRFormat.STRING)
 
     result_2 = pytket_to_qir(circ, name="test_pytket_qir")
 

@@ -90,17 +90,17 @@ def pytket_to_qir(
 
         bitcode = pyqir.Module.from_ir(pyqir.Context(), result).bitcode  # type: ignore
 
-        if returntype == QIRFormat.BINARY:
+        if qir_format == QIRFormat.BINARY:
             return bitcode  # type: ignore
-        elif returntype == QIRFormat.STRING:
+        elif qir_format == QIRFormat.STRING:
             return result  # type: ignore
         else:
             raise ValueError("unsupported return type")
 
     else:
-        if returntype == QIRFormat.BINARY:
+        if qir_format == QIRFormat.BINARY:
             return populated_module.module.bitcode()
-        elif returntype == QIRFormat.STRING:
+        elif qir_format == QIRFormat.STRING:
             return populated_module.module.ir()
         else:
             raise ValueError("unsupported return type")
