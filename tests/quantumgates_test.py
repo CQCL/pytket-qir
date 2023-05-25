@@ -38,6 +38,7 @@ source_filename = "test_pytket_qir_quantum"
 define void @main() #0 {
 entry:
   call void @__quantum__qis__h__body(%Qubit* null)
+  call void @__quantum__rt__tuple_end_record_output()
   ret void
 }
 
@@ -52,6 +53,8 @@ declare i1 @__quantum__qis__read_result__body(%Result*)
 declare i64 @reg2var(i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1)
 
 declare void @__quantum__rt__int_record_output(i64)
+
+declare void @__quantum__rt__tuple_end_record_output()
 
 declare void @__quantum__qis__h__body(%Qubit*)
 
@@ -116,6 +119,7 @@ entry:
   %2 = call i1 @__quantum__qis__read_result__body(%Result* inttoptr (i64 1 to %Result*))
   call void @set_one_bit_in_reg(i64 %0, i64 1, i1 %2)
   call void @__quantum__rt__int_record_output(i64 %0)
+  call void @__quantum__rt__tuple_end_record_output()
   ret void
 }
 
@@ -130,6 +134,8 @@ declare i1 @__quantum__qis__read_result__body(%Result*)
 declare i64 @reg2var(i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1)
 
 declare void @__quantum__rt__int_record_output(i64)
+
+declare void @__quantum__rt__tuple_end_record_output()
 
 declare void @__quantum__qis__h__body(%Qubit*)
 

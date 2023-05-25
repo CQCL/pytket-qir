@@ -44,6 +44,7 @@ source_filename = "test_pytket_qir"
 define void @main() #0 {
 entry:
   call void @__quantum__qis__h__body(%Qubit* null)
+  call void @__quantum__rt__tuple_end_record_output()
   ret void
 }
 
@@ -58,6 +59,8 @@ declare i1 @__quantum__qis__read_result__body(%Result*)
 declare i64 @reg2var(i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1)
 
 declare void @__quantum__rt__int_record_output(i64)
+
+declare void @__quantum__rt__tuple_end_record_output()
 
 declare void @__quantum__qis__h__body(%Qubit*)
 
@@ -92,6 +95,7 @@ source_filename = "test_pytket_qir_2"
 define void @main() #0 {
 entry:
   call void @__quantum__qis__h__body(%Qubit* null)
+  call void @__quantum__rt__tuple_end_record_output()
   ret void
 }
 
@@ -106,6 +110,8 @@ declare i1 @__quantum__qis__read_result__body(%Result*)
 declare i64 @reg2var(i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1)
 
 declare void @__quantum__rt__int_record_output(i64)
+
+declare void @__quantum__rt__tuple_end_record_output()
 
 declare void @__quantum__qis__h__body(%Qubit*)
 
@@ -146,6 +152,7 @@ entry:
   call void @__quantum__qis__h__body(%Qubit* inttoptr (i64 1 to %Qubit*))
   call void @__quantum__qis__h__body(%Qubit* inttoptr (i64 2 to %Qubit*))
   call void @__quantum__rt__int_record_output(i64 %0)
+  call void @__quantum__rt__tuple_end_record_output()
   ret void
 }
 
@@ -160,6 +167,8 @@ declare i1 @__quantum__qis__read_result__body(%Result*)
 declare i64 @reg2var(i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1)
 
 declare void @__quantum__rt__int_record_output(i64)
+
+declare void @__quantum__rt__tuple_end_record_output()
 
 declare void @__quantum__qis__h__body(%Qubit*)
 
@@ -222,6 +231,7 @@ continue:                                         ; preds = %else, %then
   call void @__quantum__rt__int_record_output(i64 %0)
   call void @__quantum__rt__int_record_output(i64 %1)
   call void @__quantum__rt__int_record_output(i64 %2)
+  call void @__quantum__rt__tuple_end_record_output()
   ret void
 }
 
@@ -236,6 +246,8 @@ declare i1 @__quantum__qis__read_result__body(%Result*)
 declare i64 @reg2var(i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1)
 
 declare void @__quantum__rt__int_record_output(i64)
+
+declare void @__quantum__rt__tuple_end_record_output()
 
 declare void @__quantum__qis__h__body(%Qubit*)
 
@@ -308,6 +320,7 @@ continue:                                         ; preds = %else, %then
   call void @__quantum__rt__int_record_output(i64 %1)
   call void @__quantum__rt__int_record_output(i64 %2)
   call void @__quantum__rt__int_record_output(i64 %3)
+  call void @__quantum__rt__tuple_end_record_output()
   ret void
 }
 
@@ -322,6 +335,8 @@ declare i1 @__quantum__qis__read_result__body(%Result*)
 declare i64 @reg2var(i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1)
 
 declare void @__quantum__rt__int_record_output(i64)
+
+declare void @__quantum__rt__tuple_end_record_output()
 
 declare void @__quantum__qis__h__body(%Qubit*)
 
@@ -398,6 +413,7 @@ continue:                                         ; preds = %else, %then
   call void @__quantum__rt__int_record_output(i64 %1)
   call void @__quantum__rt__int_record_output(i64 %2)
   call void @__quantum__rt__int_record_output(i64 %3)
+  call void @__quantum__rt__tuple_end_record_output()
   ret void
 }
 
@@ -412,6 +428,8 @@ declare i1 @__quantum__qis__read_result__body(%Result*)
 declare i64 @reg2var(i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1)
 
 declare void @__quantum__rt__int_record_output(i64)
+
+declare void @__quantum__rt__tuple_end_record_output()
 
 declare void @__quantum__qis__x__body(%Qubit*)
 
@@ -509,6 +527,7 @@ entry:
   call void @__quantum__rt__int_record_output(i64 %1)
   call void @__quantum__rt__int_record_output(i64 %2)
   call void @__quantum__rt__int_record_output(i64 %3)
+  call void @__quantum__rt__tuple_end_record_output()
   ret void
 }
 
@@ -523,6 +542,8 @@ declare i1 @__quantum__qis__read_result__body(%Result*)
 declare i64 @reg2var(i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1)
 
 declare void @__quantum__rt__int_record_output(i64)
+
+declare void @__quantum__rt__tuple_end_record_output()
 
 attributes #0 = { "entry_point" "num_required_qubits"="2" "num_required_results"="2" "output_labeling_schema" "qir_profiles"="custom" }
 
