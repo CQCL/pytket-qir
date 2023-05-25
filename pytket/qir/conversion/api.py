@@ -19,6 +19,8 @@ public api for qir conversion from pytket
 from enum import Enum
 from typing import Union
 
+import pyqir
+
 from pytket.circuit import Circuit
 
 from .conversion import QirGenerator
@@ -38,6 +40,7 @@ def pytket_to_qir(
     circ: Circuit,
     name: str = "Generated from input pytket circuit",
     qir_format: QIRFormat = QIRFormat.BINARY,
+    pyqir_0_7_compatibility: bool = False,
 ) -> Union[str, bytes, None]:
     """converts given pytket circuit to qir
     :param circ: given circuit
@@ -46,6 +49,9 @@ def pytket_to_qir(
     :type name: str
     :param qir_format: format of the generated qir, default value is binary
     :type qir_format: QIRFormat
+    :param pyqir_0_7_compatibility: converts the output to be compatible with
+    pyqir 0.7, default value false
+    :type pyqir_0_7_compatibility: bool
     """
 
     if len(circ.q_registers) > 1 or circ.q_registers[0].name != "q":
@@ -75,9 +81,26 @@ def pytket_to_qir(
     populated_module = qir_generator.circuit_to_module(
         qir_generator.circuit, qir_generator.module, True
     )
-    if qir_format == QIRFormat.BINARY:
-        return populated_module.module.bitcode()
-    elif qir_format == QIRFormat.STRING:
-        return populated_module.module.ir()
+
+    if pyqir_0_7_compatibility:
+
+        initial_result = str(populated_module.module.ir())  # type: ignore
+
+        result = initial_result.replace("entry_point", "EntryPoint").replace("num_required_qubits", "requiredQubits").replace("num_required_results", "requiredResults")  # type: ignore
+
+        bitcode = pyqir.Module.from_ir(pyqir.Context(), result).bitcode  # type: ignore
+
+        if qir_format == QIRFormat.BINARY:
+            return bitcode  # type: ignore
+        elif qir_format == QIRFormat.STRING:
+            return result  # type: ignore
+        else:
+            assert not "unsupported return type"
+
     else:
-        raise ValueError("unsupported return type")
+        if qir_format == QIRFormat.BINARY:
+            return populated_module.module.bitcode()
+        elif qir_format == QIRFormat.STRING:
+            return populated_module.module.ir()
+        else:
+            assert not "unsupported return type"
