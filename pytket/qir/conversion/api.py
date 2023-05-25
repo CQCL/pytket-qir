@@ -95,7 +95,7 @@ def pytket_to_qir(
         elif qir_format == QIRFormat.STRING:
             return result  # type: ignore
         else:
-            raise ValueError("unsupported return type")
+            assert not "unsupported return type"
 
     else:
         if qir_format == QIRFormat.BINARY:
@@ -103,4 +103,4 @@ def pytket_to_qir(
         elif qir_format == QIRFormat.STRING:
             return populated_module.module.ir()
         else:
-            raise ValueError("unsupported return type")
+            assert not "unsupported return type"
