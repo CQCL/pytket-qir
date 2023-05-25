@@ -25,7 +25,7 @@ from .conversion import QirGenerator
 from .module import tketqirModule
 
 
-class ReturnTypeQIR(Enum):
+class QIRFormat(Enum):
     """Return types qir, options are BINARY for a binary
     output and STRING for a string output
     """
@@ -37,29 +37,27 @@ class ReturnTypeQIR(Enum):
 def pytket_to_qir(
     circ: Circuit,
     name: str = "Generated from input pytket circuit",
-    returntype: ReturnTypeQIR = ReturnTypeQIR.BINARY,
+    qir_format: QIRFormat = QIRFormat.BINARY,
 ) -> Union[str, bytes, None]:
     """converts given pytket circuit to qir
     :param circ: given circuit
     :type circ: pytket circuit
     :param name: name for the qir module created
     :type name: str
-    :param returntype: format of the generated qir, defaut value is binary
-    :type returntype: ReturnTypeQIR
+    :param qir_format: format of the generated qir, default value is binary
+    :type qir_format: QIRFormat
     """
 
     if len(circ.q_registers) > 1 or circ.q_registers[0].name != "q":
         raise ValueError(
             """The circuit that should be converted should only have the default
-            quantum register, you can convert it with using the pytket
-              compilerpass `FlattenRelabelRegistersPass`"""
+            quantum register. You can convert it using the pytket
+            compiler pass `FlattenRelabelRegistersPass`."""
         )
 
     for creg in circ.c_registers:
         if creg.size > 64:
-            raise ValueError(
-                "each of the classical register must not have more than 64 bits"
-            )
+            raise ValueError("classical registers must not have more than 64 bits")
 
     m = tketqirModule(
         name=name,
@@ -77,9 +75,9 @@ def pytket_to_qir(
     populated_module = qir_generator.circuit_to_module(
         qir_generator.circuit, qir_generator.module, True
     )
-    if returntype == ReturnTypeQIR.BINARY:
+    if qir_format == QIRFormat.BINARY:
         return populated_module.module.bitcode()
-    elif returntype == ReturnTypeQIR.STRING:
+    elif qir_format == QIRFormat.STRING:
         return populated_module.module.ir()
     else:
         raise ValueError("unsupported return type")

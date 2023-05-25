@@ -15,4 +15,4 @@
 """Backends for processing pytket circuits with Quantinuum devices
 """
 
-from .api import pytket_to_qir, ReturnTypeQIR
+from .api import pytket_to_qir, QIRFormat
