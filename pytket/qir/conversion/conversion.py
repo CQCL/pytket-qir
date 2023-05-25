@@ -189,12 +189,21 @@ class QirGenerator:
 
         # void __quantum__rt__result_record_output(i64)
         # self.record_output_result = self.module.module.add_external_function(
-        #   "__quantum__rt__result_record_output",
-        #   pyqir.FunctionType(
-        #       pyqir.Type.void(self.module.module.context),
-        #       [pyqir.result_type(self.module.module.context)],
-        #   ),
+        #    "__quantum__rt__result_record_output",
+        #    pyqir.FunctionType(
+        #        pyqir.Type.void(self.module.module.context),
+        #        [pyqir.result_type(self.module.module.context)],
+        #    ),
         # )
+
+        # void __quantum__rt__tuple_start_record_output(i64)
+        self.record_output_start = self.module.module.add_external_function(
+            "__quantum__rt__tuple_start_record_output",
+            pyqir.FunctionType(
+                pyqir.Type.void(self.module.module.context),
+                [],
+            ),
+        )
 
         # void __quantum__rt__tuple_end_record_output(i64)
         self.record_output_end = self.module.module.add_external_function(
@@ -765,6 +774,12 @@ class QirGenerator:
                     else:
                         get_gate(*qubits)
         if record_output:
+
+            self.module.builder.call(
+                self.record_output_start,
+                [],
+            )
+
             for creg in self.circuit.c_registers:
                 reg_name = creg[0].reg_name
                 self.module.builder.call(
