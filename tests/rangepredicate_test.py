@@ -147,6 +147,7 @@ else14:                                           ; preds = %continue12
 continue15:                                       ; preds = %else14, %then13
   call void @__quantum__rt__int_record_output(i64 %0)
   call void @__quantum__rt__int_record_output(i64 %1)
+  call void @__quantum__rt__tuple_end_record_output()
   ret void
 }
 

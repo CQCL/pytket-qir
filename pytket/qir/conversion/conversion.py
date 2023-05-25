@@ -179,11 +179,29 @@ class QirGenerator:
         )
 
         # void __quantum__rt__int_record_output(i64)
-        self.record_output = self.module.module.add_external_function(
+        self.record_output_i64 = self.module.module.add_external_function(
             "__quantum__rt__int_record_output",
             pyqir.FunctionType(
                 pyqir.Type.void(self.module.module.context),
                 [pyqir.IntType(self.module.module.context, qir_int_type)],
+            ),
+        )
+
+        # void __quantum__rt__result_record_output(i64)
+        # self.record_output_result = self.module.module.add_external_function(
+        #   "__quantum__rt__result_record_output",
+        #   pyqir.FunctionType(
+        #       pyqir.Type.void(self.module.module.context),
+        #       [pyqir.result_type(self.module.module.context)],
+        #   ),
+        # )
+
+        # void __quantum__rt__tuple_end_record_output(i64)
+        self.record_output_end = self.module.module.add_external_function(
+            "__quantum__rt__tuple_end_record_output",
+            pyqir.FunctionType(
+                pyqir.Type.void(self.module.module.context),
+                [],
             ),
         )
 
@@ -750,10 +768,23 @@ class QirGenerator:
             for creg in self.circuit.c_registers:
                 reg_name = creg[0].reg_name
                 self.module.builder.call(
-                    self.record_output,
+                    self.record_output_i64,
                     [
                         self.ssa_vars[reg_name],
                     ],
                 )
+
+            # for i in range(self.circuit.q_registers[0].size):
+            #    self.module.builder.call(
+            #        self.record_output_result,
+            #        [
+            #            self.module.module.results[i],
+            #        ],
+            #    )
+
+            self.module.builder.call(
+                self.record_output_end,
+                [],
+            )
 
         return module
