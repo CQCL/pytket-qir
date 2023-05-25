@@ -539,9 +539,7 @@ class QirGenerator:
                     # this should be an assertion when working
 
             elif isinstance(op, WASMOp):
-                raise ValueError(
-                    "WASM not supported yet"
-                )
+                raise ValueError("WASM not supported yet")
             elif op.type == OpType.Measure:
 
                 assert len(command.bits) == 1
