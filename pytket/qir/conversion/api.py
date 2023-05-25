@@ -44,8 +44,8 @@ def pytket_to_qir(
     :type circ: pytket circuit
     :param name: name for the qir module created
     :type name: str
-    :param format: format of the generated qir, default value is binary
-    :type format: QIRFormat
+    :param qir_format: format of the generated qir, default value is binary
+    :type qir_format: QIRFormat
     """
 
     if len(circ.q_registers) > 1 or circ.q_registers[0].name != "q":
