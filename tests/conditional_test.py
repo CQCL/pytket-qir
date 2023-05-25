@@ -338,7 +338,7 @@ def test_pytket_qir_conditional_iv() -> None:
     circ.add_gate(OpType.H, [0], condition_bits=[0, 1], condition_value=3)
 
     result = pytket_to_qir(
-        circ, name="test_pytket_qir_conditional_iv", returntype=ReturnTypeQIR.STRING
+        circ, name="test_pytket_qir_conditional_iv", qir_format=QIRFormat.STRING
     )
 
     print(result)
@@ -414,7 +414,7 @@ def test_pytket_qir_conditional_v() -> None:
     circ.add_gate(OpType.H, [0], condition_bits=[0, 1, 2], condition_value=3)
 
     result = pytket_to_qir(
-        circ, name="test_pytket_qir_conditional_v", returntype=ReturnTypeQIR.STRING
+        circ, name="test_pytket_qir_conditional_v", qir_format=QIRFormat.STRING
     )
 
     circ = Circuit(2, 2).H(0).H(1).measure_all()
@@ -422,7 +422,7 @@ def test_pytket_qir_conditional_v() -> None:
     circ.add_gate(OpType.H, [0], condition_bits=[0, 1], condition_value=3)
 
     result_2 = pytket_to_qir(
-        circ, name="test_pytket_qir_conditional_v", returntype=ReturnTypeQIR.STRING
+        circ, name="test_pytket_qir_conditional_v", qir_format=QIRFormat.STRING
     )
 
     print(result)
