@@ -362,10 +362,8 @@ entry:
   call void @__quantum__qis__mz__body(%Qubit* inttoptr (i64 1 to %Qubit*), %Result* inttoptr (i64 1 to %Result*))
   %2 = call i1 @__quantum__qis__read_result__body(%Result* inttoptr (i64 1 to %Result*))
   call void @set_one_bit_in_reg(i64 %0, i64 1, i1 %2)
-  %3 = icmp sgt i64 3, %0
-  %4 = icmp sgt i64 %0, 3
-  %5 = and i1 %3, %4
-  br i1 %5, label %then, label %else
+  %3 = icmp eq i64 3, %0
+  br i1 %3, label %then, label %else
 
 then:                                             ; preds = %entry
   call void @__quantum__qis__h__body(%Qubit* null)
@@ -446,10 +444,8 @@ entry:
   call void @__quantum__qis__mz__body(%Qubit* inttoptr (i64 1 to %Qubit*), %Result* inttoptr (i64 1 to %Result*))
   %2 = call i1 @__quantum__qis__read_result__body(%Result* inttoptr (i64 1 to %Result*))
   call void @set_one_bit_in_reg(i64 %0, i64 1, i1 %2)
-  %3 = icmp sgt i64 3, %0
-  %4 = icmp sgt i64 %0, 3
-  %5 = and i1 %3, %4
-  br i1 %5, label %then, label %else
+  %3 = icmp eq i64 3, %0
+  br i1 %3, label %then, label %else
 
 then:                                             ; preds = %entry
   call void @__quantum__qis__h__body(%Qubit* null)
