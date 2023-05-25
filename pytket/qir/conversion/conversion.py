@@ -493,12 +493,14 @@ class QirGenerator:
                 )
 
             elif isinstance(op, Conditional):
+
+                conditional_circuit = self._rebase_op_to_gateset(
+                    op.op, command.args[op.width :]
+                )
+                condition_name = command.args[0].reg_name
+
                 if op.width == 1:  # only one conditional bit
-                    conditional_circuit = self._rebase_op_to_gateset(
-                        op.op, command.args[op.width :]
-                    )
                     condition_bit_index = command.args[0].index[0]
-                    condition_name = command.args[0].reg_name
 
                     def condition_block_true() -> None:
                         """
@@ -516,33 +518,23 @@ class QirGenerator:
                         if op.value == 0:
                             self.circuit_to_module(conditional_circuit, module)
 
-                    if condition_name in self.ssa_vars:
+                    assert condition_name in self.ssa_vars
 
-                        ssabool = module.builder.call(
-                            self.read_bit_from_reg,
-                            [
-                                self.ssa_vars[condition_name],
-                                pyqir.const(self.qir_int_type, condition_bit_index),
-                            ],
-                        )
-
-                        module.module.builder.if_(
-                            ssabool,
-                            true=lambda: condition_block_true(),  # type: ignore
-                            false=lambda: condition_block_false(),  # type: ignore
-                        )
-
-                    else:
-                        ValueError(
-                            """circuit contruction with this condition
-                            not yet supported"""
-                        )
-                        # this should be an assertion when working
-                else:
-                    conditional_circuit = self._rebase_op_to_gateset(
-                        op.op, command.args[op.width :]
+                    ssabool = module.builder.call(
+                        self.read_bit_from_reg,
+                        [
+                            self.ssa_vars[condition_name],
+                            pyqir.const(self.qir_int_type, condition_bit_index),
+                        ],
                     )
-                    condition_name = command.args[0].reg_name
+
+                    module.module.builder.if_(
+                        ssabool,
+                        true=lambda: condition_block_true(),  # type: ignore
+                        false=lambda: condition_block_false(),  # type: ignore
+                    )
+
+                else:
 
                     for i in range(op.width):
                         if command.args[i].reg_name != condition_name:
@@ -568,18 +560,11 @@ class QirGenerator:
                         """
                         self.circuit_to_module(conditional_circuit, module)
 
-                    lower_cond = module.module.builder.icmp(
-                        pyqir.IntPredicate.SGT,
+                    ssabool = module.module.builder.icmp(
+                        pyqir.IntPredicate.EQ,
                         pyqir.const(self.qir_int_type, op.value),
                         self.ssa_vars[condition_name],
                     )
-                    upper_cond = module.module.builder.icmp(
-                        pyqir.IntPredicate.SGT,
-                        self.ssa_vars[condition_name],
-                        pyqir.const(self.qir_int_type, op.value),
-                    )
-
-                    ssabool = module.module.builder.and_(lower_cond, upper_cond)
 
                     module.module.builder.if_(
                         ssabool,
