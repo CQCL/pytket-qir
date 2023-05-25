@@ -40,6 +40,7 @@ def pytket_to_qir(
     circ: Circuit,
     name: str = "Generated from input pytket circuit",
     returntype: ReturnTypeQIR = ReturnTypeQIR.BINARY,
+    pyqir_0_7_compatibility: bool = False,
 ) -> Union[str, bytes, None]:
     """converts given pytket circuit to qir
     :param circ: given circuit
@@ -79,37 +80,26 @@ def pytket_to_qir(
     populated_module = qir_generator.circuit_to_module(
         qir_generator.circuit, qir_generator.module, True
     )
-    if returntype == ReturnTypeQIR.BINARY:
-        return populated_module.module.bitcode()
-    elif returntype == ReturnTypeQIR.STRING:
-        return populated_module.module.ir()
+
+    if pyqir_0_7_compatibility:
+
+        initial_result = str(populated_module.module.ir())  # type: ignore
+
+        result = initial_result.replace("entry_point", "EntryPoint").replace("num_required_qubits", "requiredQubits").replace("num_required_results", "requiredResults")  # type: ignore
+
+        bitcode = pyqir.Module.from_ir(pyqir.Context(), result).bitcode  # type: ignore
+
+        if returntype == ReturnTypeQIR.BINARY:
+            return bitcode  # type: ignore
+        elif returntype == ReturnTypeQIR.STRING:
+            return result  # type: ignore
+        else:
+            raise ValueError("unsupported return type")
+
     else:
-        raise ValueError("unsupported return type")
-
-
-def pytket_to_qir_optimised(
-    circ: Circuit,
-    name: str = "Generated from input pytket circuit",
-    returntype: ReturnTypeQIR = ReturnTypeQIR.BINARY,
-) -> Union[str, bytes, None]:
-    """converts given pytket circuit to qir
-    :param circ: given circuit
-    :type circ: pytket circuit
-    :param name: name for the qir module created
-    :type name: str
-    :param returntype: format of the generated qir, defaut value is binary
-    :type returntype: ReturnTypeQIR
-    """
-
-    initial_result = str(pytket_to_qir(circ, name, ReturnTypeQIR.STRING))  # type: ignore
-
-    result = initial_result.replace("entry_point", "EntryPoint").replace("num_required_qubits", "requiredQubits").replace("num_required_results", "requiredResults")  # type: ignore
-
-    bitcode = pyqir.Module.from_ir(pyqir.Context(), result).bitcode  # type: ignore
-
-    if returntype == ReturnTypeQIR.BINARY:
-        return bitcode  # type: ignore
-    elif returntype == ReturnTypeQIR.STRING:
-        return result  # type: ignore
-    else:
-        raise ValueError("unsupported return type")
+        if returntype == ReturnTypeQIR.BINARY:
+            return populated_module.module.bitcode()
+        elif returntype == ReturnTypeQIR.STRING:
+            return populated_module.module.ir()
+        else:
+            raise ValueError("unsupported return type")

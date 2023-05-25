@@ -19,7 +19,6 @@ import pyqir
 
 from pytket.qir.conversion.api import (
     pytket_to_qir,
-    pytket_to_qir_optimised,
     ReturnTypeQIR,
 )
 from pytket.circuit import Circuit  # type: ignore
@@ -90,8 +89,11 @@ def test_pytket_qir_optimised() -> None:
     circ = Circuit(3)
     circ.H(0)
 
-    result = pytket_to_qir_optimised(
-        circ, name="test_pytket_qir", returntype=ReturnTypeQIR.STRING
+    result = pytket_to_qir(
+        circ,
+        name="test_pytket_qir",
+        returntype=ReturnTypeQIR.STRING,
+        pyqir_0_7_compatibility=True,
     )
 
     print(result)
