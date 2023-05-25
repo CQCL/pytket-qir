@@ -540,7 +540,7 @@ class QirGenerator:
 
             elif isinstance(op, WASMOp):
                 raise ValueError(
-                    "WASM not supported yet, support expected with pytket-qir==0.3.0"
+                    "WASM not supported yet"
                 )
             elif op.type == OpType.Measure:
 
