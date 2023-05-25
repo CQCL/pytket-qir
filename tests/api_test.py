@@ -19,7 +19,7 @@ import pyqir
 
 from pytket.qir.conversion.api import (
     pytket_to_qir,
-    ReturnTypeQIR,
+    QIRFormat,
 )
 from pytket.circuit import Circuit  # type: ignore
 
@@ -28,9 +28,7 @@ def test_pytket_qir_BINARY() -> None:
     circ = Circuit(3)
     circ.H(0)
 
-    result = pytket_to_qir(
-        circ, name="test_pytket_qir", returntype=ReturnTypeQIR.BINARY
-    )
+    result = pytket_to_qir(circ, name="test_pytket_qir", qir_format=QIRFormat.BINARY)
 
     assert type(result) == bytes
 
@@ -39,9 +37,7 @@ def test_pytket_qir() -> None:
     circ = Circuit(3)
     circ.H(0)
 
-    result = pytket_to_qir(
-        circ, name="test_pytket_qir", returntype=ReturnTypeQIR.STRING
-    )
+    result = pytket_to_qir(circ, name="test_pytket_qir", qir_format=QIRFormat.STRING)
 
     print(result)
 
