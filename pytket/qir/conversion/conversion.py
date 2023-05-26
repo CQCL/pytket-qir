@@ -200,15 +200,6 @@ class QirGenerator:
                 ),
             )
 
-            # void __quantum__rt__result_record_output(result)
-            # self.record_output_result = self.module.module.add_external_function(
-            #    "__quantum__rt__result_record_output",
-            #    pyqir.FunctionType(
-            #        pyqir.Type.void(self.module.module.context),
-            #        [pyqir.result_type(self.module.module.context)],
-            #    ),
-            # )
-
             # void __quantum__rt__tuple_start_record_output()
             self.record_output_start = self.module.module.add_external_function(
                 "__quantum__rt__tuple_start_record_output",
@@ -804,14 +795,6 @@ class QirGenerator:
                             self.reg_const[reg_name],
                         ],
                     )
-
-                # for i in range(self.circuit.q_registers[0].size):
-                #    self.module.builder.call(
-                #        self.record_output_result,
-                #        [
-                #            self.module.module.results[i],
-                #        ],
-                #    )
 
                 self.module.builder.call(
                     self.record_output_end,
