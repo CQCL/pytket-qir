@@ -43,6 +43,7 @@ def pytket_to_qir(
     pyqir_0_7_compatibility: bool = False,
 ) -> Union[str, bytes, None]:
     """converts given pytket circuit to qir
+
     :param circ: given circuit
     :type circ: pytket circuit
     :param name: name for the qir module created
@@ -50,7 +51,7 @@ def pytket_to_qir(
     :param qir_format: format of the generated qir, default value is binary
     :type qir_format: QIRFormat
     :param pyqir_0_7_compatibility: converts the output to be compatible with
-    pyqir 0.7, default value false
+        pyqir 0.7, default value false
     :type pyqir_0_7_compatibility: bool
     """
 
