@@ -186,37 +186,35 @@ class QirGenerator:
                 str.encode(reg_name)
             )
 
-        if len(self.reg_const) > 0:
-
             # void __quantum__rt__int_record_output(i64)
-            self.record_output_i64 = self.module.module.add_external_function(
-                "__quantum__rt__int_record_output",
-                pyqir.FunctionType(
-                    pyqir.Type.void(self.module.module.context),
-                    [
-                        pyqir.IntType(self.module.module.context, qir_int_type),
-                        self.reg_const[list(self.reg_const)[0]].type,
-                    ],
-                ),
-            )
+        self.record_output_i64 = self.module.module.add_external_function(
+            "__quantum__rt__int_record_output",
+            pyqir.FunctionType(
+                pyqir.Type.void(self.module.module.context),
+                [
+                    pyqir.IntType(self.module.module.context, qir_int_type),
+                    pyqir.PointerType(pyqir.IntType(self.module.module.context, 8)),
+                ],
+            ),
+        )
 
-            # void __quantum__rt__tuple_start_record_output()
-            self.record_output_start = self.module.module.add_external_function(
-                "__quantum__rt__tuple_start_record_output",
-                pyqir.FunctionType(
-                    pyqir.Type.void(self.module.module.context),
-                    [],
-                ),
-            )
+        # void __quantum__rt__tuple_start_record_output()
+        self.record_output_start = self.module.module.add_external_function(
+            "__quantum__rt__tuple_start_record_output",
+            pyqir.FunctionType(
+                pyqir.Type.void(self.module.module.context),
+                [],
+            ),
+        )
 
-            # void __quantum__rt__tuple_end_record_output()
-            self.record_output_end = self.module.module.add_external_function(
-                "__quantum__rt__tuple_end_record_output",
-                pyqir.FunctionType(
-                    pyqir.Type.void(self.module.module.context),
-                    [],
-                ),
-            )
+        # void __quantum__rt__tuple_end_record_output()
+        self.record_output_end = self.module.module.add_external_function(
+            "__quantum__rt__tuple_end_record_output",
+            pyqir.FunctionType(
+                pyqir.Type.void(self.module.module.context),
+                [],
+            ),
+        )
 
         self.barrier: List[Optional[pyqir.Function]] = [None] * (
             self.circuit.n_qubits + 1
@@ -779,26 +777,24 @@ class QirGenerator:
                         get_gate(*qubits)
         if record_output:
 
-            if len(self.reg_const) > 0:
+            self.module.builder.call(
+                self.record_output_start,
+                [],
+            )
 
+            for creg in self.circuit.c_registers:
+                reg_name = creg[0].reg_name
                 self.module.builder.call(
-                    self.record_output_start,
-                    [],
+                    self.record_output_i64,
+                    [
+                        self.ssa_vars[reg_name],
+                        self.reg_const[reg_name],
+                    ],
                 )
 
-                for creg in self.circuit.c_registers:
-                    reg_name = creg[0].reg_name
-                    self.module.builder.call(
-                        self.record_output_i64,
-                        [
-                            self.ssa_vars[reg_name],
-                            self.reg_const[reg_name],
-                        ],
-                    )
-
-                self.module.builder.call(
-                    self.record_output_end,
-                    [],
-                )
+            self.module.builder.call(
+                self.record_output_end,
+                [],
+            )
 
         return module
