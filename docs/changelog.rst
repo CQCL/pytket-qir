@@ -1,7 +1,7 @@
 Changelog
 ~~~~~~~~~
 
-0.2.0rc7 (May 2023)
+0.2.0rc8 (May 2023)
 -------------------
 
 * add pytket to qir conversion
