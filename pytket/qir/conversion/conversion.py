@@ -127,38 +127,38 @@ class QirGenerator:
         self.ssa_vars: Dict[str, Value] = {}  # Keep track of set ssa variables.
 
         # i1 read_bit_from_reg(i64 reg, i64 index)
-        self.read_bit_from_reg = self.module.module.add_external_function(
-            "read_bit_from_reg",
-            pyqir.FunctionType(
-                pyqir.IntType(self.module.module.context, 1),
-                [self.qir_int_type] * 2,
-            ),
-        )
+        # self.read_bit_from_reg = self.module.module.add_external_function(
+        #    "read_bit_from_reg",
+        #    pyqir.FunctionType(
+        #        pyqir.IntType(self.module.module.context, 1),
+        #        [self.qir_int_type] * 2,
+        #    ),
+        # )
 
         # void set_one_bit_in_reg(i64 reg, i64 index, i1 value)
-        self.set_one_bit_in_reg = self.module.module.add_external_function(
-            "set_one_bit_in_reg",
-            pyqir.FunctionType(
-                pyqir.Type.void(self.module.module.context),
-                [
-                    self.qir_int_type,
-                    self.qir_int_type,
-                    pyqir.IntType(self.module.module.context, 1),
-                ],
-            ),
-        )
+        # self.set_one_bit_in_reg = self.module.module.add_external_function(
+        #    "set_one_bit_in_reg",
+        #    pyqir.FunctionType(
+        #        pyqir.Type.void(self.module.module.context),
+        #        [
+        #            self.qir_int_type,
+        #            self.qir_int_type,
+        #            pyqir.IntType(self.module.module.context, 1),
+        #        ],
+        #    ),
+        # )
 
         # void set_all_bits_in_reg(i64 reg, i64 value)
-        self.set_all_bits_in_reg = self.module.module.add_external_function(
-            "set_all_bits_in_reg",
-            pyqir.FunctionType(
-                pyqir.Type.void(self.module.module.context),
-                [
-                    self.qir_int_type,
-                    self.qir_int_type,
-                ],
-            ),
-        )
+        # self.set_all_bits_in_reg = self.module.module.add_external_function(
+        #    "set_all_bits_in_reg",
+        #    pyqir.FunctionType(
+        #        pyqir.Type.void(self.module.module.context),
+        #        [
+        #            self.qir_int_type,
+        #            self.qir_int_type,
+        #        ],
+        #    ),
+        # )
 
         # __quantum__qis__read_result__body(result)
         self.read_bit_from_result = self.module.module.add_external_function(
