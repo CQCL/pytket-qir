@@ -85,30 +85,25 @@ def pytket_to_qir(
 
     if pyqir_0_7_compatibility:
 
-        assert len(circ.c_registers) <= 1
+        if len(circ.c_registers) > 1:
+            raise ValueError(
+                "The qir optimised for pyqir 0.7 can only contain one classical register"
+            )
 
         initial_result = str(populated_module.module.ir())  # type: ignore
 
         initial_result = initial_result.replace("entry_point", "EntryPoint").replace("num_required_qubits", "requiredQubits").replace("num_required_results", "requiredResults")  # type: ignore
 
-        result = ""
+        def keep_line(line):
+            return (
+                ("@__quantum__qis__read_result__body" not in line)
+                and ("@set_one_bit_in_reg" not in line)
+                and ("@reg2var" not in line)
+                and ("@read_bit_from_reg" not in line)
+                and ("@set_all_bits_in_reg" not in line)
+            )
 
-        for line in initial_result.split("\n"):
-            keep_line = True
-            if "@__quantum__qis__read_result__body" in line:
-                keep_line = False
-            elif "@set_one_bit_in_reg" in line:
-                keep_line = False
-            elif " @reg2var" in line:
-                keep_line = False
-            elif "@read_bit_from_reg" in line:
-                keep_line = False
-            elif "@set_all_bits_in_reg" in line:
-                keep_line = False
-
-            if keep_line:
-                result += line
-                result += "\n"
+        result = "\n".join(filter(keep_line, initial_result.split("\n")))
 
         result = result.replace("i64 %0", "i64 0")
         for _ in range(10):
