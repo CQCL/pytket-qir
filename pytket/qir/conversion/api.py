@@ -85,9 +85,7 @@ def pytket_to_qir(
 
     if pyqir_0_7_compatibility:
 
-        for creg in circ.c_registers:
-            reg_name = creg[0].reg_name
-            assert reg_name == "c"
+        assert len(circ.c_registers) == 1
 
         initial_result = str(populated_module.module.ir())  # type: ignore
 
