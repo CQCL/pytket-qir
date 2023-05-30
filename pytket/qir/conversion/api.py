@@ -95,7 +95,7 @@ one classical register"""
 
         initial_result = initial_result.replace("entry_point", "EntryPoint").replace("num_required_qubits", "requiredQubits").replace("num_required_results", "requiredResults")  # type: ignore
 
-        def keep_line(line):
+        def keep_line(line: str) -> bool:
             return (
                 ("@__quantum__qis__read_result__body" not in line)
                 and ("@set_one_bit_in_reg" not in line)
