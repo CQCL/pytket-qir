@@ -108,22 +108,25 @@ def pytket_to_qir(
         )
 
         initial_result = initial_result.replace(
-            """declare i64 @reg2var(i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, \
-i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, \
-i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, \
-i1, i1, i1, i1)""",
+            """declare i64 @reg2var(i1, i1, i1, i1, i1, i1, i1, i1, i1, \
+i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, \
+i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, \
+i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, \
+i1)""",
             "",
         )
 
         initial_result = initial_result.replace(
-            """  %0 = call i64 @reg2var(i1 false, i1 false, i1 false, i1 false, i1 false, i1 \
-false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 \
-false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 \
-false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 \
-false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 \
-false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 \
-false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 \
-false, i1 false, i1 false, i1 false, i1 false)""",
+            """  %0 = call i64 @reg2var(i1 false, i1 false, i1 false, \
+i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, \
+i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, \
+i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, \
+i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, \
+i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, \
+i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, \
+i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, \
+i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, \
+i1 false, i1 false, i1 false, i1 false, i1 false)""",
             "",
         )
 
