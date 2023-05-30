@@ -209,6 +209,9 @@ def test_pytket_qir_4() -> None:
 
     result = pytket_to_qir(circ, name="test_pytket_qir_4", qir_format=QIRFormat.STRING)
 
+    with open("test_pytket_qir_4.qir", "wb") as file:
+        file.write(pytket_to_qir(circ, name="test_pytket_qir_4"))
+
     print(result)
 
     assert (
@@ -297,6 +300,9 @@ def test_pytket_qir_5() -> None:
     result = pytket_to_qir(circ, name="test_pytket_qir_5", qir_format=QIRFormat.STRING)
 
     print(result)
+
+    with open("test_pytket_qir_5.qir", "wb") as file:
+        file.write(pytket_to_qir(circ, name="test_pytket_qir_5"))
 
     assert circ.c_registers == [
         BitRegister("a", 5),
@@ -400,6 +406,9 @@ def test_pytket_qir_6() -> None:
     result = pytket_to_qir(circ, name="test_pytket_qir_6", qir_format=QIRFormat.STRING)
 
     print(result)
+
+    with open("test_pytket_qir_6.qir", "wb") as file:
+        file.write(pytket_to_qir(circ, name="test_pytket_qir_6"))
 
     assert (
         result
@@ -515,6 +524,9 @@ def test_pytket_qir_7() -> None:
     result = pytket_to_qir(circ, name="test_pytket_qir_7", qir_format=QIRFormat.STRING)
 
     print(result)
+
+    with open("test_pytket_qir_7.qir", "wb") as file:
+        file.write(pytket_to_qir(circ, name="test_pytket_qir_7"))
 
     assert (
         result

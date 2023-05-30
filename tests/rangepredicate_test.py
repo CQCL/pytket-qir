@@ -43,6 +43,9 @@ def test_pytket_qir_rangepredicate() -> None:
 
     print(result)
 
+    with open("test_pytket_qir_rangepredicate.qir", "wb") as file:
+        file.write(pytket_to_qir(circ, name="test_pytket_qir_rangepredicate"))
+
     assert (
         result
         == """; ModuleID = 'test_pytket_qir_rangepredicate'

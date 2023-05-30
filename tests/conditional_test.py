@@ -42,6 +42,9 @@ def test_pytket_qir_conditional() -> None:
 
     print(result)
 
+    with open("test_pytket_qir_conditional.qir", "wb") as file:
+        file.write(pytket_to_qir(circ, name="test_pytket_qir_conditional"))
+
     assert (
         result
         == """; ModuleID = 'test_pytket_qir_conditional'
@@ -156,6 +159,9 @@ def test_pytket_qir_conditional_ii() -> None:
     )
 
     print(result)
+
+    with open("test_pytket_qir_conditional_ii.qir", "wb") as file:
+        file.write(pytket_to_qir(circ, name="test_pytket_qir_conditional_ii"))
 
     assert (
         result
@@ -272,6 +278,9 @@ def test_pytket_qir_conditional_iii() -> None:
 
     print(result)
 
+    with open("test_pytket_qir_conditional_iii.qir", "wb") as file:
+        file.write(pytket_to_qir(circ, name="test_pytket_qir_conditional_iii"))
+
     assert (
         result
         == """; ModuleID = 'test_pytket_qir_conditional_iii'
@@ -378,6 +387,9 @@ def test_pytket_qir_conditional_iv() -> None:
 
     print(result)
 
+    with open("test_pytket_qir_conditional_iv.qir", "wb") as file:
+        file.write(pytket_to_qir(circ, name="test_pytket_qir_conditional_iv"))
+
     assert (
         result
         == """; ModuleID = 'test_pytket_qir_conditional_iv'
@@ -469,6 +481,9 @@ def test_pytket_qir_conditional_v() -> None:
     )
 
     print(result)
+
+    with open("test_pytket_qir_conditional_v.qir", "wb") as file:
+        file.write(pytket_to_qir(circ, name="test_pytket_qir_conditional_v"))
 
     expected_result = """; ModuleID = 'test_pytket_qir_conditional_v'
 source_filename = "test_pytket_qir_conditional_v"

@@ -37,6 +37,9 @@ def test_pytket_qir_barrier() -> None:
 
     print(result)
 
+    with open("test_pytket_qir_barrier.qir", "wb") as file:
+        file.write(pytket_to_qir(circ, name="test_pytket_qir_barrier"))
+
     assert (
         result
         == """; ModuleID = 'test_pytket_qir_barrier'
@@ -114,6 +117,9 @@ def test_pytket_qir_barrier_ii() -> None:
     )
 
     print(result)
+
+    with open("test_pytket_qir_barrier_ii.qir", "wb") as file:
+        file.write(pytket_to_qir(circ, name="test_pytket_qir_barrier_ii"))
 
     assert (
         result

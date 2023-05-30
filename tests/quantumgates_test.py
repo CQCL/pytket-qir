@@ -92,20 +92,26 @@ def test_pytket_qir_quantum_ii() -> None:
 
     print(result)
 
+    with open("test_pytket_qir_quantum.qir", "wb") as file:
+        file.write(pytket_to_qir(circ, name="test_pytket_qir_quantum"))
+
 
 def test_pytket_qir_quantum_iii() -> None:
     circ = Circuit(2).H(0).CX(0, 1).measure_all()
 
     result = pytket_to_qir(
-        circ, name="test_pytket_qir_quantum", qir_format=QIRFormat.STRING
+        circ, name="test_pytket_qir_quantum_iii", qir_format=QIRFormat.STRING
     )
 
     print(result)
 
+    with open("test_pytket_qir_quantum_iii.qir", "wb") as file:
+        file.write(pytket_to_qir(circ, name="test_pytket_qir_quantum_iii"))
+
     assert (
         result
-        == """; ModuleID = 'test_pytket_qir_quantum'
-source_filename = "test_pytket_qir_quantum"
+        == """; ModuleID = 'test_pytket_qir_quantum_iii'
+source_filename = "test_pytket_qir_quantum_iii"
 
 %Qubit = type opaque
 %Result = type opaque
