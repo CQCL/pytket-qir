@@ -91,52 +91,28 @@ def pytket_to_qir(
 
         initial_result = initial_result.replace("entry_point", "EntryPoint").replace("num_required_qubits", "requiredQubits").replace("num_required_results", "requiredResults")  # type: ignore
 
-        initial_result = initial_result.replace(
-            "declare void @set_all_bits_in_reg(i64, i64)", ""
-        )
+        result = ""
 
-        initial_result = initial_result.replace(
-            "declare i1 @__quantum__qis__read_result__body(%Result*)", ""
-        )
+        for line in initial_result.split("\n"):
+            keep_line = True
+            if "@__quantum__qis__read_result__body" in line:
+                keep_line = False
+            elif "@set_one_bit_in_reg" in line:
+                keep_line = False
+            elif " @reg2var" in line:
+                keep_line = False
+            elif "@read_bit_from_reg" in line:
+                keep_line = False
+            elif "@set_all_bits_in_reg" in line:
+                keep_line = False
 
-        initial_result = initial_result.replace(
-            "declare i1 @read_bit_from_reg(i64, i64)", ""
-        )
+            if keep_line:
+                result += line
+                result += "\n"
 
-        initial_result = initial_result.replace(
-            "declare void @set_one_bit_in_reg(i64, i64, i1)", ""
-        )
-
-        initial_result = initial_result.replace(
-            """declare i64 @reg2var(i1, i1, i1, i1, i1, i1, i1, i1, i1, \
-i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, \
-i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, \
-i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, \
-i1)""",
-            "",
-        )
-
-        initial_result = initial_result.replace(
-            """  %0 = call i64 @reg2var(i1 false, i1 false, i1 false, \
-i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, \
-i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, \
-i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, \
-i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, \
-i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, \
-i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, \
-i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, \
-i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, \
-i1 false, i1 false, i1 false, i1 false, i1 false)""",
-            "",
-        )
-
-        initial_result = initial_result.replace("i64 %0", "i64 0")
-
-        result = initial_result.replace("\n\n\n\n", "\n\n")
-
-        result = result.replace("\n\n\n\n", "\n\n")
-
-        result = result.replace("\n\n\n\n", "\n\n")
+        result = result.replace("i64 %0", "i64 0")
+        for _ in range(10):
+            result = result.replace("\n\n\n\n", "\n\n")
 
         bitcode = pyqir.Module.from_ir(pyqir.Context(), result).bitcode  # type: ignore
 
