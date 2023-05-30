@@ -87,7 +87,8 @@ def pytket_to_qir(
 
         if len(circ.c_registers) > 1:
             raise ValueError(
-                "The qir optimised for pyqir 0.7 can only contain one classical register"
+                """The qir optimised for pyqir 0.7 can only contain 
+one classical register"""
             )
 
         initial_result = str(populated_module.module.ir())  # type: ignore
