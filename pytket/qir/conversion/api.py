@@ -106,7 +106,9 @@ one classical register"""
 
         result = "\n".join(filter(keep_line, initial_result.split("\n")))
 
+        # replace the use of the removed register variable with i64 0
         result = result.replace("i64 %0", "i64 0")
+
         for _ in range(10):
             result = result.replace("\n\n\n\n", "\n\n")
 
