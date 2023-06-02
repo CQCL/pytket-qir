@@ -40,7 +40,7 @@ def pytket_to_qir(
     circ: Circuit,
     name: str = "Generated from input pytket circuit",
     qir_format: QIRFormat = QIRFormat.BINARY,
-    pyqir_0_7_compatibility: bool = False,
+    pyqir_0_6_compatibility: bool = False,
 ) -> Union[str, bytes, None]:
     """converts given pytket circuit to qir
 
@@ -50,9 +50,9 @@ def pytket_to_qir(
     :type name: str
     :param qir_format: format of the generated qir, default value is binary
     :type qir_format: QIRFormat
-    :param pyqir_0_7_compatibility: converts the output to be compatible with
-        pyqir 0.7, default value false
-    :type pyqir_0_7_compatibility: bool
+    :param pyqir_0_6_compatibility: converts the output to be compatible with
+        pyqir 0.6, default value false
+    :type pyqir_0_6_compatibility: bool
     """
 
     if len(circ.q_registers) > 1 or circ.q_registers[0].name != "q":
@@ -83,11 +83,11 @@ def pytket_to_qir(
         qir_generator.circuit, qir_generator.module, True
     )
 
-    if pyqir_0_7_compatibility:
+    if pyqir_0_6_compatibility:
 
         if len(circ.c_registers) > 1:
             raise ValueError(
-                """The qir optimised for pyqir 0.7 can only contain 
+                """The qir optimised for pyqir 0.6 can only contain 
 one classical register"""
             )
 
