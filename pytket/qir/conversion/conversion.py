@@ -631,7 +631,10 @@ class QirGenerator:
                 self.module.builder.call(
                     self.additional_quantum_gates[OpType.ZZPhase],
                     [
-                        pyqir.const(pyqir.Type.double(self.module.module.context), float(op.params[0])),
+                        pyqir.const(
+                            pyqir.Type.double(self.module.module.context),
+                            float(op.params[0]),
+                        ),
                         module.module.qubits[command.qubits[0].index[0]],
                         module.module.qubits[command.qubits[1].index[0]],
                     ],
@@ -661,8 +664,14 @@ class QirGenerator:
                 self.module.builder.call(
                     self.additional_quantum_gates[OpType.PhasedX],
                     [
-                        pyqir.const(pyqir.Type.double(self.module.module.context), float(op.params[0])),
-                        pyqir.const(pyqir.Type.double(self.module.module.context), float(op.params[1])),
+                        pyqir.const(
+                            pyqir.Type.double(self.module.module.context),
+                            float(op.params[0]),
+                        ),
+                        pyqir.const(
+                            pyqir.Type.double(self.module.module.context),
+                            float(op.params[1]),
+                        ),
                         module.module.qubits[command.qubits[0].index[0]],
                     ],
                 )
@@ -693,7 +702,7 @@ class QirGenerator:
                         module.module.qubits[command.qubits[0].index[0]],
                         module.module.qubits[command.qubits[1].index[0]],
                     ],
-                )                                
+                )
 
             elif op.type == OpType.Measure:
 
