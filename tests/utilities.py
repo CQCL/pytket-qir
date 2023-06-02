@@ -22,7 +22,8 @@ def check_qir_result(given_qir: str, filename: str, writefile: bool = False) -> 
     :type given_qir: str
     :param filename: name of the file that should be compared with or written to
     :type filename: str
-    :param writefile: if set a file named `filename` will be created containing the `given_qir`
+    :param writefile: if set a file named `filename` will be created containing
+      the `given_qir`
     :type writefile: bool
     """
 
