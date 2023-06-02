@@ -62,8 +62,6 @@ from pytket.circuit.logic_exp import (  # type: ignore
     BitAnd,
 )
 
-from pytket.passes import auto_rebase_pass  # type: ignore
-
 from .gatesets import (
     FuncSpec,
 )
