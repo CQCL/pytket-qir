@@ -125,9 +125,6 @@ _TK_TO_PYQIR = {
     OpType.CX: QirGate(
         func_nat=FuncNat.QIS, func_name=FuncName.CX, func_spec=FuncSpec.BODY
     ),
-    # OpType.ZZPhase: QirGate(
-    #    func_nat=FuncNat.QIS, func_name=FuncName.ZZPHASE, func_spec=FuncSpec.BODY
-    # ),
     OpType.CZ: QirGate(
         func_nat=FuncNat.QIS, func_name=FuncName.CZ, func_spec=FuncSpec.BODY
     ),

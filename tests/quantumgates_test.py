@@ -45,10 +45,7 @@ def test_pytket_qir_quantum_ii() -> None:
         circ, name="test_pytket_qir_quantum", qir_format=QIRFormat.STRING
     )
 
-    assert "call void @__quantum__qis__mz__body" in str(result)
-    assert "call void @__quantum__qis__h__body" in str(result)
-    assert "call void @__quantum__qis__cnot__body" in str(result)
-    assert "call void @__quantum__qis__rx__body" in str(result)
+    check_qir_result(result, "test_pytket_qir_quantum_ii")
 
 
 def test_pytket_qir_quantum_iii() -> None:
