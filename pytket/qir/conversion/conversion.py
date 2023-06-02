@@ -118,7 +118,7 @@ class QirGenerator:
         self.cregs = _retrieve_registers(self.circuit.bits, BitRegister)
         self.target_gateset = self.module.gateset.base_gateset
 
-        self.getset_predicate = predicates.GateSetPredicate(set(self.target_gateset))
+        self.getset_predicate = predicates.GateSetPredicate(set(self.target_gateset))  # type: ignore
 
         self.set_cregs: Dict[str, List] = {}  # Keep track of set registers.
         self.ssa_vars: Dict[str, Value] = {}  # Keep track of set ssa variables.
