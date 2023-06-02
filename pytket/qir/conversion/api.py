@@ -51,7 +51,7 @@ def pytket_to_qir(
     :param qir_format: format of the generated qir, default value is binary
     :type qir_format: QIRFormat
     :param pyqir_0_6_compatibility: converts the output to be compatible with
-        pyqir 0.7, default value false
+        pyqir 0.6, default value false
     :type pyqir_0_6_compatibility: bool
     """
 
