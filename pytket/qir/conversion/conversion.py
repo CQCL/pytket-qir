@@ -23,7 +23,7 @@ from typing import cast, Dict, List, Optional, Sequence, Tuple, Union
 from pyqir import Value, IntPredicate
 import pyqir
 
-from pytket import Circuit, OpType, Bit, Qubit  # type: ignore
+from pytket import Circuit, OpType, Bit, Qubit, predicates  # type: ignore
 from pytket.qasm.qasm import _retrieve_registers  # type: ignore
 from pytket.circuit import (  # type: ignore
     BitRegister,
@@ -120,8 +120,7 @@ class QirGenerator:
         self.cregs = _retrieve_registers(self.circuit.bits, BitRegister)
         self.target_gateset = self.module.gateset.base_gateset
 
-        # Will throw an exception if the rebase can not handle the target gateset.
-        self.rebase_to_gateset = auto_rebase_pass(self.target_gateset)
+        self.getset_predicate = predicates.GateSetPredicate(set(self.target_gateset))
 
         self.set_cregs: Dict[str, List] = {}  # Keep track of set registers.
         self.ssa_vars: Dict[str, Value] = {}  # Keep track of set ssa variables.
@@ -325,7 +324,7 @@ class QirGenerator:
         if optype not in self.module.gateset.base_gateset:
             circuit = Circuit(self.circuit.n_qubits, self.circuit.n_bits)
             circuit.add_gate(optype, params, args)
-            if self.rebase_to_gateset.apply(circuit):
+            if not self.getset_predicate.verify(circuit):
                 raise ValueError("Gate not supported")
             return circuit
         return None
@@ -344,7 +343,7 @@ class QirGenerator:
             params = op.params
             circuit = Circuit(self.circuit.n_qubits, self.circuit.n_bits)
             circuit.add_gate(optype, params, args)
-            if self.rebase_to_gateset.apply(circuit):
+            if not self.getset_predicate.verify(circuit):
                 raise ValueError("Gate not supported")
             return circuit
 
