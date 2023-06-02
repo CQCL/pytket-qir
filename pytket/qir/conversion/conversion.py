@@ -326,7 +326,7 @@ class QirGenerator:
             circuit = Circuit(self.circuit.n_qubits, self.circuit.n_bits)
             circuit.add_gate(optype, params, args)
             if self.rebase_to_gateset.apply(circuit):
-                assert 1 == 2
+                raise ValueError("Gate not supported")
             return circuit
         return None
 
@@ -345,7 +345,7 @@ class QirGenerator:
             circuit = Circuit(self.circuit.n_qubits, self.circuit.n_bits)
             circuit.add_gate(optype, params, args)
             if self.rebase_to_gateset.apply(circuit):
-                assert 1 == 2
+                raise ValueError("Gate not supported")
             return circuit
 
     def _get_optype_and_params(self, op: Op) -> Tuple[OpType, Sequence[float]]:
