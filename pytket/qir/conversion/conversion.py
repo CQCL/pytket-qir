@@ -229,7 +229,7 @@ class QirGenerator:
             self.circuit.n_qubits + 1
         )
 
-        self.additional_quantum_gates: dict[OpType, Optional[pyqir.Function]] = {}
+        self.additional_quantum_gates: dict[OpType, pyqir.Function] = {}
 
         for creg in self.circuit.c_registers:
             self._reg2ssa_var(creg, qir_int_type)
@@ -628,7 +628,7 @@ class QirGenerator:
                         ),
                     )
 
-                self.module.builder.call(
+                self.module.builder.call(  # type: ignore
                     self.additional_quantum_gates[OpType.ZZPhase],
                     [
                         pyqir.const(
@@ -661,7 +661,7 @@ class QirGenerator:
                         ),
                     )
 
-                self.module.builder.call(
+                self.module.builder.call(  # type: ignore
                     self.additional_quantum_gates[OpType.PhasedX],
                     [
                         pyqir.const(
@@ -696,7 +696,7 @@ class QirGenerator:
                         ),
                     )
 
-                self.module.builder.call(
+                self.module.builder.call(  # type: ignore
                     self.additional_quantum_gates[OpType.ZZMax],
                     [
                         module.module.qubits[command.qubits[0].index[0]],

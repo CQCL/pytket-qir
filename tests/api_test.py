@@ -17,7 +17,7 @@ import pytest
 
 import pyqir
 
-from utilities import check_qir_result
+from utilities import check_qir_result  # type: ignore
 
 from pytket.qir.conversion.api import (
     pytket_to_qir,

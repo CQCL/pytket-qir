@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from utilities import check_qir_result
+from utilities import check_qir_result  # type: ignore
 
 from pytket.qir.conversion.api import pytket_to_qir, QIRFormat
 from pytket.circuit import Circuit, Qubit, Bit, BitRegister  # type: ignore
