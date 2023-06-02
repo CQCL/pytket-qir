@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from utilities import check_qir_result
+from utilities import check_qir_result  # type: ignore
 
 from pytket.qir.conversion.api import pytket_to_qir, QIRFormat
 from pytket.circuit import Circuit  # type: ignore
@@ -45,10 +45,10 @@ def test_pytket_qir_quantum_ii() -> None:
         circ, name="test_pytket_qir_quantum", qir_format=QIRFormat.STRING
     )
 
-    assert "call void @__quantum__qis__mz__body" in result
-    assert "call void @__quantum__qis__h__body" in result
-    assert "call void @__quantum__qis__cnot__body" in result
-    assert "call void @__quantum__qis__rx__body" in result
+    assert "call void @__quantum__qis__mz__body" in str(result)
+    assert "call void @__quantum__qis__h__body" in str(result)
+    assert "call void @__quantum__qis__cnot__body" in str(result)
+    assert "call void @__quantum__qis__rx__body" in str(result)
 
 
 def test_pytket_qir_quantum_iii() -> None:
