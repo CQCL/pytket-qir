@@ -20,6 +20,8 @@ from pytket circuits.
 from functools import partial
 from typing import cast, Dict, List, Optional, Sequence, Tuple, Union
 
+import numpy as np
+
 from pyqir import Value, IntPredicate
 import pyqir
 
@@ -670,6 +672,49 @@ class QirGenerator:
                             float(op.params[1]),
                         ),
                         module.module.qubits[command.qubits[0].index[0]],
+                    ],
+                )
+
+            elif op.type == OpType.TK2:
+
+                assert len(command.bits) == 0
+                assert len(command.qubits) == 2
+                assert len(op.params) == 3
+
+                if OpType.TK2 not in self.additional_quantum_gates:
+                    self.additional_quantum_gates[
+                        OpType.TK2
+                    ] = self.module.module.add_external_function(
+                        f"__quantum__qis__rxxyyzz__body",
+                        pyqir.FunctionType(
+                            pyqir.Type.void(self.module.module.context),
+                            [
+                                pyqir.Type.double(self.module.module.context),
+                                pyqir.Type.double(self.module.module.context),
+                                pyqir.Type.double(self.module.module.context),
+                                pyqir.qubit_type(self.module.module.context),
+                                pyqir.qubit_type(self.module.module.context),
+                            ],
+                        ),
+                    )
+
+                self.module.builder.call(  # type: ignore
+                    self.additional_quantum_gates[OpType.TK2],
+                    [
+                        pyqir.const(
+                            pyqir.Type.double(self.module.module.context),
+                            float(float(op.params[0]) * np.pi),
+                        ),
+                        pyqir.const(
+                            pyqir.Type.double(self.module.module.context),
+                            float(float(op.params[1]) * np.pi),
+                        ),
+                        pyqir.const(
+                            pyqir.Type.double(self.module.module.context),
+                            float(float(op.params[2]) * np.pi),
+                        ),
+                        module.module.qubits[command.qubits[0].index[0]],
+                        module.module.qubits[command.qubits[1].index[0]],
                     ],
                 )
 

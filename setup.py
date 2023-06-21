@@ -43,11 +43,12 @@ setup(
     packages=find_namespace_packages(include=["pytket.*"]),
     include_package_data=True,
     install_requires=[
-        "pytket ~= 1.15",
+        "pytket ~= 1.16",
         "pyqir == 0.8.2",
         "pyqir-generator == 0.7.0",
         "pyqir-evaluator == 0.7.0",
         "pyqir-parser == 0.7.0",
+        "numpy",
     ],
     classifiers=[
         "Environment :: Console",

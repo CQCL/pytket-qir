@@ -81,7 +81,35 @@ def test_pytket_qir_quantum_iv() -> None:
     check_qir_result(result, "test_pytket_qir_quantum_iv")
 
 
+def test_pytket_qir_quantum_v() -> None:
+    circ = Circuit(4, 4)
+    circ.H(0)
+    circ.X(0)
+    circ.Y(0)
+    circ.Z(0)
+    circ.Rx(0.5, 0)
+    circ.ZZPhase(0.5, 0, 1)
+    circ.PhasedX(0.5, 0.4, 1)
+    
+    circ.TK2(0.5, 0.4, 0.3, 0, 1)
+    circ.TK2(1.5, 1.4, 1.3, 2, 1)
+
+    circ.CX(1, 2)
+    circ.CX(1, 3)
+    circ.H(1)
+    circ.Measure(1, 1)
+
+    result = pytket_to_qir(
+        circ, name="test_pytket_qir_quantum_v", qir_format=QIRFormat.STRING
+    )
+
+    check_qir_result(result, "test_pytket_qir_quantum_v")
+
+
 if __name__ == "__main__":
     test_pytket_qir_quantum()
     test_pytket_qir_quantum_ii()
     test_pytket_qir_quantum_iii()
+    test_pytket_qir_quantum_iv()
+    test_pytket_qir_quantum_v()
+
