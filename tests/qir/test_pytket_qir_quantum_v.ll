@@ -1,5 +1,5 @@
-; ModuleID = 'test_pytket_qir_quantum_iv'
-source_filename = "test_pytket_qir_quantum_iv"
+; ModuleID = 'test_pytket_qir_quantum_v'
+source_filename = "test_pytket_qir_quantum_v"
 
 %Qubit = type opaque
 %Result = type opaque
@@ -16,7 +16,8 @@ entry:
   call void @__quantum__qis__rx__body(double 0x3FF921FB54442D18, %Qubit* null)
   call void @__quantum__qis__rzz__body(double 0x3FF921FB54442D18, %Qubit* null, %Qubit* inttoptr (i64 1 to %Qubit*))
   call void @__quantum__qis__phasedx__body(double 0x3FF921FB54442D18, double 0x3FF41B2F769CF0E0, %Qubit* inttoptr (i64 1 to %Qubit*))
-  call void @__quantum__qis__zzmax__body(%Qubit* null, %Qubit* inttoptr (i64 1 to %Qubit*))
+  call void @__quantum__qis__rxxyyzz__body(double 0x3FF921FB54442D18, double 0x3FF41B2F769CF0E0, double 0x3FEE28C731EB6950, %Qubit* null, %Qubit* inttoptr (i64 1 to %Qubit*))
+  call void @__quantum__qis__rxxyyzz__body(double 0x4012D97C7F3321D2, double 0x401197C987C952C4, double 0x40105616905F83B6, %Qubit* inttoptr (i64 2 to %Qubit*), %Qubit* inttoptr (i64 1 to %Qubit*))
   call void @__quantum__qis__cnot__body(%Qubit* inttoptr (i64 1 to %Qubit*), %Qubit* inttoptr (i64 2 to %Qubit*))
   call void @__quantum__qis__cnot__body(%Qubit* inttoptr (i64 1 to %Qubit*), %Qubit* inttoptr (i64 3 to %Qubit*))
   call void @__quantum__qis__h__body(%Qubit* inttoptr (i64 1 to %Qubit*))
@@ -59,7 +60,7 @@ declare void @__quantum__qis__rzz__body(double, %Qubit*, %Qubit*)
 
 declare void @__quantum__qis__phasedx__body(double, double, %Qubit*)
 
-declare void @__quantum__qis__zzmax__body(%Qubit*, %Qubit*)
+declare void @__quantum__qis__rxxyyzz__body(double, double, double, %Qubit*, %Qubit*)
 
 declare void @__quantum__qis__cnot__body(%Qubit*, %Qubit*)
 

@@ -20,6 +20,8 @@ from pytket circuits.
 from functools import partial
 from typing import cast, Dict, List, Optional, Sequence, Tuple, Union
 
+import math
+
 from pyqir import Value, IntPredicate
 import pyqir
 
@@ -630,7 +632,7 @@ class QirGenerator:
                     [
                         pyqir.const(
                             pyqir.Type.double(self.module.module.context),
-                            float(op.params[0]),
+                            (float(op.params[0]) * math.pi),
                         ),
                         module.module.qubits[command.qubits[0].index[0]],
                         module.module.qubits[command.qubits[1].index[0]],
@@ -663,13 +665,56 @@ class QirGenerator:
                     [
                         pyqir.const(
                             pyqir.Type.double(self.module.module.context),
-                            float(op.params[0]),
+                            (float(op.params[0]) * math.pi),
                         ),
                         pyqir.const(
                             pyqir.Type.double(self.module.module.context),
-                            float(op.params[1]),
+                            (float(op.params[1]) * math.pi),
                         ),
                         module.module.qubits[command.qubits[0].index[0]],
+                    ],
+                )
+
+            elif op.type == OpType.TK2:
+
+                assert len(command.bits) == 0
+                assert len(command.qubits) == 2
+                assert len(op.params) == 3
+
+                if OpType.TK2 not in self.additional_quantum_gates:
+                    self.additional_quantum_gates[
+                        OpType.TK2
+                    ] = self.module.module.add_external_function(
+                        f"__quantum__qis__rxxyyzz__body",
+                        pyqir.FunctionType(
+                            pyqir.Type.void(self.module.module.context),
+                            [
+                                pyqir.Type.double(self.module.module.context),
+                                pyqir.Type.double(self.module.module.context),
+                                pyqir.Type.double(self.module.module.context),
+                                pyqir.qubit_type(self.module.module.context),
+                                pyqir.qubit_type(self.module.module.context),
+                            ],
+                        ),
+                    )
+
+                self.module.builder.call(  # type: ignore
+                    self.additional_quantum_gates[OpType.TK2],
+                    [
+                        pyqir.const(
+                            pyqir.Type.double(self.module.module.context),
+                            (float(op.params[0]) * math.pi),
+                        ),
+                        pyqir.const(
+                            pyqir.Type.double(self.module.module.context),
+                            (float(op.params[1]) * math.pi),
+                        ),
+                        pyqir.const(
+                            pyqir.Type.double(self.module.module.context),
+                            (float(op.params[2]) * math.pi),
+                        ),
+                        module.module.qubits[command.qubits[0].index[0]],
+                        module.module.qubits[command.qubits[1].index[0]],
                     ],
                 )
 
@@ -855,6 +900,7 @@ class QirGenerator:
                     self.circuit_to_module(rebased_circ, module)
                 else:
                     optype, params = self._get_optype_and_params(op)
+                    pi_params = [p * math.pi for p in params]
                     qubits = self._to_qis_qubits(command.qubits)
                     results = self._to_qis_results(command.bits)
                     bits: Optional[Sequence[Value]] = None
@@ -869,7 +915,7 @@ class QirGenerator:
                     if bits:
                         get_gate(*bits)
                     elif params:
-                        get_gate(*params, *qubits)
+                        get_gate(*pi_params, *qubits)
                     elif results:
                         get_gate(*qubits, results)
                     else:
