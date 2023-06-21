@@ -632,7 +632,7 @@ class QirGenerator:
                     [
                         pyqir.const(
                             pyqir.Type.double(self.module.module.context),
-                            float(float(op.params[0]) * math.pi),
+                            (float(op.params[0]) * math.pi),
                         ),
                         module.module.qubits[command.qubits[0].index[0]],
                         module.module.qubits[command.qubits[1].index[0]],
@@ -665,11 +665,11 @@ class QirGenerator:
                     [
                         pyqir.const(
                             pyqir.Type.double(self.module.module.context),
-                            float(float(op.params[0]) * math.pi),
+                            (float(op.params[0]) * math.pi),
                         ),
                         pyqir.const(
                             pyqir.Type.double(self.module.module.context),
-                            float(float(op.params[1]) * math.pi),
+                            (float(op.params[1]) * math.pi),
                         ),
                         module.module.qubits[command.qubits[0].index[0]],
                     ],
@@ -703,15 +703,15 @@ class QirGenerator:
                     [
                         pyqir.const(
                             pyqir.Type.double(self.module.module.context),
-                            float(float(op.params[0]) * math.pi),
+                            (float(op.params[0]) * math.pi),
                         ),
                         pyqir.const(
                             pyqir.Type.double(self.module.module.context),
-                            float(float(op.params[1]) * math.pi),
+                            (float(op.params[1]) * math.pi),
                         ),
                         pyqir.const(
                             pyqir.Type.double(self.module.module.context),
-                            float(float(op.params[2]) * math.pi),
+                            (float(op.params[2]) * math.pi),
                         ),
                         module.module.qubits[command.qubits[0].index[0]],
                         module.module.qubits[command.qubits[1].index[0]],
