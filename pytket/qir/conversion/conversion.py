@@ -20,7 +20,7 @@ from pytket circuits.
 from functools import partial
 from typing import cast, Dict, List, Optional, Sequence, Tuple, Union
 
-import numpy as np
+import math
 
 from pyqir import Value, IntPredicate
 import pyqir
@@ -703,15 +703,15 @@ class QirGenerator:
                     [
                         pyqir.const(
                             pyqir.Type.double(self.module.module.context),
-                            float(float(op.params[0]) * np.pi),
+                            float(float(op.params[0]) * math.pi),
                         ),
                         pyqir.const(
                             pyqir.Type.double(self.module.module.context),
-                            float(float(op.params[1]) * np.pi),
+                            float(float(op.params[1]) * math.pi),
                         ),
                         pyqir.const(
                             pyqir.Type.double(self.module.module.context),
-                            float(float(op.params[2]) * np.pi),
+                            float(float(op.params[2]) * math.pi),
                         ),
                         module.module.qubits[command.qubits[0].index[0]],
                         module.module.qubits[command.qubits[1].index[0]],

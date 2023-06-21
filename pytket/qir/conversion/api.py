@@ -119,7 +119,7 @@ one classical register"""
         elif qir_format == QIRFormat.STRING:
             return result  # type: ignore
         else:
-            assert not "unsupported return type"
+            assert not "unsupported return type"  # type: ignore
 
     else:
         if qir_format == QIRFormat.BINARY:
@@ -127,4 +127,4 @@ one classical register"""
         elif qir_format == QIRFormat.STRING:
             return populated_module.module.ir()
         else:
-            assert not "unsupported return type"
+            assert not "unsupported return type"  # type: ignore

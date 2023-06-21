@@ -48,7 +48,6 @@ setup(
         "pyqir-generator == 0.7.0",
         "pyqir-evaluator == 0.7.0",
         "pyqir-parser == 0.7.0",
-        "numpy",
     ],
     classifiers=[
         "Environment :: Console",
