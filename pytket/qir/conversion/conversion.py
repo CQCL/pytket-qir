@@ -632,7 +632,7 @@ class QirGenerator:
                     [
                         pyqir.const(
                             pyqir.Type.double(self.module.module.context),
-                            float(op.params[0]),
+                            float(float(op.params[0]) * math.pi),
                         ),
                         module.module.qubits[command.qubits[0].index[0]],
                         module.module.qubits[command.qubits[1].index[0]],
@@ -665,11 +665,11 @@ class QirGenerator:
                     [
                         pyqir.const(
                             pyqir.Type.double(self.module.module.context),
-                            float(op.params[0]),
+                            float(float(op.params[0]) * math.pi),
                         ),
                         pyqir.const(
                             pyqir.Type.double(self.module.module.context),
-                            float(op.params[1]),
+                            float(float(op.params[1]) * math.pi),
                         ),
                         module.module.qubits[command.qubits[0].index[0]],
                     ],
@@ -900,6 +900,7 @@ class QirGenerator:
                     self.circuit_to_module(rebased_circ, module)
                 else:
                     optype, params = self._get_optype_and_params(op)
+                    pi_params = [p * math.pi for p in params]
                     qubits = self._to_qis_qubits(command.qubits)
                     results = self._to_qis_results(command.bits)
                     bits: Optional[Sequence[Value]] = None
@@ -914,7 +915,7 @@ class QirGenerator:
                     if bits:
                         get_gate(*bits)
                     elif params:
-                        get_gate(*params, *qubits)
+                        get_gate(*pi_params, *qubits)
                     elif results:
                         get_gate(*qubits, results)
                     else:

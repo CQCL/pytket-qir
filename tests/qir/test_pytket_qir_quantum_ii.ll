@@ -19,7 +19,7 @@ entry:
   %1 = call i1 @__quantum__qis__read_result__body(%Result* inttoptr (i64 1 to %Result*))
   call void @set_one_bit_in_reg(i64 %0, i64 1, i1 %1)
   call void @__quantum__qis__z__body(%Qubit* null)
-  call void @__quantum__qis__rx__body(double 5.000000e-01, %Qubit* null)
+  call void @__quantum__qis__rx__body(double 0x3FF921FB54442D18, %Qubit* null)
   call void @__quantum__rt__tuple_start_record_output()
   call void @__quantum__rt__int_record_output(i64 %0, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @0, i32 0, i32 0))
   call void @__quantum__rt__tuple_end_record_output()
