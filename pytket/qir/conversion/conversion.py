@@ -831,6 +831,7 @@ class QirGenerator:
                     ](module.builder)(ssa_left, ssa_right)
 
                 else:
+                    print(op)
                     raise ValueError(" unexpected classical op")
 
                 if returntypebool:
