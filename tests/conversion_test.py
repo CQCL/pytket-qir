@@ -14,6 +14,9 @@
 
 from utilities import check_qir_result  # type: ignore
 
+import pytest
+
+from pytket.passes import FlattenRelabelRegistersPass
 from pytket.qir.conversion.api import pytket_to_qir, QIRFormat
 from pytket.circuit import Circuit, Qubit, Bit, if_not_bit, BitRegister  # type: ignore
 from pytket.circuit.logic_exp import (  # type: ignore
@@ -210,6 +213,63 @@ def test_pytket_qir_9() -> None:
     check_qir_result(result, "test_pytket_qir_9")
 
 
+def test_pytket_qir_10() -> None:
+    # try circuit with muti circuit register
+    c = Circuit()
+    q1 = Qubit("q1", 0)
+    q2 = Qubit("q2", 0)
+    c1 = Bit("c1", 0)
+    c2 = Bit("c2", 0)
+    for q in (q1, q2):
+        c.add_qubit(q)
+    for cb in (c1, c2):
+        c.add_bit(cb)
+    c.H(q1)
+    c.CX(q1, q2)
+    c.Measure(q1, c1)
+    c.Measure(q2, c2)
+
+    assert c.n_qubits == 2
+    assert c.n_bits == 2
+
+    with pytest.raises(ValueError):
+        pytket_to_qir(c, name="test_pytket_qir_10", qir_format=QIRFormat.STRING)
+
+    # gives:
+    # E ValueError: The circuit that should be converted should only have the default
+    # E             quantum register. You can convert it using the pytket
+    # E             compiler pass `FlattenRelabelRegistersPass`.
+
+
+def test_pytket_qir_11() -> None:
+    # try circuit with muti circuit register
+    c = Circuit()
+    q1 = Qubit("q1", 0)
+    q2 = Qubit("q2", 0)
+    c1 = Bit("c1", 0)
+    c2 = Bit("c2", 0)
+    for q in (q1, q2):
+        c.add_qubit(q)
+    for cb in (c1, c2):
+        c.add_bit(cb)
+    c.H(q1)
+    c.CX(q1, q2)
+    c.Measure(q1, c1)
+    c.Measure(q2, c2)
+
+    assert c.n_qubits == 2
+    assert c.n_bits == 2
+
+    FlattenRelabelRegistersPass().apply(c)
+
+    assert c.n_qubits == 2
+    assert c.n_bits == 2
+
+    result = pytket_to_qir(c, name="test_pytket_qir_11", qir_format=QIRFormat.STRING)
+
+    check_qir_result(result, "test_pytket_qir_11")
+
+
 if __name__ == "__main__":
     test_pytket_qir()
     test_pytket_qir_2()
@@ -220,3 +280,5 @@ if __name__ == "__main__":
     test_pytket_qir_7()
     test_pytket_qir_8()
     test_pytket_qir_9()
+    test_pytket_qir_10()
+    test_pytket_qir_11()
