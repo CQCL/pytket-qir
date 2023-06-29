@@ -434,7 +434,7 @@ class QirGenerator:
                     com_bits = args[:in_width]
                     args = args[in_width:]
                     regname = com_bits[0].reg_name
-                    #if com_bits != list(self.cregs[regname]):
+                    # if com_bits != list(self.cregs[regname]):
                     #    raise ValueError("SetBitOp must act on entire registers.")
                     reglist.append(regname)
         return inputs, outputs
@@ -456,8 +456,10 @@ class QirGenerator:
             return output_instruction  # type: ignore
         elif type(reg) == BitRegister:
             return self.ssa_vars[reg.name]
+        elif type(reg) == int:
+            return pyqir.const(self.qir_int_type, reg)
         else:
-            raise ValueError("unsupported classical register operaton")
+            raise ValueError(f"unsupported classical register operaton: {type(reg)}")
 
     def _get_ssa_from_cl_bit_op(
         self, bit: Union[Bit, BitAnd, BitOr, BitXor], module: tketqirModule
@@ -864,7 +866,7 @@ class QirGenerator:
                 assert len(command.qubits) == 0
 
                 for b, v in zip(command.bits, command.op.values):
-                    if(v):
+                    if v:
                         output_instruction = pyqir.const(self.qir_bool_type, 1)
                     else:
                         output_instruction = pyqir.const(self.qir_bool_type, 0)
@@ -880,7 +882,7 @@ class QirGenerator:
 
             elif isinstance(op, CopyBitsOp):
                 assert len(command.qubits) == 0
-                half_length = int(len(command.args)/2)
+                half_length = int(len(command.args) / 2)
                 assert 2 * half_length == len(command.args)
 
                 for i, o in zip(command.args[:half_length], command.args[half_length:]):
@@ -888,7 +890,7 @@ class QirGenerator:
                         self.read_bit_from_reg,
                         [
                             self.ssa_vars[i.reg_name],
-                            pyqir.const(self.qir_int_type, i.index[0])
+                            pyqir.const(self.qir_int_type, i.index[0]),
                         ],
                     )
 
@@ -923,7 +925,7 @@ class QirGenerator:
                 else:
                     raise ValueError("Meta op is not supported yet")
 
-            #elif isinstance(op, CopyBitsOp):
+            # elif isinstance(op, CopyBitsOp):
             #    input_reg = command.args[0]
             #    output_reg = command.args[1]
             #    output_name = output_reg.reg_name
