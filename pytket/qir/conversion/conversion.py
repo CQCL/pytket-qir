@@ -114,6 +114,7 @@ class QirGenerator:
         self.module = module
         self.wasm_int_type = pyqir.IntType(self.module.context, wasm_int_type)
         self.qir_int_type = pyqir.IntType(self.module.context, qir_int_type)
+        self.qir_bool_type = pyqir.IntType(self.module.context, 1)
         self.qubit_type = pyqir.qubit_type(self.module.context)
         self.result_type = pyqir.result_type(self.module.context)
 
@@ -433,8 +434,8 @@ class QirGenerator:
                     com_bits = args[:in_width]
                     args = args[in_width:]
                     regname = com_bits[0].reg_name
-                    if com_bits != list(self.cregs[regname]):
-                        raise ValueError("SetBitOp must act on entire registers.")
+                    #if com_bits != list(self.cregs[regname]):
+                    #    raise ValueError("SetBitOp must act on entire registers.")
                     reglist.append(regname)
         return inputs, outputs
 
@@ -859,9 +860,59 @@ class QirGenerator:
                     )
 
             elif isinstance(op, SetBitsOp):
-                _, outputs = self._get_c_regs_from_com(command)
-                for out in outputs:
-                    self.set_cregs[out] = command.op.values
+                assert len(command.op.values) == len(command.bits)
+                assert len(command.qubits) == 0
+
+                for b, v in zip(command.bits, command.op.values):
+                    if(v):
+                        output_instruction = pyqir.const(self.qir_bool_type, 1)
+                    else:
+                        output_instruction = pyqir.const(self.qir_bool_type, 0)
+
+                    self.module.builder.call(
+                        self.set_one_bit_in_reg,
+                        [
+                            self.ssa_vars[b.reg_name],
+                            pyqir.const(self.qir_int_type, b.index[0]),
+                            output_instruction,
+                        ],
+                    )
+
+            elif isinstance(op, CopyBitsOp):
+                assert len(command.qubits) == 0
+                half_length = int(len(command.args)/2)
+                assert 2 * half_length == len(command.args)
+
+                print(command.bits)
+
+                print(command.args)
+
+                print("INPUT:")
+                for b in command.args[:half_length]:
+                    print(b)
+
+                print("output:")
+                for b in command.args[half_length:]:
+                    print(b)
+
+                for i, o in zip(command.args[:half_length], command.args[half_length:]):
+                    output_instruction = self.module.builder.call(
+                        self.read_bit_from_reg,
+                        [
+                            self.ssa_vars[i.reg_name],
+                            pyqir.const(self.qir_int_type, i.index[0])
+                        ],
+                    )
+
+                    self.module.builder.call(
+                        self.set_one_bit_in_reg,
+                        [
+                            self.ssa_vars[o.reg_name],
+                            pyqir.const(self.qir_int_type, o.index[0]),
+                            output_instruction,
+                        ],
+                    )
+
             elif isinstance(op, MetaOp):
 
                 assert command.qubits[0].reg_name == "q"
@@ -884,17 +935,17 @@ class QirGenerator:
                 else:
                     raise ValueError("Meta op is not supported yet")
 
-            elif isinstance(op, CopyBitsOp):
-                input_reg = command.args[0]
-                output_reg = command.args[1]
-                output_name = output_reg.reg_name
-                optype, _ = self._get_optype_and_params(op)
-                gate = module.gateset.tk_to_gateset(optype)
-                ssa_var = cast(Value, self.module.module.results[input_reg.index[0]])
-                get_gate = getattr(module, gate.func_name.value)
-                output_instr = module.builder.call(get_gate, [ssa_var])
-                ssa_var_result = output_instr
-                self.set_all_bits_in_reg(self.ssa_vars[output_name], ssa_var_result)  # type: ignore
+            #elif isinstance(op, CopyBitsOp):
+            #    input_reg = command.args[0]
+            #    output_reg = command.args[1]
+            #    output_name = output_reg.reg_name
+            #    optype, _ = self._get_optype_and_params(op)
+            #    gate = module.gateset.tk_to_gateset(optype)
+            #    ssa_var = cast(Value, self.module.module.results[input_reg.index[0]])
+            #    get_gate = getattr(module, gate.func_name.value)
+            #    output_instr = module.builder.call(get_gate, [ssa_var])
+            #    ssa_var_result = output_instr
+            #    self.set_all_bits_in_reg(self.ssa_vars[output_name], ssa_var_result)  # type: ignore
 
             else:
                 rebased_circ = self._rebase_command_to_gateset(

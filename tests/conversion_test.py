@@ -154,21 +154,57 @@ def test_pytket_qir_7() -> None:
 
     check_qir_result(result, "test_pytket_qir_7")
 
+def test_pytket_qir_8a() -> None:
+    # test setbits op
+    c = Circuit(1, name="test_classical")
+    a = c.add_c_register("a", 8)
+
+    c.add_c_setbits([True], [a[0]])
+    c.add_c_setbits([True], [a[2]])
+    c.add_c_setbits([True], [a[1]])
+    c.add_c_setbits([True], [a[7]])
+    c.add_c_setbits([False, True] + [False] * 6, list(a))
+
+    assert c.n_qubits == 1
+    assert c.n_bits == 8
+
+    result = pytket_to_qir(c, name="test_pytket_qir_8a", qir_format=QIRFormat.STRING)
+
+    check_qir_result(result, "test_pytket_qir_8a")
+
+
+def test_pytket_qir_8b() -> None:
+    # test copybits op
+    c = Circuit(1, name="test_classical")
+    a = c.add_c_register("a", 2)
+    b = c.add_c_register("b", 2)
+
+    c.add_c_copyreg(a, b)
+
+    assert c.n_qubits == 1
+    assert c.n_bits == 4
+
+    for com in c:
+        print(com)
+
+    result = pytket_to_qir(c, name="test_pytket_qir_8b", qir_format=QIRFormat.STRING)
+
+    check_qir_result(result, "test_pytket_qir_8b")
+
 
 def test_pytket_qir_8() -> None:
-    # test calssical exp box handling
-    # circuit to cover capabilities covered in example notebook
+    # test setbits op
     c = Circuit(1, name="test_classical")
     a = c.add_c_register("a", 8)
     b = c.add_c_register("b", 10)
     d = c.add_c_register("d", 10)
 
-    # c.add_c_setbits([True], [a[0]])
+    c.add_c_setbits([True], [a[0]])
     c.add_c_setbits([False, True] + [False] * 6, list(a))
     c.add_c_setbits([True, True] + [False] * 8, list(b))
 
     c.add_c_setreg(23, a)
-    # c.add_c_copyreg(a, b)
+    c.add_c_copyreg(a, b)
 
     c.add_classicalexpbox_register(a + b, d)
     c.add_classicalexpbox_register(a - b, d)
@@ -192,6 +228,9 @@ def test_pytket_qir_8() -> None:
 
     assert c.n_qubits == 1
     assert c.n_bits == 133
+
+    for com in c:
+        print(com)
 
     result = pytket_to_qir(c, name="test_pytket_qir_8", qir_format=QIRFormat.STRING)
 
