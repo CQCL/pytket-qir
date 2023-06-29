@@ -185,7 +185,7 @@ def test_pytket_qir_8() -> None:
     c.X(0, condition=reg_lt(a, 1))
     c.X(0, condition=reg_geq(a, 1))
     c.X(0, condition=reg_leq(a, 1))
-    # c.Phase(0, condition=a[0])
+    c.Phase(0, condition=a[0])
 
     assert c.n_qubits == 1
     assert c.n_bits == 133

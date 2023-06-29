@@ -53,32 +53,31 @@ entry:
   call void @set_all_bits_in_reg(i64 %5, i64 %27)
   %28 = or i64 %0, %1
   call void @set_all_bits_in_reg(i64 %6, i64 %28)
-  %29 = sub i64 %0, %1
-  call void @set_all_bits_in_reg(i64 %2, i64 %29)
-  %30 = icmp sgt i64 1, %4
-  %31 = icmp sgt i64 %4, 1
-  %32 = and i1 %30, %31
-  call void @set_one_bit_in_reg(i64 %3, i64 0, i1 %32)
-  %33 = icmp sgt i64 1, %5
-  %34 = icmp sgt i64 %5, 1
-  %35 = and i1 %33, %34
-  call void @set_one_bit_in_reg(i64 %3, i64 2, i1 %35)
-  %36 = icmp sgt i64 1, %6
-  %37 = icmp sgt i64 %6, 1
-  %38 = and i1 %36, %37
-  call void @set_one_bit_in_reg(i64 %3, i64 3, i1 %38)
-  %39 = call i1 @read_bit_from_reg(i64 %3, i64 0)
-  br i1 %39, label %then, label %else
+  %29 = call i1 @read_bit_from_reg(i64 %0, i64 0)
+  br i1 %29, label %then, label %else
 
 then:                                             ; preds = %entry
-  call void @__quantum__qis__x__body(%Qubit* null)
   br label %continue
 
 else:                                             ; preds = %entry
   br label %continue
 
 continue:                                         ; preds = %else, %then
-  %40 = call i1 @read_bit_from_reg(i64 %3, i64 1)
+  %30 = sub i64 %0, %1
+  call void @set_all_bits_in_reg(i64 %2, i64 %30)
+  %31 = icmp sgt i64 1, %4
+  %32 = icmp sgt i64 %4, 1
+  %33 = and i1 %31, %32
+  call void @set_one_bit_in_reg(i64 %3, i64 0, i1 %33)
+  %34 = icmp sgt i64 1, %5
+  %35 = icmp sgt i64 %5, 1
+  %36 = and i1 %34, %35
+  call void @set_one_bit_in_reg(i64 %3, i64 2, i1 %36)
+  %37 = icmp sgt i64 1, %6
+  %38 = icmp sgt i64 %6, 1
+  %39 = and i1 %37, %38
+  call void @set_one_bit_in_reg(i64 %3, i64 3, i1 %39)
+  %40 = call i1 @read_bit_from_reg(i64 %3, i64 0)
   br i1 %40, label %then1, label %else2
 
 then1:                                            ; preds = %continue
@@ -89,7 +88,7 @@ else2:                                            ; preds = %continue
   br label %continue3
 
 continue3:                                        ; preds = %else2, %then1
-  %41 = call i1 @read_bit_from_reg(i64 %3, i64 2)
+  %41 = call i1 @read_bit_from_reg(i64 %3, i64 1)
   br i1 %41, label %then4, label %else5
 
 then4:                                            ; preds = %continue3
@@ -100,7 +99,7 @@ else5:                                            ; preds = %continue3
   br label %continue6
 
 continue6:                                        ; preds = %else5, %then4
-  %42 = call i1 @read_bit_from_reg(i64 %3, i64 3)
+  %42 = call i1 @read_bit_from_reg(i64 %3, i64 2)
   br i1 %42, label %then7, label %else8
 
 then7:                                            ; preds = %continue6
@@ -111,7 +110,7 @@ else8:                                            ; preds = %continue6
   br label %continue9
 
 continue9:                                        ; preds = %else8, %then7
-  %43 = call i1 @read_bit_from_reg(i64 %0, i64 0)
+  %43 = call i1 @read_bit_from_reg(i64 %3, i64 3)
   br i1 %43, label %then10, label %else11
 
 then10:                                           ; preds = %continue9
@@ -122,18 +121,18 @@ else11:                                           ; preds = %continue9
   br label %continue12
 
 continue12:                                       ; preds = %else11, %then10
-  %44 = call i1 @read_bit_from_reg(i64 %3, i64 4)
+  %44 = call i1 @read_bit_from_reg(i64 %0, i64 0)
   br i1 %44, label %then13, label %else14
 
 then13:                                           ; preds = %continue12
-  br label %continue15
-
-else14:                                           ; preds = %continue12
   call void @__quantum__qis__x__body(%Qubit* null)
   br label %continue15
 
+else14:                                           ; preds = %continue12
+  br label %continue15
+
 continue15:                                       ; preds = %else14, %then13
-  %45 = call i1 @read_bit_from_reg(i64 %0, i64 0)
+  %45 = call i1 @read_bit_from_reg(i64 %3, i64 4)
   br i1 %45, label %then16, label %else17
 
 then16:                                           ; preds = %continue15
@@ -144,18 +143,18 @@ else17:                                           ; preds = %continue15
   br label %continue18
 
 continue18:                                       ; preds = %else17, %then16
-  %46 = call i1 @read_bit_from_reg(i64 %3, i64 5)
+  %46 = call i1 @read_bit_from_reg(i64 %0, i64 0)
   br i1 %46, label %then19, label %else20
 
 then19:                                           ; preds = %continue18
-  call void @__quantum__qis__x__body(%Qubit* null)
   br label %continue21
 
 else20:                                           ; preds = %continue18
+  call void @__quantum__qis__x__body(%Qubit* null)
   br label %continue21
 
 continue21:                                       ; preds = %else20, %then19
-  %47 = call i1 @read_bit_from_reg(i64 %3, i64 6)
+  %47 = call i1 @read_bit_from_reg(i64 %3, i64 5)
   br i1 %47, label %then22, label %else23
 
 then22:                                           ; preds = %continue21
@@ -166,7 +165,7 @@ else23:                                           ; preds = %continue21
   br label %continue24
 
 continue24:                                       ; preds = %else23, %then22
-  %48 = call i1 @read_bit_from_reg(i64 %3, i64 7)
+  %48 = call i1 @read_bit_from_reg(i64 %3, i64 6)
   br i1 %48, label %then25, label %else26
 
 then25:                                           ; preds = %continue24
@@ -177,7 +176,7 @@ else26:                                           ; preds = %continue24
   br label %continue27
 
 continue27:                                       ; preds = %else26, %then25
-  %49 = call i1 @read_bit_from_reg(i64 %3, i64 8)
+  %49 = call i1 @read_bit_from_reg(i64 %3, i64 7)
   br i1 %49, label %then28, label %else29
 
 then28:                                           ; preds = %continue27
@@ -188,6 +187,17 @@ else29:                                           ; preds = %continue27
   br label %continue30
 
 continue30:                                       ; preds = %else29, %then28
+  %50 = call i1 @read_bit_from_reg(i64 %3, i64 8)
+  br i1 %50, label %then31, label %else32
+
+then31:                                           ; preds = %continue30
+  call void @__quantum__qis__x__body(%Qubit* null)
+  br label %continue33
+
+else32:                                           ; preds = %continue30
+  br label %continue33
+
+continue33:                                       ; preds = %else32, %then31
   call void @__quantum__rt__tuple_start_record_output()
   call void @__quantum__rt__int_record_output(i64 %0, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @0, i32 0, i32 0))
   call void @__quantum__rt__int_record_output(i64 %1, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @1, i32 0, i32 0))

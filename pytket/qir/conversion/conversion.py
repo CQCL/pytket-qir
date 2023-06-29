@@ -773,6 +773,9 @@ class QirGenerator:
                     ],
                 )
 
+            elif op.type == OpType.Phase:
+                continue
+
             elif isinstance(op, ClassicalExpBox):
 
                 returntypebool = False
