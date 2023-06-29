@@ -185,9 +185,6 @@ def test_pytket_qir_8b() -> None:
     assert c.n_qubits == 1
     assert c.n_bits == 4
 
-    for com in c:
-        print(com)
-
     result = pytket_to_qir(c, name="test_pytket_qir_8b", qir_format=QIRFormat.STRING)
 
     check_qir_result(result, "test_pytket_qir_8b")
@@ -231,16 +228,11 @@ def test_pytket_qir_8c() -> None:
     # test << and >> ops
     c = Circuit(1, name="test_classical")
     a = c.add_c_register("a", 8)
-    # b = c.add_c_register("b", 8)
 
     c.add_classicalexpbox_register(a << 1, a)
-    # c.add_classicalexpbox_register(a >> 1, b)
 
     assert c.n_qubits == 1
     assert c.n_bits == 8
-
-    for com in c:
-        print(com)
 
     result = pytket_to_qir(c, name="test_pytket_qir_8c", qir_format=QIRFormat.STRING)
 
@@ -284,8 +276,8 @@ def test_pytket_qir_8() -> None:
     c.add_classicalexpbox_register(a + b, d)
     c.add_classicalexpbox_register(a - b, d)
     # c.add_classicalexpbox_register(a * b // d, d)
-    # c.add_classicalexpbox_register(a << 1, a)
-    # c.add_classicalexpbox_register(a >> 1, b)
+    c.add_classicalexpbox_register(a << 1, a)
+    c.add_classicalexpbox_register(a >> 1, b)
 
     c.X(0, condition=reg_eq(a ^ b, 1))
     c.X(0, condition=(a[0] ^ b[0]))
@@ -303,9 +295,6 @@ def test_pytket_qir_8() -> None:
 
     assert c.n_qubits == 1
     assert c.n_bits == 133
-
-    for com in c:
-        print(com)
 
     result = pytket_to_qir(c, name="test_pytket_qir_8", qir_format=QIRFormat.STRING)
 
