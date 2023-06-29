@@ -55,7 +55,9 @@ def pytket_to_qir(
     :type pyqir_0_6_compatibility: bool
     """
 
-    if len(circ.q_registers) > 1 or circ.q_registers[0].name != "q":
+    if len(circ.q_registers) > 1 or (
+        len(circ.q_registers) == 1 and circ.q_registers[0].name != "q"
+    ):
         raise ValueError(
             """The circuit that should be converted should only have the default
             quantum register. You can convert it using the pytket

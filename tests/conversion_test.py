@@ -201,11 +201,11 @@ def test_pytket_qir_8() -> None:
 def test_pytket_qir_9() -> None:
     # test calssical exp box handling
     # circuit to cover capabilities covered in example notebook
-    c = Circuit(1, 1, name="test_classical")
+    c = Circuit(0, 1, name="test_classical")
     a = c.add_c_register("a", 8)
     c.add_c_setreg(32, a)
 
-    assert c.n_qubits == 1
+    assert c.n_qubits == 0
     assert c.n_bits == 9
 
     result = pytket_to_qir(c, name="test_pytket_qir_9", qir_format=QIRFormat.STRING)
