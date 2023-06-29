@@ -251,9 +251,6 @@ def test_pytket_qir_13() -> None:
     assert c.n_qubits == 1
     assert c.n_bits == 16
 
-    for com in c:
-        print(com)
-
     result = pytket_to_qir(c, name="test_pytket_qir_13", qir_format=QIRFormat.STRING)
 
     check_qir_result(result, "test_pytket_qir_13")
