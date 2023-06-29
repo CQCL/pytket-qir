@@ -889,8 +889,8 @@ class QirGenerator:
                     output_instruction = self.module.builder.call(
                         self.read_bit_from_reg,
                         [
-                            self.ssa_vars[i.reg_name],
-                            pyqir.const(self.qir_int_type, i.index[0]),
+                            self.ssa_vars[i.reg_name],  # type: ignore
+                            pyqir.const(self.qir_int_type, i.index[0]),  # type: ignore
                         ],
                     )
 
