@@ -14,8 +14,11 @@
 
 from utilities import check_qir_result  # type: ignore
 
+import pytest
+
+from pytket.passes import FlattenRelabelRegistersPass  # type: ignore
 from pytket.qir.conversion.api import pytket_to_qir, QIRFormat
-from pytket.circuit import Circuit, Qubit, Bit, BitRegister  # type: ignore
+from pytket.circuit import Circuit, Qubit, Bit, if_not_bit, BitRegister  # type: ignore
 from pytket.circuit.logic_exp import (  # type: ignore
     reg_eq,
     reg_neq,
@@ -152,6 +155,224 @@ def test_pytket_qir_7() -> None:
     check_qir_result(result, "test_pytket_qir_7")
 
 
+def test_pytket_qir_8() -> None:
+    # test setbits op
+    c = Circuit(1, name="test_classical")
+    a = c.add_c_register("a", 8)
+
+    c.add_c_setbits([True], [a[0]])
+    c.add_c_setbits([True], [a[2]])
+    c.add_c_setbits([True], [a[1]])
+    c.add_c_setbits([True], [a[7]])
+    c.add_c_setbits([False, True] + [False] * 6, list(a))
+
+    assert c.n_qubits == 1
+    assert c.n_bits == 8
+
+    result = pytket_to_qir(c, name="test_pytket_qir_8", qir_format=QIRFormat.STRING)
+
+    check_qir_result(result, "test_pytket_qir_8")
+
+
+def test_pytket_qir_9() -> None:
+    # test copybits op
+    c = Circuit(1, name="test_classical")
+    a = c.add_c_register("a", 2)
+    b = c.add_c_register("b", 2)
+
+    c.add_c_copyreg(a, b)
+
+    assert c.n_qubits == 1
+    assert c.n_bits == 4
+
+    result = pytket_to_qir(c, name="test_pytket_qir_9", qir_format=QIRFormat.STRING)
+
+    check_qir_result(result, "test_pytket_qir_9")
+
+
+def test_pytket_qir_10() -> None:
+    # test copybits op
+    c = Circuit(1, name="test_classical")
+    a = c.add_c_register("a", 4)
+    b = c.add_c_register("b", 2)
+
+    c.add_c_copyreg(a, b)
+
+    assert c.n_qubits == 1
+    assert c.n_bits == 6
+
+    result = pytket_to_qir(c, name="test_pytket_qir_10", qir_format=QIRFormat.STRING)
+
+    check_qir_result(result, "test_pytket_qir_10")
+
+
+def test_pytket_qir_11() -> None:
+    # test copybits op
+    c = Circuit(1, name="test_classical")
+    a = c.add_c_register("a", 2)
+    b = c.add_c_register("b", 4)
+
+    c.add_c_copyreg(a, b)
+
+    assert c.n_qubits == 1
+    assert c.n_bits == 6
+
+    result = pytket_to_qir(c, name="test_pytket_qir_10", qir_format=QIRFormat.STRING)
+
+    check_qir_result(
+        result, "test_pytket_qir_10"
+    )  # should be identical to the testcase above
+
+
+def test_pytket_qir_12() -> None:
+    # test << and >> ops
+    c = Circuit(1, name="test_classical")
+    a = c.add_c_register("a", 8)
+
+    c.add_classicalexpbox_register(a << 1, a)
+
+    assert c.n_qubits == 1
+    assert c.n_bits == 8
+
+    result = pytket_to_qir(c, name="test_pytket_qir_12", qir_format=QIRFormat.STRING)
+
+    check_qir_result(result, "test_pytket_qir_12")
+
+
+def test_pytket_qir_13() -> None:
+    # test << and >> ops
+    c = Circuit(1, name="test_classical")
+    a = c.add_c_register("a", 8)
+    b = c.add_c_register("b", 8)
+
+    c.add_classicalexpbox_register(a << 1, a)
+    c.add_classicalexpbox_register(a >> 3, b)
+
+    assert c.n_qubits == 1
+    assert c.n_bits == 16
+
+    for com in c:
+        print(com)
+
+    result = pytket_to_qir(c, name="test_pytket_qir_13", qir_format=QIRFormat.STRING)
+
+    check_qir_result(result, "test_pytket_qir_13")
+
+
+def test_pytket_qir_14() -> None:
+    # test setbits op
+    c = Circuit(1, name="test_classical")
+    a = c.add_c_register("a", 8)
+    b = c.add_c_register("b", 10)
+    d = c.add_c_register("d", 10)
+
+    c.add_c_setbits([True], [a[0]])
+    c.add_c_setbits([False, True] + [False] * 6, list(a))
+    c.add_c_setbits([True, True] + [False] * 8, list(b))
+
+    c.add_c_setreg(23, a)
+    c.add_c_copyreg(a, b)
+
+    c.add_classicalexpbox_register(a + b, d)
+    c.add_classicalexpbox_register(a - b, d)
+    # c.add_classicalexpbox_register(a * b // d, d)
+    c.add_classicalexpbox_register(a << 1, a)
+    c.add_classicalexpbox_register(a >> 1, b)
+
+    c.X(0, condition=reg_eq(a ^ b, 1))
+    c.X(0, condition=(a[0] ^ b[0]))
+    c.X(0, condition=reg_eq(a & b, 1))
+    c.X(0, condition=reg_eq(a | b, 1))
+
+    c.X(0, condition=a[0])
+    c.X(0, condition=reg_neq(a, 1))
+    c.X(0, condition=if_not_bit(a[0]))
+    c.X(0, condition=reg_gt(a, 1))
+    c.X(0, condition=reg_lt(a, 1))
+    c.X(0, condition=reg_geq(a, 1))
+    c.X(0, condition=reg_leq(a, 1))
+    c.Phase(0, condition=a[0])
+
+    assert c.n_qubits == 1
+    assert c.n_bits == 133
+
+    result = pytket_to_qir(c, name="test_pytket_qir_14", qir_format=QIRFormat.STRING)
+
+    check_qir_result(result, "test_pytket_qir_14")
+
+
+def test_pytket_qir_15() -> None:
+    # test calssical exp box handling
+    # circuit to cover capabilities covered in example notebook
+    c = Circuit(0, 1, name="test_classical")
+    a = c.add_c_register("a", 8)
+    c.add_c_setreg(32, a)
+
+    assert c.n_qubits == 0
+    assert c.n_bits == 9
+
+    result = pytket_to_qir(c, name="test_pytket_qir_15", qir_format=QIRFormat.STRING)
+
+    check_qir_result(result, "test_pytket_qir_15")
+
+
+def test_pytket_qir_16() -> None:
+    # try circuit with muti circuit register
+    c = Circuit()
+    q1 = Qubit("q1", 0)
+    q2 = Qubit("q2", 0)
+    c1 = Bit("c1", 0)
+    c2 = Bit("c2", 0)
+    for q in (q1, q2):
+        c.add_qubit(q)
+    for cb in (c1, c2):
+        c.add_bit(cb)
+    c.H(q1)
+    c.CX(q1, q2)
+    c.Measure(q1, c1)
+    c.Measure(q2, c2)
+
+    assert c.n_qubits == 2
+    assert c.n_bits == 2
+
+    with pytest.raises(ValueError):
+        pytket_to_qir(c, name="test_pytket_qir_16", qir_format=QIRFormat.STRING)
+
+    # gives:
+    # E ValueError: The circuit that should be converted should only have the default
+    # E             quantum register. You can convert it using the pytket
+    # E             compiler pass `FlattenRelabelRegistersPass`.
+
+
+def test_pytket_qir_17() -> None:
+    # try circuit with muti circuit register
+    c = Circuit()
+    q1 = Qubit("q1", 0)
+    q2 = Qubit("q2", 0)
+    c1 = Bit("c1", 0)
+    c2 = Bit("c2", 0)
+    for q in (q1, q2):
+        c.add_qubit(q)
+    for cb in (c1, c2):
+        c.add_bit(cb)
+    c.H(q1)
+    c.CX(q1, q2)
+    c.Measure(q1, c1)
+    c.Measure(q2, c2)
+
+    assert c.n_qubits == 2
+    assert c.n_bits == 2
+
+    FlattenRelabelRegistersPass().apply(c)
+
+    assert c.n_qubits == 2
+    assert c.n_bits == 2
+
+    result = pytket_to_qir(c, name="test_pytket_qir_17", qir_format=QIRFormat.STRING)
+
+    check_qir_result(result, "test_pytket_qir_17")
+
+
 if __name__ == "__main__":
     test_pytket_qir()
     test_pytket_qir_2()
@@ -160,3 +381,13 @@ if __name__ == "__main__":
     test_pytket_qir_5()
     test_pytket_qir_6()
     test_pytket_qir_7()
+    test_pytket_qir_8()
+    test_pytket_qir_9()
+    test_pytket_qir_10()
+    test_pytket_qir_11()
+    test_pytket_qir_12()
+    test_pytket_qir_13()
+    test_pytket_qir_14()
+    test_pytket_qir_15()
+    test_pytket_qir_16()
+    test_pytket_qir_17()
