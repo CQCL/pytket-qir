@@ -154,6 +154,7 @@ def test_pytket_qir_7() -> None:
 
     check_qir_result(result, "test_pytket_qir_7")
 
+
 def test_pytket_qir_8a() -> None:
     # test setbits op
     c = Circuit(1, name="test_classical")
@@ -190,6 +191,38 @@ def test_pytket_qir_8b() -> None:
     result = pytket_to_qir(c, name="test_pytket_qir_8b", qir_format=QIRFormat.STRING)
 
     check_qir_result(result, "test_pytket_qir_8b")
+
+
+def test_pytket_qir_8b_ii() -> None:
+    # test copybits op
+    c = Circuit(1, name="test_classical")
+    a = c.add_c_register("a", 4)
+    b = c.add_c_register("b", 2)
+
+    c.add_c_copyreg(a, b)
+
+    assert c.n_qubits == 1
+    assert c.n_bits == 6
+
+    result = pytket_to_qir(c, name="test_pytket_qir_8b_ii", qir_format=QIRFormat.STRING)
+
+    check_qir_result(result, "test_pytket_qir_8b_ii")
+
+
+def test_pytket_qir_8b_iii() -> None:
+    # test copybits op
+    c = Circuit(1, name="test_classical")
+    a = c.add_c_register("a", 2)
+    b = c.add_c_register("b", 4)
+
+    c.add_c_copyreg(a, b)
+
+    assert c.n_qubits == 1
+    assert c.n_bits == 6
+
+    result = pytket_to_qir(c, name="test_pytket_qir_8b_ii", qir_format=QIRFormat.STRING)
+
+    check_qir_result(result, "test_pytket_qir_8b_ii") # should be identical to the testcase above
 
 
 def test_pytket_qir_8() -> None:

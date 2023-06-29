@@ -883,18 +883,6 @@ class QirGenerator:
                 half_length = int(len(command.args)/2)
                 assert 2 * half_length == len(command.args)
 
-                print(command.bits)
-
-                print(command.args)
-
-                print("INPUT:")
-                for b in command.args[:half_length]:
-                    print(b)
-
-                print("output:")
-                for b in command.args[half_length:]:
-                    print(b)
-
                 for i, o in zip(command.args[:half_length], command.args[half_length:]):
                     output_instruction = self.module.builder.call(
                         self.read_bit_from_reg,
