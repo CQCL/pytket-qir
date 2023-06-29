@@ -16,7 +16,7 @@ from utilities import check_qir_result  # type: ignore
 
 import pytest
 
-from pytket.passes import FlattenRelabelRegistersPass
+from pytket.passes import FlattenRelabelRegistersPass  # type: ignore
 from pytket.qir.conversion.api import pytket_to_qir, QIRFormat
 from pytket.circuit import Circuit, Qubit, Bit, if_not_bit, BitRegister  # type: ignore
 from pytket.circuit.logic_exp import (  # type: ignore
