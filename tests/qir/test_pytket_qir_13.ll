@@ -1,5 +1,5 @@
-; ModuleID = 'test_pytket_qir_8c_ii'
-source_filename = "test_pytket_qir_8c_ii"
+; ModuleID = 'test_pytket_qir_13'
+source_filename = "test_pytket_qir_13"
 
 %Result = type opaque
 

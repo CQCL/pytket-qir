@@ -1,5 +1,5 @@
-; ModuleID = 'test_pytket_qir_8a'
-source_filename = "test_pytket_qir_8a"
+; ModuleID = 'test_pytket_qir_12'
+source_filename = "test_pytket_qir_12"
 
 %Result = type opaque
 
@@ -8,18 +8,8 @@ source_filename = "test_pytket_qir_8a"
 define void @main() #0 {
 entry:
   %0 = call i64 @reg2var(i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false)
-  call void @set_one_bit_in_reg(i64 %0, i64 0, i1 true)
-  call void @set_one_bit_in_reg(i64 %0, i64 1, i1 true)
-  call void @set_one_bit_in_reg(i64 %0, i64 2, i1 true)
-  call void @set_one_bit_in_reg(i64 %0, i64 7, i1 true)
-  call void @set_one_bit_in_reg(i64 %0, i64 0, i1 false)
-  call void @set_one_bit_in_reg(i64 %0, i64 1, i1 true)
-  call void @set_one_bit_in_reg(i64 %0, i64 2, i1 false)
-  call void @set_one_bit_in_reg(i64 %0, i64 3, i1 false)
-  call void @set_one_bit_in_reg(i64 %0, i64 4, i1 false)
-  call void @set_one_bit_in_reg(i64 %0, i64 5, i1 false)
-  call void @set_one_bit_in_reg(i64 %0, i64 6, i1 false)
-  call void @set_one_bit_in_reg(i64 %0, i64 7, i1 false)
+  %1 = shl i64 %0, 1
+  call void @set_all_bits_in_reg(i64 %0, i64 %1)
   call void @__quantum__rt__tuple_start_record_output()
   call void @__quantum__rt__int_record_output(i64 %0, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @0, i32 0, i32 0))
   call void @__quantum__rt__tuple_end_record_output()

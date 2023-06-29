@@ -155,7 +155,7 @@ def test_pytket_qir_7() -> None:
     check_qir_result(result, "test_pytket_qir_7")
 
 
-def test_pytket_qir_8a() -> None:
+def test_pytket_qir_8() -> None:
     # test setbits op
     c = Circuit(1, name="test_classical")
     a = c.add_c_register("a", 8)
@@ -169,12 +169,12 @@ def test_pytket_qir_8a() -> None:
     assert c.n_qubits == 1
     assert c.n_bits == 8
 
-    result = pytket_to_qir(c, name="test_pytket_qir_8a", qir_format=QIRFormat.STRING)
+    result = pytket_to_qir(c, name="test_pytket_qir_8", qir_format=QIRFormat.STRING)
 
-    check_qir_result(result, "test_pytket_qir_8a")
+    check_qir_result(result, "test_pytket_qir_8")
 
 
-def test_pytket_qir_8b() -> None:
+def test_pytket_qir_9() -> None:
     # test copybits op
     c = Circuit(1, name="test_classical")
     a = c.add_c_register("a", 2)
@@ -185,12 +185,12 @@ def test_pytket_qir_8b() -> None:
     assert c.n_qubits == 1
     assert c.n_bits == 4
 
-    result = pytket_to_qir(c, name="test_pytket_qir_8b", qir_format=QIRFormat.STRING)
+    result = pytket_to_qir(c, name="test_pytket_qir_9", qir_format=QIRFormat.STRING)
 
-    check_qir_result(result, "test_pytket_qir_8b")
+    check_qir_result(result, "test_pytket_qir_9")
 
 
-def test_pytket_qir_8b_ii() -> None:
+def test_pytket_qir_10() -> None:
     # test copybits op
     c = Circuit(1, name="test_classical")
     a = c.add_c_register("a", 4)
@@ -201,12 +201,12 @@ def test_pytket_qir_8b_ii() -> None:
     assert c.n_qubits == 1
     assert c.n_bits == 6
 
-    result = pytket_to_qir(c, name="test_pytket_qir_8b_ii", qir_format=QIRFormat.STRING)
+    result = pytket_to_qir(c, name="test_pytket_qir_10", qir_format=QIRFormat.STRING)
 
-    check_qir_result(result, "test_pytket_qir_8b_ii")
+    check_qir_result(result, "test_pytket_qir_10")
 
 
-def test_pytket_qir_8b_iii() -> None:
+def test_pytket_qir_11() -> None:
     # test copybits op
     c = Circuit(1, name="test_classical")
     a = c.add_c_register("a", 2)
@@ -217,14 +217,14 @@ def test_pytket_qir_8b_iii() -> None:
     assert c.n_qubits == 1
     assert c.n_bits == 6
 
-    result = pytket_to_qir(c, name="test_pytket_qir_8b_ii", qir_format=QIRFormat.STRING)
+    result = pytket_to_qir(c, name="test_pytket_qir_10", qir_format=QIRFormat.STRING)
 
     check_qir_result(
-        result, "test_pytket_qir_8b_ii"
+        result, "test_pytket_qir_10"
     )  # should be identical to the testcase above
 
 
-def test_pytket_qir_8c() -> None:
+def test_pytket_qir_12() -> None:
     # test << and >> ops
     c = Circuit(1, name="test_classical")
     a = c.add_c_register("a", 8)
@@ -234,12 +234,12 @@ def test_pytket_qir_8c() -> None:
     assert c.n_qubits == 1
     assert c.n_bits == 8
 
-    result = pytket_to_qir(c, name="test_pytket_qir_8c", qir_format=QIRFormat.STRING)
+    result = pytket_to_qir(c, name="test_pytket_qir_12", qir_format=QIRFormat.STRING)
 
-    check_qir_result(result, "test_pytket_qir_8c")
+    check_qir_result(result, "test_pytket_qir_12")
 
 
-def test_pytket_qir_8c_ii() -> None:
+def test_pytket_qir_13() -> None:
     # test << and >> ops
     c = Circuit(1, name="test_classical")
     a = c.add_c_register("a", 8)
@@ -254,12 +254,12 @@ def test_pytket_qir_8c_ii() -> None:
     for com in c:
         print(com)
 
-    result = pytket_to_qir(c, name="test_pytket_qir_8c_ii", qir_format=QIRFormat.STRING)
+    result = pytket_to_qir(c, name="test_pytket_qir_13", qir_format=QIRFormat.STRING)
 
-    check_qir_result(result, "test_pytket_qir_8c_ii")
+    check_qir_result(result, "test_pytket_qir_13")
 
 
-def test_pytket_qir_8() -> None:
+def test_pytket_qir_14() -> None:
     # test setbits op
     c = Circuit(1, name="test_classical")
     a = c.add_c_register("a", 8)
@@ -296,12 +296,12 @@ def test_pytket_qir_8() -> None:
     assert c.n_qubits == 1
     assert c.n_bits == 133
 
-    result = pytket_to_qir(c, name="test_pytket_qir_8", qir_format=QIRFormat.STRING)
+    result = pytket_to_qir(c, name="test_pytket_qir_14", qir_format=QIRFormat.STRING)
 
-    check_qir_result(result, "test_pytket_qir_8")
+    check_qir_result(result, "test_pytket_qir_14")
 
 
-def test_pytket_qir_9() -> None:
+def test_pytket_qir_15() -> None:
     # test calssical exp box handling
     # circuit to cover capabilities covered in example notebook
     c = Circuit(0, 1, name="test_classical")
@@ -311,12 +311,12 @@ def test_pytket_qir_9() -> None:
     assert c.n_qubits == 0
     assert c.n_bits == 9
 
-    result = pytket_to_qir(c, name="test_pytket_qir_9", qir_format=QIRFormat.STRING)
+    result = pytket_to_qir(c, name="test_pytket_qir_15", qir_format=QIRFormat.STRING)
 
-    check_qir_result(result, "test_pytket_qir_9")
+    check_qir_result(result, "test_pytket_qir_15")
 
 
-def test_pytket_qir_10() -> None:
+def test_pytket_qir_16() -> None:
     # try circuit with muti circuit register
     c = Circuit()
     q1 = Qubit("q1", 0)
@@ -336,7 +336,7 @@ def test_pytket_qir_10() -> None:
     assert c.n_bits == 2
 
     with pytest.raises(ValueError):
-        pytket_to_qir(c, name="test_pytket_qir_10", qir_format=QIRFormat.STRING)
+        pytket_to_qir(c, name="test_pytket_qir_16", qir_format=QIRFormat.STRING)
 
     # gives:
     # E ValueError: The circuit that should be converted should only have the default
@@ -344,7 +344,7 @@ def test_pytket_qir_10() -> None:
     # E             compiler pass `FlattenRelabelRegistersPass`.
 
 
-def test_pytket_qir_11() -> None:
+def test_pytket_qir_17() -> None:
     # try circuit with muti circuit register
     c = Circuit()
     q1 = Qubit("q1", 0)
@@ -368,9 +368,9 @@ def test_pytket_qir_11() -> None:
     assert c.n_qubits == 2
     assert c.n_bits == 2
 
-    result = pytket_to_qir(c, name="test_pytket_qir_11", qir_format=QIRFormat.STRING)
+    result = pytket_to_qir(c, name="test_pytket_qir_17", qir_format=QIRFormat.STRING)
 
-    check_qir_result(result, "test_pytket_qir_11")
+    check_qir_result(result, "test_pytket_qir_17")
 
 
 if __name__ == "__main__":
@@ -385,3 +385,9 @@ if __name__ == "__main__":
     test_pytket_qir_9()
     test_pytket_qir_10()
     test_pytket_qir_11()
+    test_pytket_qir_12()
+    test_pytket_qir_13()
+    test_pytket_qir_14()
+    test_pytket_qir_15()
+    test_pytket_qir_16()
+    test_pytket_qir_17()
