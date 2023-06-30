@@ -880,8 +880,8 @@ class QirGenerator:
 
             elif isinstance(op, CopyBitsOp):
                 assert len(command.qubits) == 0
-                half_length = int(len(command.args) / 2)
-                assert 2 * half_length == len(command.args)
+                assert len(command.args) % 2 == 0
+                half_length = len(command.args) // 2
 
                 for i, o in zip(command.args[:half_length], command.args[half_length:]):
                     output_instruction = self.module.builder.call(
