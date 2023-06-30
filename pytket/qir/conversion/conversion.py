@@ -124,6 +124,7 @@ class QirGenerator:
         self.target_gateset.add(OpType.PhasedX)
         self.target_gateset.add(OpType.ZZPhase)
         self.target_gateset.add(OpType.ZZMax)
+        self.target_gateset.add(OpType.TK2)
 
         self.getset_predicate = predicates.GateSetPredicate(set(self.target_gateset))  # type: ignore
 
