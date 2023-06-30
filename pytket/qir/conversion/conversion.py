@@ -864,10 +864,7 @@ class QirGenerator:
                 assert len(command.qubits) == 0
 
                 for b, v in zip(command.bits, command.op.values):
-                    if v:
-                        output_instruction = pyqir.const(self.qir_bool_type, 1)
-                    else:
-                        output_instruction = pyqir.const(self.qir_bool_type, 0)
+                    output_instruction = pyqir.const(self.qir_bool_type, int(v))
 
                     self.module.builder.call(
                         self.set_one_bit_in_reg,
