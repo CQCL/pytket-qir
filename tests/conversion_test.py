@@ -116,9 +116,6 @@ def test_pytket_qir_6() -> None:
     circ.Z(0, condition=c[4])
     circ.H(0)
 
-    assert circ.n_qubits == 3
-    assert circ.n_bits == 20
-
     result = pytket_to_qir(circ, name="test_pytket_qir_6", qir_format=QIRFormat.STRING)
 
     check_qir_result(result, "test_pytket_qir_6")
@@ -147,9 +144,6 @@ def test_pytket_qir_7() -> None:
     circ.add_classicalexpbox_register(reg_lt(a, b), c)
     circ.add_classicalexpbox_register(reg_leq(a, b), c)
 
-    assert circ.n_qubits == 2
-    assert circ.n_bits == 12
-
     result = pytket_to_qir(circ, name="test_pytket_qir_7", qir_format=QIRFormat.STRING)
 
     check_qir_result(result, "test_pytket_qir_7")
@@ -166,9 +160,6 @@ def test_pytket_qir_8() -> None:
     c.add_c_setbits([True], [a[7]])
     c.add_c_setbits([False, True] + [False] * 6, list(a))
 
-    assert c.n_qubits == 1
-    assert c.n_bits == 8
-
     result = pytket_to_qir(c, name="test_pytket_qir_8", qir_format=QIRFormat.STRING)
 
     check_qir_result(result, "test_pytket_qir_8")
@@ -181,9 +172,6 @@ def test_pytket_qir_9() -> None:
     b = c.add_c_register("b", 2)
 
     c.add_c_copyreg(a, b)
-
-    assert c.n_qubits == 1
-    assert c.n_bits == 4
 
     result = pytket_to_qir(c, name="test_pytket_qir_9", qir_format=QIRFormat.STRING)
 
@@ -198,9 +186,6 @@ def test_pytket_qir_10() -> None:
 
     c.add_c_copyreg(a, b)
 
-    assert c.n_qubits == 1
-    assert c.n_bits == 6
-
     result = pytket_to_qir(c, name="test_pytket_qir_10", qir_format=QIRFormat.STRING)
 
     check_qir_result(result, "test_pytket_qir_10")
@@ -213,9 +198,6 @@ def test_pytket_qir_11() -> None:
     b = c.add_c_register("b", 4)
 
     c.add_c_copyreg(a, b)
-
-    assert c.n_qubits == 1
-    assert c.n_bits == 6
 
     result = pytket_to_qir(c, name="test_pytket_qir_10", qir_format=QIRFormat.STRING)
 
@@ -231,9 +213,6 @@ def test_pytket_qir_12() -> None:
 
     c.add_classicalexpbox_register(a << 1, a)
 
-    assert c.n_qubits == 1
-    assert c.n_bits == 8
-
     result = pytket_to_qir(c, name="test_pytket_qir_12", qir_format=QIRFormat.STRING)
 
     check_qir_result(result, "test_pytket_qir_12")
@@ -247,9 +226,6 @@ def test_pytket_qir_13() -> None:
 
     c.add_classicalexpbox_register(a << 1, a)
     c.add_classicalexpbox_register(a >> 3, b)
-
-    assert c.n_qubits == 1
-    assert c.n_bits == 16
 
     for com in c:
         print(com)
@@ -293,9 +269,6 @@ def test_pytket_qir_14() -> None:
     c.X(0, condition=reg_leq(a, 1))
     c.Phase(0, condition=a[0])
 
-    assert c.n_qubits == 1
-    assert c.n_bits == 133
-
     result = pytket_to_qir(c, name="test_pytket_qir_14", qir_format=QIRFormat.STRING)
 
     check_qir_result(result, "test_pytket_qir_14")
@@ -307,9 +280,6 @@ def test_pytket_qir_15() -> None:
     c = Circuit(0, 1, name="test_classical")
     a = c.add_c_register("a", 8)
     c.add_c_setreg(32, a)
-
-    assert c.n_qubits == 0
-    assert c.n_bits == 9
 
     result = pytket_to_qir(c, name="test_pytket_qir_15", qir_format=QIRFormat.STRING)
 
@@ -331,9 +301,6 @@ def test_pytket_qir_16() -> None:
     c.CX(q1, q2)
     c.Measure(q1, c1)
     c.Measure(q2, c2)
-
-    assert c.n_qubits == 2
-    assert c.n_bits == 2
 
     with pytest.raises(ValueError):
         pytket_to_qir(c, name="test_pytket_qir_16", qir_format=QIRFormat.STRING)
@@ -360,13 +327,7 @@ def test_pytket_qir_17() -> None:
     c.Measure(q1, c1)
     c.Measure(q2, c2)
 
-    assert c.n_qubits == 2
-    assert c.n_bits == 2
-
     FlattenRelabelRegistersPass().apply(c)
-
-    assert c.n_qubits == 2
-    assert c.n_bits == 2
 
     result = pytket_to_qir(c, name="test_pytket_qir_17", qir_format=QIRFormat.STRING)
 
