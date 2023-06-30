@@ -121,6 +121,11 @@ class QirGenerator:
         self.cregs = _retrieve_registers(self.circuit.bits, BitRegister)
         self.target_gateset = self.module.gateset.base_gateset
 
+        self.target_gateset.add(OpType.PhasedX)
+        self.target_gateset.add(OpType.ZZPhase)
+        self.target_gateset.add(OpType.ZZMax)
+        self.target_gateset.add(OpType.TK2)
+
         self.getset_predicate = predicates.GateSetPredicate(set(self.target_gateset))  # type: ignore
 
         self.set_cregs: Dict[str, List] = {}  # Keep track of set registers.
@@ -326,7 +331,7 @@ class QirGenerator:
             circuit = Circuit(self.circuit.n_qubits, self.circuit.n_bits)
             circuit.add_gate(optype, params, args)
             if not self.getset_predicate.verify(circuit):
-                raise ValueError("Gate not supported")
+                raise ValueError("Gate not supported {optype}, {params}, {args}")
             return circuit
         return None
 
@@ -345,7 +350,7 @@ class QirGenerator:
             circuit = Circuit(self.circuit.n_qubits, self.circuit.n_bits)
             circuit.add_gate(optype, params, args)
             if not self.getset_predicate.verify(circuit):
-                raise ValueError("Gate not supported")
+                raise ValueError("Gate not supported {optype}, {params}")
             return circuit
 
     def _get_optype_and_params(self, op: Op) -> Tuple[OpType, Sequence[float]]:
