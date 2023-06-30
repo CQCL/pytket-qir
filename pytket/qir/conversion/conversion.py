@@ -422,19 +422,6 @@ class QirGenerator:
                     if com_bits != list(self.cregs[regname]):
                         raise ValueError("WASM ops must act on entire registers.")
                     reglist.append(regname)
-        elif isinstance(op, SetBitsOp):
-            for reglist, sizes in [
-                (outputs, [op.n_outputs]),
-            ]:
-                for in_width in sizes:
-                    if in_width == 0:
-                        raise ValueError(
-                            "A value is getting assigned to an empty register."
-                        )
-                    com_bits = args[:in_width]
-                    args = args[in_width:]
-                    regname = com_bits[0].reg_name
-                    reglist.append(regname)
         return inputs, outputs
 
     def _get_ssa_from_cl_reg_op(

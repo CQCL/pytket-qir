@@ -227,9 +227,6 @@ def test_pytket_qir_13() -> None:
     c.add_classicalexpbox_register(a << 1, a)
     c.add_classicalexpbox_register(a >> 3, b)
 
-    for com in c:
-        print(com)
-
     result = pytket_to_qir(c, name="test_pytket_qir_13", qir_format=QIRFormat.STRING)
 
     check_qir_result(result, "test_pytket_qir_13")
