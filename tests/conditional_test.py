@@ -136,7 +136,7 @@ def test_pytket_qir_conditional_v() -> None:
 
 
 def test_pytket_qir_conditional_6() -> None:
-    # test complicated conditions and recursive classical op
+    # test conditional for manual added gates
 
     circ = Circuit(2, 3).H(0).H(1)
 
