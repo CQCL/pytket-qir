@@ -23,7 +23,7 @@ def test_pytket_qir_quantum() -> None:
     circ.H(0)
 
     result = pytket_to_qir(
-        circ, name="test_pytket_qir_quantum", qir_format=QIRFormat.STRING
+        circ, name="test_pytket_qir_quantum", qir_format=QIRFormat.BINARY
     )
 
     check_qir_result(result, "test_pytket_qir_quantum")
@@ -42,7 +42,7 @@ def test_pytket_qir_quantum_ii() -> None:
     circ.Measure(1, 1)
 
     result = pytket_to_qir(
-        circ, name="test_pytket_qir_quantum", qir_format=QIRFormat.STRING
+        circ, name="test_pytket_qir_quantum", qir_format=QIRFormat.BINARY
     )
 
     check_qir_result(result, "test_pytket_qir_quantum_ii")
@@ -52,7 +52,7 @@ def test_pytket_qir_quantum_iii() -> None:
     circ = Circuit(2).H(0).CX(0, 1).measure_all()
 
     result = pytket_to_qir(
-        circ, name="test_pytket_qir_quantum", qir_format=QIRFormat.STRING
+        circ, name="test_pytket_qir_quantum", qir_format=QIRFormat.BINARY
     )
 
     check_qir_result(result, "test_pytket_qir_quantum_iii")
@@ -75,7 +75,7 @@ def test_pytket_qir_quantum_iv() -> None:
     circ.Measure(1, 1)
 
     result = pytket_to_qir(
-        circ, name="test_pytket_qir_quantum_iv", qir_format=QIRFormat.STRING
+        circ, name="test_pytket_qir_quantum_iv", qir_format=QIRFormat.BINARY
     )
 
     check_qir_result(result, "test_pytket_qir_quantum_iv")
@@ -90,6 +90,7 @@ def test_pytket_qir_quantum_v() -> None:
     circ.Rx(0.5, 0)
     circ.ZZPhase(0.5, 0, 1)
     circ.PhasedX(0.5, 0.4, 1)
+    circ.PhasedX(0.5, 0.4, 1)
 
     circ.TK2(0.5, 0.4, 0.3, 0, 1)
     circ.TK2(1.5, 1.4, 1.3, 2, 1)
@@ -100,7 +101,7 @@ def test_pytket_qir_quantum_v() -> None:
     circ.Measure(1, 1)
 
     result = pytket_to_qir(
-        circ, name="test_pytket_qir_quantum_v", qir_format=QIRFormat.STRING
+        circ, name="test_pytket_qir_quantum_v", qir_format=QIRFormat.BINARY
     )
 
     check_qir_result(result, "test_pytket_qir_quantum_v")

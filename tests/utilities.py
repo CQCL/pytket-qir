@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-def check_qir_result(given_qir: str, filename: str, writefile: bool = False) -> None:
+def check_qir_result(given_qir: str, filename: str, writefile: bool = True) -> None:
     """this function can be used to compare the generated qir to the qir in a file
     can be used to write the file as well, if the file is written
     this function will have a wrong assert to fail the testcase
@@ -28,11 +28,11 @@ def check_qir_result(given_qir: str, filename: str, writefile: bool = False) -> 
     """
 
     if writefile:
-        with open(f"qir/{filename}.ll", "w") as f:
+        with open(f"qir/{filename}.bc", "wb") as f:
             f.write(given_qir)
         assert not "testcase is writing file"
 
-    with open(f"qir/{filename}.ll", "r") as f:
+    with open(f"qir/{filename}.bc", "b") as f:
         data = f.read()
 
     assert data == given_qir

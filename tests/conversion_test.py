@@ -33,7 +33,7 @@ def test_pytket_qir() -> None:
     circ = Circuit(3)
     circ.H(0)
 
-    result = pytket_to_qir(circ, name="test_pytket_qir", qir_format=QIRFormat.STRING)
+    result = pytket_to_qir(circ, name="test_pytket_qir", qir_format=QIRFormat.BINARY)
 
     check_qir_result(result, "test_pytket_qir")
 
@@ -42,7 +42,7 @@ def test_pytket_qir_2() -> None:
     circ = Circuit(3)
     circ.H(0)
 
-    result = pytket_to_qir(circ, name="test_pytket_qir_2", qir_format=QIRFormat.STRING)
+    result = pytket_to_qir(circ, name="test_pytket_qir_2", qir_format=QIRFormat.BINARY)
 
     check_qir_result(result, "test_pytket_qir_2")
 
@@ -53,7 +53,7 @@ def test_pytket_qir_3() -> None:
     circ.H(1)
     circ.H(2)
 
-    result = pytket_to_qir(circ, name="test_pytket_qir_3", qir_format=QIRFormat.STRING)
+    result = pytket_to_qir(circ, name="test_pytket_qir_3", qir_format=QIRFormat.BINARY)
 
     check_qir_result(result, "test_pytket_qir_3")
 
@@ -70,7 +70,7 @@ def test_pytket_qir_4() -> None:
     circ.H(0, condition=b[4])
     circ.H(0)
 
-    result = pytket_to_qir(circ, name="test_pytket_qir_4", qir_format=QIRFormat.STRING)
+    result = pytket_to_qir(circ, name="test_pytket_qir_4", qir_format=QIRFormat.BINARY)
 
     check_qir_result(result, "test_pytket_qir_4")
 
@@ -88,7 +88,7 @@ def test_pytket_qir_5() -> None:
     circ.H(0, condition=Bit(3))
     circ.H(0)
 
-    result = pytket_to_qir(circ, name="test_pytket_qir_5", qir_format=QIRFormat.STRING)
+    result = pytket_to_qir(circ, name="test_pytket_qir_5", qir_format=QIRFormat.BINARY)
 
     check_qir_result(result, "test_pytket_qir_5")
 
@@ -116,7 +116,7 @@ def test_pytket_qir_6() -> None:
     circ.Z(0, condition=c[4])
     circ.H(0)
 
-    result = pytket_to_qir(circ, name="test_pytket_qir_6", qir_format=QIRFormat.STRING)
+    result = pytket_to_qir(circ, name="test_pytket_qir_6", qir_format=QIRFormat.BINARY)
 
     check_qir_result(result, "test_pytket_qir_6")
 
@@ -144,7 +144,7 @@ def test_pytket_qir_7() -> None:
     circ.add_classicalexpbox_register(reg_lt(a, b), c)
     circ.add_classicalexpbox_register(reg_leq(a, b), c)
 
-    result = pytket_to_qir(circ, name="test_pytket_qir_7", qir_format=QIRFormat.STRING)
+    result = pytket_to_qir(circ, name="test_pytket_qir_7", qir_format=QIRFormat.BINARY)
 
     check_qir_result(result, "test_pytket_qir_7")
 
@@ -160,7 +160,7 @@ def test_pytket_qir_8() -> None:
     c.add_c_setbits([True], [a[7]])
     c.add_c_setbits([False, True] + [False] * 6, list(a))
 
-    result = pytket_to_qir(c, name="test_pytket_qir_8", qir_format=QIRFormat.STRING)
+    result = pytket_to_qir(c, name="test_pytket_qir_8", qir_format=QIRFormat.BINARY)
 
     check_qir_result(result, "test_pytket_qir_8")
 
@@ -173,7 +173,7 @@ def test_pytket_qir_9() -> None:
 
     c.add_c_copyreg(a, b)
 
-    result = pytket_to_qir(c, name="test_pytket_qir_9", qir_format=QIRFormat.STRING)
+    result = pytket_to_qir(c, name="test_pytket_qir_9", qir_format=QIRFormat.BINARY)
 
     check_qir_result(result, "test_pytket_qir_9")
 
@@ -186,7 +186,7 @@ def test_pytket_qir_10() -> None:
 
     c.add_c_copyreg(a, b)
 
-    result = pytket_to_qir(c, name="test_pytket_qir_10", qir_format=QIRFormat.STRING)
+    result = pytket_to_qir(c, name="test_pytket_qir_10", qir_format=QIRFormat.BINARY)
 
     check_qir_result(result, "test_pytket_qir_10")
 
@@ -199,7 +199,7 @@ def test_pytket_qir_11() -> None:
 
     c.add_c_copyreg(a, b)
 
-    result = pytket_to_qir(c, name="test_pytket_qir_10", qir_format=QIRFormat.STRING)
+    result = pytket_to_qir(c, name="test_pytket_qir_10", qir_format=QIRFormat.BINARY)
 
     check_qir_result(
         result, "test_pytket_qir_10"
@@ -213,7 +213,7 @@ def test_pytket_qir_12() -> None:
 
     c.add_classicalexpbox_register(a << 1, a)
 
-    result = pytket_to_qir(c, name="test_pytket_qir_12", qir_format=QIRFormat.STRING)
+    result = pytket_to_qir(c, name="test_pytket_qir_12", qir_format=QIRFormat.BINARY)
 
     check_qir_result(result, "test_pytket_qir_12")
 
@@ -227,7 +227,7 @@ def test_pytket_qir_13() -> None:
     c.add_classicalexpbox_register(a << 1, a)
     c.add_classicalexpbox_register(a >> 3, b)
 
-    result = pytket_to_qir(c, name="test_pytket_qir_13", qir_format=QIRFormat.STRING)
+    result = pytket_to_qir(c, name="test_pytket_qir_13", qir_format=QIRFormat.BINARY)
 
     check_qir_result(result, "test_pytket_qir_13")
 
@@ -266,7 +266,7 @@ def test_pytket_qir_14() -> None:
     c.X(0, condition=reg_leq(a, 1))
     c.Phase(0, condition=a[0])
 
-    result = pytket_to_qir(c, name="test_pytket_qir_14", qir_format=QIRFormat.STRING)
+    result = pytket_to_qir(c, name="test_pytket_qir_14", qir_format=QIRFormat.BINARY)
 
     check_qir_result(result, "test_pytket_qir_14")
 
@@ -278,7 +278,7 @@ def test_pytket_qir_15() -> None:
     a = c.add_c_register("a", 8)
     c.add_c_setreg(32, a)
 
-    result = pytket_to_qir(c, name="test_pytket_qir_15", qir_format=QIRFormat.STRING)
+    result = pytket_to_qir(c, name="test_pytket_qir_15", qir_format=QIRFormat.BINARY)
 
     check_qir_result(result, "test_pytket_qir_15")
 
@@ -300,7 +300,7 @@ def test_pytket_qir_16() -> None:
     c.Measure(q2, c2)
 
     with pytest.raises(ValueError):
-        pytket_to_qir(c, name="test_pytket_qir_16", qir_format=QIRFormat.STRING)
+        pytket_to_qir(c, name="test_pytket_qir_16", qir_format=QIRFormat.BINARY)
 
     # gives:
     # E ValueError: The circuit that should be converted should only have the default
@@ -326,7 +326,7 @@ def test_pytket_qir_17() -> None:
 
     FlattenRelabelRegistersPass().apply(c)
 
-    result = pytket_to_qir(c, name="test_pytket_qir_17", qir_format=QIRFormat.STRING)
+    result = pytket_to_qir(c, name="test_pytket_qir_17", qir_format=QIRFormat.BINARY)
 
     check_qir_result(result, "test_pytket_qir_17")
 

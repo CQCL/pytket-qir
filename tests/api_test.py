@@ -39,7 +39,7 @@ def test_pytket_qir() -> None:
     circ = Circuit(3)
     circ.H(0)
 
-    result = pytket_to_qir(circ, name="test_pytket_qir", qir_format=QIRFormat.STRING)
+    result = pytket_to_qir(circ, name="test_pytket_qir", qir_format=QIRFormat.BINARY)
 
     check_qir_result(result, "test_pytket_qir")
 
@@ -53,7 +53,7 @@ def test_pytket_qir_optimised() -> None:
     result = pytket_to_qir(
         circ,
         name="test_pytket_qir",
-        qir_format=QIRFormat.STRING,
+        qir_format=QIRFormat.BINARY,
         pyqir_0_6_compatibility=True,
     )
 
@@ -66,7 +66,7 @@ def test_pytket_qir_optimised_ii() -> None:
     result = pytket_to_qir(
         circ,
         name="test_pytket_qir",
-        qir_format=QIRFormat.STRING,
+        qir_format=QIRFormat.BINARY,
         pyqir_0_6_compatibility=True,
     )
 
@@ -106,7 +106,7 @@ def test_pytket_qir_module() -> None:
     circ = Circuit(3)
     circ.H(0)
 
-    result = pytket_to_qir(circ, name="test_pytket_qir", qir_format=QIRFormat.STRING)
+    result = pytket_to_qir(circ, name="test_pytket_qir", qir_format=QIRFormat.BINARY)
 
     result_2 = pytket_to_qir(circ, name="test_pytket_qir")
 
