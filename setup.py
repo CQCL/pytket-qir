@@ -48,6 +48,7 @@ setup(
         "pyqir-generator == 0.7.0",
         "pyqir-evaluator == 0.7.0",
         "pyqir-parser == 0.7.0",
+        "llvmlite == 0.40.1",
     ],
     classifiers=[
         "Environment :: Console",

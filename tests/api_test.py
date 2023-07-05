@@ -23,6 +23,9 @@ from pytket.qir.conversion.api import (
     pytket_to_qir,
     QIRFormat,
 )
+
+from pytket.qir.conversion.apill import pytket_to_qir_ll
+
 from pytket.circuit import Circuit  # type: ignore
 
 
@@ -42,6 +45,42 @@ def test_pytket_qir() -> None:
     result = pytket_to_qir(circ, name="test_pytket_qir", qir_format=QIRFormat.STRING)
 
     check_qir_result(result, "test_pytket_qir")
+
+
+def test_pytket_qir_ll() -> None:
+    circ = Circuit(1)
+
+    result = pytket_to_qir(circ, name="test_pytket_qir_ll", qir_format=QIRFormat.STRING)
+    result2 = pytket_to_qir_ll(circ, name="test_pytket_qir_ll")
+
+    check_qir_result(result, "test_pytket_qir_ll")
+    check_qir_result(result2, "test_pytket_qir_lll")
+
+
+def test_pytket_qir_ll_2() -> None:
+    circ = Circuit(1)
+    circ.H(0)
+
+    result = pytket_to_qir(
+        circ, name="test_pytket_qir_ll_2", qir_format=QIRFormat.STRING
+    )
+    result2 = pytket_to_qir_ll(circ, name="test_pytket_qir_ll_2")
+
+    check_qir_result(result, "test_pytket_qir_ll_2")
+    check_qir_result(result2, "test_pytket_qir_lll_2")
+
+
+"""def test_pytket_qir_ll_3() -> None:
+    circ = Circuit(3)
+    circ.H(0)
+
+    result = pytket_to_qir(
+        circ, name="test_pytket_qir_ll_3", qir_format=QIRFormat.STRING
+    )
+    result2 = pytket_to_qir_ll(circ, name="test_pytket_qir_ll_3")
+
+    check_qir_result(result, "test_pytket_qir_ll_3")
+    check_qir_result(result2, "test_pytket_qir_ll_3")"""
 
 
 def test_pytket_qir_optimised() -> None:
