@@ -76,18 +76,17 @@ def check_qir_result_2(given_qir: str, given_qir_2: str) -> None:
             print(given_qir_lines_2[i])
             stoppoint = i
             break
-        
 
         # assert given_qir_lines[i] == given_qir_lines_2[i]
 
     print("\n\n\n")
 
-    for i in range(stoppoint,len(given_qir_lines)):
+    for i in range(stoppoint, len(given_qir_lines)):
         print(given_qir_lines[i])
 
     print("\n\n\n\n\n")
 
-    for i in range(stoppoint,len(given_qir_lines_2)):
+    for i in range(stoppoint, len(given_qir_lines_2)):
         print(given_qir_lines_2[i])
 
     assert given_qir == given_qir_2

@@ -50,12 +50,14 @@ def test_pytket_qir() -> None:
 def test_pytket_qir_lll() -> None:
     circ = Circuit(1)
 
-    result = pytket_to_qir(circ, name="test_pytket_qir_lll", qir_format=QIRFormat.STRING)
+    result = pytket_to_qir(
+        circ, name="test_pytket_qir_lll", qir_format=QIRFormat.STRING
+    )
     result2 = pytket_to_qir_ll(circ, name="test_pytket_qir_lll")
 
     check_qir_result(result, "test_pytket_qir_lll")
     check_qir_result(result2, "test_pytket_qir_lllb")
-    # check_qir_result_2(result, result2)
+    check_qir_result_2(result, result2)
 
 
 def test_pytket_qir_ll_2() -> None:

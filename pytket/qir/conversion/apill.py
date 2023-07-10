@@ -73,10 +73,10 @@ def pytket_to_qir_ll(
         "llvm.module.flags", ["dynamic_result_management", ll.Constant(bit, 0)]
     )
 
-    if(circ.depth() > 0):
+    if circ.depth() > 0:
         q = ll.global_context.get_identified_type("Qubit")
         qp = ll.PointerType(q)
-    
+
     r = ll.global_context.get_identified_type("Result")
     rp = ll.PointerType(r)
 
@@ -120,13 +120,21 @@ def pytket_to_qir_ll(
         replacements['"Result"'] = "Result"
         replacements['"main"'] = "main"
         replacements['"main"'] = "main"
-        replacements['"__quantum__rt__tuple_start_record_output"'] = "__quantum__rt__tuple_start_record_output"
-        replacements['"__quantum__rt__tuple_end_record_output"()'] = "__quantum__rt__tuple_end_record_output()\n  ret void"
+        replacements[
+            '"__quantum__rt__tuple_start_record_output"'
+        ] = "__quantum__rt__tuple_start_record_output"
+        replacements[
+            '"__quantum__rt__tuple_end_record_output"()'
+        ] = "__quantum__rt__tuple_end_record_output()\n  ret void"
         replacements["alwaysinline optsize readonly"] = "#0"
-        replacements["define void @main() #0\n{"] = "\ndefine void @main() #0 {"        
-        replacements["; ModuleID = \"test_pytket_qir_ll\""] = "; ModuleID = 'test_pytket_qir_ll'\nsource_filename = \"test_pytket_qir_ll\""
-        replacements["""@__quantum__rt__tuple_start_record_output = external global void ()
-@"__quantum__rt__tuple_end_record_output" = external global void ()"""] = """\ndeclare i1 @read_bit_from_reg(i64, i64)
+        replacements["define void @main() #0\n{"] = "\ndefine void @main() #0 {"
+        replacements[
+            '; ModuleID = "test_pytket_qir_lll"'
+        ] = "; ModuleID = 'test_pytket_qir_lll'\nsource_filename = \"test_pytket_qir_lll\""
+        replacements[
+            """@__quantum__rt__tuple_start_record_output = external global void ()
+@"__quantum__rt__tuple_end_record_output" = external global void ()"""
+        ] = """declare i1 @read_bit_from_reg(i64, i64)
 
 declare void @set_one_bit_in_reg(i64, i64, i1)
 
@@ -141,19 +149,27 @@ declare void @__quantum__rt__int_record_output(i64, i8*)
 declare void @__quantum__rt__tuple_start_record_output()
 
 declare void @__quantum__rt__tuple_end_record_output()"""
+        replacements[
+            """!llvm.module.flags = !{ !0, !1, !2, !3 }
+!0 = !{ !"qir_major_version", i32 1 }
+!1 = !{ !"qir_minor_version", i32 0 }
+!2 = !{ !"dynamic_qubit_management", i1 0 }
+!3 = !{ !"dynamic_result_management", i1 0 }"""
+        ] = """\nattributes #0 = { "entry_point" "num_required_qubits"="1" "num_required_results"="1" "output_labeling_schema" "qir_profiles"="custom" }
 
+!llvm.module.flags = !{!0, !1, !2, !3}
 
+!0 = !{i32 1, !"qir_major_version", i32 1}
+!1 = !{i32 7, !"qir_minor_version", i32 0}
+!2 = !{i32 1, !"dynamic_qubit_management", i1 false}
+!3 = !{i32 1, !"dynamic_result_management", i1 false}\n"""
 
         for s, r in replacements.items():
             initial_result = initial_result.replace(s, r)
 
         def keep_line(line: str) -> bool:
-            return (
-                ('target triple = "unknown-unknown-unknown"' not in line)
-                and ('target datalayout = ""' not in line)
-                and ("@reg2var" not in line)
-                and ("@read_bit_from_reg" not in line)
-                and ("@set_all_bits_in_reg" not in line)
+            return ('target triple = "unknown-unknown-unknown"' not in line) and (
+                'target datalayout = ""' not in line
             )
 
         result = "\n".join(filter(keep_line, initial_result.split("\n")))
