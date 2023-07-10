@@ -22,7 +22,7 @@ from typing import Union
 import llvmlite.ir as ll  # type: ignore
 import pyqir
 
-from pytket.circuit import Circuit
+from pytket.circuit import Circuit, OpType
 
 
 def pytket_to_qir_ll(
@@ -56,7 +56,7 @@ def pytket_to_qir_ll(
     bit = ll.IntType(1)
     # int8 = ll.IntType(8)
     int32 = ll.IntType(32)
-    # int64 = ll.IntType(64)
+    int64 = ll.IntType(64)
     # int8ptr = int8.as_pointer()
     void = ll.VoidType()
 
@@ -73,12 +73,12 @@ def pytket_to_qir_ll(
         "llvm.module.flags", ["dynamic_result_management", ll.Constant(bit, 0)]
     )
 
+    r = ll.global_context.get_identified_type("Result")
+    rp = ll.PointerType(r)
+
     if circ.depth() > 0:
         q = ll.global_context.get_identified_type("Qubit")
         qp = ll.PointerType(q)
-
-    r = ll.global_context.get_identified_type("Result")
-    rp = ll.PointerType(r)
 
     main_fntype = ll.FunctionType(void, [])
     main_func = ll.Function(module, main_fntype, name="main")
@@ -92,11 +92,27 @@ def pytket_to_qir_ll(
     builder = ll.IRBuilder()
     builder.position_at_end(bb_entry)
 
-    if circ.depth() > 0:
+    qir_functions = {}
 
-        h_fntype = ll.FunctionType(void, [qp])
-        h_func = ll.GlobalVariable(module, h_fntype, name="__quantum__qis__h__body")
-        builder.call(h_func, [ll.Constant(int32, 0).inttoptr(qp)])
+    for command in circ:
+        op = command.op
+
+        if op.type == OpType.H:
+
+            assert len(command.bits) == 0
+            assert len(command.qubits) == 1
+            assert len(op.params) == 0
+
+            if OpType.H not in qir_functions:
+                h_fntype = ll.FunctionType(void, [qp])
+                qir_functions[OpType.H] = ll.GlobalVariable(
+                    module, h_fntype, name="__quantum__qis__h__body"
+                )
+
+            builder.call(
+                qir_functions[OpType.H],
+                [ll.Constant(int64, command.qubits[0].index[0]).inttoptr(qp)],
+            )
 
     start_output_fntype = ll.FunctionType(void, [])
     start_output_func = ll.GlobalVariable(
@@ -119,7 +135,6 @@ def pytket_to_qir_ll(
         replacements['"Qubit"'] = "Qubit"
         replacements['"Result"'] = "Result"
         replacements['"main"'] = "main"
-        replacements['"main"'] = "main"
         replacements[
             '"__quantum__rt__tuple_start_record_output"'
         ] = "__quantum__rt__tuple_start_record_output"
@@ -129,12 +144,10 @@ def pytket_to_qir_ll(
         replacements["alwaysinline optsize readonly"] = "#0"
         replacements["define void @main() #0\n{"] = "\ndefine void @main() #0 {"
         replacements[
-            '; ModuleID = "test_pytket_qir_lll"'
-        ] = "; ModuleID = 'test_pytket_qir_lll'\nsource_filename = \"test_pytket_qir_lll\""
-        replacements[
-            """@__quantum__rt__tuple_start_record_output = external global void ()
-@"__quantum__rt__tuple_end_record_output" = external global void ()"""
-        ] = """declare i1 @read_bit_from_reg(i64, i64)
+            f'; ModuleID = "{name}"'
+        ] = f"; ModuleID = '{name}'\nsource_filename = \"{name}\""
+
+        long_str = """declare i1 @read_bit_from_reg(i64, i64)
 
 declare void @set_one_bit_in_reg(i64, i64, i1)
 
@@ -149,13 +162,22 @@ declare void @__quantum__rt__int_record_output(i64, i8*)
 declare void @__quantum__rt__tuple_start_record_output()
 
 declare void @__quantum__rt__tuple_end_record_output()"""
+
+        if circ.depth() > 0:
+            long_str = long_str + "\n\ndeclare void @__quantum__qis__h__body(%Qubit*)"
+
+        replacements[
+            """@__quantum__rt__tuple_start_record_output = external global void ()
+@"__quantum__rt__tuple_end_record_output" = external global void ()"""
+        ] = long_str
+
         replacements[
             """!llvm.module.flags = !{ !0, !1, !2, !3 }
 !0 = !{ !"qir_major_version", i32 1 }
 !1 = !{ !"qir_minor_version", i32 0 }
 !2 = !{ !"dynamic_qubit_management", i1 0 }
 !3 = !{ !"dynamic_result_management", i1 0 }"""
-        ] = """\nattributes #0 = { "entry_point" "num_required_qubits"="1" "num_required_results"="1" "output_labeling_schema" "qir_profiles"="custom" }
+        ] = """\nattributes #0 = { "entry_point" "num_required_qubits"="NUMQUBITS" "num_required_results"="NUMQUBITS" "output_labeling_schema" "qir_profiles"="custom" }
 
 !llvm.module.flags = !{!0, !1, !2, !3}
 
@@ -163,13 +185,25 @@ declare void @__quantum__rt__tuple_end_record_output()"""
 !1 = !{i32 7, !"qir_minor_version", i32 0}
 !2 = !{i32 1, !"dynamic_qubit_management", i1 false}
 !3 = !{i32 1, !"dynamic_result_management", i1 false}\n"""
+        replacements[
+            "%Result = type opaque\n%Qubit = type opaque"
+        ] = "%Qubit = type opaque\n%Result = type opaque"
+        replacements['"__quantum__qis__h__body"'] = "__quantum__qis__h__body"
+        replacements["inttoptr (i64 0 to %Qubit*)"] = "null"
+        replacements["NUMQUBITS"] = f"{len(circ.qubits)}"
+        # replacements[""] = ""
 
         for s, r in replacements.items():
             initial_result = initial_result.replace(s, r)
 
         def keep_line(line: str) -> bool:
-            return ('target triple = "unknown-unknown-unknown"' not in line) and (
-                'target datalayout = ""' not in line
+            return (
+                ('target triple = "unknown-unknown-unknown"' not in line)
+                and ('target datalayout = ""' not in line)
+                and (
+                    "@__quantum__qis__h__body = external global void (%Qubit*)"
+                    not in line
+                )
             )
 
         result = "\n".join(filter(keep_line, initial_result.split("\n")))

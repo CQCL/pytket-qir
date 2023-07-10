@@ -71,6 +71,7 @@ def test_pytket_qir_ll_2() -> None:
 
     check_qir_result(result, "test_pytket_qir_lll_2")
     check_qir_result(result2, "test_pytket_qir_lll_2b")
+    check_qir_result_2(result, result2)
 
 
 def test_pytket_qir_ll_3() -> None:
@@ -86,6 +87,7 @@ def test_pytket_qir_ll_3() -> None:
 
     check_qir_result(result, "test_pytket_qir_lll_3")
     check_qir_result(result2, "test_pytket_qir_lll_3b")
+    check_qir_result_2(result, result2)
 
 
 def test_pytket_qir_optimised() -> None:
