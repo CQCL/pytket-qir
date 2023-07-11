@@ -24,6 +24,20 @@ import pyqir
 
 from pytket.circuit import Circuit, OpType
 
+from pytket.circuit import (  # type: ignore
+    BitRegister,
+    ClassicalExpBox,
+    Command,
+    Conditional,
+    RangePredicateOp,
+    CopyBitsOp,
+    Op,
+    MetaOp,
+    SetBitsOp,
+    WASMOp,
+    OpType,
+)
+
 
 def pytket_to_qir_ll(
     circ: Circuit,
@@ -54,10 +68,10 @@ def pytket_to_qir_ll(
     module = ll.Module(name)
 
     bit = ll.IntType(1)
-    # int8 = ll.IntType(8)
+    int8 = ll.IntType(8)
     int32 = ll.IntType(32)
     int64 = ll.IntType(64)
-    # int8ptr = int8.as_pointer()
+    int8ptr = int8.as_pointer()
     void = ll.VoidType()
 
     module.add_named_metadata(
@@ -79,6 +93,14 @@ def pytket_to_qir_ll(
     if circ.depth() > 0:
         q = ll.global_context.get_identified_type("Qubit")
         qp = ll.PointerType(q)
+
+    register = [None]
+
+    print(circ.bits)
+    print(type(circ.bits))
+
+    if len(circ.bits) > 0:
+        register[0] = (int8ptr("c"), int64(0))
 
     main_fntype = ll.FunctionType(void, [])
     main_func = ll.Function(module, main_fntype, name="main")
@@ -114,11 +136,60 @@ def pytket_to_qir_ll(
                 [ll.Constant(int64, command.qubits[0].index[0]).inttoptr(qp)],
             )
 
+        elif isinstance(op, Conditional):
+
+            # conditional_circuit = self._rebase_op_to_gateset(
+            #    op.op, command.args[op.width :]
+            # )
+            # condition_name = command.args[0].reg_name
+            # condition_bit_index = command.args[0].index[0]
+
+            classical_fntype = ll.FunctionType(int64, [int64])
+            cl_fun = ll.GlobalVariable(module, classical_fntype, name="__something__")
+
+            value0 = builder.call(
+                cl_fun,
+                [ll.Constant(int64, command.args[0].index[0])],
+            )
+
+            cond = builder.call(
+                cl_fun,
+                [ll.Constant(int64, command.args[0].index[0])],
+            )
+
+            with builder.if_else(cond) as (then, otherwise):
+                with then:
+                    value1 = builder.call(
+                        cl_fun,
+                        [ll.Constant(int64, command.args[0].index[0])],
+                    )
+
+                with otherwise:
+                    # emit instructions for when the predicate is false
+                    # emit instructions following the if-else block
+                    value2 = builder.call(
+                        cl_fun,
+                        [ll.Constant(int64, command.args[0].index[0])],
+                    )
+
+            p = builder.phi(int64)
+            # p.add_incoming(value1,"entry.if") #value2)
+
+        else:
+            assert 1 == 0
+
     start_output_fntype = ll.FunctionType(void, [])
     start_output_func = ll.GlobalVariable(
         module, start_output_fntype, name="__quantum__rt__tuple_start_record_output"
     )
     builder.call(start_output_func, [])
+
+    if len(circ.bits) > 0:
+        int_output_fntype = ll.FunctionType(void, [int64, int8ptr])
+        int_output_func = ll.GlobalVariable(
+            module, int_output_fntype, name="__quantum__rt__int_record_output"
+        )
+        builder.call(int_output_func, [register[0][1], register[0][0]])
 
     end_output_fntype = ll.FunctionType(void, [])
     end_output_func = ll.GlobalVariable(
@@ -130,6 +201,9 @@ def pytket_to_qir_ll(
 
         initial_result = str(module)
 
+        # print(initial_result)
+        # exit()
+
         replacements = {}
 
         replacements['"Qubit"'] = "Qubit"
@@ -138,6 +212,9 @@ def pytket_to_qir_ll(
         replacements[
             '"__quantum__rt__tuple_start_record_output"'
         ] = "__quantum__rt__tuple_start_record_output"
+        replacements[
+            '"__quantum__rt__int_record_output"'
+        ] = "__quantum__rt__int_record_output"
         replacements[
             '"__quantum__rt__tuple_end_record_output"()'
         ] = "__quantum__rt__tuple_end_record_output()\n  ret void"

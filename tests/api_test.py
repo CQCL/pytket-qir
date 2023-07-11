@@ -90,6 +90,22 @@ def test_pytket_qir_ll_3() -> None:
     check_qir_result_2(result, result2)
 
 
+def test_pytket_qir_ll_4() -> None:
+    circ = Circuit(1)
+    c = circ.add_c_register("c", 1)
+    circ.H(0)
+    circ.H(0, condition=c[0])
+
+    result = pytket_to_qir(
+        circ, name="test_pytket_qir_ll_4", qir_format=QIRFormat.STRING
+    )
+    result2 = pytket_to_qir_ll(circ, name="test_pytket_qir_ll_4")
+
+    check_qir_result(result, "test_pytket_qir_lll_4")
+    # check_qir_result(result2, "test_pytket_qir_lll_4b", True)
+    check_qir_result_2(result, result2)
+
+
 def test_pytket_qir_optimised() -> None:
     circ = Circuit(
         3,
