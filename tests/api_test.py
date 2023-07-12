@@ -102,8 +102,8 @@ def test_pytket_qir_ll_4() -> None:
     result2 = pytket_to_qir_ll(circ, name="test_pytket_qir_ll_4")
 
     check_qir_result(result, "test_pytket_qir_lll_4")
-    # check_qir_result(result2, "test_pytket_qir_lll_4b", True)
-    check_qir_result_2(result, result2)
+    check_qir_result(result2, "test_pytket_qir_lll_4b")
+    # check_qir_result_2(result, result2)
 
 
 def test_pytket_qir_optimised() -> None:

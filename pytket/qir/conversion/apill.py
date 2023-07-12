@@ -159,6 +159,7 @@ def pytket_to_qir_ll(
 
             with builder.if_else(cond) as (then, otherwise):
                 with then:
+                    bb_1 = builder.basic_block
                     value1 = builder.call(
                         cl_fun,
                         [ll.Constant(int64, command.args[0].index[0])],
@@ -167,13 +168,25 @@ def pytket_to_qir_ll(
                 with otherwise:
                     # emit instructions for when the predicate is false
                     # emit instructions following the if-else block
+                    bb_2 = builder.basic_block
                     value2 = builder.call(
                         cl_fun,
                         [ll.Constant(int64, command.args[0].index[0])],
                     )
 
             p = builder.phi(int64)
-            # p.add_incoming(value1,"entry.if") #value2)
+            p.add_incoming(value1, bb_1)  # value2)
+            p.add_incoming(value2, bb_2)  # value2)
+
+            value3 = builder.call(
+                cl_fun,
+                [p],
+            )
+            value4 = ll.Constant(int64, command.args[0].index[0])
+            value5 = builder.call(
+                cl_fun,
+                [value4],
+            )
 
         else:
             assert 1 == 0
