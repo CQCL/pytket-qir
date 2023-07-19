@@ -23,8 +23,6 @@ and Windows. To install, run:
 This will install `pytket` if it isn't already installed, and add new classes
 and methods into the `pytket.extensions` namespace.
 
-The [example notebooks](https://github.com/CQCL/pytket-qir/tree/develop/examples) also demonstrate some of the key features of pytket-qir.
-
 ## Bugs, support and feature requests
 
 Please file bugs and feature requests on the Github
