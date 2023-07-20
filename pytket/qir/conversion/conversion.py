@@ -348,8 +348,14 @@ class QirGenerator:
             return circuit
         elif op.type == OpType.CircBox:
             circuit = op.get_circuit()
-            assert self.circuit.n_qubits == circuit.n_qubits
-            assert circuit.n_bits == 0
+            if self.circuit.n_qubits != circuit.n_qubits:
+                raise ValueError(
+                    "The number of qubits of the circbox need to match the number of qubits of the circuit"
+                )
+            if circuit.n_bits != 0:
+                raise ValueError(
+                    "The number of bits and registers of the circbox need to be 0"
+                )
             return circuit
 
         else:
