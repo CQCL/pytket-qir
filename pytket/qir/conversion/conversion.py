@@ -491,31 +491,55 @@ class QirGenerator:
             op = command.op
 
             if isinstance(op, RangePredicateOp):
-                lower_qir = pyqir.const(self.qir_int_type, op.lower)
-                upper_qir = pyqir.const(self.qir_int_type, op.upper)
+                # special case handling for REG_EQ
+                if op.lower == op.upper:
+                    registername = command.args[0].reg_name
 
-                registername = command.args[0].reg_name
-
-                lower_cond = module.module.builder.icmp(
-                    pyqir.IntPredicate.SGT, lower_qir, self.ssa_vars[registername]
-                )
-                upper_cond = module.module.builder.icmp(
-                    pyqir.IntPredicate.SGT, self.ssa_vars[registername], upper_qir
-                )
-
-                result = module.module.builder.and_(lower_cond, upper_cond)
-
-                condition_bit_index = command.args[-1].index[0]
-                registername = command.args[-1].reg_name
-
-                self.module.builder.call(
-                    self.set_one_bit_in_reg,
-                    [
+                    result = module.module.builder.icmp(
+                        pyqir.IntPredicate.EQ,
+                        pyqir.const(self.qir_int_type, op.lower),
                         self.ssa_vars[registername],
-                        pyqir.const(self.qir_int_type, condition_bit_index),
-                        result,
-                    ],
-                )
+                    )
+
+                    condition_bit_index = command.args[-1].index[0]
+                    result_registername = command.args[-1].reg_name
+
+                    self.module.builder.call(
+                        self.set_one_bit_in_reg,
+                        [
+                            self.ssa_vars[result_registername],
+                            pyqir.const(self.qir_int_type, condition_bit_index),
+                            result,
+                        ],
+                    )
+
+                else:
+
+                    lower_qir = pyqir.const(self.qir_int_type, op.lower)
+                    upper_qir = pyqir.const(self.qir_int_type, op.upper)
+
+                    registername = command.args[0].reg_name
+
+                    lower_cond = module.module.builder.icmp(
+                        pyqir.IntPredicate.SGT, lower_qir, self.ssa_vars[registername]
+                    )
+                    upper_cond = module.module.builder.icmp(
+                        pyqir.IntPredicate.SGT, self.ssa_vars[registername], upper_qir
+                    )
+
+                    result = module.module.builder.and_(lower_cond, upper_cond)
+
+                    condition_bit_index = command.args[-1].index[0]
+                    registername = command.args[-1].reg_name
+
+                    self.module.builder.call(
+                        self.set_one_bit_in_reg,
+                        [
+                            self.ssa_vars[registername],
+                            pyqir.const(self.qir_int_type, condition_bit_index),
+                            result,
+                        ],
+                    )
 
             elif isinstance(op, Conditional):
 
