@@ -553,11 +553,21 @@ class QirGenerator:
                         ],
                     )
 
-                    module.module.builder.if_(
-                        ssabool,
-                        true=lambda: condition_block_true(),  # type: ignore
-                        false=lambda: condition_block_false(),  # type: ignore
-                    )
+                    if op.value == 1:
+                        module.module.builder.if_(
+                            ssabool,
+                            true=lambda: condition_block_true(),  # type: ignore
+                            # false=lambda: condition_block_false(),  # type: ignore
+                        )
+
+                    elif op.value == 0:
+                        module.module.builder.if_(
+                            ssabool,
+                            # true=lambda: condition_block_true(),  # type: ignore
+                            false=lambda: condition_block_false(),  # type: ignore
+                        )
+                    else:
+                        assert 1 == 0
 
                 else:
 

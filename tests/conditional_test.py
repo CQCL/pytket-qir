@@ -151,6 +151,30 @@ def test_pytket_qir_conditional_6() -> None:
     check_qir_result(result, "test_pytket_qir_conditional_6")
 
 
+def test_pytket_qir_conditional_7() -> None:
+
+    # test setbits op
+    circ = Circuit(1, name="test_classical")
+    a = circ.add_c_register("a", 8)
+    b = circ.add_c_register("b", 10)
+    d = circ.add_c_register("d", 10)
+
+    circ.X(0, condition=a[0])
+    circ.X(0, condition=a[0])
+    circ.X(0, condition=a[0])
+    circ.X(0, condition=a[0])
+    circ.X(0, condition=a[0])
+    circ.X(0, condition=a[0])
+    circ.X(0, condition=a[0])
+    circ.X(0, condition=a[0])
+
+    result = pytket_to_qir(
+        circ, name="test_pytket_qir_conditional_7", qir_format=QIRFormat.STRING
+    )
+
+    check_qir_result(result, "test_pytket_qir_conditional_7")
+
+
 if __name__ == "__main__":
     test_pytket_qir_conditional()
     test_pytket_qir_conditional_ii()
