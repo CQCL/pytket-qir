@@ -39,6 +39,7 @@ from pytket.circuit import (  # type: ignore
     SetBitsOp,
     WASMOp,
     OpType,
+    CircBox,
 )
 
 from pytket.circuit.logic_exp import (  # type: ignore
@@ -345,6 +346,10 @@ class QirGenerator:
 
             circuit.add_gate(op, args)
             return circuit
+        elif op.type == OpType.CircBox:
+            circuit = op.get_circuit()
+            return circuit
+
         else:
             params = op.params
             circuit = Circuit(self.circuit.n_qubits, self.circuit.n_bits)
