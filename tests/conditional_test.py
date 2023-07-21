@@ -16,7 +16,7 @@ from utilities import check_qir_result  # type: ignore
 
 from pytket.qir.conversion.api import pytket_to_qir, QIRFormat
 
-from pytket.circuit import Circuit, Qubit, if_not_bit, Bit, OpType  # type: ignore
+from pytket.circuit import Circuit, Qubit, if_not_bit, Bit, OpType, reg_eq  # type: ignore
 
 
 def test_pytket_qir_conditional() -> None:
@@ -151,9 +151,30 @@ def test_pytket_qir_conditional_6() -> None:
     check_qir_result(result, "test_pytket_qir_conditional_6")
 
 
+def test_pytket_qir_conditional_7() -> None:
+
+    circ = Circuit(7, name="testcirc")
+
+    syn = circ.add_c_register("syn", 4)
+
+    circ.X(0, condition=reg_eq(syn, 1))
+    circ.X(0, condition=reg_eq(syn, 2))
+    circ.X(0, condition=reg_eq(syn, 2))
+    circ.X(0, condition=reg_eq(syn, 3))
+    circ.X(0, condition=reg_eq(syn, 4))
+    circ.X(0, condition=reg_eq(syn, 4))
+
+    result = pytket_to_qir(
+        circ, name="test_pytket_qir_conditional_7", qir_format=QIRFormat.STRING
+    )
+
+    check_qir_result(result, "test_pytket_qir_conditional_7")
+
+
 if __name__ == "__main__":
     test_pytket_qir_conditional()
     test_pytket_qir_conditional_ii()
     test_pytket_qir_conditional_iii()
     test_pytket_qir_conditional_iv()
     test_pytket_qir_conditional_6()
+    test_pytket_qir_conditional_7()
