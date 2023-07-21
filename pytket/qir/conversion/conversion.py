@@ -349,7 +349,8 @@ class QirGenerator:
             circuit = op.get_circuit()
             if self.circuit.n_qubits != circuit.n_qubits:
                 raise ValueError(
-                    "The number of qubits of the circbox need to match the number of qubits of the circuit"
+                    """The number of qubits of the circbox need to
+match the number of qubits of the circuit"""
                 )
             if circuit.n_bits != 0:
                 raise ValueError(
