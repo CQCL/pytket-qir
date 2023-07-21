@@ -41,6 +41,7 @@ def pytket_to_qir(
     name: str = "Generated from input pytket circuit",
     qir_format: QIRFormat = QIRFormat.BINARY,
     pyqir_0_6_compatibility: bool = False,
+    qir_optimisation: bool = False,
 ) -> Union[str, bytes, None]:
     """converts given pytket circuit to qir
 
@@ -53,6 +54,9 @@ def pytket_to_qir(
     :param pyqir_0_6_compatibility: converts the output to be compatible with
         pyqir 0.6, default value false
     :type pyqir_0_6_compatibility: bool
+    :param qir_optimisation: optimises the qir by removing some of the
+      generated empty blocks
+    :type qir_optimisation: bool
     """
 
     if len(circ.q_registers) > 1 or (
@@ -84,6 +88,78 @@ def pytket_to_qir(
     populated_module = qir_generator.circuit_to_module(
         qir_generator.circuit, qir_generator.module, True
     )
+
+    if qir_optimisation:
+
+        if pyqir_0_6_compatibility:
+            raise ValueError(
+                "pyqir_0_6_compatibility not compatible with qir_optimisation"
+            )
+
+        result = str(populated_module.module.ir())  # type: ignore
+
+        # clean up and remove empty blocks:
+        list_empty_blocks = []
+
+        list_empty_blocks.append(
+            (
+                """else:                                             ; preds = %entry
+  br label %continue
+""",
+                "label %else\n",
+                "label %continue",
+            )
+        )
+
+        list_empty_blocks.append(
+            (
+                """else2:                                            ; preds = %continue
+  br label %continue3
+""",
+                "label %else2\n",
+                "label %continue3",
+            )
+        )
+
+        for i in range(3, 10):
+
+            list_empty_blocks.append(
+                (
+                    f"""else{i}:                                            ;\
+ preds = %continue{i-2}
+  br label %continue{i+1}
+""",
+                    f"label %else{i}\n",
+                    f"label %continue{i+1}",
+                )
+            )
+
+        for i in range(10, 100):
+
+            list_empty_blocks.append(
+                (
+                    f"""else{i}:                                           ;\
+ preds = %continue{i-2}
+  br label %continue{i+1}
+""",
+                    f"label %else{i}\n",
+                    f"label %continue{i+1}",
+                )
+            )
+
+        for b in list_empty_blocks:
+            if b[1] in result:
+                result = result.replace(b[0], "")
+                result = result.replace(b[1], b[2])
+
+        bitcode = pyqir.Module.from_ir(pyqir.Context(), result).bitcode  # type: ignore
+
+        if qir_format == QIRFormat.BINARY:
+            return bitcode  # type: ignore
+        elif qir_format == QIRFormat.STRING:
+            return result  # type: ignore
+        else:
+            assert not "unsupported return type"  # type: ignore
 
     if pyqir_0_6_compatibility:
 

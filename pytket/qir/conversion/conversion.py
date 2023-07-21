@@ -25,6 +25,7 @@ import math
 from pyqir import Value, IntPredicate
 import pyqir
 
+from pytket.transform import Transform  # type: ignore
 from pytket import Circuit, OpType, Bit, Qubit, predicates  # type: ignore
 from pytket.qasm.qasm import _retrieve_registers  # type: ignore
 from pytket.circuit import (  # type: ignore
@@ -345,6 +346,13 @@ class QirGenerator:
 
             circuit.add_gate(op, args)
             return circuit
+        elif op.type == OpType.CircBox:
+            circuit = Circuit(self.circuit.n_qubits, self.circuit.n_bits)
+            circuit.add_circbox(op, args)
+            Transform.DecomposeBoxes().apply(circuit)
+
+            return circuit
+
         else:
             params = op.params
             circuit = Circuit(self.circuit.n_qubits, self.circuit.n_bits)
