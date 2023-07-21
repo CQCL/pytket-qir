@@ -40,7 +40,6 @@ from pytket.circuit import (  # type: ignore
     SetBitsOp,
     WASMOp,
     OpType,
-    CircBox,
 )
 
 from pytket.circuit.logic_exp import (  # type: ignore
