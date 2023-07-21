@@ -16,7 +16,7 @@ from utilities import check_qir_result  # type: ignore
 
 from pytket.qir.conversion.api import pytket_to_qir, QIRFormat
 
-from pytket.circuit import Circuit, Qubit, if_not_bit, Bit, OpType, reg_eq  # type: ignore
+from pytket.circuit import Circuit, Qubit, if_not_bit, Bit, OpType, reg_eq, CircBox  # type: ignore
 
 
 def test_pytket_qir_conditional() -> None:
@@ -169,6 +169,68 @@ def test_pytket_qir_conditional_7() -> None:
     )
 
     check_qir_result(result, "test_pytket_qir_conditional_7")
+
+
+def test_pytket_qir_conditional_8() -> None:
+
+    c = Circuit(4)
+    c.H(0)
+    c.H(1)
+    c.H(2)
+    c.H(3)
+    cbox = CircBox(c)
+    d = Circuit(4)
+    a = d.add_c_register("a", 4)
+    d.add_circbox(cbox, [0, 2, 1, 3], condition=a[0])
+
+    result = pytket_to_qir(
+        d, name="test_pytket_qir_conditional_8", qir_format=QIRFormat.STRING
+    )
+
+    check_qir_result(result, "test_pytket_qir_conditional_8")
+
+
+def test_pytket_qir_conditional_9() -> None:
+
+    c = Circuit(4)
+    c.X(0)
+    c.Y(1)
+    c.Z(2)
+    c.H(3)
+    cbox = CircBox(c)
+    d = Circuit(4)
+    a = d.add_c_register("a", 4)
+    d.add_circbox(cbox, [0, 2, 1, 3], condition=a[0])
+
+    result = pytket_to_qir(
+        d, name="test_pytket_qir_conditional_9", qir_format=QIRFormat.STRING
+    )
+
+    check_qir_result(result, "test_pytket_qir_conditional_9")
+
+
+def test_pytket_qir_conditional_10() -> None:
+
+    box_circ = Circuit(4)
+    box_circ.X(0)
+    box_circ.Y(1)
+    box_circ.Z(2)
+    box_circ.H(3)
+    box_c = box_circ.add_c_register("c", 5)
+
+    box_circ.H(0)
+    box_circ.add_classicalexpbox_register(box_c | box_c, box_c)
+
+    cbox = CircBox(box_circ)
+    d = Circuit(4, 5)
+    a = d.add_c_register("a", 4)
+    d.add_circbox(cbox, [0, 2, 1, 3, 0, 1, 2, 3, 4], condition=a[0])
+
+    result = pytket_to_qir(
+        d, name="test_pytket_qir_conditional_10", qir_format=QIRFormat.STRING
+    )
+
+    check_qir_result(result, "test_pytket_qir_conditional_10")
 
 
 if __name__ == "__main__":
