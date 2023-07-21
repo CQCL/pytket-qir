@@ -172,7 +172,8 @@ def test_pytket_qir_conditional_7() -> None:
 
 
 def test_pytket_qir_conditional_8() -> None:
-    c = Circuit(4)
+
+  c = Circuit(4)
     c.H(0)
     c.H(1)
     c.H(2)
