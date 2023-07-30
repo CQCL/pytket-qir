@@ -186,7 +186,7 @@ def test_pytket_qir_10() -> None:
     c.add_c_copyreg(a, b)
 
     result = pytket_to_qir(c, name="test_pytket_qir_10", qir_format=QIRFormat.STRING)
-    print(result)
+
     check_qir_result(result, "test_pytket_qir_10")
 
 

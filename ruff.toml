@@ -30,6 +30,7 @@ select = [
   # "S",    # flake8-bandit (Security)
   "SIM",  # flake8-simplify
   # "SLF",  # flake8-self
+  "T20",  #flake8-print
   # "TRY",  # tryceratops
   "UP",   # pyupgrade
   # "YTT",  # flake8-2020
