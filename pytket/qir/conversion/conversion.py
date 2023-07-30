@@ -422,7 +422,7 @@ class QirGenerator:
                 return pyqir.const(self.qir_int_type, value)
             else:
                 reg_value = [False] * len(bit_reg)
-                empty_reg =True
+                empty_reg = True
             if (size := len(reg_value)) <= int_size:  # Widening by zero-padding.
                 bool_reg = reg_value + [False] * (int_size - size)
             else:  # Narrowing by truncation.
