@@ -15,7 +15,7 @@ select = [
   # "FA",   # flake8-future-annotations
   # "FIX",  # flake8-fixme
   # "FLY",  # flynt
-  # "I",    # isort
+  "I",    # isort
   # "INP",  # flake8-no-pep420
   # "ISC",  # flake8-implicit-str-concat
   # "N",    # pep8-Naming
@@ -28,7 +28,7 @@ select = [
   # "RSE",  # flake8-raise
   # "RUF",  # Ruff-specific
   # "S",    # flake8-bandit (Security)
-  # "SIM",  # flake8-simplify
+  "SIM",  # flake8-simplify
   # "SLF",  # flake8-self
   # "TRY",  # tryceratops
   "UP",   # pyupgrade
