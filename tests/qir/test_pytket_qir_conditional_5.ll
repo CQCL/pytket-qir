@@ -1,5 +1,5 @@
-; ModuleID = 'test_pytket_qir_conditional_v'
-source_filename = "test_pytket_qir_conditional_v"
+; ModuleID = 'test_pytket_qir_conditional_5'
+source_filename = "test_pytket_qir_conditional_5"
 
 %Qubit = type opaque
 %Result = type opaque
@@ -8,7 +8,7 @@ source_filename = "test_pytket_qir_conditional_v"
 
 define void @main() #0 {
 entry:
-  %0 = call i64 @init_reg(i64 3)
+  %0 = call i64 @init_reg(i64 2)
   call void @__quantum__qis__h__body(%Qubit* null)
   call void @__quantum__qis__h__body(%Qubit* inttoptr (i64 1 to %Qubit*))
   call void @__quantum__qis__mz__body(%Qubit* null, %Result* null)

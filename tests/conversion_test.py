@@ -186,24 +186,8 @@ def test_pytket_qir_10() -> None:
     c.add_c_copyreg(a, b)
 
     result = pytket_to_qir(c, name="test_pytket_qir_10", qir_format=QIRFormat.STRING)
-
+    print(result)
     check_qir_result(result, "test_pytket_qir_10")
-
-
-def test_pytket_qir_11() -> None:
-    # test copybits op
-    c = Circuit(1, name="test_classical")
-    a = c.add_c_register("a", 2)
-    b = c.add_c_register("b", 4)
-
-    c.add_c_copyreg(a, b)
-
-    result = pytket_to_qir(c, name="test_pytket_qir_10", qir_format=QIRFormat.STRING)
-
-    check_qir_result(
-        result,
-        "test_pytket_qir_10",
-    )  # should be identical to the testcase above
 
 
 def test_pytket_qir_12() -> None:
@@ -342,7 +326,6 @@ if __name__ == "__main__":
     test_pytket_qir_8()
     test_pytket_qir_9()
     test_pytket_qir_10()
-    test_pytket_qir_11()
     test_pytket_qir_12()
     test_pytket_qir_13()
     test_pytket_qir_14()

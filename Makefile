@@ -9,7 +9,7 @@ dev:
 	pip install -e .
 
 tests:
-	cd tests && pytest -v && cd -
+	cd tests && pytest -x -v && cd -
 
 build:
 	python -m build --sdist --wheel -n

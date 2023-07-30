@@ -50,7 +50,6 @@ def test_pytket_qir_conditional() -> None:
         name="test_pytket_qir_conditional",
         qir_format=QIRFormat.STRING,
     )
-
     check_qir_result(result, "test_pytket_qir_conditional")
 
 
@@ -139,19 +138,23 @@ def test_pytket_qir_conditional_v() -> None:
         qir_format=QIRFormat.STRING,
     )
 
+    check_qir_result(result, "test_pytket_qir_conditional_v")
+
+
+def test_pytket_qir_conditional_5() -> None:
+    # test complicated conditions and recursive classical op
+
     circ = Circuit(2, 2).H(0).H(1).measure_all()
 
     circ.add_gate(OpType.H, [0], condition_bits=[0, 1], condition_value=3)
 
-    result_2 = pytket_to_qir(
+    result = pytket_to_qir(
         circ,
-        name="test_pytket_qir_conditional_v",
+        name="test_pytket_qir_conditional_5",
         qir_format=QIRFormat.STRING,
     )
 
-    check_qir_result(result, "test_pytket_qir_conditional_v")
-
-    check_qir_result(result_2, "test_pytket_qir_conditional_v")
+    check_qir_result(result, "test_pytket_qir_conditional_5")
 
 
 def test_pytket_qir_conditional_6() -> None:

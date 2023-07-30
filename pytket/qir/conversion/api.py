@@ -78,7 +78,7 @@ def pytket_to_qir(
         circuit=circ,
         module=m,
         wasm_int_type=32,
-        qir_int_type=64,
+        qir_int_size=64,
     )
 
     populated_module = qir_generator.circuit_to_module(
@@ -107,6 +107,7 @@ one classical register""",
                 ("@__quantum__qis__read_result__body" not in line)
                 and ("@set_one_bit_in_reg" not in line)
                 and ("@reg2var" not in line)
+                and ("@init_reg" not in line)
                 and ("@read_bit_from_reg" not in line)
                 and ("@set_all_bits_in_reg" not in line)
             )
