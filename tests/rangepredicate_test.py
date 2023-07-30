@@ -14,17 +14,16 @@
 
 from utilities import check_qir_result  # type: ignore
 
-from pytket.qir.conversion.api import pytket_to_qir, QIRFormat
-
 from pytket.circuit import (
     Circuit,
     reg_eq,
-    reg_neq,
-    reg_lt,
+    reg_geq,
     reg_gt,
     reg_leq,
-    reg_geq,
+    reg_lt,
+    reg_neq,
 )
+from pytket.qir.conversion.api import QIRFormat, pytket_to_qir
 
 
 def test_pytket_qir_rangepredicate() -> None:
@@ -40,7 +39,9 @@ def test_pytket_qir_rangepredicate() -> None:
     circ.H(0, condition=reg_geq(a, 1))
 
     result = pytket_to_qir(
-        circ, name="test_pytket_qir_rangepredicate", qir_format=QIRFormat.STRING
+        circ,
+        name="test_pytket_qir_rangepredicate",
+        qir_format=QIRFormat.STRING,
     )
 
     check_qir_result(result, "test_pytket_qir_rangepredicate")

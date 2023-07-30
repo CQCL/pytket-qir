@@ -1,17 +1,15 @@
-# Pytket Extensions
-
-# this is currently work in progress
+# pytket-qir -- Pytket QIR Extension
 
 This repository contains the pytket-qir extension, using Quantinuum's
 [pytket](https://cqcl.github.io/tket/pytket/api/index.html) quantum SDK.
-
-# pytket-qir
 
 [Pytket](https://cqcl.github.io/tket/pytket/api/index.html) is a python module for interfacing
 with tket, a quantum computing toolkit and optimisation compiler developed by Quantinuum.
 
 `pytket-qir` is an extension to `pytket` that allows `pytket` circuits to
 be converted to qir.
+
+## This is currently work in progress
 
 ## Getting started
 
@@ -32,7 +30,13 @@ There is also a Slack channel for discussion and support. Click [here](https://t
 
 ## Development
 
-To install this extension in editable mode, simply change to this directory, and run:
+First install required dependencies:
+
+```sh
+pip install black build mypy pre-commit pylint pytest ruff wheel
+```
+
+Then install this extension in editable mode, simply change to this directory, and run:
 
 ```shell
 pip install -e .

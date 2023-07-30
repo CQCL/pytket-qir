@@ -13,12 +13,10 @@
 # limitations under the License.
 
 
-from string import Template
-
 from dataclasses import dataclass
 from enum import Enum
 from string import Template
-from typing import Callable, Dict, List, NamedTuple, Set, Union, Any
+from typing import Any, Callable, NamedTuple, Union
 
 from pytket import OpType  # type: ignore
 
@@ -78,70 +76,98 @@ class QirGate:
 
 @dataclass(frozen=True)
 class CustomQirGate(QirGate):
-    function_signature: List
+    function_signature: list
     return_type: Any
 
 
-CustomGateSet = NamedTuple(
-    "CustomGateSet",
-    [
-        ("name", str),
-        ("template", Template),
-        ("base_gateset", Set[OpType]),
-        ("gateset", Dict[str, CustomQirGate]),
-        ("tk_to_gateset", Callable),
-    ],
-)
+class CustomGateSet(NamedTuple):
+    name: str
+    template: Template
+    base_gateset: set[OpType]
+    gateset: dict[str, CustomQirGate]
+    tk_to_gateset: Callable
 
 
 _TK_TO_PYQIR = {
     OpType.H: QirGate(
-        func_nat=FuncNat.QIS, func_name=FuncName.H, func_spec=FuncSpec.BODY
+        func_nat=FuncNat.QIS,
+        func_name=FuncName.H,
+        func_spec=FuncSpec.BODY,
     ),
     OpType.X: QirGate(
-        func_nat=FuncNat.QIS, func_name=FuncName.X, func_spec=FuncSpec.BODY
+        func_nat=FuncNat.QIS,
+        func_name=FuncName.X,
+        func_spec=FuncSpec.BODY,
     ),
     OpType.Y: QirGate(
-        func_nat=FuncNat.QIS, func_name=FuncName.Y, func_spec=FuncSpec.BODY
+        func_nat=FuncNat.QIS,
+        func_name=FuncName.Y,
+        func_spec=FuncSpec.BODY,
     ),
     OpType.Z: QirGate(
-        func_nat=FuncNat.QIS, func_name=FuncName.Z, func_spec=FuncSpec.BODY
+        func_nat=FuncNat.QIS,
+        func_name=FuncName.Z,
+        func_spec=FuncSpec.BODY,
     ),
     OpType.S: QirGate(
-        func_nat=FuncNat.QIS, func_name=FuncName.S, func_spec=FuncSpec.BODY
+        func_nat=FuncNat.QIS,
+        func_name=FuncName.S,
+        func_spec=FuncSpec.BODY,
     ),
     OpType.Sdg: QirGate(
-        func_nat=FuncNat.QIS, func_name=FuncName.S, func_spec=FuncSpec.ADJ
+        func_nat=FuncNat.QIS,
+        func_name=FuncName.S,
+        func_spec=FuncSpec.ADJ,
     ),
     OpType.T: QirGate(
-        func_nat=FuncNat.QIS, func_name=FuncName.T, func_spec=FuncSpec.BODY
+        func_nat=FuncNat.QIS,
+        func_name=FuncName.T,
+        func_spec=FuncSpec.BODY,
     ),
     OpType.Tdg: QirGate(
-        func_nat=FuncNat.QIS, func_name=FuncName.T, func_spec=FuncSpec.ADJ
+        func_nat=FuncNat.QIS,
+        func_name=FuncName.T,
+        func_spec=FuncSpec.ADJ,
     ),
     OpType.Reset: QirGate(
-        func_nat=FuncNat.QIS, func_name=FuncName.RESET, func_spec=FuncSpec.BODY
+        func_nat=FuncNat.QIS,
+        func_name=FuncName.RESET,
+        func_spec=FuncSpec.BODY,
     ),
     OpType.CX: QirGate(
-        func_nat=FuncNat.QIS, func_name=FuncName.CX, func_spec=FuncSpec.BODY
+        func_nat=FuncNat.QIS,
+        func_name=FuncName.CX,
+        func_spec=FuncSpec.BODY,
     ),
     OpType.CZ: QirGate(
-        func_nat=FuncNat.QIS, func_name=FuncName.CZ, func_spec=FuncSpec.BODY
+        func_nat=FuncNat.QIS,
+        func_name=FuncName.CZ,
+        func_spec=FuncSpec.BODY,
     ),
     OpType.Measure: QirGate(
-        func_nat=FuncNat.QIS, func_name=FuncName.MEASUREZ, func_spec=FuncSpec.BODY
+        func_nat=FuncNat.QIS,
+        func_name=FuncName.MEASUREZ,
+        func_spec=FuncSpec.BODY,
     ),
     OpType.Rx: QirGate(
-        func_nat=FuncNat.QIS, func_name=FuncName.Rx, func_spec=FuncSpec.BODY
+        func_nat=FuncNat.QIS,
+        func_name=FuncName.Rx,
+        func_spec=FuncSpec.BODY,
     ),
     OpType.Ry: QirGate(
-        func_nat=FuncNat.QIS, func_name=FuncName.Ry, func_spec=FuncSpec.BODY
+        func_nat=FuncNat.QIS,
+        func_name=FuncName.Ry,
+        func_spec=FuncSpec.BODY,
     ),
     OpType.Rz: QirGate(
-        func_nat=FuncNat.QIS, func_name=FuncName.Rz, func_spec=FuncSpec.BODY
+        func_nat=FuncNat.QIS,
+        func_name=FuncName.Rz,
+        func_spec=FuncSpec.BODY,
     ),
     OpType.CopyBits: QirGate(
-        func_nat=FuncNat.QIS, func_name=FuncName.READ_RES, func_spec=FuncSpec.BODY
+        func_nat=FuncNat.QIS,
+        func_name=FuncName.READ_RES,
+        func_spec=FuncSpec.BODY,
     ),
 }
 

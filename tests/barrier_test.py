@@ -14,11 +14,10 @@
 
 from utilities import check_qir_result  # type: ignore
 
-from pytket.qir.conversion.api import pytket_to_qir, QIRFormat
-
 from pytket.circuit import (
     Circuit,
 )
+from pytket.qir.conversion.api import QIRFormat, pytket_to_qir
 
 
 def test_pytket_qir_barrier() -> None:
@@ -34,7 +33,9 @@ def test_pytket_qir_barrier() -> None:
     circ.H(4)
 
     result = pytket_to_qir(
-        circ, name="test_pytket_qir_barrier", qir_format=QIRFormat.STRING
+        circ,
+        name="test_pytket_qir_barrier",
+        qir_format=QIRFormat.STRING,
     )
 
     check_qir_result(result, "test_pytket_qir_barrier")
@@ -55,7 +56,9 @@ def test_pytket_qir_barrier_ii() -> None:
     circ.add_barrier([0], data="sleep(10000)")
 
     result = pytket_to_qir(
-        circ, name="test_pytket_qir_barrier_ii", qir_format=QIRFormat.STRING
+        circ,
+        name="test_pytket_qir_barrier_ii",
+        qir_format=QIRFormat.STRING,
     )
 
     check_qir_result(result, "test_pytket_qir_barrier_ii")
