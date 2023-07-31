@@ -30,10 +30,14 @@ There is also a Slack channel for discussion and support. Click [here](https://t
 
 ## Development
 
-First install required dependencies:
+First setup your virtual environment and install required dependencies:
 
 ```sh
+python -m venv .venv
+source .venv/bin/activate
+pip install -U pip setuptools
 pip install black build mypy pre-commit pylint pytest ruff wheel
+pre-commit install
 ```
 
 Then install this extension in editable mode, simply change to this directory, and run:
