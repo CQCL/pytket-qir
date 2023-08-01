@@ -30,6 +30,8 @@ declare i1 @__quantum__qis__read_result__body(%Result*)
 
 declare i64 @reg2var(i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1)
 
+declare i64 @init_reg(i64)
+
 declare void @__quantum__rt__int_record_output(i64, i8*)
 
 declare void @__quantum__rt__tuple_start_record_output()

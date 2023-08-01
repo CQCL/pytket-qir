@@ -106,12 +106,12 @@ class QirGenerator:
         circuit: Circuit,
         module: tketqirModule,
         wasm_int_type: int,
-        qir_int_type: int,
+        qir_int_size: int,
     ) -> None:
         self.circuit = circuit
         self.module = module
         self.wasm_int_type = pyqir.IntType(self.module.context, wasm_int_type)
-        self.qir_int_type = pyqir.IntType(self.module.context, qir_int_type)
+        self.qir_int_type = pyqir.IntType(self.module.context, qir_int_size)
         self.qir_bool_type = pyqir.IntType(self.module.context, 1)
         self.qubit_type = pyqir.qubit_type(self.module.context)
         self.result_type = pyqir.result_type(self.module.context)
@@ -176,8 +176,17 @@ class QirGenerator:
         self.reg2var = self.module.module.add_external_function(
             "reg2var",
             pyqir.FunctionType(
-                pyqir.IntType(self.module.module.context, qir_int_type),
-                [pyqir.IntType(self.module.module.context, 1)] * qir_int_type,
+                pyqir.IntType(self.module.module.context, qir_int_size),
+                [pyqir.IntType(self.module.module.context, 1)] * qir_int_size,
+            ),
+        )
+
+        # i64 init_reg(i64 size), create an empty classical register of size bits
+        self.init_reg = self.module.module.add_external_function(
+            "init_reg",
+            pyqir.FunctionType(
+                pyqir.IntType(self.module.module.context, qir_int_size),
+                [self.qir_int_type],
             ),
         )
 
@@ -189,13 +198,13 @@ class QirGenerator:
                 str.encode(reg_name)
             )
 
-            # void __quantum__rt__int_record_output(i64)
+        # void __quantum__rt__int_record_output(i64)
         self.record_output_i64 = self.module.module.add_external_function(
             "__quantum__rt__int_record_output",
             pyqir.FunctionType(
                 pyqir.Type.void(self.module.module.context),
                 [
-                    pyqir.IntType(self.module.module.context, qir_int_type),
+                    pyqir.IntType(self.module.module.context, qir_int_size),
                     pyqir.PointerType(pyqir.IntType(self.module.module.context, 8)),
                 ],
             ),
@@ -235,7 +244,7 @@ class QirGenerator:
         self.additional_quantum_gates: dict[OpType, pyqir.Function] = {}
 
         for creg in self.circuit.c_registers:
-            self._reg2ssa_var(creg, qir_int_type)
+            self._reg2ssa_var(creg, qir_int_size)
 
     def _add_barrier_op(
         self, module: tketqirModule, index: int, qir_qubits: Sequence
@@ -391,22 +400,25 @@ class QirGenerator:
 
     def _reg2ssa_var(self, bit_reg: BitRegister, int_size: int) -> Value:
         """Convert a BitRegister to an SSA variable using pyqir types."""
-        reg_name = bit_reg[0].reg_name
-        if (
-            reg_name not in self.ssa_vars
-        ):  # Check if the register has been previously set.
+        reg_name = bit_reg.name
+        if reg_name not in self.ssa_vars:
             # Check if the register has been previously set. If not, initialise to 0.
+            empty_reg = False
             if reg_value := self.set_cregs.get(reg_name):
-                bit_reg = reg_value
                 value = sum([n * 2**k for k, n in enumerate(reg_value)])
                 return pyqir.const(self.qir_int_type, value)
             else:
-                bit_reg = [False] * len(bit_reg)
-            if (size := len(bit_reg)) <= int_size:  # Widening by zero-padding.
-                bool_reg = bit_reg + [False] * (int_size - size)
+                reg_value = [False] * len(bit_reg)
+                empty_reg = True
+            if (size := len(reg_value)) <= int_size:  # Widening by zero-padding.
+                bool_reg = reg_value + [False] * (int_size - size)
             else:  # Narrowing by truncation.
-                bool_reg = bit_reg[:int_size]
-            ssa_var = cast(Value, self.module.builder.call(self.reg2var, [*bool_reg]))  # type: ignore  # noqa: E501
+                bool_reg = reg_value[:int_size]
+
+            if empty_reg:
+                ssa_var = cast(Value, self.module.builder.call(self.init_reg, [bit_reg.size]))  # type: ignore  # noqa: E501
+            else:
+                ssa_var = cast(Value, self.module.builder.call(self.reg2var, [*bool_reg]))  # type: ignore  # noqa: E501
             self.ssa_vars[reg_name] = ssa_var
             return ssa_var
         else:
@@ -823,7 +835,7 @@ class QirGenerator:
 
                     # add function to module
                     returntypebool = True
-                    result_index = command.args[-1].index[0]  # todo
+                    result_index = command.args[-1].index[0]  # TODO
                     output_instruction = _TK_CLOPS_TO_PYQIR_BIT[type(op.get_exp())](
                         module.builder
                     )(ssa_left, ssa_right)
