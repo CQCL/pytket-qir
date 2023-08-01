@@ -658,7 +658,7 @@ class QirGenerator:
                     )
 
             elif isinstance(op, WASMOp):
-                raise TypeError("WASM not supported yet")
+                raise ValueError("WASM not supported yet")
 
             elif op.type == OpType.ZZPhase:
                 assert len(command.bits) == 0
