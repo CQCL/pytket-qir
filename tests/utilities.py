@@ -32,7 +32,7 @@ def check_qir_result(given_qir: str, filename: str, writefile: bool = False) -> 
             f.write(given_qir)
         assert not "testcase is writing file"
 
-    with open(f"qir/{filename}.ll", "r") as f:
+    with open(f"qir/{filename}.ll") as f:
         data = f.read()
 
     assert data == given_qir

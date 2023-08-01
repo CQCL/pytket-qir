@@ -14,9 +14,16 @@
 
 from utilities import check_qir_result  # type: ignore
 
-from pytket.qir.conversion.api import pytket_to_qir, QIRFormat
-
-from pytket.circuit import Circuit, Qubit, if_not_bit, Bit, OpType, reg_eq, CircBox  # type: ignore
+from pytket.circuit import (  # type: ignore[attr-defined]
+    Bit,
+    CircBox,
+    Circuit,
+    OpType,
+    Qubit,
+    if_not_bit,
+    reg_eq,
+)
+from pytket.qir.conversion.api import QIRFormat, pytket_to_qir
 
 
 def test_pytket_qir_conditional() -> None:
@@ -152,7 +159,6 @@ def test_pytket_qir_conditional_6() -> None:
 
 
 def test_pytket_qir_conditional_7() -> None:
-
     circ = Circuit(7, name="testcirc")
 
     syn = circ.add_c_register("syn", 4)
@@ -172,7 +178,6 @@ def test_pytket_qir_conditional_7() -> None:
 
 
 def test_pytket_qir_conditional_8() -> None:
-
     c = Circuit(4)
     c.H(0)
     c.H(1)
@@ -191,7 +196,6 @@ def test_pytket_qir_conditional_8() -> None:
 
 
 def test_pytket_qir_conditional_9() -> None:
-
     c = Circuit(4)
     c.X(0)
     c.Y(1)
@@ -210,7 +214,6 @@ def test_pytket_qir_conditional_9() -> None:
 
 
 def test_pytket_qir_conditional_10() -> None:
-
     box_circ = Circuit(4)
     box_circ.X(0)
     box_circ.Y(1)
