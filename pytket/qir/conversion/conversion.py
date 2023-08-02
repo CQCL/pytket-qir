@@ -440,7 +440,6 @@ class QirGenerator:
     def _get_ssa_from_cl_reg_op(
         self, reg: Union[BitRegister, RegAnd, RegOr, RegXor], module: tketqirModule
     ) -> Value:
-
         if type(reg) in _TK_CLOPS_TO_PYQIR_REG:
             assert len(reg.args) == 2
 
@@ -462,9 +461,7 @@ class QirGenerator:
     def _get_ssa_from_cl_bit_op(
         self, bit: Union[Bit, BitAnd, BitOr, BitXor], module: tketqirModule
     ) -> Value:
-
         if type(bit) == Bit:
-
             result = module.builder.call(
                 self.read_bit_from_reg,
                 [
@@ -475,7 +472,6 @@ class QirGenerator:
 
             return result
         elif type(bit) in _TK_CLOPS_TO_PYQIR_BIT:
-
             assert len(bit.args) == 2
 
             ssa_left = self._get_ssa_from_cl_bit_op(bit.args[0], module)
@@ -522,7 +518,6 @@ class QirGenerator:
                     )
 
                 else:
-
                     lower_qir = pyqir.const(self.qir_int_type, op.lower)
                     upper_qir = pyqir.const(self.qir_int_type, op.upper)
 
@@ -550,7 +545,6 @@ class QirGenerator:
                     )
 
             elif isinstance(op, Conditional):
-
                 conditional_circuit = self._rebase_op_to_gateset(
                     op.op, command.args[op.width :]
                 )
@@ -592,7 +586,6 @@ class QirGenerator:
                     )
 
                 else:
-
                     for i in range(op.width):
                         if command.args[i].reg_name != condition_name:
                             raise ValueError(
@@ -632,7 +625,6 @@ class QirGenerator:
                 raise ValueError("WASM not supported yet")
 
             elif op.type == OpType.ZZPhase:
-
                 assert len(command.bits) == 0
                 assert len(command.qubits) == 2
                 assert len(op.params) == 1
@@ -665,7 +657,6 @@ class QirGenerator:
                 )
 
             elif op.type == OpType.PhasedX:
-
                 assert len(command.bits) == 0
                 assert len(command.qubits) == 1
                 assert len(op.params) == 2
@@ -701,7 +692,6 @@ class QirGenerator:
                 )
 
             elif op.type == OpType.TK2:
-
                 assert len(command.bits) == 0
                 assert len(command.qubits) == 2
                 assert len(op.params) == 3
@@ -744,7 +734,6 @@ class QirGenerator:
                 )
 
             elif op.type == OpType.ZZMax:
-
                 assert len(command.bits) == 0
                 assert len(command.qubits) == 2
                 assert len(op.params) == 0
@@ -772,7 +761,6 @@ class QirGenerator:
                 )
 
             elif op.type == OpType.Measure:
-
                 assert len(command.bits) == 1
                 assert len(command.qubits) == 1
                 assert command.qubits[0].reg_name == "q"
@@ -803,7 +791,6 @@ class QirGenerator:
                 continue
 
             elif isinstance(op, ClassicalExpBox):
-
                 returntypebool = False
                 result_index = (
                     0  # defines the default value for ops that returns bool, see below
@@ -923,7 +910,6 @@ class QirGenerator:
                     )
 
             elif isinstance(op, MetaOp):
-
                 assert command.qubits[0].reg_name == "q"
 
                 qir_qubits = self._to_qis_qubits(command.qubits)
@@ -973,7 +959,6 @@ class QirGenerator:
                     else:
                         get_gate(*qubits)
         if record_output:
-
             self.module.builder.call(
                 self.record_output_start,
                 [],

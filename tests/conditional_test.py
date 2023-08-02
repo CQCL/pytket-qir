@@ -152,7 +152,6 @@ def test_pytket_qir_conditional_6() -> None:
 
 
 def test_pytket_qir_conditional_7() -> None:
-
     circ = Circuit(7, name="testcirc")
 
     syn = circ.add_c_register("syn", 4)
@@ -172,7 +171,6 @@ def test_pytket_qir_conditional_7() -> None:
 
 
 def test_pytket_qir_conditional_8() -> None:
-
     c = Circuit(4)
     c.H(0)
     c.H(1)
@@ -191,7 +189,6 @@ def test_pytket_qir_conditional_8() -> None:
 
 
 def test_pytket_qir_conditional_9() -> None:
-
     c = Circuit(4)
     c.X(0)
     c.Y(1)
@@ -210,7 +207,6 @@ def test_pytket_qir_conditional_9() -> None:
 
 
 def test_pytket_qir_conditional_10() -> None:
-
     box_circ = Circuit(4)
     box_circ.X(0)
     box_circ.Y(1)

@@ -86,7 +86,6 @@ def pytket_to_qir(
     )
 
     if pyqir_0_6_compatibility:
-
         if len(circ.c_registers) > 1:
             raise ValueError(
                 """The qir optimised for pyqir 0.6 can only contain 
