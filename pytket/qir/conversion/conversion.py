@@ -184,6 +184,15 @@ class QirGenerator:
             ),
         )
 
+        # i64 reg2var(i1, i1, i1, ...)
+        #self.reg2varp = self.module.module.add_external_function(
+        #    "reg2varPointer",
+        #    pyqir.FunctionType(
+        #        pyqir.PointerType(pyqir.IntType(self.module.module.context, 64)),
+        #        [pyqir.IntType(self.module.module.context, qir_int_type)],
+        #    ),
+        #)
+
         self.reg_const = {}
 
         for creg in self.circuit.c_registers:
