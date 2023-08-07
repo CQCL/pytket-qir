@@ -115,6 +115,7 @@ class QirGenerator:
         self.module = module
         self.wasm_int_type = pyqir.IntType(self.module.context, wasm_int_type)
         self.qir_int_type = pyqir.IntType(self.module.context, qir_int_type)
+        self.qir_i1p_type = pyqir.PointerType(pyqir.IntType(self.module.context, 1))
         self.qir_bool_type = pyqir.IntType(self.module.context, 1)
         self.qubit_type = pyqir.qubit_type(self.module.context)
         self.result_type = pyqir.result_type(self.module.context)
@@ -132,35 +133,35 @@ class QirGenerator:
         self.set_cregs: Dict[str, List] = {}  # Keep track of set registers.
         self.ssa_vars: Dict[str, Value] = {}  # Keep track of set ssa variables.
 
-        # i1 read_bit_from_reg(i64 reg, i64 index)
+        # i1 read_bit_from_reg(i1* reg, i64 index)
         self.read_bit_from_reg = self.module.module.add_external_function(
             "read_bit_from_reg",
             pyqir.FunctionType(
                 pyqir.IntType(self.module.module.context, 1),
-                [self.qir_int_type] * 2,
+                [self.qir_i1p_type, self.qir_int_type],
             ),
         )
 
-        # void set_one_bit_in_reg(i64 reg, i64 index, i1 value)
+        # void set_one_bit_in_reg(i1* reg, i64 index, i1 value)
         self.set_one_bit_in_reg = self.module.module.add_external_function(
             "set_one_bit_in_reg",
             pyqir.FunctionType(
                 pyqir.Type.void(self.module.module.context),
                 [
-                    self.qir_int_type,
+                    self.qir_i1p_type,
                     self.qir_int_type,
                     pyqir.IntType(self.module.module.context, 1),
                 ],
             ),
         )
 
-        # void set_all_bits_in_reg(i64 reg, i64 value)
+        # void set_all_bits_in_reg(i1* reg, i64 value)
         self.set_all_bits_in_reg = self.module.module.add_external_function(
             "set_all_bits_in_reg",
             pyqir.FunctionType(
                 pyqir.Type.void(self.module.module.context),
                 [
-                    self.qir_int_type,
+                    self.qir_i1p_type,
                     self.qir_int_type,
                 ],
             ),
@@ -175,12 +176,23 @@ class QirGenerator:
             ),
         )
 
-        # i64 reg2var(i1, i1, i1, ...)
-        self.reg2var = self.module.module.add_external_function(
-            "reg2var",
+        # i1* create_reg(i64 size)
+        self.create_reg = self.module.module.add_external_function(
+            "create_reg",
             pyqir.FunctionType(
-                pyqir.IntType(self.module.module.context, qir_int_type),
-                [pyqir.IntType(self.module.module.context, 1)] * qir_int_type,
+                self.qir_i1p_type,
+                [pyqir.IntType(self.module.module.context, qir_int_type)],
+            ),
+        )
+
+        # i64 create_reg(i1* reg)
+        self.read_all_bits_from_reg = self.module.module.add_external_function(
+            "read_all_bits_from_reg",
+            pyqir.FunctionType(
+                self.qir_int_type,
+                [
+                    self.qir_i1p_type,
+                ],
             ),
         )
 
@@ -377,6 +389,13 @@ class QirGenerator:
             params = op.params
         return (optype, params)
 
+    def _get_i64_ssa_reg(self, name: str) -> Value:
+        ssa_var = self.module.builder.call(
+            self.read_all_bits_from_reg,
+            [self.ssa_vars[name]],
+        )
+        return ssa_var
+
     def _to_qis_qubits(self, qubits: List[Qubit]) -> Sequence[Qubit]:
         return [self.module.module.qubits[qubit.index[0]] for qubit in qubits]
 
@@ -405,11 +424,11 @@ class QirGenerator:
                 return pyqir.const(self.qir_int_type, value)
             else:
                 bit_reg = [False] * len(bit_reg)
-            if (size := len(bit_reg)) <= int_size:  # Widening by zero-padding.
-                bool_reg = bit_reg + [False] * (int_size - size)
-            else:  # Narrowing by truncation.
-                bool_reg = bit_reg[:int_size]
-            ssa_var = cast(Value, self.module.builder.call(self.reg2var, [*bool_reg]))  # type: ignore
+            if len(bit_reg) > int_size:
+                raise ValueError(
+                    f"Classical register should only have the size of {int_size}"
+                )
+            ssa_var = cast(Value, self.module.builder.call(self.create_reg, [pyqir.const(self.qir_int_type, len(bit_reg))]))  # type: ignore
             self.ssa_vars[reg_name] = ssa_var
             return ssa_var
         else:
@@ -453,7 +472,7 @@ class QirGenerator:
             )
             return output_instruction  # type: ignore
         elif type(reg) == BitRegister:
-            return self.ssa_vars[reg.name]
+            return self._get_i64_ssa_reg(reg.name)
         elif type(reg) == int:
             return pyqir.const(self.qir_int_type, reg)
         else:
@@ -506,7 +525,7 @@ class QirGenerator:
                     result = module.module.builder.icmp(
                         pyqir.IntPredicate.EQ,
                         pyqir.const(self.qir_int_type, op.lower),
-                        self.ssa_vars[registername],
+                        self._get_i64_ssa_reg(registername),
                     )
 
                     condition_bit_index = command.args[-1].index[0]
@@ -529,10 +548,14 @@ class QirGenerator:
                     registername = command.args[0].reg_name
 
                     lower_cond = module.module.builder.icmp(
-                        pyqir.IntPredicate.SGT, lower_qir, self.ssa_vars[registername]
+                        pyqir.IntPredicate.SGT,
+                        lower_qir,
+                        self._get_i64_ssa_reg(registername),
                     )
                     upper_cond = module.module.builder.icmp(
-                        pyqir.IntPredicate.SGT, self.ssa_vars[registername], upper_qir
+                        pyqir.IntPredicate.SGT,
+                        self._get_i64_ssa_reg(registername),
+                        upper_qir,
                     )
 
                     result = module.module.builder.and_(lower_cond, upper_cond)
@@ -620,7 +643,7 @@ class QirGenerator:
                     ssabool = module.module.builder.icmp(
                         pyqir.IntPredicate.EQ,
                         pyqir.const(self.qir_int_type, op.value),
-                        self.ssa_vars[condition_name],
+                        self._get_i64_ssa_reg(condition_name),
                     )
 
                     module.module.builder.if_(
@@ -809,18 +832,18 @@ class QirGenerator:
                     0  # defines the default value for ops that returns bool, see below
                 )
                 outputs = command.args[-1].reg_name
-                ssa_left = self.ssa_vars[list(self.ssa_vars)[0]]  # set default value
-                ssa_right = self.ssa_vars[list(self.ssa_vars)[0]]  # set default value
-
-                #
+                ssa_left = (self._get_i64_ssa_reg(list(self.ssa_vars)[0]),)
+                ssa_right = (self._get_i64_ssa_reg(list(self.ssa_vars)[0]),)
 
                 if type(op.get_exp()) in _TK_CLOPS_TO_PYQIR_REG:
                     # classical ops acting on registers returning register
-                    ssa_left = self._get_ssa_from_cl_reg_op(
-                        op.get_exp().args[0], module
+                    ssa_left = cast(  # type: ignore
+                        Value,
+                        self._get_ssa_from_cl_reg_op(op.get_exp().args[0], module),
                     )
-                    ssa_right = self._get_ssa_from_cl_reg_op(
-                        op.get_exp().args[1], module
+                    ssa_right = cast(  # type: ignore
+                        Value,
+                        self._get_ssa_from_cl_reg_op(op.get_exp().args[1], module),
                     )
 
                     # add function to module
@@ -830,11 +853,13 @@ class QirGenerator:
 
                 elif type(op.get_exp()) in _TK_CLOPS_TO_PYQIR_BIT:
                     # classical ops acting on bits returning bit
-                    ssa_left = self._get_ssa_from_cl_bit_op(
-                        op.get_exp().args[0], module
+                    ssa_left = cast(  # type: ignore
+                        Value,
+                        self._get_ssa_from_cl_bit_op(op.get_exp().args[0], module),
                     )
-                    ssa_right = self._get_ssa_from_cl_bit_op(
-                        op.get_exp().args[1], module
+                    ssa_right = cast(  # type: ignore
+                        Value,
+                        self._get_ssa_from_cl_bit_op(op.get_exp().args[1], module),
                     )
 
                     # add function to module
@@ -846,11 +871,13 @@ class QirGenerator:
 
                 elif type(op.get_exp()) in _TK_CLOPS_TO_PYQIR_REG_BOOL:
                     # classical ops acting on registers returning bit
-                    ssa_left = self._get_ssa_from_cl_reg_op(
-                        op.get_exp().args[0], module
+                    ssa_left = cast(  # type: ignore
+                        Value,
+                        self._get_ssa_from_cl_reg_op(op.get_exp().args[0], module),
                     )
-                    ssa_right = self._get_ssa_from_cl_reg_op(
-                        op.get_exp().args[1], module
+                    ssa_right = cast(  # type: ignore
+                        Value,
+                        self._get_ssa_from_cl_reg_op(op.get_exp().args[1], module),
                     )
 
                     # add function to module
@@ -984,7 +1011,7 @@ class QirGenerator:
                 self.module.builder.call(
                     self.record_output_i64,
                     [
-                        self.ssa_vars[reg_name],
+                        self._get_i64_ssa_reg(reg_name),
                         self.reg_const[reg_name],
                     ],
                 )

@@ -1,5 +1,5 @@
-; ModuleID = 'test_pytket_qir_9'
-source_filename = "test_pytket_qir_9"
+; ModuleID = 'test_pytket_qir_11'
+source_filename = "test_pytket_qir_11"
 
 %Result = type opaque
 
@@ -9,7 +9,7 @@ source_filename = "test_pytket_qir_9"
 define void @main() #0 {
 entry:
   %0 = call i1* @create_reg(i64 2)
-  %1 = call i1* @create_reg(i64 2)
+  %1 = call i1* @create_reg(i64 4)
   %2 = call i1 @read_bit_from_reg(i1* %0, i64 0)
   call void @set_one_bit_in_reg(i1* %1, i64 0, i1 %2)
   %3 = call i1 @read_bit_from_reg(i1* %0, i64 1)

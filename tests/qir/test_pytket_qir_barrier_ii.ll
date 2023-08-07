@@ -20,15 +20,17 @@ entry:
   ret void
 }
 
-declare i1 @read_bit_from_reg(i64, i64)
+declare i1 @read_bit_from_reg(i1*, i64)
 
-declare void @set_one_bit_in_reg(i64, i64, i1)
+declare void @set_one_bit_in_reg(i1*, i64, i1)
 
-declare void @set_all_bits_in_reg(i64, i64)
+declare void @set_all_bits_in_reg(i1*, i64)
 
 declare i1 @__quantum__qis__read_result__body(%Result*)
 
-declare i64 @reg2var(i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1)
+declare i1* @create_reg(i64)
+
+declare i64 @read_all_bits_from_reg(i1*)
 
 declare void @__quantum__rt__int_record_output(i64, i8*)
 

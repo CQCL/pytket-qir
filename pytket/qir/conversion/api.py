@@ -101,15 +101,17 @@ one classical register"""
             return (
                 ("@__quantum__qis__read_result__body" not in line)
                 and ("@set_one_bit_in_reg" not in line)
-                and ("@reg2var" not in line)
                 and ("@read_bit_from_reg" not in line)
                 and ("@set_all_bits_in_reg" not in line)
+                and ("@read_all_bits_from_reg" not in line)
+                and ("@create_reg" not in line)
             )
 
         result = "\n".join(filter(keep_line, initial_result.split("\n")))
 
         # replace the use of the removed register variable with i64 0
         result = result.replace("i64 %0", "i64 0")
+        result = result.replace("i64 %3", "i64 0")
 
         for _ in range(10):
             result = result.replace("\n\n\n\n", "\n\n")

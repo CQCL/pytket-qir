@@ -199,11 +199,9 @@ def test_pytket_qir_11() -> None:
 
     c.add_c_copyreg(a, b)
 
-    result = pytket_to_qir(c, name="test_pytket_qir_10", qir_format=QIRFormat.STRING)
+    result = pytket_to_qir(c, name="test_pytket_qir_11", qir_format=QIRFormat.STRING)
 
-    check_qir_result(
-        result, "test_pytket_qir_10"
-    )  # should be identical to the testcase above
+    check_qir_result(result, "test_pytket_qir_11")
 
 
 def test_pytket_qir_12() -> None:
