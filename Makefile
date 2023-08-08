@@ -1,4 +1,4 @@
-.PHONY: build tests install clean dev
+.PHONY: build tests install clean dev lint
 
 all: install tests build
 
@@ -7,6 +7,9 @@ install:
 
 dev:
 	pip install -e .
+
+lint:
+	pre-commit run --all-files
 
 tests:
 	cd tests && pytest -x -v && cd -
