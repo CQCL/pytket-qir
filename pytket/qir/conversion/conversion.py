@@ -411,16 +411,7 @@ class QirGenerator:
     def _reg2ssa_var(self, bit_reg: BitRegister, int_size: int) -> Value:
         """Convert a BitRegister to an SSA variable using pyqir types."""
         reg_name = bit_reg[0].reg_name
-        if (
-            reg_name not in self.ssa_vars
-        ):  # Check if the register has been previously set.
-            # Check if the register has been previously set. If not, initialise to 0.
-            if reg_value := self.set_cregs.get(reg_name):
-                bit_reg = reg_value
-                value = sum([n * 2**k for k, n in enumerate(reg_value)])
-                return pyqir.const(self.qir_int_type, value)
-            else:
-                bit_reg = [False] * len(bit_reg)
+        if reg_name not in self.ssa_vars:
             if len(bit_reg) > int_size:
                 raise ValueError(
                     f"Classical register should only have the size of {int_size}"
