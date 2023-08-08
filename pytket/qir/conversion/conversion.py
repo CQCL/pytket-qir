@@ -425,7 +425,12 @@ class QirGenerator:
                 raise ValueError(
                     f"Classical register should only have the size of {int_size}"
                 )
-            ssa_var = cast(Value, self.module.builder.call(self.create_reg, [pyqir.const(self.qir_int_type, len(bit_reg))]))  # type: ignore
+            ssa_var = cast(
+                Value,  # type: ignore
+                self.module.builder.call(
+                    self.create_reg, [pyqir.const(self.qir_int_type, len(bit_reg))]
+                ),
+            )
             self.ssa_vars[reg_name] = ssa_var
             return ssa_var
         else:
