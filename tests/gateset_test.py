@@ -12,9 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from pytket.qir.conversion.gatesets import _TK_TO_PYQIR
-
 from pytket.circuit import OpType  # type: ignore
+from pytket.qir.conversion.gatesets import _TK_TO_PYQIR
 
 
 def test_gateset() -> None:
@@ -38,7 +37,7 @@ def test_gateset() -> None:
 
 def test_gateset_ii() -> None:
     for opt in _TK_TO_PYQIR:
-        assert type(opt) == type(OpType.H)
+        assert type(opt) == type(OpType.H)  # noqa: E721
 
 
 if __name__ == "__main__":

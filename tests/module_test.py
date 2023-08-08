@@ -21,7 +21,7 @@ def test_module() -> None:
     m = tketqirModule("modulename", 3, 1)
     pm = pyqir.SimpleModule("name", 1, 1)
     assert type(m.module) == type(pm)
-    assert type(m.qis) == type(pyqir.BasicQisBuilder(pm.builder))
+    assert type(m.qis) == type(pyqir.BasicQisBuilder(pm.builder))  # noqa: E721
 
 
 if __name__ == "__main__":

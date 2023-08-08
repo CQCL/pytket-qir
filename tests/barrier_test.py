@@ -14,11 +14,10 @@
 
 from utilities import check_qir_result  # type: ignore
 
-from pytket.qir.conversion.api import pytket_to_qir, QIRFormat
-
 from pytket.circuit import (
     Circuit,
 )
+from pytket.qir.conversion.api import QIRFormat, pytket_to_qir
 
 
 def test_pytket_qir_barrier() -> None:

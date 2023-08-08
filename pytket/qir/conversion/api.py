@@ -86,16 +86,19 @@ def pytket_to_qir(
     )
 
     if pyqir_0_6_compatibility:
-
         if len(circ.c_registers) > 1:
             raise ValueError(
-                """The qir optimised for pyqir 0.6 can only contain 
+                """The qir optimised for pyqir 0.6 can only contain
 one classical register"""
             )
 
         initial_result = str(populated_module.module.ir())  # type: ignore
 
-        initial_result = initial_result.replace("entry_point", "EntryPoint").replace("num_required_qubits", "requiredQubits").replace("num_required_results", "requiredResults")  # type: ignore
+        initial_result = (
+            initial_result.replace("entry_point", "EntryPoint")
+            .replace("num_required_qubits", "requiredQubits")
+            .replace("num_required_results", "requiredResults")
+        )
 
         def keep_line(line: str) -> bool:
             return (
