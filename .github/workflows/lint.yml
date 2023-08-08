@@ -25,11 +25,14 @@ jobs:
         python-version: '3.x'
     - name: Update pip
       run: pip install --upgrade pip
-    - name: Install black and pylint
-      run: pip install black~=22.3 pylint~=2.13,!=2.13.6
+    - name: Install formatters and linters
+      run: pip install black~=23.7 pylint~=2.17 ruff==0.0.282
     - name: Check files are formatted with black
       run: |
         black --check .
+    - name: Run ruff
+      run: |
+        ruff check .
     - name: Run pylint
-      run: |        
+      run: |
         pylint */

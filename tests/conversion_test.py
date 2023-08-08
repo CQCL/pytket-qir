@@ -12,21 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import pytest
 from utilities import check_qir_result  # type: ignore
 
-import pytest
-
-from pytket.passes import FlattenRelabelRegistersPass  # type: ignore
-from pytket.qir.conversion.api import pytket_to_qir, QIRFormat
-from pytket.circuit import Circuit, Qubit, Bit, if_not_bit, BitRegister  # type: ignore
+from pytket.circuit import Bit, BitRegister, Circuit, Qubit, if_not_bit  # type: ignore
 from pytket.circuit.logic_exp import (  # type: ignore
     reg_eq,
-    reg_neq,
     reg_geq,
     reg_gt,
-    reg_lt,
     reg_leq,
+    reg_lt,
+    reg_neq,
 )
+from pytket.passes import FlattenRelabelRegistersPass  # type: ignore
+from pytket.qir.conversion.api import QIRFormat, pytket_to_qir
 
 
 def test_pytket_qir() -> None:
@@ -284,7 +283,7 @@ def test_pytket_qir_15() -> None:
 
 
 def test_pytket_qir_16() -> None:
-    # try circuit with muti circuit register
+    # try circuit with multi-circuit register
     c = Circuit()
     q1 = Qubit("q1", 0)
     q2 = Qubit("q2", 0)
@@ -309,7 +308,7 @@ def test_pytket_qir_16() -> None:
 
 
 def test_pytket_qir_17() -> None:
-    # try circuit with muti circuit register
+    # try circuit with multi-circuit register
     c = Circuit()
     q1 = Qubit("q1", 0)
     q2 = Qubit("q2", 0)

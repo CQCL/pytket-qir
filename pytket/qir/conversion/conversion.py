@@ -17,62 +17,59 @@ This module contains all functionality to generate QIR files
 from pytket circuits.
 """
 
-from functools import partial
-from typing import cast, Dict, List, Optional, Sequence, Tuple, Union
-
 import math
+from collections.abc import Sequence
+from functools import partial
+from typing import Optional, Union, cast
 
-from pyqir import Value, IntPredicate
 import pyqir
+from pyqir import IntPredicate, Value
 
-from pytket.transform import Transform  # type: ignore
-from pytket import Circuit, OpType, Bit, Qubit, predicates  # type: ignore
-from pytket.qasm.qasm import _retrieve_registers  # type: ignore
+from pytket import Bit, Circuit, Qubit, predicates  # type: ignore
 from pytket.circuit import (  # type: ignore
     BitRegister,
     ClassicalExpBox,
     Command,
     Conditional,
-    RangePredicateOp,
     CopyBitsOp,
-    Op,
     MetaOp,
+    Op,
+    OpType,
+    RangePredicateOp,
     SetBitsOp,
     WASMOp,
-    OpType,
 )
-
 from pytket.circuit.logic_exp import (  # type: ignore
+    BitAnd,
+    BitEq,
+    BitNeq,
+    BitOr,
     BitWiseOp,
+    BitXor,
     RegAdd,
     RegAnd,
     RegEq,
     RegGeq,
     RegGt,
     RegLeq,
-    RegLt,
-    RegNeq,
-    RegSub,
-    RegMul,
-    RegOr,
     RegLsh,
+    RegLt,
+    RegMul,
+    RegNeq,
+    RegOr,
     RegRsh,
+    RegSub,
     RegXor,
-    BitOr,
-    BitXor,
-    BitNeq,
-    BitEq,
-    BitAnd,
 )
+from pytket.qasm.qasm import _retrieve_registers  # type: ignore
+from pytket.transform import Transform  # type: ignore
 
 from .gatesets import (
     FuncSpec,
 )
-
 from .module import tketqirModule
 
-
-_TK_CLOPS_TO_PYQIR_REG: Dict = {
+_TK_CLOPS_TO_PYQIR_REG: dict = {
     RegAnd: lambda b: b.and_,
     RegOr: lambda b: b.or_,
     RegXor: lambda b: b.xor,
@@ -83,7 +80,7 @@ _TK_CLOPS_TO_PYQIR_REG: Dict = {
     RegRsh: lambda b: b.lshr,
 }
 
-_TK_CLOPS_TO_PYQIR_REG_BOOL: Dict = {
+_TK_CLOPS_TO_PYQIR_REG_BOOL: dict = {
     RegEq: lambda b: partial(b.icmp, IntPredicate.EQ),
     RegNeq: lambda b: partial(b.icmp, IntPredicate.NE),
     RegGt: lambda b: partial(b.icmp, IntPredicate.UGT),
@@ -92,7 +89,7 @@ _TK_CLOPS_TO_PYQIR_REG_BOOL: Dict = {
     RegLeq: lambda b: partial(b.icmp, IntPredicate.ULE),
 }
 
-_TK_CLOPS_TO_PYQIR_BIT: Dict = {
+_TK_CLOPS_TO_PYQIR_BIT: dict = {
     BitAnd: lambda b: b.and_,
     BitOr: lambda b: b.or_,
     BitXor: lambda b: b.xor,
@@ -127,10 +124,10 @@ class QirGenerator:
         self.target_gateset.add(OpType.ZZMax)
         self.target_gateset.add(OpType.TK2)
 
-        self.getset_predicate = predicates.GateSetPredicate(set(self.target_gateset))  # type: ignore
+        self.getset_predicate = predicates.GateSetPredicate(set(self.target_gateset))  # type: ignore  # noqa: E501
 
-        self.set_cregs: Dict[str, List] = {}  # Keep track of set registers.
-        self.ssa_vars: Dict[str, Value] = {}  # Keep track of set ssa variables.
+        self.set_cregs: dict[str, list] = {}  # Keep track of set registers.
+        self.ssa_vars: dict[str, Value] = {}  # Keep track of set ssa variables.
 
         # i1 read_bit_from_reg(i64 reg, i64 index)
         self.read_bit_from_reg = self.module.module.add_external_function(
@@ -222,16 +219,16 @@ class QirGenerator:
             ),
         )
 
-        self.barrier: List[Optional[pyqir.Function]] = [None] * (
+        self.barrier: list[Optional[pyqir.Function]] = [None] * (
             self.circuit.n_qubits + 1
         )
-        self.order: List[Optional[pyqir.Function]] = [None] * (
+        self.order: list[Optional[pyqir.Function]] = [None] * (
             self.circuit.n_qubits + 1
         )
-        self.group: List[Optional[pyqir.Function]] = [None] * (
+        self.group: list[Optional[pyqir.Function]] = [None] * (
             self.circuit.n_qubits + 1
         )
-        self.sleep: List[Optional[pyqir.Function]] = [None] * (
+        self.sleep: list[Optional[pyqir.Function]] = [None] * (
             self.circuit.n_qubits + 1
         )
 
@@ -244,7 +241,7 @@ class QirGenerator:
         self, module: tketqirModule, index: int, qir_qubits: Sequence
     ) -> None:
         # __quantum__qis__barrier1__body()
-        if self.barrier[index] == None:
+        if self.barrier[index] is None:
             self.barrier[index] = self.module.module.add_external_function(
                 f"__quantum__qis__barrier{index}__body",
                 pyqir.FunctionType(
@@ -262,7 +259,7 @@ class QirGenerator:
         self, module: tketqirModule, index: int, qir_qubits: Sequence
     ) -> None:
         # __quantum__qis__group1__body()
-        if self.group[index] == None:
+        if self.group[index] is None:
             self.group[index] = self.module.module.add_external_function(
                 f"__quantum__qis__group{index}__body",
                 pyqir.FunctionType(
@@ -280,7 +277,7 @@ class QirGenerator:
         self, module: tketqirModule, index: int, qir_qubits: Sequence
     ) -> None:
         # __quantum__qis__order1__body()
-        if self.order[index] == None:
+        if self.order[index] is None:
             self.order[index] = self.module.module.add_external_function(
                 f"__quantum__qis__order{index}__body",
                 pyqir.FunctionType(
@@ -302,13 +299,13 @@ class QirGenerator:
         if index > 1:
             raise ValueError("Sleep operation only allowed on one qubit")
 
-        if self.sleep[index] == None:
+        if self.sleep[index] is None:
             paramlist = [pyqir.qubit_type(self.module.module.context)] * index
             paramlist.append(
                 pyqir.Type.double(self.module.module.context)
             )  # add float parameter
             self.sleep[index] = self.module.module.add_external_function(
-                f"__quantum__qis__sleep__body",
+                "__quantum__qis__sleep__body",
                 pyqir.FunctionType(
                     pyqir.Type.void(self.module.module.context),
                     paramlist,
@@ -336,7 +333,7 @@ class QirGenerator:
             return circuit
         return None
 
-    def _rebase_op_to_gateset(self, op: OpType, args: List) -> Optional[Circuit]:
+    def _rebase_op_to_gateset(self, op: OpType, args: list) -> Optional[Circuit]:
         """Rebase an op to the target gateset if needed."""
         optype = op.type
         if op.type == OpType.ClassicalExpBox:
@@ -361,9 +358,9 @@ class QirGenerator:
                 raise ValueError("Gate not supported {optype}, {params}")
             return circuit
 
-    def _get_optype_and_params(self, op: Op) -> Tuple[OpType, Sequence[float]]:
+    def _get_optype_and_params(self, op: Op) -> tuple[OpType, Sequence[float]]:
         optype = op.type
-        params: List = []
+        params: list = []
         if optype == OpType.ExplicitPredicate:
             if op.get_name() == "AND":
                 optype = BitWiseOp.AND
@@ -377,15 +374,15 @@ class QirGenerator:
             params = op.params
         return (optype, params)
 
-    def _to_qis_qubits(self, qubits: List[Qubit]) -> Sequence[Qubit]:
+    def _to_qis_qubits(self, qubits: list[Qubit]) -> Sequence[Qubit]:
         return [self.module.module.qubits[qubit.index[0]] for qubit in qubits]
 
-    def _to_qis_results(self, bits: List[Bit]) -> Optional[Value]:
+    def _to_qis_results(self, bits: list[Bit]) -> Optional[Value]:
         if bits:
             return self.module.module.results[bits[0].index[0]]  # type: ignore
         return None
 
-    def _to_qis_bits(self, args: List[Bit]) -> Sequence[Value]:
+    def _to_qis_bits(self, args: list[Bit]) -> Sequence[Value]:
         for b in args:
             assert b.name == "c"
         if args:
@@ -396,7 +393,7 @@ class QirGenerator:
         """Convert a BitRegister to an SSA variable using pyqir types."""
         reg_name = bit_reg[0].reg_name
         if (
-            reg_name not in self.ssa_vars.keys()
+            reg_name not in self.ssa_vars
         ):  # Check if the register has been previously set.
             # Check if the register has been previously set. If not, initialise to 0.
             if reg_value := self.set_cregs.get(reg_name):
@@ -409,18 +406,18 @@ class QirGenerator:
                 bool_reg = bit_reg + [False] * (int_size - size)
             else:  # Narrowing by truncation.
                 bool_reg = bit_reg[:int_size]
-            ssa_var = cast(Value, self.module.builder.call(self.reg2var, [*bool_reg]))  # type: ignore
+            ssa_var = cast(Value, self.module.builder.call(self.reg2var, [*bool_reg]))  # type: ignore  # noqa: E501
             self.ssa_vars[reg_name] = ssa_var
             return ssa_var
         else:
             return cast(Value, self.ssa_vars[reg_name])  # type: ignore
 
-    def _get_c_regs_from_com(self, command: Command) -> Tuple[List[str], List[str]]:
+    def _get_c_regs_from_com(self, command: Command) -> tuple[list[str], list[str]]:
         """Get classical registers from command op types."""
         op = command.op
         args = command.args
-        inputs: List[str] = []
-        outputs: List[str] = []
+        inputs: list[str] = []
+        outputs: list[str] = []
 
         if isinstance(op, WASMOp):
             for reglist, sizes in [
@@ -440,7 +437,6 @@ class QirGenerator:
     def _get_ssa_from_cl_reg_op(
         self, reg: Union[BitRegister, RegAnd, RegOr, RegXor], module: tketqirModule
     ) -> Value:
-
         if type(reg) in _TK_CLOPS_TO_PYQIR_REG:
             assert len(reg.args) == 2
 
@@ -457,14 +453,12 @@ class QirGenerator:
         elif type(reg) == int:
             return pyqir.const(self.qir_int_type, reg)
         else:
-            raise ValueError(f"unsupported classical register operaton: {type(reg)}")
+            raise ValueError(f"unsupported classical register operation: {type(reg)}")
 
     def _get_ssa_from_cl_bit_op(
         self, bit: Union[Bit, BitAnd, BitOr, BitXor], module: tketqirModule
     ) -> Value:
-
         if type(bit) == Bit:
-
             result = module.builder.call(
                 self.read_bit_from_reg,
                 [
@@ -475,7 +469,6 @@ class QirGenerator:
 
             return result
         elif type(bit) in _TK_CLOPS_TO_PYQIR_BIT:
-
             assert len(bit.args) == 2
 
             ssa_left = self._get_ssa_from_cl_bit_op(bit.args[0], module)
@@ -522,7 +515,6 @@ class QirGenerator:
                     )
 
                 else:
-
                     lower_qir = pyqir.const(self.qir_int_type, op.lower)
                     upper_qir = pyqir.const(self.qir_int_type, op.upper)
 
@@ -550,7 +542,6 @@ class QirGenerator:
                     )
 
             elif isinstance(op, Conditional):
-
                 conditional_circuit = self._rebase_op_to_gateset(
                     op.op, command.args[op.width :]
                 )
@@ -592,7 +583,6 @@ class QirGenerator:
                     )
 
                 else:
-
                     for i in range(op.width):
                         if command.args[i].reg_name != condition_name:
                             raise ValueError(
@@ -632,7 +622,6 @@ class QirGenerator:
                 raise ValueError("WASM not supported yet")
 
             elif op.type == OpType.ZZPhase:
-
                 assert len(command.bits) == 0
                 assert len(command.qubits) == 2
                 assert len(op.params) == 1
@@ -641,7 +630,7 @@ class QirGenerator:
                     self.additional_quantum_gates[
                         OpType.ZZPhase
                     ] = self.module.module.add_external_function(
-                        f"__quantum__qis__rzz__body",
+                        "__quantum__qis__rzz__body",
                         pyqir.FunctionType(
                             pyqir.Type.void(self.module.module.context),
                             [
@@ -665,7 +654,6 @@ class QirGenerator:
                 )
 
             elif op.type == OpType.PhasedX:
-
                 assert len(command.bits) == 0
                 assert len(command.qubits) == 1
                 assert len(op.params) == 2
@@ -674,7 +662,7 @@ class QirGenerator:
                     self.additional_quantum_gates[
                         OpType.PhasedX
                     ] = self.module.module.add_external_function(
-                        f"__quantum__qis__phasedx__body",
+                        "__quantum__qis__phasedx__body",
                         pyqir.FunctionType(
                             pyqir.Type.void(self.module.module.context),
                             [
@@ -701,7 +689,6 @@ class QirGenerator:
                 )
 
             elif op.type == OpType.TK2:
-
                 assert len(command.bits) == 0
                 assert len(command.qubits) == 2
                 assert len(op.params) == 3
@@ -710,7 +697,7 @@ class QirGenerator:
                     self.additional_quantum_gates[
                         OpType.TK2
                     ] = self.module.module.add_external_function(
-                        f"__quantum__qis__rxxyyzz__body",
+                        "__quantum__qis__rxxyyzz__body",
                         pyqir.FunctionType(
                             pyqir.Type.void(self.module.module.context),
                             [
@@ -744,7 +731,6 @@ class QirGenerator:
                 )
 
             elif op.type == OpType.ZZMax:
-
                 assert len(command.bits) == 0
                 assert len(command.qubits) == 2
                 assert len(op.params) == 0
@@ -753,7 +739,7 @@ class QirGenerator:
                     self.additional_quantum_gates[
                         OpType.ZZMax
                     ] = self.module.module.add_external_function(
-                        f"__quantum__qis__zzmax__body",
+                        "__quantum__qis__zzmax__body",
                         pyqir.FunctionType(
                             pyqir.Type.void(self.module.module.context),
                             [
@@ -772,7 +758,6 @@ class QirGenerator:
                 )
 
             elif op.type == OpType.Measure:
-
                 assert len(command.bits) == 1
                 assert len(command.qubits) == 1
                 assert command.qubits[0].reg_name == "q"
@@ -803,7 +788,6 @@ class QirGenerator:
                 continue
 
             elif isinstance(op, ClassicalExpBox):
-
                 returntypebool = False
                 result_index = (
                     0  # defines the default value for ops that returns bool, see below
@@ -923,7 +907,6 @@ class QirGenerator:
                     )
 
             elif isinstance(op, MetaOp):
-
                 assert command.qubits[0].reg_name == "q"
 
                 qir_qubits = self._to_qis_qubits(command.qubits)
@@ -959,7 +942,7 @@ class QirGenerator:
                     if type(optype) == BitWiseOp:
                         bits = self._to_qis_bits(command.args)
                     gate = module.gateset.tk_to_gateset(optype)
-                    if not gate.func_spec == FuncSpec.BODY:
+                    if gate.func_spec != FuncSpec.BODY:
                         func_name = gate.func_name.value + "_" + gate.func_spec.value
                         get_gate = getattr(module.qis, func_name)
                     else:
@@ -973,7 +956,6 @@ class QirGenerator:
                     else:
                         get_gate(*qubits)
         if record_output:
-
             self.module.builder.call(
                 self.record_output_start,
                 [],

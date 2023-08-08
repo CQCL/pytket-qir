@@ -13,12 +13,10 @@
 # limitations under the License.
 
 
-from string import Template
-
 from dataclasses import dataclass
 from enum import Enum
 from string import Template
-from typing import Callable, Dict, List, NamedTuple, Set, Union, Any
+from typing import Any, Callable, NamedTuple, Union
 
 from pytket import OpType  # type: ignore
 
@@ -78,20 +76,16 @@ class QirGate:
 
 @dataclass(frozen=True)
 class CustomQirGate(QirGate):
-    function_signature: List
+    function_signature: list
     return_type: Any
 
 
-CustomGateSet = NamedTuple(
-    "CustomGateSet",
-    [
-        ("name", str),
-        ("template", Template),
-        ("base_gateset", Set[OpType]),
-        ("gateset", Dict[str, CustomQirGate]),
-        ("tk_to_gateset", Callable),
-    ],
-)
+class CustomGateSet(NamedTuple):
+    name: str
+    template: Template
+    base_gateset: set[OpType]
+    gateset: dict[str, CustomQirGate]
+    tk_to_gateset: Callable
 
 
 _TK_TO_PYQIR = {
