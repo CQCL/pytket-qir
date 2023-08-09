@@ -1,6 +1,11 @@
 Changelog
 ~~~~~~~~~
 
+0.2.0rc15 (August 2023)
+-----------------------
+* update the classical register handling to use i1* pointer
+* update pytket requirement to 1.18
+
 0.2.0rc14 (July 2023)
 ---------------------
 * add simplification for RangePredicate in case of equal bounds
