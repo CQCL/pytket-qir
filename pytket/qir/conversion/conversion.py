@@ -329,7 +329,7 @@ class QirGenerator:
             circuit = Circuit(self.circuit.n_qubits, self.circuit.n_bits)
             circuit.add_gate(optype, params, args)
             if not self.getset_predicate.verify(circuit):
-                raise ValueError("Gate not supported {optype}, {params}, {args}")
+                raise ValueError(f"Gate not supported {optype}, {params}, {args}")
             return circuit
         return None
 
@@ -355,7 +355,7 @@ class QirGenerator:
             circuit = Circuit(self.circuit.n_qubits, self.circuit.n_bits)
             circuit.add_gate(optype, params, args)
             if not self.getset_predicate.verify(circuit):
-                raise ValueError("Gate not supported {optype}, {params}")
+                raise ValueError(f"Gate not supported {optype}, {params}")
             return circuit
 
     def _get_optype_and_params(self, op: Op) -> tuple[OpType, Sequence[float]]:
