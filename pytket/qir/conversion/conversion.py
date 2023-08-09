@@ -130,7 +130,7 @@ class QirGenerator:
         self.set_cregs: dict[str, list] = {}  # Keep track of set registers.
         self.ssa_vars: dict[str, Value] = {}  # Keep track of set ssa variables.
 
-        # i1 get_creg_bit(i1* reg, i64 index)
+        # i1 get_creg_bit(i1* creg, i64 index)
         self.get_creg_bit = self.module.module.add_external_function(
             "get_creg_bit",
             pyqir.FunctionType(
@@ -139,7 +139,7 @@ class QirGenerator:
             ),
         )
 
-        # void set_creg_bit(i1* reg, i64 index, i1 value)
+        # void set_creg_bit(i1* creg, i64 index, i1 value)
         self.set_creg_bit = self.module.module.add_external_function(
             "set_creg_bit",
             pyqir.FunctionType(
@@ -152,7 +152,7 @@ class QirGenerator:
             ),
         )
 
-        # void set_creg_to_int(i1* reg, i64 value)
+        # void set_creg_to_int(i1* creg, i64 value)
         self.set_creg_to_int = self.module.module.add_external_function(
             "set_creg_to_int",
             pyqir.FunctionType(
