@@ -11,57 +11,75 @@ source_filename = "test_pytket_qir_conditional_ii"
 
 define void @main() #0 {
 entry:
-  %0 = call i64 @reg2var(i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false)
-  %1 = call i64 @reg2var(i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false)
-  %2 = call i64 @reg2var(i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false)
-  %3 = call i64 @reg2var(i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false, i1 false)
-  %4 = or i64 %0, %1
-  call void @set_all_bits_in_reg(i64 %2, i64 %4)
+  %0 = call i1* @create_creg(i64 5)
+  %1 = call i1* @create_creg(i64 5)
+  %2 = call i1* @create_creg(i64 5)
+  %3 = call i1* @create_creg(i64 5)
+  %4 = call i64 @get_int_from_creg(i1* %0)
+  %5 = call i64 @get_int_from_creg(i1* %0)
+  %6 = call i64 @get_int_from_creg(i1* %0)
+  %7 = call i64 @get_int_from_creg(i1* %1)
+  %8 = or i64 %6, %7
+  call void @set_creg_to_int(i1* %2, i64 %8)
   call void @__quantum__qis__h__body(%Qubit* null)
   call void @__quantum__qis__h__body(%Qubit* inttoptr (i64 1 to %Qubit*))
   call void @__quantum__qis__h__body(%Qubit* inttoptr (i64 2 to %Qubit*))
-  %5 = or i64 %2, %1
-  call void @set_all_bits_in_reg(i64 %3, i64 %5)
+  %9 = call i64 @get_int_from_creg(i1* %0)
+  %10 = call i64 @get_int_from_creg(i1* %0)
+  %11 = call i64 @get_int_from_creg(i1* %2)
+  %12 = call i64 @get_int_from_creg(i1* %1)
+  %13 = or i64 %11, %12
+  call void @set_creg_to_int(i1* %3, i64 %13)
   call void @__quantum__qis__h__body(%Qubit* null)
-  %6 = call i1 @read_bit_from_reg(i64 %0, i64 4)
-  br i1 %6, label %then, label %else
+  %14 = call i1 @get_creg_bit(i1* %0, i64 4)
+  br i1 %14, label %then, label %else
 
 then:                                             ; preds = %entry
   br label %continue
 
 else:                                             ; preds = %entry
-  %7 = or i64 %2, %1
-  call void @set_all_bits_in_reg(i64 %3, i64 %7)
+  %15 = call i64 @get_int_from_creg(i1* %0)
+  %16 = call i64 @get_int_from_creg(i1* %0)
+  %17 = call i64 @get_int_from_creg(i1* %2)
+  %18 = call i64 @get_int_from_creg(i1* %1)
+  %19 = or i64 %17, %18
+  call void @set_creg_to_int(i1* %3, i64 %19)
   br label %continue
 
 continue:                                         ; preds = %else, %then
   call void @__quantum__qis__mz__body(%Qubit* inttoptr (i64 2 to %Qubit*), %Result* inttoptr (i64 2 to %Result*))
-  %8 = call i1 @__quantum__qis__read_result__body(%Result* inttoptr (i64 2 to %Result*))
-  call void @set_one_bit_in_reg(i64 %3, i64 2, i1 %8)
+  %20 = call i1 @__quantum__qis__read_result__body(%Result* inttoptr (i64 2 to %Result*))
+  call void @set_creg_bit(i1* %3, i64 2, i1 %20)
   call void @__quantum__qis__mz__body(%Qubit* inttoptr (i64 1 to %Qubit*), %Result* inttoptr (i64 1 to %Result*))
-  %9 = call i1 @__quantum__qis__read_result__body(%Result* inttoptr (i64 1 to %Result*))
-  call void @set_one_bit_in_reg(i64 %3, i64 3, i1 %9)
+  %21 = call i1 @__quantum__qis__read_result__body(%Result* inttoptr (i64 1 to %Result*))
+  call void @set_creg_bit(i1* %3, i64 3, i1 %21)
   call void @__quantum__qis__mz__body(%Qubit* null, %Result* null)
-  %10 = call i1 @__quantum__qis__read_result__body(%Result* null)
-  call void @set_one_bit_in_reg(i64 %3, i64 4, i1 %10)
+  %22 = call i1 @__quantum__qis__read_result__body(%Result* null)
+  call void @set_creg_bit(i1* %3, i64 4, i1 %22)
   call void @__quantum__rt__tuple_start_record_output()
-  call void @__quantum__rt__int_record_output(i64 %0, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @0, i32 0, i32 0))
-  call void @__quantum__rt__int_record_output(i64 %1, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @1, i32 0, i32 0))
-  call void @__quantum__rt__int_record_output(i64 %2, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @2, i32 0, i32 0))
-  call void @__quantum__rt__int_record_output(i64 %3, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @3, i32 0, i32 0))
+  %23 = call i64 @get_int_from_creg(i1* %0)
+  call void @__quantum__rt__int_record_output(i64 %23, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @0, i32 0, i32 0))
+  %24 = call i64 @get_int_from_creg(i1* %1)
+  call void @__quantum__rt__int_record_output(i64 %24, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @1, i32 0, i32 0))
+  %25 = call i64 @get_int_from_creg(i1* %2)
+  call void @__quantum__rt__int_record_output(i64 %25, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @2, i32 0, i32 0))
+  %26 = call i64 @get_int_from_creg(i1* %3)
+  call void @__quantum__rt__int_record_output(i64 %26, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @3, i32 0, i32 0))
   call void @__quantum__rt__tuple_end_record_output()
   ret void
 }
 
-declare i1 @read_bit_from_reg(i64, i64)
+declare i1 @get_creg_bit(i1*, i64)
 
-declare void @set_one_bit_in_reg(i64, i64, i1)
+declare void @set_creg_bit(i1*, i64, i1)
 
-declare void @set_all_bits_in_reg(i64, i64)
+declare void @set_creg_to_int(i1*, i64)
 
 declare i1 @__quantum__qis__read_result__body(%Result*)
 
-declare i64 @reg2var(i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1, i1)
+declare i1* @create_creg(i64)
+
+declare i64 @get_int_from_creg(i1*)
 
 declare void @__quantum__rt__int_record_output(i64, i8*)
 

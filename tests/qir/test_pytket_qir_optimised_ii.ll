@@ -18,7 +18,6 @@ entry:
   ret void
 }
 
-
 declare void @__quantum__rt__int_record_output(i64, i8*)
 
 declare void @__quantum__rt__tuple_start_record_output()
