@@ -130,18 +130,18 @@ class QirGenerator:
         self.set_cregs: dict[str, list] = {}  # Keep track of set registers.
         self.ssa_vars: dict[str, Value] = {}  # Keep track of set ssa variables.
 
-        # i1 read_bit_from_reg(i1* reg, i64 index)
-        self.read_bit_from_reg = self.module.module.add_external_function(
-            "read_bit_from_reg",
+        # i1 get_creg_bit(i1* reg, i64 index)
+        self.get_creg_bit = self.module.module.add_external_function(
+            "get_creg_bit",
             pyqir.FunctionType(
                 pyqir.IntType(self.module.module.context, 1),
                 [self.qir_i1p_type, self.qir_int_type],
             ),
         )
 
-        # void set_one_bit_in_reg(i1* reg, i64 index, i1 value)
-        self.set_one_bit_in_reg = self.module.module.add_external_function(
-            "set_one_bit_in_reg",
+        # void set_creg_bit(i1* reg, i64 index, i1 value)
+        self.set_creg_bit = self.module.module.add_external_function(
+            "set_creg_bit",
             pyqir.FunctionType(
                 pyqir.Type.void(self.module.module.context),
                 [
@@ -152,9 +152,9 @@ class QirGenerator:
             ),
         )
 
-        # void set_all_bits_in_reg(i1* reg, i64 value)
-        self.set_all_bits_in_reg = self.module.module.add_external_function(
-            "set_all_bits_in_reg",
+        # void set_creg_to_int(i1* reg, i64 value)
+        self.set_creg_to_int = self.module.module.add_external_function(
+            "set_creg_to_int",
             pyqir.FunctionType(
                 pyqir.Type.void(self.module.module.context),
                 [
@@ -173,18 +173,18 @@ class QirGenerator:
             ),
         )
 
-        # i1* create_reg(i64 size)
-        self.create_reg = self.module.module.add_external_function(
-            "create_reg",
+        # i1* create_creg(i64 size)
+        self.create_creg = self.module.module.add_external_function(
+            "create_creg",
             pyqir.FunctionType(
                 self.qir_i1p_type,
                 [pyqir.IntType(self.module.module.context, qir_int_type)],
             ),
         )
 
-        # i64 create_reg(i1* reg)
-        self.read_all_bits_from_reg = self.module.module.add_external_function(
-            "read_all_bits_from_reg",
+        # i64 get_int_from_creg(i1* creg)
+        self.get_int_from_creg = self.module.module.add_external_function(
+            "get_int_from_creg",
             pyqir.FunctionType(
                 self.qir_int_type,
                 [
@@ -388,7 +388,7 @@ class QirGenerator:
 
     def _get_i64_ssa_reg(self, name: str) -> Value:
         ssa_var = self.module.builder.call(
-            self.read_all_bits_from_reg,
+            self.get_int_from_creg,
             [self.ssa_vars[name]],
         )
         return ssa_var
@@ -417,7 +417,7 @@ class QirGenerator:
                     f"Classical register should only have the size of {int_size}"
                 )
             ssa_var = self.module.builder.call(  # type: ignore
-                self.create_reg, [pyqir.const(self.qir_int_type, len(bit_reg))]
+                self.create_creg, [pyqir.const(self.qir_int_type, len(bit_reg))]
             )
             self.ssa_vars[reg_name] = ssa_var
             return ssa_var
@@ -472,7 +472,7 @@ class QirGenerator:
     ) -> Value:
         if type(bit) == Bit:
             result = module.builder.call(
-                self.read_bit_from_reg,
+                self.get_creg_bit,
                 [
                     self.ssa_vars[bit.reg_name],
                     pyqir.const(self.qir_int_type, bit.index[0]),
@@ -518,7 +518,7 @@ class QirGenerator:
                     result_registername = command.args[-1].reg_name
 
                     self.module.builder.call(
-                        self.set_one_bit_in_reg,
+                        self.set_creg_bit,
                         [
                             self.ssa_vars[result_registername],
                             pyqir.const(self.qir_int_type, condition_bit_index),
@@ -549,7 +549,7 @@ class QirGenerator:
                     registername = command.args[-1].reg_name
 
                     self.module.builder.call(
-                        self.set_one_bit_in_reg,
+                        self.set_creg_bit,
                         [
                             self.ssa_vars[registername],
                             pyqir.const(self.qir_int_type, condition_bit_index),
@@ -585,7 +585,7 @@ class QirGenerator:
                     assert condition_name in self.ssa_vars
 
                     ssabool = module.builder.call(
-                        self.read_bit_from_reg,
+                        self.get_creg_bit,
                         [
                             self.ssa_vars[condition_name],
                             pyqir.const(self.qir_int_type, condition_bit_index),
@@ -791,7 +791,7 @@ class QirGenerator:
                 )
 
                 self.module.builder.call(
-                    self.set_one_bit_in_reg,
+                    self.set_creg_bit,
                     [
                         self.ssa_vars[command.bits[0].reg_name],
                         pyqir.const(self.qir_int_type, command.bits[0].index[0]),
@@ -874,7 +874,7 @@ class QirGenerator:
                     # of the register, this could be changed to a user given value
 
                     self.module.builder.call(
-                        self.set_one_bit_in_reg,
+                        self.set_creg_bit,
                         [
                             self.ssa_vars[outputs],
                             pyqir.const(self.qir_int_type, result_index),
@@ -883,7 +883,7 @@ class QirGenerator:
                     )
                 else:
                     self.module.builder.call(
-                        self.set_all_bits_in_reg,
+                        self.set_creg_to_int,
                         [self.ssa_vars[outputs], output_instruction],
                     )
 
@@ -895,7 +895,7 @@ class QirGenerator:
                     output_instruction = pyqir.const(self.qir_bool_type, int(v))
 
                     self.module.builder.call(
-                        self.set_one_bit_in_reg,
+                        self.set_creg_bit,
                         [
                             self.ssa_vars[b.reg_name],
                             pyqir.const(self.qir_int_type, b.index[0]),
@@ -910,7 +910,7 @@ class QirGenerator:
 
                 for i, o in zip(command.args[:half_length], command.args[half_length:]):
                     output_instruction = self.module.builder.call(
-                        self.read_bit_from_reg,
+                        self.get_creg_bit,
                         [
                             self.ssa_vars[i.reg_name],  # type: ignore
                             pyqir.const(self.qir_int_type, i.index[0]),  # type: ignore
@@ -918,7 +918,7 @@ class QirGenerator:
                     )
 
                     self.module.builder.call(
-                        self.set_one_bit_in_reg,
+                        self.set_creg_bit,
                         [
                             self.ssa_vars[o.reg_name],
                             pyqir.const(self.qir_int_type, o.index[0]),

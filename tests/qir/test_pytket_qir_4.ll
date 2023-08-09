@@ -10,17 +10,17 @@ source_filename = "test_pytket_qir_4"
 
 define void @main() #0 {
 entry:
-  %0 = call i1* @create_reg(i64 5)
-  %1 = call i1* @create_reg(i64 5)
-  %2 = call i1* @create_reg(i64 5)
-  %3 = call i64 @read_all_bits_from_reg(i1* %0)
-  %4 = call i64 @read_all_bits_from_reg(i1* %0)
-  %5 = call i64 @read_all_bits_from_reg(i1* %0)
-  %6 = call i64 @read_all_bits_from_reg(i1* %1)
+  %0 = call i1* @create_creg(i64 5)
+  %1 = call i1* @create_creg(i64 5)
+  %2 = call i1* @create_creg(i64 5)
+  %3 = call i64 @get_int_from_creg(i1* %0)
+  %4 = call i64 @get_int_from_creg(i1* %0)
+  %5 = call i64 @get_int_from_creg(i1* %0)
+  %6 = call i64 @get_int_from_creg(i1* %1)
   %7 = or i64 %5, %6
-  call void @set_all_bits_in_reg(i1* %2, i64 %7)
+  call void @set_creg_to_int(i1* %2, i64 %7)
   call void @__quantum__qis__h__body(%Qubit* null)
-  %8 = call i1 @read_bit_from_reg(i1* %1, i64 4)
+  %8 = call i1 @get_creg_bit(i1* %1, i64 4)
   br i1 %8, label %then, label %else
 
 then:                                             ; preds = %entry
@@ -33,27 +33,27 @@ else:                                             ; preds = %entry
 continue:                                         ; preds = %else, %then
   call void @__quantum__qis__h__body(%Qubit* null)
   call void @__quantum__rt__tuple_start_record_output()
-  %9 = call i64 @read_all_bits_from_reg(i1* %0)
+  %9 = call i64 @get_int_from_creg(i1* %0)
   call void @__quantum__rt__int_record_output(i64 %9, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @0, i32 0, i32 0))
-  %10 = call i64 @read_all_bits_from_reg(i1* %1)
+  %10 = call i64 @get_int_from_creg(i1* %1)
   call void @__quantum__rt__int_record_output(i64 %10, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @1, i32 0, i32 0))
-  %11 = call i64 @read_all_bits_from_reg(i1* %2)
+  %11 = call i64 @get_int_from_creg(i1* %2)
   call void @__quantum__rt__int_record_output(i64 %11, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @2, i32 0, i32 0))
   call void @__quantum__rt__tuple_end_record_output()
   ret void
 }
 
-declare i1 @read_bit_from_reg(i1*, i64)
+declare i1 @get_creg_bit(i1*, i64)
 
-declare void @set_one_bit_in_reg(i1*, i64, i1)
+declare void @set_creg_bit(i1*, i64, i1)
 
-declare void @set_all_bits_in_reg(i1*, i64)
+declare void @set_creg_to_int(i1*, i64)
 
 declare i1 @__quantum__qis__read_result__body(%Result*)
 
-declare i1* @create_reg(i64)
+declare i1* @create_creg(i64)
 
-declare i64 @read_all_bits_from_reg(i1*)
+declare i64 @get_int_from_creg(i1*)
 
 declare void @__quantum__rt__int_record_output(i64, i8*)
 

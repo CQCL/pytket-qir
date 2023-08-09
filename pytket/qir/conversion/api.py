@@ -103,11 +103,11 @@ one classical register"""
         def keep_line(line: str) -> bool:
             return (
                 ("@__quantum__qis__read_result__body" not in line)
-                and ("@set_one_bit_in_reg" not in line)
-                and ("@read_bit_from_reg" not in line)
-                and ("@set_all_bits_in_reg" not in line)
-                and ("@read_all_bits_from_reg" not in line)
-                and ("@create_reg" not in line)
+                and ("@set_creg_bit" not in line)
+                and ("@get_creg_bit" not in line)
+                and ("@set_creg_to_int" not in line)
+                and ("@get_int_from_creg" not in line)
+                and ("@create_creg" not in line)
             )
 
         result = "\n".join(filter(keep_line, initial_result.split("\n")))
