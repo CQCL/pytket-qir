@@ -14,39 +14,64 @@ entry:
   call void @__quantum__qis__cnot__body(%Qubit* null, %Qubit* inttoptr (i64 1 to %Qubit*))
   call void @__quantum__qis__mz__body(%Qubit* null, %Result* null)
   %0 = call i1 @__quantum__qis__read_result__body(%Result* null)
-  %1 = zext i1 %0 to i2 
+  %1 = zext i1 %0 to i2    ; a[0] = %0
   call void @__quantum__qis__mz__body(%Qubit* inttoptr (i64 1 to %Qubit*), %Result* inttoptr (i64 1 to %Result*))
   %2 = call i1 @__quantum__qis__read_result__body(%Result* inttoptr (i64 1 to %Result*))
   %3 = zext i1 %2 to i2
   %4 = shl i2 %3, 1
-  %5 = or i2 %1, %4 
+  %5 = or i2 %1, %4 ; a[1] = %2
+
+  ; a = %5
+  ; b = 0
+  ; c = 125
+
   %6 = trunc i2 %5 to i1
+  br i1 %6, label %then1, label %continue1; if a[0]
 
-  br i1 %6, label %then, label %continue
+then1:                                          ; preds = %entry
+  ; c = c - b = c
 
-then:                                             ; preds = %entry
-  br label %continue
+  ; a = %5
+  ; b = 0
+  ; c = 125
+  br label %continue1
 
-continue:                                         ; preds = %entry, %then
+continue1:                                      ; preds = %entry, %then1
   %7 = and i2 2, %5
   %8 = lshr i2 %7, 1
   %9 = trunc i2 %8 to i1
-  br i1 %9, label %then1, label %continue3
+  br i1 %9, label %then2, label %continue2; if a[1]
 
-then1:                                            ; preds = %continue
+then2:                                            ; preds = %continue1
   %10 = zext i2 %5 to i7
   %11 = sub i7 125, %10
-  %12 = trunc i7 %11 to i5 
-  br label %continue3
+  %12 = trunc i7 %11 to i5 ; b = c - a
 
-continue3:                                        ; preds = %continue, %then1
-  %13 = phi i5 [%12, %then1], [0,%continue] ; b
+  ; a = %5
+  ; b = %12
+  ; c = 125
+
+  br label %continue2
+
+continue2:                                        ; preds = %contineu1, %then2
+  %13 = phi i5 [%12, %then2], [0,%continue1] ; b
+
+  ; a = %5
+  ; b = %13
+  ; c = 125
+
   %14 = zext i5 %13 to i7
   %15 = sub i7 125, %14
-  %16 = trunc i7 %15 to i2 
-  %17 = zext i2 %16 to i64
-  %18 = zext i5 %13 to i64 
-  %19 = zext i7 125 to i64 
+  %16 = trunc i7 %15 to i2 ; a = c - b
+
+  ; a = %16
+  ; b = %13
+  ; c = 125
+
+  %17 = zext i2 %16 to i64 ; a
+  %18 = zext i5 %13 to i64 ; b
+  %19 = zext i7 125 to i64 ; c
+
   call void @__quantum__rt__tuple_start_record_output()
   call void @__quantum__rt__int_record_output(i64 %17, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @0, i32 0, i32 0))
   call void @__quantum__rt__int_record_output(i64 %18, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @1, i32 0, i32 0))
