@@ -49,7 +49,7 @@ declare void @__quantum__rt__tuple_end_record_output()
 
 declare void @init() #1
 
-declare i64 @add_something(i64)
+declare i64 @add_something(i64) #1
 
 attributes #0 = { "entry_point" "num_required_qubits"="6" "num_required_results"="6" "output_labeling_schema" "qir_profiles"="custom" }
 

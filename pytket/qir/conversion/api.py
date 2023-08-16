@@ -90,12 +90,12 @@ def pytket_to_qir(
     )
 
     if wfh is not None:
-        wasm_dict: dict[str, str] = qir_generator.get_wasm_sar()
+        wasm_sar_dict: dict[str, str] = qir_generator.get_wasm_sar()
 
         initial_result = str(populated_module.module.ir())  # type: ignore
 
-        for wf in wasm_dict:
-            initial_result = initial_result.replace(wf, wasm_dict[wf])
+        for wf in wasm_sar_dict:
+            initial_result = initial_result.replace(wf, wasm_sar_dict[wf])
 
         result = initial_result
 

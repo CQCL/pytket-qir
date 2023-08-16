@@ -4,6 +4,8 @@ Changelog
 0.2.0rc16 (August 2023)
 -----------------------
 * add support for wasm in the conversion
+* new parameter to set the size of the int parameters of the registers in this conversion
+* update pytket requirement to 1.19.0rc0
 
 0.2.0rc15 (August 2023)
 -----------------------
