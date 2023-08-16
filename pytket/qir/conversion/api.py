@@ -24,9 +24,7 @@ import pyqir
 from pytket import wasm
 from pytket._tket.circuit import _TEMP_BIT_NAME  # type: ignore
 from pytket.circuit import Bit, Circuit  # type: ignore
-from pytket.passes import (  # type: ignore
-    CustomPass,
-)
+from pytket.passes import CustomPass  # type: ignore
 
 from .conversion import QirGenerator
 from .module import tketqirModule
