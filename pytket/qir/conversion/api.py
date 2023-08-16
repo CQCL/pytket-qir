@@ -17,10 +17,11 @@ public api for qir conversion from pytket
 """
 
 from enum import Enum
-from typing import Union
+from typing import Optional, Union
 
 import pyqir
 
+from pytket import wasm
 from pytket.circuit import Circuit
 
 from .conversion import QirGenerator
@@ -40,7 +41,8 @@ def pytket_to_qir(
     circ: Circuit,
     name: str = "Generated from input pytket circuit",
     qir_format: QIRFormat = QIRFormat.BINARY,
-    pyqir_0_6_compatibility: bool = False,
+    wfh: Optional[wasm.WasmFileHandler] = None,
+    int_type: int = 64,
 ) -> Union[str, bytes, None]:
     """converts given pytket circuit to qir
 
@@ -53,6 +55,8 @@ def pytket_to_qir(
     :param pyqir_0_6_compatibility: converts the output to be compatible with
         pyqir 0.6, default value false
     :type pyqir_0_6_compatibility: bool
+    :param int_type: size of each integer, allowed value 32 and 64
+    :type int_type: int
     """
 
     if len(circ.q_registers) > 1 or (
@@ -63,6 +67,9 @@ def pytket_to_qir(
             quantum register. You can convert it using the pytket
             compiler pass `FlattenRelabelRegistersPass`."""
         )
+
+    if int_type != 32 and int_type != 64:
+        raise ValueError("the integer size must be 32 or 64")
 
     for creg in circ.c_registers:
         if creg.size > 64:
@@ -75,49 +82,22 @@ def pytket_to_qir(
     )
 
     qir_generator = QirGenerator(
-        circuit=circ,
-        module=m,
-        wasm_int_type=32,
-        qir_int_type=64,
+        circuit=circ, module=m, wasm_int_type=int_type, qir_int_type=int_type, wfh=wfh
     )
 
     populated_module = qir_generator.circuit_to_module(
         qir_generator.circuit, qir_generator.module, True
     )
 
-    if pyqir_0_6_compatibility:
-        if len(circ.c_registers) > 1:
-            raise ValueError(
-                """The qir optimised for pyqir 0.6 can only contain
-one classical register"""
-            )
+    if wfh is not None:
+        wasm_dict: dict[str, str] = qir_generator.get_wasm_sar()
 
         initial_result = str(populated_module.module.ir())  # type: ignore
 
-        initial_result = (
-            initial_result.replace("entry_point", "EntryPoint")
-            .replace("num_required_qubits", "requiredQubits")
-            .replace("num_required_results", "requiredResults")
-        )
+        for wf in wasm_dict:
+            initial_result = initial_result.replace(wf, wasm_dict[wf])
 
-        def keep_line(line: str) -> bool:
-            return (
-                ("@__quantum__qis__read_result__body" not in line)
-                and ("@set_creg_bit" not in line)
-                and ("@get_creg_bit" not in line)
-                and ("@set_creg_to_int" not in line)
-                and ("@get_int_from_creg" not in line)
-                and ("@create_creg" not in line)
-            )
-
-        result = "\n".join(filter(keep_line, initial_result.split("\n")))
-
-        # replace the use of the removed register variable with i64 0
-        result = result.replace("i64 %0", "i64 0")
-        result = result.replace("i64 %3", "i64 0")
-
-        for _ in range(10):
-            result = result.replace("\n\n\n\n", "\n\n")
+        result = initial_result
 
         bitcode = pyqir.Module.from_ir(pyqir.Context(), result).bitcode  # type: ignore
 

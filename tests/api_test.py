@@ -42,35 +42,6 @@ def test_pytket_qir() -> None:
     check_qir_result(result, "test_pytket_qir")
 
 
-def test_pytket_qir_optimised() -> None:
-    circ = Circuit(
-        3,
-    )
-    circ.H(0)
-
-    result = pytket_to_qir(
-        circ,
-        name="test_pytket_qir",
-        qir_format=QIRFormat.STRING,
-        pyqir_0_6_compatibility=True,
-    )
-
-    check_qir_result(result, "test_pytket_qir_optimised")
-
-
-def test_pytket_qir_optimised_ii() -> None:
-    circ = Circuit(2).H(0).CX(0, 1).measure_all()
-
-    result = pytket_to_qir(
-        circ,
-        name="test_pytket_qir",
-        qir_format=QIRFormat.STRING,
-        pyqir_0_6_compatibility=True,
-    )
-
-    check_qir_result(result, "test_pytket_qir_optimised_ii")
-
-
 def test_pytket_api_qreg() -> None:
     circ = Circuit(3)
     circ.H(0)
