@@ -121,8 +121,8 @@ class QirGenerator:
         self.cregs = _retrieve_registers(self.circuit.bits, BitRegister)
         self.target_gateset = self.module.gateset.base_gateset
 
-        self.wasm_dict: dict[str, str] = {}
-        self.wasm_dict[
+        self.wasm_sar_dict: dict[str, str] = {}
+        self.wasm_sar_dict[
             "!llvm.module.flags"
         ] = 'attributes #1 = { "wasm" }\n\n!llvm.module.flags'
         self.int_type_str = f"i{qir_int_type}"
@@ -262,7 +262,7 @@ class QirGenerator:
                     wasm_func_interface += "void "
                 elif wfh._functions[fn][1] == 1:
                     returntype = self.qir_int_type
-                    wasm_func_interface += f"i{self.int_type_str} "
+                    wasm_func_interface += f"{self.int_type_str} "
                 else:
                     raise ValueError(
                         "wasm function which return more than"
@@ -285,7 +285,7 @@ class QirGenerator:
                 else:
                     wasm_func_interface += ")"
 
-                self.wasm_dict[wasm_func_interface] = f"{wasm_func_interface} #1"
+                self.wasm_sar_dict[wasm_func_interface] = f"{wasm_func_interface} #1"
 
         self.additional_quantum_gates: dict[OpType, pyqir.Function] = {}
 
@@ -539,7 +539,7 @@ class QirGenerator:
             raise ValueError("unsupported bisewise operation")
 
     def get_wasm_sar(self) -> dict[str, str]:
-        return self.wasm_dict
+        return self.wasm_sar_dict
 
     def circuit_to_module(
         self, circuit: Circuit, module: tketqirModule, record_output: bool = False
