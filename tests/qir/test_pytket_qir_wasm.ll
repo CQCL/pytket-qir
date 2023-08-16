@@ -1,5 +1,5 @@
-; ModuleID = 'test_pytket_qir'
-source_filename = "test_pytket_qir"
+; ModuleID = 'test_pytket_qir_wasm'
+source_filename = "test_pytket_qir_wasm"
 
 %Qubit = type opaque
 %Result = type opaque
@@ -12,27 +12,45 @@ entry:
   ret void
 }
 
-declare i1 @get_creg_bit(i1*, i64)
+declare i1 @get_creg_bit(i1*, i32)
 
-declare void @set_creg_bit(i1*, i64, i1)
+declare void @set_creg_bit(i1*, i32, i1)
 
-declare void @set_creg_to_int(i1*, i64)
+declare void @set_creg_to_int(i1*, i32)
 
 declare i1 @__quantum__qis__read_result__body(%Result*)
 
-declare i1* @create_creg(i64)
+declare i1* @create_creg(i32)
 
-declare i64 @get_int_from_creg(i1*)
+declare i32 @get_int_from_creg(i1*)
 
-declare void @__quantum__rt__int_record_output(i64, i8*)
+declare void @__quantum__rt__int_record_output(i32, i8*)
 
 declare void @__quantum__rt__tuple_start_record_output()
 
 declare void @__quantum__rt__tuple_end_record_output()
 
+declare void @init() #1
+
+declare i32 @add_one(i32)
+
+declare i32 @multi(i32, i32)
+
+declare i32 @add_two(i32)
+
+declare i32 @add_eleven(i32)
+
+declare void @no_return(i32) #1
+
+declare i32 @no_parameters()
+
+declare i32 @new_function()
+
 declare void @__quantum__qis__h__body(%Qubit*)
 
-attributes #0 = { "entry_point" "num_required_qubits"="3" "num_required_results"="3" "output_labeling_schema" "qir_profiles"="custom" }
+attributes #0 = { "entry_point" "num_required_qubits"="1" "num_required_results"="1" "output_labeling_schema" "qir_profiles"="custom" }
+
+attributes #1 = { "wasm" }
 
 !llvm.module.flags = !{!0, !1, !2, !3}
 

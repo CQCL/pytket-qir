@@ -25,7 +25,7 @@ from typing import Optional, Union, cast
 import pyqir
 from pyqir import IntPredicate, Value
 
-from pytket import Bit, Circuit, Qubit, predicates  # type: ignore
+from pytket import Bit, Circuit, Qubit, predicates, wasm  # type: ignore
 from pytket.circuit import (  # type: ignore
     BitRegister,
     ClassicalExpBox,
@@ -107,6 +107,7 @@ class QirGenerator:
         module: tketqirModule,
         wasm_int_type: int,
         qir_int_type: int,
+        wfh: Optional[wasm.WasmFileHandler] = None,
     ) -> None:
         self.circuit = circuit
         self.module = module
@@ -119,6 +120,12 @@ class QirGenerator:
 
         self.cregs = _retrieve_registers(self.circuit.bits, BitRegister)
         self.target_gateset = self.module.gateset.base_gateset
+
+        self.wasm_dict: dict[str, str] = {}
+        self.wasm_dict[
+            "!llvm.module.flags"
+        ] = 'attributes #1 = { "wasm" }\n\n!llvm.module.flags'
+        self.int_type_str = f"i{qir_int_type}"
 
         self.target_gateset.add(OpType.PhasedX)
         self.target_gateset.add(OpType.ZZPhase)
@@ -243,6 +250,42 @@ class QirGenerator:
         self.sleep: list[Optional[pyqir.Function]] = [None] * (
             self.circuit.n_qubits + 1
         )
+
+        # void functionname()
+        if wfh is not None:
+            self.wasm: dict[str, pyqir.Function] = {}
+            for fn in wfh._functions:
+                wasm_func_interface = "declare "
+                parametertype = [self.qir_int_type] * wfh._functions[fn][0]
+                if wfh._functions[fn][1] == 0:
+                    returntype = pyqir.Type.void(self.module.module.context)
+                    wasm_func_interface += "void "
+                elif wfh._functions[fn][1] == 1:
+                    returntype = self.qir_int_type
+                    wasm_func_interface += f"i{self.int_type_str} "
+                else:
+                    raise ValueError(
+                        "wasm function which return more than"
+                        + " one value are not supported yet"
+                    )
+
+                self.wasm[fn] = self.module.module.add_external_function(
+                    f"{fn}",
+                    pyqir.FunctionType(
+                        returntype,
+                        parametertype,
+                    ),
+                )
+
+                wasm_func_interface += f"@{fn}("
+                if wfh._functions[fn][0] > 0:
+                    param_str = f"{self.int_type_str}, " * (wfh._functions[fn][0] - 1)
+                    wasm_func_interface += param_str
+                    wasm_func_interface += f"{self.int_type_str})"
+                else:
+                    wasm_func_interface += ")"
+
+                self.wasm_dict[wasm_func_interface] = f"{wasm_func_interface} #1"
 
         self.additional_quantum_gates: dict[OpType, pyqir.Function] = {}
 
@@ -495,6 +538,9 @@ class QirGenerator:
         else:
             raise ValueError("unsupported bisewise operation")
 
+    def get_wasm_sar(self):
+        return self.wasm_dict
+
     def circuit_to_module(
         self, circuit: Circuit, module: tketqirModule, record_output: bool = False
     ) -> tketqirModule:
@@ -635,7 +681,20 @@ class QirGenerator:
                     )
 
             elif isinstance(op, WASMOp):
-                raise ValueError("WASM not supported yet")
+                paramreg, resultreg = self._get_c_regs_from_com(command)
+
+                paramssa = [self._get_i64_ssa_reg(p) for p in paramreg]
+
+                result = self.module.builder.call(  # type: ignore
+                    self.wasm[command.op.func_name],
+                    [*paramssa],
+                )
+
+                if len(resultreg) == 1:
+                    self.module.builder.call(
+                        self.set_creg_to_int,
+                        [self.ssa_vars[resultreg[0]], result],
+                    )
 
             elif op.type == OpType.ZZPhase:
                 assert len(command.bits) == 0
