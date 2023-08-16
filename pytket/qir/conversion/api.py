@@ -41,7 +41,6 @@ def pytket_to_qir(
     circ: Circuit,
     name: str = "Generated from input pytket circuit",
     qir_format: QIRFormat = QIRFormat.BINARY,
-    pyqir_0_6_compatibility: bool = False,
     wfh: Optional[wasm.WasmFileHandler] = None,
     int_type: int = 64,
 ) -> Union[str, bytes, None]:
@@ -99,57 +98,6 @@ def pytket_to_qir(
             initial_result = initial_result.replace(wf, wasm_dict[wf])
 
         result = initial_result
-
-        bitcode = pyqir.Module.from_ir(pyqir.Context(), result).bitcode  # type: ignore
-
-        if qir_format == QIRFormat.BINARY:
-            return bitcode  # type: ignore
-        elif qir_format == QIRFormat.STRING:
-            return result  # type: ignore
-        else:
-            assert not "unsupported return type"  # type: ignore
-
-    else:
-        if qir_format == QIRFormat.BINARY:
-            return populated_module.module.bitcode()
-        elif qir_format == QIRFormat.STRING:
-            return populated_module.module.ir()
-        else:
-            assert not "unsupported return type"  # type: ignore
-
-    if pyqir_0_6_compatibility:  # this will be removed today in a second PR
-        if len(circ.c_registers) > 1:
-            raise ValueError(
-                """The qir optimised for pyqir 0.6 can only contain
-one classical register"""
-            )
-
-        initial_result = str(populated_module.module.ir())  # type: ignore
-
-        initial_result = (
-            initial_result.replace("entry_point", "EntryPoint")
-            .replace("num_required_qubits", "requiredQubits")
-            .replace("num_required_results", "requiredResults")
-        )
-
-        def keep_line(line: str) -> bool:
-            return (
-                ("@__quantum__qis__read_result__body" not in line)
-                and ("@set_creg_bit" not in line)
-                and ("@get_creg_bit" not in line)
-                and ("@set_creg_to_int" not in line)
-                and ("@get_int_from_creg" not in line)
-                and ("@create_creg" not in line)
-            )
-
-        result = "\n".join(filter(keep_line, initial_result.split("\n")))
-
-        # replace the use of the removed register variable with i64 0
-        result = result.replace("i64 %0", "i64 0")
-        result = result.replace("i64 %3", "i64 0")
-
-        for _ in range(10):
-            result = result.replace("\n\n\n\n", "\n\n")
 
         bitcode = pyqir.Module.from_ir(pyqir.Context(), result).bitcode  # type: ignore
 
