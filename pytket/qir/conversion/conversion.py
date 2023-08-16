@@ -538,7 +538,7 @@ class QirGenerator:
         else:
             raise ValueError("unsupported bisewise operation")
 
-    def get_wasm_sar(self):
+    def get_wasm_sar(self) -> dict[str, str]:
         return self.wasm_dict
 
     def circuit_to_module(

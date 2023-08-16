@@ -91,7 +91,7 @@ def pytket_to_qir(
     )
 
     if wfh is not None:
-        wasm_dict = qir_generator.get_wasm_sar()
+        wasm_dict: dict[str, str] = qir_generator.get_wasm_sar()
 
         initial_result = str(populated_module.module.ir())  # type: ignore
 
