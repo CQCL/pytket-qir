@@ -391,7 +391,11 @@ class QirGenerator:
     def _rebase_op_to_gateset(self, op: OpType, args: list) -> Optional[Circuit]:
         """Rebase an op to the target gateset if needed."""
         optype = op.type
-        if op.type == OpType.ClassicalExpBox:
+        if (
+            op.type == OpType.ClassicalExpBox
+            or op.type == OpType.SetBits
+            or op.type == OpType.CopyBits
+        ):
             circuit = Circuit(self.circuit.n_qubits)
             for cr in self.circuit.c_registers:
                 circuit.add_c_register(cr.name, cr.size)
@@ -407,7 +411,9 @@ class QirGenerator:
 
         else:
             params = op.params
-            circuit = Circuit(self.circuit.n_qubits, self.circuit.n_bits)
+            circuit = Circuit(self.circuit.n_qubits)
+            for cr in self.circuit.c_registers:
+                circuit.add_c_register(cr.name, cr.size)
             circuit.add_gate(optype, params, args)
             if not self.getset_predicate.verify(circuit):
                 raise ValueError(f"Gate not supported {optype}, {params}")
@@ -523,6 +529,8 @@ class QirGenerator:
             )
 
             return result
+        elif type(bit) == int:
+            return pyqir.const(self.qir_bool_type, bit)
         elif type(bit) in _TK_CLOPS_TO_PYQIR_BIT:
             assert len(bit.args) == 2
 
@@ -536,7 +544,7 @@ class QirGenerator:
 
             return output_instruction  # type: ignore
         else:
-            raise ValueError("unsupported bisewise operation")
+            raise ValueError(f"unsupported bisewise operation {type(bit)}")
 
     def get_wasm_sar(self) -> dict[str, str]:
         return self.wasm_sar_dict
