@@ -55,9 +55,9 @@ def pytket_to_qir(
     :type name: str
     :param qir_format: format of the generated qir, default value is binary
     :type qir_format: QIRFormat
-    :param pyqir_0_6_compatibility: converts the output to be compatible with
-        pyqir 0.6, default value false
-    :type pyqir_0_6_compatibility: bool
+    :param wfh: wasm file handler used when creating the circuit.
+      Only needed when there are wasm calls in the circuit.
+    :type wfh: pytket.wasm.WasmFileHandler
     :param int_type: size of each integer, allowed value 32 and 64
     :type int_type: int
     :param cut_pytket_register: breaks up the internal scratch bit registers
