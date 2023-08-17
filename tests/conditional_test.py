@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import pytest
 from utilities import check_qir_result  # type: ignore
 
 from pytket.circuit import (  # type: ignore[attr-defined]
@@ -224,6 +225,39 @@ def test_pytket_qir_conditional_10() -> None:
     )
 
     check_qir_result(result, "test_pytket_qir_conditional_10")
+
+
+def test_pytket_qir_conditional_11() -> None:
+    # test conditional with to big scratch register
+
+    circ = Circuit(7, name="testcirc")
+
+    syn = circ.add_c_register("syn", 4)
+
+    for _ in range(11):
+        circ.X(0, condition=reg_eq(syn, 1))
+        circ.X(0, condition=reg_eq(syn, 2))
+        circ.X(0, condition=reg_eq(syn, 2))
+        circ.X(0, condition=reg_eq(syn, 3))
+        circ.X(0, condition=reg_eq(syn, 4))
+        circ.X(0, condition=reg_eq(syn, 4))
+
+    with pytest.raises(Exception):
+        pytket_to_qir(
+            circ,
+            name="test_pytket_qir_conditional_11",
+            qir_format=QIRFormat.STRING,
+            cut_pytket_register=False,
+        )
+
+    result = pytket_to_qir(
+        circ,
+        name="test_pytket_qir_conditional_11",
+        qir_format=QIRFormat.STRING,
+        cut_pytket_register=True,
+    )
+
+    check_qir_result(result, "test_pytket_qir_conditional_11")
 
 
 if __name__ == "__main__":

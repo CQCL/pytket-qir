@@ -22,7 +22,9 @@ from typing import Optional, Union
 import pyqir
 
 from pytket import wasm
-from pytket.circuit import Circuit
+from pytket._tket.circuit import _TEMP_BIT_NAME  # type: ignore
+from pytket.circuit import Bit, Circuit  # type: ignore
+from pytket.passes import CustomPass  # type: ignore
 
 from .conversion import QirGenerator
 from .module import tketqirModule
@@ -43,6 +45,7 @@ def pytket_to_qir(
     qir_format: QIRFormat = QIRFormat.BINARY,
     wfh: Optional[wasm.WasmFileHandler] = None,
     int_type: int = 64,
+    cut_pytket_register: bool = False,
 ) -> Union[str, bytes, None]:
     """converts given pytket circuit to qir
 
@@ -57,6 +60,9 @@ def pytket_to_qir(
     :type pyqir_0_6_compatibility: bool
     :param int_type: size of each integer, allowed value 32 and 64
     :type int_type: int
+    :param cut_pytket_register: breaks up the internal scratch bit registers
+      into smaller registers, default value false
+    :type cut_pytket_register: bool
     """
 
     if len(circ.q_registers) > 1 or (
@@ -70,6 +76,10 @@ def pytket_to_qir(
 
     if int_type != 32 and int_type != 64:
         raise ValueError("the integer size must be 32 or 64")
+
+    if cut_pytket_register:
+        cpass = _scratch_reg_resize_pass(int_type)
+        cpass.apply(circ)
 
     for creg in circ.c_registers:
         if creg.size > 64:
@@ -115,3 +125,29 @@ def pytket_to_qir(
             return populated_module.module.ir()
         else:
             assert not "unsupported return type"  # type: ignore
+
+
+def _scratch_reg_resize_pass(max_size: int) -> CustomPass:
+    """Given a max scratch register width, return a compiler pass that
+    breaks up the internal scratch bit registers into smaller registers
+    """
+
+    def trans(circ: Circuit, max_size: int = max_size) -> Circuit:
+        # Find all scratch bits
+        scratch_bits = [
+            bit
+            for bit in circ.bits
+            if (
+                bit.reg_name == _TEMP_BIT_NAME
+                or bit.reg_name.startswith(f"{_TEMP_BIT_NAME}_")
+            )
+        ]
+        # If the total number of scratch bits exceeds the max width, rename them
+        if len(scratch_bits) > max_size:
+            bits_map = {}
+            for i, bit in enumerate(scratch_bits):
+                bits_map[bit] = Bit(f"{_TEMP_BIT_NAME}_{i//max_size}", i % max_size)
+            circ.rename_units(bits_map)
+        return circ
+
+    return CustomPass(trans, label="resize scratch bits")
