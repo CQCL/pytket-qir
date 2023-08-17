@@ -50,19 +50,13 @@ def pytket_to_qir(
     """converts given pytket circuit to qir
 
     :param circ: given circuit
-    :type circ: pytket circuit
     :param name: name for the qir module created
-    :type name: str
     :param qir_format: format of the generated qir, default value is binary
-    :type qir_format: QIRFormat
     :param wfh: wasm file handler used when creating the circuit.
       Only needed when there are wasm calls in the circuit.
-    :type wfh: pytket.wasm.WasmFileHandler
     :param int_type: size of each integer, allowed value 32 and 64
-    :type int_type: int
     :param cut_pytket_register: breaks up the internal scratch bit registers
       into smaller registers, default value false
-    :type cut_pytket_register: bool
     """
 
     if len(circ.q_registers) > 1 or (
