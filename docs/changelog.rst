@@ -1,6 +1,10 @@
 Changelog
 ~~~~~~~~~
 
+0.2.0rc17 (August 2023)
+-----------------------
+* fix issue with integer in regular expression
+
 0.2.0rc16 (August 2023)
 -----------------------
 * add support for wasm in the conversion
