@@ -1,6 +1,6 @@
 API documentation
 ~~~~~~~~~~~~~~~~~
 
-.. automodule:: pytket.extensions.qir
+.. automodule:: pytket.qir
     :special-members:
-    :members: pytket_to_qir
+    :members: pytket_to_qir, QIRFormat

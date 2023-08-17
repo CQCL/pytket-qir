@@ -12,16 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import shutil
 import os
-from setuptools import setup, find_namespace_packages  # type: ignore
+import shutil
+from pathlib import Path
+
+from setuptools import find_namespace_packages, setup  # type: ignore
 
 metadata: dict = {}
 with open("_metadata.py") as fp:
     exec(fp.read(), metadata)
 shutil.copy(
     "_metadata.py",
-    os.path.join("pytket", "extensions", "qir", "_metadata.py"),
+    os.path.join("pytket", "qir", "_metadata.py"),
 )
 
 
@@ -37,14 +39,14 @@ setup(
         "Tracker": "https://github.com/CQCL/pytket-qir/issues",
     },
     description="Extension for pytket, providing functions for conversion into to qir",
-    long_description=open("README.md").read(),
+    long_description=(Path(__file__).parent / "README.md").read_text(),
     long_description_content_type="text/markdown",
     license="Apache 2",
     packages=find_namespace_packages(include=["pytket.*"]),
     include_package_data=True,
     install_requires=[
-        "pytket ~= 1.14",
-        "pyqir == 0.8.1",
+        "pytket == 1.19.0rc0",
+        "pyqir == 0.8.2",
         "pyqir-generator == 0.7.0",
         "pyqir-evaluator == 0.7.0",
         "pyqir-parser == 0.7.0",
