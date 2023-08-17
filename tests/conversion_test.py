@@ -268,6 +268,45 @@ def test_pytket_qir_14() -> None:
     check_qir_result(result, "test_pytket_qir_14")
 
 
+def test_pytket_qir_14_b() -> None:
+    # test setbits op
+    c = Circuit(1, name="test_classical")
+    a = c.add_c_register("a", 32)
+    b = c.add_c_register("b", 32)
+    d = c.add_c_register("d", 32)
+
+    c.add_c_setbits([True], [a[0]])
+    c.add_c_setbits([False, True] + [False] * 30, list(a))
+    c.add_c_setbits([True, True] + [False] * 30, list(b))
+
+    c.add_c_setreg(23, a)
+    c.add_c_copyreg(a, b)
+
+    c.add_classicalexpbox_register(a + b, d)
+    c.add_classicalexpbox_register(a - b, d)
+    # c.add_classicalexpbox_register(a * b // d, d)
+    c.add_classicalexpbox_register(a << 1, a)
+    c.add_classicalexpbox_register(a >> 1, b)
+
+    c.X(0, condition=reg_eq(a ^ b, 1))
+    c.X(0, condition=(a[0] ^ b[0]))
+    c.X(0, condition=reg_eq(a & b, 1))
+    c.X(0, condition=reg_eq(a | b, 1))
+
+    c.X(0, condition=a[0])
+    c.X(0, condition=reg_neq(a, 1))
+    c.X(0, condition=if_not_bit(a[0]))
+    c.X(0, condition=reg_gt(a, 1))
+    c.X(0, condition=reg_lt(a, 1))
+    c.X(0, condition=reg_geq(a, 1))
+    c.X(0, condition=reg_leq(a, 1))
+    c.Phase(0, condition=a[0])
+
+    result = pytket_to_qir(c, name="test_pytket_qir_14_b", qir_format=QIRFormat.STRING)
+
+    check_qir_result(result, "test_pytket_qir_14_b")
+
+
 def test_pytket_qir_15() -> None:
     # test calssical exp box handling
     # circuit to cover capabilities covered in example notebook
