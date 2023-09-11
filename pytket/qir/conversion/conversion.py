@@ -27,12 +27,12 @@ from pyqir import IntPredicate, Value
 
 from pytket import Bit, Circuit, Qubit, predicates, wasm  # type: ignore
 from pytket.circuit import (  # type: ignore
+    BarrierOp,
     BitRegister,
     ClassicalExpBox,
     Command,
     Conditional,
     CopyBitsOp,
-    MetaOp,
     Op,
     OpType,
     RangePredicateOp,
@@ -993,7 +993,7 @@ class QirGenerator:
                         ],
                     )
 
-            elif isinstance(op, MetaOp):
+            elif isinstance(op, BarrierOp):
                 assert command.qubits[0].reg_name == "q"
 
                 qir_qubits = self._to_qis_qubits(command.qubits)
@@ -1012,7 +1012,7 @@ class QirGenerator:
                         float(command.op.data[6:-1]),
                     )
                 else:
-                    raise ValueError("Meta op is not supported yet")
+                    raise ValueError("op is not supported yet")
 
             else:
                 rebased_circ = self._rebase_command_to_gateset(
