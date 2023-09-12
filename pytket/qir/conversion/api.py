@@ -22,9 +22,9 @@ from typing import Optional, Union
 import pyqir
 
 from pytket import wasm
-from pytket._tket.circuit import _TEMP_BIT_NAME  # type: ignore
-from pytket.circuit import Bit, Circuit  # type: ignore
+from pytket.circuit import Bit, Circuit, UnitID  # type: ignore
 from pytket.passes import CustomPass  # type: ignore
+from pytket.unit_id import _TEMP_BIT_NAME  # type: ignore
 
 from .conversion import QirGenerator
 from .module import tketqirModule
@@ -73,7 +73,7 @@ def pytket_to_qir(
 
     if cut_pytket_register:
         cpass = _scratch_reg_resize_pass(int_type)
-        cpass.apply(circ)
+        cpass.apply(circ)  # type: ignore
 
     for creg in circ.c_registers:
         if creg.size > 64:
@@ -121,7 +121,7 @@ def pytket_to_qir(
             assert not "unsupported return type"  # type: ignore
 
 
-def _scratch_reg_resize_pass(max_size: int) -> CustomPass:
+def _scratch_reg_resize_pass(max_size: int) -> CustomPass:  # type: ignore
     """Given a max scratch register width, return a compiler pass that
     breaks up the internal scratch bit registers into smaller registers
     """
@@ -138,7 +138,7 @@ def _scratch_reg_resize_pass(max_size: int) -> CustomPass:
         ]
         # If the total number of scratch bits exceeds the max width, rename them
         if len(scratch_bits) > max_size:
-            bits_map = {}
+            bits_map: dict[UnitID, UnitID] = {}
             for i, bit in enumerate(scratch_bits):
                 bits_map[bit] = Bit(f"{_TEMP_BIT_NAME}_{i//max_size}", i % max_size)
             circ.rename_units(bits_map)

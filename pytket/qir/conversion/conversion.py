@@ -27,12 +27,12 @@ from pyqir import IntPredicate, Value
 
 from pytket import Bit, Circuit, Qubit, predicates, wasm  # type: ignore
 from pytket.circuit import (  # type: ignore
+    BarrierOp,
     BitRegister,
     ClassicalExpBox,
     Command,
     Conditional,
     CopyBitsOp,
-    MetaOp,
     Op,
     OpType,
     RangePredicateOp,
@@ -388,7 +388,7 @@ class QirGenerator:
             return circuit
         return None
 
-    def _rebase_op_to_gateset(self, op: OpType, args: list) -> Optional[Circuit]:
+    def _rebase_op_to_gateset(self, op: Op, args: list) -> Optional[Circuit]:
         """Rebase an op to the target gateset if needed."""
         optype = op.type
         if (
@@ -420,16 +420,9 @@ class QirGenerator:
             return circuit
 
     def _get_optype_and_params(self, op: Op) -> tuple[OpType, Sequence[float]]:
-        optype = op.type
+        optype: OpType = op.type
         params: list = []
-        if optype == OpType.ExplicitPredicate:
-            if op.get_name() == "AND":
-                optype = BitWiseOp.AND
-            elif op.get_name() == "OR":
-                optype = BitWiseOp.OR
-            elif op.get_name() == "XOR":
-                optype = BitWiseOp.XOR
-        elif optype in [OpType.Barrier, OpType.CopyBits]:
+        if optype in [OpType.ExplicitPredicate, OpType.Barrier, OpType.CopyBits]:
             pass
         else:
             params = op.params
@@ -490,7 +483,7 @@ class QirGenerator:
                     com_bits = args[:in_width]
                     args = args[in_width:]
                     regname = com_bits[0].reg_name
-                    if com_bits != list(self.cregs[regname]):
+                    if com_bits != list(self.cregs[regname]):  # type: ignore
                         raise ValueError("WASM ops must act on entire registers.")
                     reglist.append(regname)
         return inputs, outputs
@@ -499,10 +492,12 @@ class QirGenerator:
         self, reg: Union[BitRegister, RegAnd, RegOr, RegXor], module: tketqirModule
     ) -> Value:
         if type(reg) in _TK_CLOPS_TO_PYQIR_REG:
-            assert len(reg.args) == 2
+            assert len(reg.args) == 2  # type: ignore
 
-            ssa_left = self._get_ssa_from_cl_reg_op(reg.args[0], module)
-            ssa_right = self._get_ssa_from_cl_reg_op(reg.args[1], module)
+            ssa_left = self._get_ssa_from_cl_reg_op(reg.args[0], module)  # type: ignore
+            ssa_right = self._get_ssa_from_cl_reg_op(
+                reg.args[1], module  # type: ignore
+            )
 
             # add function to module
             output_instruction = _TK_CLOPS_TO_PYQIR_REG[type(reg)](module.builder)(
@@ -883,11 +878,15 @@ class QirGenerator:
                     # classical ops acting on registers returning register
                     ssa_left = cast(  # type: ignore
                         Value,
-                        self._get_ssa_from_cl_reg_op(op.get_exp().args[0], module),
+                        self._get_ssa_from_cl_reg_op(
+                            op.get_exp().args[0], module  # type: ignore
+                        ),
                     )
                     ssa_right = cast(  # type: ignore
                         Value,
-                        self._get_ssa_from_cl_reg_op(op.get_exp().args[1], module),
+                        self._get_ssa_from_cl_reg_op(
+                            op.get_exp().args[1], module  # type: ignore
+                        ),
                     )
 
                     # add function to module
@@ -899,11 +898,15 @@ class QirGenerator:
                     # classical ops acting on bits returning bit
                     ssa_left = cast(  # type: ignore
                         Value,
-                        self._get_ssa_from_cl_bit_op(op.get_exp().args[0], module),
+                        self._get_ssa_from_cl_bit_op(
+                            op.get_exp().args[0], module  # type: ignore
+                        ),
                     )
                     ssa_right = cast(  # type: ignore
                         Value,
-                        self._get_ssa_from_cl_bit_op(op.get_exp().args[1], module),
+                        self._get_ssa_from_cl_bit_op(
+                            op.get_exp().args[1], module  # type: ignore
+                        ),
                     )
 
                     # add function to module
@@ -917,11 +920,15 @@ class QirGenerator:
                     # classical ops acting on registers returning bit
                     ssa_left = cast(  # type: ignore
                         Value,
-                        self._get_ssa_from_cl_reg_op(op.get_exp().args[0], module),
+                        self._get_ssa_from_cl_reg_op(
+                            op.get_exp().args[0], module  # type: ignore
+                        ),
                     )
                     ssa_right = cast(  # type: ignore
                         Value,
-                        self._get_ssa_from_cl_reg_op(op.get_exp().args[1], module),
+                        self._get_ssa_from_cl_reg_op(
+                            op.get_exp().args[1], module  # type: ignore
+                        ),
                     )
 
                     # add function to module
@@ -993,7 +1000,7 @@ class QirGenerator:
                         ],
                     )
 
-            elif isinstance(op, MetaOp):
+            elif isinstance(op, BarrierOp):
                 assert command.qubits[0].reg_name == "q"
 
                 qir_qubits = self._to_qis_qubits(command.qubits)
@@ -1012,7 +1019,7 @@ class QirGenerator:
                         float(command.op.data[6:-1]),
                     )
                 else:
-                    raise ValueError("Meta op is not supported yet")
+                    raise ValueError("op is not supported yet")
 
             else:
                 rebased_circ = self._rebase_command_to_gateset(
