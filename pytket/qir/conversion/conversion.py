@@ -422,14 +422,7 @@ class QirGenerator:
     def _get_optype_and_params(self, op: Op) -> tuple[OpType, Sequence[float]]:
         optype: OpType = op.type
         params: list = []
-        if optype == OpType.ExplicitPredicate:
-            if op.get_name() == "AND":
-                optype = BitWiseOp.AND  # type: ignore
-            elif op.get_name() == "OR":
-                optype = BitWiseOp.OR  # type: ignore
-            elif op.get_name() == "XOR":
-                optype = BitWiseOp.XOR  # type: ignore
-        elif optype in [OpType.Barrier, OpType.CopyBits]:
+        if optype in [OpType.ExplicitPredicate, OpType.Barrier, OpType.CopyBits]:
             pass
         else:
             params = op.params
