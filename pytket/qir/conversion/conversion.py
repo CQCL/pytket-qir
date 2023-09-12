@@ -420,7 +420,7 @@ class QirGenerator:
             return circuit
 
     def _get_optype_and_params(self, op: Op) -> tuple[OpType, Sequence[float]]:
-        optype = op.type
+        optype: OpType = op.type
         params: list = []
         if optype == OpType.ExplicitPredicate:
             if op.get_name() == "AND":
