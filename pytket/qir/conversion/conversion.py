@@ -388,7 +388,7 @@ class QirGenerator:
             return circuit
         return None
 
-    def _rebase_op_to_gateset(self, op: OpType, args: list) -> Optional[Circuit]:
+    def _rebase_op_to_gateset(self, op: Op, args: list) -> Optional[Circuit]:
         """Rebase an op to the target gateset if needed."""
         optype = op.type
         if (
@@ -424,11 +424,11 @@ class QirGenerator:
         params: list = []
         if optype == OpType.ExplicitPredicate:
             if op.get_name() == "AND":
-                optype = BitWiseOp.AND
+                optype = BitWiseOp.AND  # type: ignore
             elif op.get_name() == "OR":
-                optype = BitWiseOp.OR
+                optype = BitWiseOp.OR  # type: ignore
             elif op.get_name() == "XOR":
-                optype = BitWiseOp.XOR
+                optype = BitWiseOp.XOR  # type: ignore
         elif optype in [OpType.Barrier, OpType.CopyBits]:
             pass
         else:
@@ -490,7 +490,7 @@ class QirGenerator:
                     com_bits = args[:in_width]
                     args = args[in_width:]
                     regname = com_bits[0].reg_name
-                    if com_bits != list(self.cregs[regname]):
+                    if com_bits != list(self.cregs[regname]):  # type: ignore
                         raise ValueError("WASM ops must act on entire registers.")
                     reglist.append(regname)
         return inputs, outputs
@@ -499,10 +499,12 @@ class QirGenerator:
         self, reg: Union[BitRegister, RegAnd, RegOr, RegXor], module: tketqirModule
     ) -> Value:
         if type(reg) in _TK_CLOPS_TO_PYQIR_REG:
-            assert len(reg.args) == 2
+            assert len(reg.args) == 2  # type: ignore
 
-            ssa_left = self._get_ssa_from_cl_reg_op(reg.args[0], module)
-            ssa_right = self._get_ssa_from_cl_reg_op(reg.args[1], module)
+            ssa_left = self._get_ssa_from_cl_reg_op(reg.args[0], module)  # type: ignore
+            ssa_right = self._get_ssa_from_cl_reg_op(
+                reg.args[1], module  # type: ignore
+            )
 
             # add function to module
             output_instruction = _TK_CLOPS_TO_PYQIR_REG[type(reg)](module.builder)(
@@ -883,11 +885,15 @@ class QirGenerator:
                     # classical ops acting on registers returning register
                     ssa_left = cast(  # type: ignore
                         Value,
-                        self._get_ssa_from_cl_reg_op(op.get_exp().args[0], module),
+                        self._get_ssa_from_cl_reg_op(
+                            op.get_exp().args[0], module  # type: ignore
+                        ),
                     )
                     ssa_right = cast(  # type: ignore
                         Value,
-                        self._get_ssa_from_cl_reg_op(op.get_exp().args[1], module),
+                        self._get_ssa_from_cl_reg_op(
+                            op.get_exp().args[1], module  # type: ignore
+                        ),
                     )
 
                     # add function to module
@@ -899,11 +905,15 @@ class QirGenerator:
                     # classical ops acting on bits returning bit
                     ssa_left = cast(  # type: ignore
                         Value,
-                        self._get_ssa_from_cl_bit_op(op.get_exp().args[0], module),
+                        self._get_ssa_from_cl_bit_op(
+                            op.get_exp().args[0], module  # type: ignore
+                        ),
                     )
                     ssa_right = cast(  # type: ignore
                         Value,
-                        self._get_ssa_from_cl_bit_op(op.get_exp().args[1], module),
+                        self._get_ssa_from_cl_bit_op(
+                            op.get_exp().args[1], module  # type: ignore
+                        ),
                     )
 
                     # add function to module
@@ -917,11 +927,15 @@ class QirGenerator:
                     # classical ops acting on registers returning bit
                     ssa_left = cast(  # type: ignore
                         Value,
-                        self._get_ssa_from_cl_reg_op(op.get_exp().args[0], module),
+                        self._get_ssa_from_cl_reg_op(
+                            op.get_exp().args[0], module  # type: ignore
+                        ),
                     )
                     ssa_right = cast(  # type: ignore
                         Value,
-                        self._get_ssa_from_cl_reg_op(op.get_exp().args[1], module),
+                        self._get_ssa_from_cl_reg_op(
+                            op.get_exp().args[1], module  # type: ignore
+                        ),
                     )
 
                     # add function to module
