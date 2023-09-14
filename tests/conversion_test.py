@@ -15,8 +15,8 @@
 import pytest
 from utilities import check_qir_result  # type: ignore
 
-from pytket.circuit import Bit, BitRegister, Circuit, Qubit, if_not_bit  # type: ignore
-from pytket.circuit.logic_exp import (  # type: ignore
+from pytket.circuit import Bit, BitRegister, Circuit, Qubit, if_not_bit
+from pytket.circuit.logic_exp import (
     reg_eq,
     reg_geq,
     reg_gt,
@@ -24,7 +24,7 @@ from pytket.circuit.logic_exp import (  # type: ignore
     reg_lt,
     reg_neq,
 )
-from pytket.passes import FlattenRelabelRegistersPass  # type: ignore
+from pytket.passes import FlattenRelabelRegistersPass
 from pytket.qir.conversion.api import QIRFormat, pytket_to_qir
 
 
@@ -236,7 +236,7 @@ def test_pytket_qir_14() -> None:
     b = c.add_c_register("b", 10)
     d = c.add_c_register("d", 10)
 
-    c.add_c_setbits([True], [a[0]])  # type: ignore
+    c.add_c_setbits([True], [a[0]])
     c.add_c_setbits([False, True] + [False] * 6, list(a))  # type: ignore
     c.add_c_setbits([True, True] + [False] * 8, list(b))  # type: ignore
 

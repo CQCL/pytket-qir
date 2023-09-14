@@ -17,7 +17,7 @@ import pyqir
 import pytest
 from utilities import check_qir_result  # type: ignore
 
-from pytket.circuit import Circuit  # type: ignore
+from pytket.circuit import Circuit
 from pytket.qir.conversion.api import (
     QIRFormat,
     pytket_to_qir,

@@ -19,7 +19,7 @@ for the needs of generating QIR from Pytket circuits.
 
 from typing import Optional
 
-from pyqir import BasicQisBuilder, SimpleModule  # type: ignore
+from pyqir import BasicQisBuilder, SimpleModule
 
 from pytket.wasm import WasmFileHandler
 
