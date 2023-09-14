@@ -15,7 +15,7 @@
 import pytest
 from utilities import check_qir_result  # type: ignore
 
-from pytket.circuit import (  # type: ignore[attr-defined]
+from pytket.circuit import (
     Bit,
     CircBox,
     Circuit,

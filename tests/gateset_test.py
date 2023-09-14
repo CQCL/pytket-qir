@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from pytket.circuit import OpType  # type: ignore
+from pytket.circuit import OpType
 from pytket.qir.conversion.gatesets import _TK_TO_PYQIR
 
 

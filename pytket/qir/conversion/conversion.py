@@ -26,7 +26,7 @@ import pyqir
 from pyqir import IntPredicate, Value
 
 from pytket import Bit, Circuit, Qubit, predicates, wasm  # type: ignore
-from pytket.circuit import (  # type: ignore
+from pytket.circuit import (
     BarrierOp,
     BitRegister,
     ClassicalExpBox,
@@ -39,7 +39,7 @@ from pytket.circuit import (  # type: ignore
     SetBitsOp,
     WASMOp,
 )
-from pytket.circuit.logic_exp import (  # type: ignore
+from pytket.circuit.logic_exp import (
     BitAnd,
     BitEq,
     BitNeq,
@@ -61,8 +61,8 @@ from pytket.circuit.logic_exp import (  # type: ignore
     RegSub,
     RegXor,
 )
-from pytket.qasm.qasm import _retrieve_registers  # type: ignore
-from pytket.transform import Transform  # type: ignore
+from pytket.qasm.qasm import _retrieve_registers
+from pytket.transform import Transform
 
 from .gatesets import (
     FuncSpec,
@@ -132,7 +132,9 @@ class QirGenerator:
         self.target_gateset.add(OpType.ZZMax)
         self.target_gateset.add(OpType.TK2)
 
-        self.getset_predicate = predicates.GateSetPredicate(set(self.target_gateset))  # type: ignore  # noqa: E501
+        self.getset_predicate = predicates.GateSetPredicate(
+            set(self.target_gateset)
+        )  # noqa: E501
 
         self.set_cregs: dict[str, list] = {}  # Keep track of set registers.
         self.ssa_vars: dict[str, Value] = {}  # Keep track of set ssa variables.
@@ -458,7 +460,7 @@ class QirGenerator:
                 raise ValueError(
                     f"Classical register should only have the size of {int_size}"
                 )
-            ssa_var = self.module.builder.call(  # type: ignore
+            ssa_var = self.module.builder.call(
                 self.create_creg, [pyqir.const(self.qir_int_type, len(bit_reg))]
             )
             self.ssa_vars[reg_name] = ssa_var
@@ -643,8 +645,8 @@ class QirGenerator:
 
                     module.module.builder.if_(
                         ssabool,
-                        true=lambda: condition_block_true(),  # type: ignore
-                        false=lambda: condition_block_false(),  # type: ignore
+                        true=lambda: condition_block_true(),
+                        false=lambda: condition_block_false(),
                     )
 
                 else:
@@ -680,7 +682,7 @@ class QirGenerator:
 
                     module.module.builder.if_(
                         ssabool,
-                        true=lambda: condition_block(),  # type: ignore
+                        true=lambda: condition_block(),
                     )
 
             elif isinstance(op, WASMOp):
@@ -688,7 +690,7 @@ class QirGenerator:
 
                 paramssa = [self._get_i64_ssa_reg(p) for p in paramreg]
 
-                result = self.module.builder.call(  # type: ignore
+                result = self.module.builder.call(
                     self.wasm[command.op.func_name],
                     [*paramssa],
                 )
@@ -719,7 +721,7 @@ class QirGenerator:
                         ),
                     )
 
-                self.module.builder.call(  # type: ignore
+                self.module.builder.call(
                     self.additional_quantum_gates[OpType.ZZPhase],
                     [
                         pyqir.const(
@@ -751,7 +753,7 @@ class QirGenerator:
                         ),
                     )
 
-                self.module.builder.call(  # type: ignore
+                self.module.builder.call(
                     self.additional_quantum_gates[OpType.PhasedX],
                     [
                         pyqir.const(
@@ -788,7 +790,7 @@ class QirGenerator:
                         ),
                     )
 
-                self.module.builder.call(  # type: ignore
+                self.module.builder.call(
                     self.additional_quantum_gates[OpType.TK2],
                     [
                         pyqir.const(
@@ -827,7 +829,7 @@ class QirGenerator:
                         ),
                     )
 
-                self.module.builder.call(  # type: ignore
+                self.module.builder.call(
                     self.additional_quantum_gates[OpType.ZZMax],
                     [
                         module.module.qubits[command.qubits[0].index[0]],

@@ -1,13 +1,9 @@
 Changelog
 ~~~~~~~~~
 
-0.2.1rc1 (September 2023)
--------------------------
-* update pytket version to 1.20rc2
-
-0.2.1rc0 (September 2023)
--------------------------
-* update pytket version to 1.20rc1
+0.3.0 (September 2023)
+----------------------
+* update pytket version to 1.20
 
 0.2.0 (August 2023)
 -------------------

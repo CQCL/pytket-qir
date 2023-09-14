@@ -16,5 +16,5 @@
 """
 
 # _metadata.py is copied to the folder after installation.
-from ._metadata import __extension_name__, __extension_version__  # type: ignore
+from ._metadata import __extension_name__, __extension_version__
 from .conversion import QIRFormat, pytket_to_qir
