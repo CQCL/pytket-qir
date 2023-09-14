@@ -1,6 +1,10 @@
 Changelog
 ~~~~~~~~~
 
+0.3.0 (September 2023)
+----------------------
+* update pytket version to 1.20
+
 0.2.0 (August 2023)
 -------------------
 * fix issue with integer in regular expression

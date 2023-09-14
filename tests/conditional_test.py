@@ -15,7 +15,7 @@
 import pytest
 from utilities import check_qir_result  # type: ignore
 
-from pytket.circuit import (  # type: ignore[attr-defined]
+from pytket.circuit import (
     Bit,
     CircBox,
     Circuit,
@@ -36,9 +36,9 @@ def test_pytket_qir_conditional() -> None:
     c = circ.add_c_register("c", 5)
     d = circ.add_c_register("d", 5)
     circ.H(0)
-    circ.add_classicalexpbox_register(a | b, c)
-    circ.add_classicalexpbox_register(c | b, d)
-    circ.add_classicalexpbox_register(c | b, d, condition=a[4])
+    circ.add_classicalexpbox_register(a | b, c)  # type: ignore
+    circ.add_classicalexpbox_register(c | b, d)  # type: ignore
+    circ.add_classicalexpbox_register(c | b, d, condition=a[4])  # type: ignore
     circ.H(0)
     circ.Measure(Qubit(0), d[4])
     circ.H(1)
@@ -62,9 +62,11 @@ def test_pytket_qir_conditional_ii() -> None:
     c = circ.add_c_register("c", 5)
     d = circ.add_c_register("d", 5)
     circ.H(0)
-    circ.add_classicalexpbox_register(a | b, c)
-    circ.add_classicalexpbox_register(c | b, d)
-    circ.add_classicalexpbox_register(c | b, d, condition=if_not_bit(a[4]))
+    circ.add_classicalexpbox_register(a | b, c)  # type: ignore
+    circ.add_classicalexpbox_register(c | b, d)  # type: ignore
+    circ.add_classicalexpbox_register(
+        c | b, d, condition=if_not_bit(a[4])  # type: ignore
+    )
     circ.H(0)
     circ.Measure(Qubit(0), d[4])
     circ.H(1)
@@ -95,8 +97,8 @@ def test_pytket_qir_conditional_iii() -> None:
     big_exp = bits[4] | bits[5] ^ bits[6] | bits[7] & bits[8]
     circ.H(0, condition=big_exp)
 
-    circ.add_classicalexpbox_register(a + b - d, c)
-    circ.add_classicalexpbox_register(a * b * d * c, e)
+    circ.add_classicalexpbox_register(a + b - d, c)  # type: ignore
+    circ.add_classicalexpbox_register(a * b * d * c, e)  # type: ignore
 
     result = pytket_to_qir(
         circ, name="test_pytket_qir_conditional_iii", qir_format=QIRFormat.STRING
@@ -213,7 +215,7 @@ def test_pytket_qir_conditional_10() -> None:
     box_c = box_circ.add_c_register("c", 5)
 
     box_circ.H(0)
-    box_circ.add_classicalexpbox_register(box_c | box_c, box_c)
+    box_circ.add_classicalexpbox_register(box_c | box_c, box_c)  # type: ignore
 
     cbox = CircBox(box_circ)
     d = Circuit(4, 5)

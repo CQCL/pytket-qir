@@ -15,8 +15,8 @@
 import pytest
 from utilities import check_qir_result  # type: ignore
 
-from pytket.circuit import Bit, BitRegister, Circuit, Qubit, if_not_bit  # type: ignore
-from pytket.circuit.logic_exp import (  # type: ignore
+from pytket.circuit import Bit, BitRegister, Circuit, Qubit, if_not_bit
+from pytket.circuit.logic_exp import (
     reg_eq,
     reg_geq,
     reg_gt,
@@ -24,7 +24,7 @@ from pytket.circuit.logic_exp import (  # type: ignore
     reg_lt,
     reg_neq,
 )
-from pytket.passes import FlattenRelabelRegistersPass  # type: ignore
+from pytket.passes import FlattenRelabelRegistersPass
 from pytket.qir.conversion.api import QIRFormat, pytket_to_qir
 
 
@@ -64,7 +64,7 @@ def test_pytket_qir_4() -> None:
     a = circ.add_c_register("a", 5)
     b = circ.add_c_register("b", 5)
     c = circ.add_c_register("c", 5)
-    circ.add_classicalexpbox_register(a | b, c)
+    circ.add_classicalexpbox_register(a | b, c)  # type: ignore
     circ.H(0)
     circ.H(0, condition=b[4])
     circ.H(0)
@@ -82,7 +82,7 @@ def test_pytket_qir_5() -> None:
     b = circ.add_c_register("b", 5)
     c = circ.add_c_register("c", 5)
     circ.add_c_register("d", 5)
-    circ.add_classicalexpbox_register(a | b, c)
+    circ.add_classicalexpbox_register(a | b, c)  # type: ignore
     circ.H(0)
     circ.H(0, condition=Bit(3))
     circ.H(0)
@@ -107,7 +107,7 @@ def test_pytket_qir_6() -> None:
     b = circ.add_c_register("b", 5)
     c = circ.add_c_register("c", 5)
     circ.add_c_register("d", 5)
-    circ.add_classicalexpbox_register(a | b, c)
+    circ.add_classicalexpbox_register(a | b, c)  # type: ignore
     circ.H(2)
     circ.H(1)
     circ.X(0)
@@ -127,21 +127,21 @@ def test_pytket_qir_7() -> None:
     b = circ.add_c_register("b", 3)
     c = circ.add_c_register("c", 3)
     d = circ.add_c_register("d", 3)
-    circ.add_classicalexpbox_register(a & d, c)
-    circ.add_classicalexpbox_register(a | b, c)
-    circ.add_classicalexpbox_register(a ^ b, c)
-    circ.add_classicalexpbox_register(a + b, c)
-    circ.add_classicalexpbox_register(a - b, c)
-    circ.add_classicalexpbox_register(a * b, c)
+    circ.add_classicalexpbox_register(a & d, c)  # type: ignore
+    circ.add_classicalexpbox_register(a | b, c)  # type: ignore
+    circ.add_classicalexpbox_register(a ^ b, c)  # type: ignore
+    circ.add_classicalexpbox_register(a + b, c)  # type: ignore
+    circ.add_classicalexpbox_register(a - b, c)  # type: ignore
+    circ.add_classicalexpbox_register(a * b, c)  # type: ignore
     # circ.add_classicalexpbox_register(a // b, c) No division yet.
-    circ.add_classicalexpbox_register(a << b, c)
-    circ.add_classicalexpbox_register(a >> b, c)
-    circ.add_classicalexpbox_register(reg_eq(a, b), c)
-    circ.add_classicalexpbox_register(reg_neq(a, b), c)
-    circ.add_classicalexpbox_register(reg_gt(a, b), c)
-    circ.add_classicalexpbox_register(reg_geq(a, b), c)
-    circ.add_classicalexpbox_register(reg_lt(a, b), c)
-    circ.add_classicalexpbox_register(reg_leq(a, b), c)
+    circ.add_classicalexpbox_register(a << b, c)  # type: ignore
+    circ.add_classicalexpbox_register(a >> b, c)  # type: ignore
+    circ.add_classicalexpbox_register(reg_eq(a, b), c)  # type: ignore
+    circ.add_classicalexpbox_register(reg_neq(a, b), c)  # type: ignore
+    circ.add_classicalexpbox_register(reg_gt(a, b), c)  # type: ignore
+    circ.add_classicalexpbox_register(reg_geq(a, b), c)  # type: ignore
+    circ.add_classicalexpbox_register(reg_lt(a, b), c)  # type: ignore
+    circ.add_classicalexpbox_register(reg_leq(a, b), c)  # type: ignore
 
     result = pytket_to_qir(circ, name="test_pytket_qir_7", qir_format=QIRFormat.STRING)
 
@@ -157,7 +157,7 @@ def test_pytket_qir_8() -> None:
     c.add_c_setbits([True], [a[2]])
     c.add_c_setbits([True], [a[1]])
     c.add_c_setbits([True], [a[7]])
-    c.add_c_setbits([False, True] + [False] * 6, list(a))
+    c.add_c_setbits([False, True] + [False] * 6, list(a))  # type: ignore
 
     result = pytket_to_qir(c, name="test_pytket_qir_8", qir_format=QIRFormat.STRING)
 
@@ -208,7 +208,7 @@ def test_pytket_qir_12() -> None:
     c = Circuit(1, name="test_classical")
     a = c.add_c_register("a", 8)
 
-    c.add_classicalexpbox_register(a << 1, a)
+    c.add_classicalexpbox_register(a << 1, a)  # type: ignore
 
     result = pytket_to_qir(c, name="test_pytket_qir_12", qir_format=QIRFormat.STRING)
 
@@ -221,8 +221,8 @@ def test_pytket_qir_13() -> None:
     a = c.add_c_register("a", 8)
     b = c.add_c_register("b", 8)
 
-    c.add_classicalexpbox_register(a << 1, a)
-    c.add_classicalexpbox_register(a >> 3, b)
+    c.add_classicalexpbox_register(a << 1, a)  # type: ignore
+    c.add_classicalexpbox_register(a >> 3, b)  # type: ignore
 
     result = pytket_to_qir(c, name="test_pytket_qir_13", qir_format=QIRFormat.STRING)
 
@@ -237,17 +237,17 @@ def test_pytket_qir_14() -> None:
     d = c.add_c_register("d", 10)
 
     c.add_c_setbits([True], [a[0]])
-    c.add_c_setbits([False, True] + [False] * 6, list(a))
-    c.add_c_setbits([True, True] + [False] * 8, list(b))
+    c.add_c_setbits([False, True] + [False] * 6, list(a))  # type: ignore
+    c.add_c_setbits([True, True] + [False] * 8, list(b))  # type: ignore
 
     c.add_c_setreg(23, a)
     c.add_c_copyreg(a, b)
 
-    c.add_classicalexpbox_register(a + b, d)
-    c.add_classicalexpbox_register(a - b, d)
+    c.add_classicalexpbox_register(a + b, d)  # type: ignore
+    c.add_classicalexpbox_register(a - b, d)  # type: ignore
     # c.add_classicalexpbox_register(a * b // d, d)
-    c.add_classicalexpbox_register(a << 1, a)
-    c.add_classicalexpbox_register(a >> 1, b)
+    c.add_classicalexpbox_register(a << 1, a)  # type: ignore
+    c.add_classicalexpbox_register(a >> 1, b)  # type: ignore
 
     c.X(0, condition=reg_eq(a ^ b, 1))
     c.X(0, condition=(a[0] ^ b[0]))
@@ -266,6 +266,45 @@ def test_pytket_qir_14() -> None:
     result = pytket_to_qir(c, name="test_pytket_qir_14", qir_format=QIRFormat.STRING)
 
     check_qir_result(result, "test_pytket_qir_14")
+
+
+def test_pytket_qir_14_b() -> None:
+    # test setbits op
+    c = Circuit(1, name="test_classical")
+    a = c.add_c_register("a", 32)
+    b = c.add_c_register("b", 32)
+    d = c.add_c_register("d", 32)
+
+    c.add_c_setbits([True], [a[0]])
+    c.add_c_setbits([False, True] + [False] * 30, list(a))  # type: ignore
+    c.add_c_setbits([True, True] + [False] * 30, list(b))  # type: ignore
+
+    c.add_c_setreg(23, a)
+    c.add_c_copyreg(a, b)
+
+    c.add_classicalexpbox_register(a + b, d)  # type: ignore
+    c.add_classicalexpbox_register(a - b, d)  # type: ignore
+    # c.add_classicalexpbox_register(a * b // d, d)
+    c.add_classicalexpbox_register(a << 1, a)  # type: ignore
+    c.add_classicalexpbox_register(a >> 1, b)  # type: ignore
+
+    c.X(0, condition=reg_eq(a ^ b, 1))
+    c.X(0, condition=(a[0] ^ b[0]))
+    c.X(0, condition=reg_eq(a & b, 1))
+    c.X(0, condition=reg_eq(a | b, 1))
+
+    c.X(0, condition=a[0])
+    c.X(0, condition=reg_neq(a, 1))
+    c.X(0, condition=if_not_bit(a[0]))
+    c.X(0, condition=reg_gt(a, 1))
+    c.X(0, condition=reg_lt(a, 1))
+    c.X(0, condition=reg_geq(a, 1))
+    c.X(0, condition=reg_leq(a, 1))
+    c.Phase(0, condition=a[0])
+
+    result = pytket_to_qir(c, name="test_pytket_qir_14_b", qir_format=QIRFormat.STRING)
+
+    check_qir_result(result, "test_pytket_qir_14_b")
 
 
 def test_pytket_qir_15() -> None:
