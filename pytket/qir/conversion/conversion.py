@@ -940,7 +940,7 @@ class QirGenerator:
                     ](module.builder)(ssa_left, ssa_right)
 
                 else:
-                    raise ValueError(" unexpected classical op")
+                    raise ValueError(f"unexpected classical op {type(op.get_exp())}")
 
                 if returntypebool:
                     # the return value of the some classical ops is bool in qir,
