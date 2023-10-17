@@ -485,7 +485,7 @@ class QirGenerator:
                     com_bits = args[:in_width]
                     args = args[in_width:]
                     regname = com_bits[0].reg_name
-                    if com_bits != list(self.cregs[regname]):  # type: ignore
+                    if com_bits != list(self.cregs[regname]):
                         raise ValueError("WASM ops must act on entire registers.")
                     reglist.append(regname)
         return inputs, outputs
@@ -508,8 +508,8 @@ class QirGenerator:
             return output_instruction  # type: ignore
         elif type(reg) == BitRegister:
             return self._get_i64_ssa_reg(reg.name)
-        elif type(reg) == int:
-            return pyqir.const(self.qir_int_type, reg)
+        elif type(reg) == int:  # type: ignore
+            return pyqir.const(self.qir_int_type, reg)  # type: ignore
         else:
             raise ValueError(f"unsupported classical register operation: {type(reg)}")
 
@@ -901,13 +901,13 @@ class QirGenerator:
                     ssa_left = cast(  # type: ignore
                         Value,
                         self._get_ssa_from_cl_bit_op(
-                            op.get_exp().args[0], module  # type: ignore
+                            op.get_exp().args[0], module
                         ),
                     )
                     ssa_right = cast(  # type: ignore
                         Value,
                         self._get_ssa_from_cl_bit_op(
-                            op.get_exp().args[1], module  # type: ignore
+                            op.get_exp().args[1], module
                         ),
                     )
 

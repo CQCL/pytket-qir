@@ -157,7 +157,7 @@ def test_pytket_qir_8() -> None:
     c.add_c_setbits([True], [a[2]])
     c.add_c_setbits([True], [a[1]])
     c.add_c_setbits([True], [a[7]])
-    c.add_c_setbits([False, True] + [False] * 6, list(a))  # type: ignore
+    c.add_c_setbits([False, True] + [False] * 6, list(a))
 
     result = pytket_to_qir(c, name="test_pytket_qir_8", qir_format=QIRFormat.STRING)
 
@@ -237,8 +237,8 @@ def test_pytket_qir_14() -> None:
     d = c.add_c_register("d", 10)
 
     c.add_c_setbits([True], [a[0]])
-    c.add_c_setbits([False, True] + [False] * 6, list(a))  # type: ignore
-    c.add_c_setbits([True, True] + [False] * 8, list(b))  # type: ignore
+    c.add_c_setbits([False, True] + [False] * 6, list(a))
+    c.add_c_setbits([True, True] + [False] * 8, list(b))
 
     c.add_c_setreg(23, a)
     c.add_c_copyreg(a, b)
@@ -276,8 +276,8 @@ def test_pytket_qir_14_b() -> None:
     d = c.add_c_register("d", 32)
 
     c.add_c_setbits([True], [a[0]])
-    c.add_c_setbits([False, True] + [False] * 30, list(a))  # type: ignore
-    c.add_c_setbits([True, True] + [False] * 30, list(b))  # type: ignore
+    c.add_c_setbits([False, True] + [False] * 30, list(a))
+    c.add_c_setbits([True, True] + [False] * 30, list(b))
 
     c.add_c_setreg(23, a)
     c.add_c_copyreg(a, b)
