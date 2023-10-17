@@ -485,13 +485,13 @@ class QirGenerator:
                     com_bits = args[:in_width]
                     args = args[in_width:]
                     regname = com_bits[0].reg_name
-                    if com_bits != list(self.cregs[regname]):  # type: ignore
+                    if com_bits != list(self.cregs[regname]):
                         raise ValueError("WASM ops must act on entire registers.")
                     reglist.append(regname)
         return inputs, outputs
 
     def _get_ssa_from_cl_reg_op(
-        self, reg: Union[BitRegister, RegAnd, RegOr, RegXor], module: tketqirModule
+        self, reg: Union[BitRegister, RegAnd, RegOr, RegXor, int], module: tketqirModule
     ) -> Value:
         if type(reg) in _TK_CLOPS_TO_PYQIR_REG:
             assert len(reg.args) == 2  # type: ignore
@@ -900,15 +900,11 @@ class QirGenerator:
                     # classical ops acting on bits returning bit
                     ssa_left = cast(  # type: ignore
                         Value,
-                        self._get_ssa_from_cl_bit_op(
-                            op.get_exp().args[0], module  # type: ignore
-                        ),
+                        self._get_ssa_from_cl_bit_op(op.get_exp().args[0], module),
                     )
                     ssa_right = cast(  # type: ignore
                         Value,
-                        self._get_ssa_from_cl_bit_op(
-                            op.get_exp().args[1], module  # type: ignore
-                        ),
+                        self._get_ssa_from_cl_bit_op(op.get_exp().args[1], module),
                     )
 
                     # add function to module
@@ -940,7 +936,7 @@ class QirGenerator:
                     ](module.builder)(ssa_left, ssa_right)
 
                 else:
-                    raise ValueError(" unexpected classical op")
+                    raise ValueError(f"unexpected classical op {type(op.get_exp())}")
 
                 if returntypebool:
                     # the return value of the some classical ops is bool in qir,
