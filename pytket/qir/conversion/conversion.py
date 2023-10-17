@@ -900,15 +900,11 @@ class QirGenerator:
                     # classical ops acting on bits returning bit
                     ssa_left = cast(  # type: ignore
                         Value,
-                        self._get_ssa_from_cl_bit_op(
-                            op.get_exp().args[0], module
-                        ),
+                        self._get_ssa_from_cl_bit_op(op.get_exp().args[0], module),
                     )
                     ssa_right = cast(  # type: ignore
                         Value,
-                        self._get_ssa_from_cl_bit_op(
-                            op.get_exp().args[1], module
-                        ),
+                        self._get_ssa_from_cl_bit_op(op.get_exp().args[1], module),
                     )
 
                     # add function to module
