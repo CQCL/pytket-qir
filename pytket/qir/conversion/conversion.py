@@ -491,7 +491,7 @@ class QirGenerator:
         return inputs, outputs
 
     def _get_ssa_from_cl_reg_op(
-        self, reg: Union[BitRegister, RegAnd, RegOr, RegXor], module: tketqirModule
+        self, reg: Union[BitRegister, RegAnd, RegOr, RegXor, int], module: tketqirModule
     ) -> Value:
         if type(reg) in _TK_CLOPS_TO_PYQIR_REG:
             assert len(reg.args) == 2  # type: ignore
@@ -508,8 +508,8 @@ class QirGenerator:
             return output_instruction  # type: ignore
         elif type(reg) == BitRegister:
             return self._get_i64_ssa_reg(reg.name)
-        elif type(reg) == int:  # type: ignore
-            return pyqir.const(self.qir_int_type, reg)  # type: ignore
+        elif type(reg) == int:
+            return pyqir.const(self.qir_int_type, reg)
         else:
             raise ValueError(f"unsupported classical register operation: {type(reg)}")
 
