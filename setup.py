@@ -46,10 +46,7 @@ setup(
     include_package_data=True,
     install_requires=[
         "pytket ~= 1.21",
-        "pyqir == 0.8.2",
-        "pyqir-generator == 0.7.0",
-        "pyqir-evaluator == 0.7.0",
-        "pyqir-parser == 0.7.0",
+        "pyqir == 0.9.0",
     ],
     classifiers=[
         "Environment :: Console",
