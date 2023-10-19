@@ -1,6 +1,12 @@
 Changelog
 ~~~~~~~~~
 
+0.5.0 (unreleased)
+------------------
+
+* Updated pyqir version requirement to 0.9.0.
+* removed depencency of pyqir-generator, pyqir-evaluator and pyqir-parser
+
 0.4.0 (October 2023)
 --------------------
 
