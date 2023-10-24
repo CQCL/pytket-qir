@@ -305,6 +305,8 @@ declare i1* @create_creg(i64)
 
 declare i64 @get_int_from_creg(i1*)
 
+declare void @mz_to_reg(%Qubit*, i1*, i64)
+
 declare void @__quantum__rt__int_record_output(i64, i8*)
 
 declare void @__quantum__rt__tuple_start_record_output()
