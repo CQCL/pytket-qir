@@ -52,7 +52,7 @@ declare i1* @create_creg(i32)
 
 declare i32 @get_int_from_creg(i1*)
 
-declare void @mz_to_reg(%Qubit*, i1*, i32)
+declare void @mz_to_creg(%Qubit*, i1*, i32)
 
 declare void @__quantum__rt__int_record_output(i32, i8*)
 

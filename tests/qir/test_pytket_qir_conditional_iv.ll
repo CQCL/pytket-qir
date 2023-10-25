@@ -11,8 +11,8 @@ entry:
   %0 = call i1* @create_creg(i64 2)
   call void @__quantum__qis__h__body(%Qubit* null)
   call void @__quantum__qis__h__body(%Qubit* inttoptr (i64 1 to %Qubit*))
-  call void @mz_to_reg(%Qubit* null, i1* %0, i64 0)
-  call void @mz_to_reg(%Qubit* inttoptr (i64 1 to %Qubit*), i1* %0, i64 1)
+  call void @mz_to_creg(%Qubit* null, i1* %0, i64 0)
+  call void @mz_to_creg(%Qubit* inttoptr (i64 1 to %Qubit*), i1* %0, i64 1)
   %1 = call i64 @get_int_from_creg(i1* %0)
   %2 = icmp eq i64 3, %1
   br i1 %2, label %then, label %else
@@ -44,7 +44,7 @@ declare i1* @create_creg(i64)
 
 declare i64 @get_int_from_creg(i1*)
 
-declare void @mz_to_reg(%Qubit*, i1*, i64)
+declare void @mz_to_creg(%Qubit*, i1*, i64)
 
 declare void @__quantum__rt__int_record_output(i64, i8*)
 

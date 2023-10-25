@@ -202,9 +202,9 @@ class QirGenerator:
             ),
         )
 
-        # void mz_to_reg(qubit, i1* creg, int)
-        self.mz_to_reg = self.module.module.add_external_function(
-            "mz_to_reg",
+        # void mz_to_creg(qubit, i1* creg, int)
+        self.mz_to_creg = self.module.module.add_external_function(
+            "mz_to_creg",
             pyqir.FunctionType(
                 pyqir.Type.void(self.module.module.context),
                 [
@@ -856,7 +856,7 @@ class QirGenerator:
                 assert command.qubits[0].reg_name == "q"
 
                 self.module.builder.call(
-                    self.mz_to_reg,
+                    self.mz_to_creg,
                     [
                         module.module.qubits[command.qubits[0].index[0]],
                         self.ssa_vars[command.bits[0].reg_name],

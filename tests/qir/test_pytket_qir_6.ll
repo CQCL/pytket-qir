@@ -24,7 +24,7 @@ entry:
   call void @__quantum__qis__x__body(%Qubit* null)
   call void @__quantum__qis__h__body(%Qubit* inttoptr (i64 1 to %Qubit*))
   call void @__quantum__qis__h__body(%Qubit* inttoptr (i64 2 to %Qubit*))
-  call void @mz_to_reg(%Qubit* null, i1* %2, i64 4)
+  call void @mz_to_creg(%Qubit* null, i1* %2, i64 4)
   %9 = call i1 @get_creg_bit(i1* %2, i64 4)
   br i1 %9, label %then, label %else
 
@@ -62,7 +62,7 @@ declare i1* @create_creg(i64)
 
 declare i64 @get_int_from_creg(i1*)
 
-declare void @mz_to_reg(%Qubit*, i1*, i64)
+declare void @mz_to_creg(%Qubit*, i1*, i64)
 
 declare void @__quantum__rt__int_record_output(i64, i8*)
 
