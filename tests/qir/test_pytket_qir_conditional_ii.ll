@@ -47,9 +47,9 @@ else:                                             ; preds = %entry
   br label %continue
 
 continue:                                         ; preds = %else, %then
-  call void @mz_to_creg(%Qubit* inttoptr (i64 2 to %Qubit*), i1* %3, i64 2)
-  call void @mz_to_creg(%Qubit* inttoptr (i64 1 to %Qubit*), i1* %3, i64 3)
-  call void @mz_to_creg(%Qubit* null, i1* %3, i64 4)
+  call void @mz_to_creg_bit(%Qubit* inttoptr (i64 2 to %Qubit*), i1* %3, i64 2)
+  call void @mz_to_creg_bit(%Qubit* inttoptr (i64 1 to %Qubit*), i1* %3, i64 3)
+  call void @mz_to_creg_bit(%Qubit* null, i1* %3, i64 4)
   call void @__quantum__rt__tuple_start_record_output()
   %20 = call i64 @get_int_from_creg(i1* %0)
   call void @__quantum__rt__int_record_output(i64 %20, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @0, i32 0, i32 0))
@@ -75,7 +75,7 @@ declare i1* @create_creg(i64)
 
 declare i64 @get_int_from_creg(i1*)
 
-declare void @mz_to_creg(%Qubit*, i1*, i64)
+declare void @mz_to_creg_bit(%Qubit*, i1*, i64)
 
 declare void @__quantum__rt__int_record_output(i64, i8*)
 
