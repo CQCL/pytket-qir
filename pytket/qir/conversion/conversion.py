@@ -202,7 +202,7 @@ class QirGenerator:
             ),
         )
 
-        # void mz_to_creg(qubit, i1* creg, int)
+        # void mz_to_creg(qubit, i1* creg, int creg_index)
         self.mz_to_creg = self.module.module.add_external_function(
             "mz_to_creg",
             pyqir.FunctionType(
