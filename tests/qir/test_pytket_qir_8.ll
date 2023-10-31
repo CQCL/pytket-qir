@@ -2,6 +2,7 @@
 source_filename = "test_pytket_qir_8"
 
 %Result = type opaque
+%Qubit = type opaque
 
 @0 = internal constant [2 x i8] c"a\00"
 
@@ -38,6 +39,8 @@ declare i1 @__quantum__qis__read_result__body(%Result*)
 declare i1* @create_creg(i64)
 
 declare i64 @get_int_from_creg(i1*)
+
+declare void @mz_to_creg_bit(%Qubit*, i1*, i64)
 
 declare void @__quantum__rt__int_record_output(i64, i8*)
 

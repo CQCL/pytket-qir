@@ -47,24 +47,18 @@ else:                                             ; preds = %entry
   br label %continue
 
 continue:                                         ; preds = %else, %then
-  call void @__quantum__qis__mz__body(%Qubit* inttoptr (i64 2 to %Qubit*), %Result* inttoptr (i64 2 to %Result*))
-  %20 = call i1 @__quantum__qis__read_result__body(%Result* inttoptr (i64 2 to %Result*))
-  call void @set_creg_bit(i1* %3, i64 2, i1 %20)
-  call void @__quantum__qis__mz__body(%Qubit* inttoptr (i64 1 to %Qubit*), %Result* inttoptr (i64 1 to %Result*))
-  %21 = call i1 @__quantum__qis__read_result__body(%Result* inttoptr (i64 1 to %Result*))
-  call void @set_creg_bit(i1* %3, i64 3, i1 %21)
-  call void @__quantum__qis__mz__body(%Qubit* null, %Result* null)
-  %22 = call i1 @__quantum__qis__read_result__body(%Result* null)
-  call void @set_creg_bit(i1* %3, i64 4, i1 %22)
+  call void @mz_to_creg_bit(%Qubit* inttoptr (i64 2 to %Qubit*), i1* %3, i64 2)
+  call void @mz_to_creg_bit(%Qubit* inttoptr (i64 1 to %Qubit*), i1* %3, i64 3)
+  call void @mz_to_creg_bit(%Qubit* null, i1* %3, i64 4)
   call void @__quantum__rt__tuple_start_record_output()
-  %23 = call i64 @get_int_from_creg(i1* %0)
-  call void @__quantum__rt__int_record_output(i64 %23, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @0, i32 0, i32 0))
-  %24 = call i64 @get_int_from_creg(i1* %1)
-  call void @__quantum__rt__int_record_output(i64 %24, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @1, i32 0, i32 0))
-  %25 = call i64 @get_int_from_creg(i1* %2)
-  call void @__quantum__rt__int_record_output(i64 %25, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @2, i32 0, i32 0))
-  %26 = call i64 @get_int_from_creg(i1* %3)
-  call void @__quantum__rt__int_record_output(i64 %26, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @3, i32 0, i32 0))
+  %20 = call i64 @get_int_from_creg(i1* %0)
+  call void @__quantum__rt__int_record_output(i64 %20, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @0, i32 0, i32 0))
+  %21 = call i64 @get_int_from_creg(i1* %1)
+  call void @__quantum__rt__int_record_output(i64 %21, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @1, i32 0, i32 0))
+  %22 = call i64 @get_int_from_creg(i1* %2)
+  call void @__quantum__rt__int_record_output(i64 %22, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @2, i32 0, i32 0))
+  %23 = call i64 @get_int_from_creg(i1* %3)
+  call void @__quantum__rt__int_record_output(i64 %23, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @3, i32 0, i32 0))
   call void @__quantum__rt__tuple_end_record_output()
   ret void
 }
@@ -81,6 +75,8 @@ declare i1* @create_creg(i64)
 
 declare i64 @get_int_from_creg(i1*)
 
+declare void @mz_to_creg_bit(%Qubit*, i1*, i64)
+
 declare void @__quantum__rt__int_record_output(i64, i8*)
 
 declare void @__quantum__rt__tuple_start_record_output()
@@ -89,10 +85,7 @@ declare void @__quantum__rt__tuple_end_record_output()
 
 declare void @__quantum__qis__h__body(%Qubit*)
 
-declare void @__quantum__qis__mz__body(%Qubit*, %Result* writeonly) #1
-
 attributes #0 = { "entry_point" "num_required_qubits"="3" "num_required_results"="3" "output_labeling_schema" "qir_profiles"="custom" }
-attributes #1 = { "irreversible" }
 
 !llvm.module.flags = !{!0, !1, !2, !3}
 

@@ -202,6 +202,20 @@ class QirGenerator:
             ),
         )
 
+        # void mz_to_creg_bit(qubit, i1* creg, int creg_index)
+        # measures one qubit to one bit entry in a creg
+        self.mz_to_creg_bit = self.module.module.add_external_function(
+            "mz_to_creg_bit",
+            pyqir.FunctionType(
+                pyqir.Type.void(self.module.module.context),
+                [
+                    pyqir.qubit_type(self.module.module.context),
+                    self.qir_i1p_type,
+                    self.qir_int_type,
+                ],
+            ),
+        )
+
         self.reg_const = {}
 
         for creg in self.circuit.c_registers:
@@ -842,24 +856,12 @@ class QirGenerator:
                 assert len(command.qubits) == 1
                 assert command.qubits[0].reg_name == "q"
 
-                module.qis.mz(
-                    module.module.qubits[command.qubits[0].index[0]],
-                    module.module.results[command.qubits[0].index[0]],
-                )
-
-                ssa_measureresult = self.module.builder.call(
-                    self.read_bit_from_result,
-                    [
-                        module.module.results[command.qubits[0].index[0]],
-                    ],
-                )
-
                 self.module.builder.call(
-                    self.set_creg_bit,
+                    self.mz_to_creg_bit,
                     [
+                        module.module.qubits[command.qubits[0].index[0]],
                         self.ssa_vars[command.bits[0].reg_name],
                         pyqir.const(self.qir_int_type, command.bits[0].index[0]),
-                        ssa_measureresult,
                     ],
                 )
 
