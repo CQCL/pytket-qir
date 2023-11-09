@@ -2,6 +2,7 @@
 source_filename = "test_pytket_qir_7"
 
 %Result = type opaque
+%Qubit = type opaque
 
 @0 = internal constant [2 x i8] c"a\00"
 @1 = internal constant [2 x i8] c"b\00"
@@ -15,98 +16,70 @@ entry:
   %2 = call i1* @create_creg(i64 3)
   %3 = call i1* @create_creg(i64 3)
   %4 = call i64 @get_int_from_creg(i1* %0)
-  %5 = call i64 @get_int_from_creg(i1* %0)
-  %6 = call i64 @get_int_from_creg(i1* %0)
-  %7 = call i64 @get_int_from_creg(i1* %3)
-  %8 = and i64 %6, %7
-  call void @set_creg_to_int(i1* %2, i64 %8)
-  %9 = call i64 @get_int_from_creg(i1* %0)
+  %5 = call i64 @get_int_from_creg(i1* %3)
+  %6 = and i64 %4, %5
+  call void @set_creg_to_int(i1* %2, i64 %6)
+  %7 = call i64 @get_int_from_creg(i1* %0)
+  %8 = call i64 @get_int_from_creg(i1* %1)
+  %9 = or i64 %7, %8
+  call void @set_creg_to_int(i1* %2, i64 %9)
   %10 = call i64 @get_int_from_creg(i1* %0)
-  %11 = call i64 @get_int_from_creg(i1* %0)
-  %12 = call i64 @get_int_from_creg(i1* %1)
-  %13 = or i64 %11, %12
-  call void @set_creg_to_int(i1* %2, i64 %13)
-  %14 = call i64 @get_int_from_creg(i1* %0)
-  %15 = call i64 @get_int_from_creg(i1* %0)
+  %11 = call i64 @get_int_from_creg(i1* %1)
+  %12 = xor i64 %10, %11
+  call void @set_creg_to_int(i1* %2, i64 %12)
+  %13 = call i64 @get_int_from_creg(i1* %0)
+  %14 = call i64 @get_int_from_creg(i1* %1)
+  %15 = add i64 %13, %14
+  call void @set_creg_to_int(i1* %2, i64 %15)
   %16 = call i64 @get_int_from_creg(i1* %0)
   %17 = call i64 @get_int_from_creg(i1* %1)
-  %18 = xor i64 %16, %17
+  %18 = sub i64 %16, %17
   call void @set_creg_to_int(i1* %2, i64 %18)
   %19 = call i64 @get_int_from_creg(i1* %0)
-  %20 = call i64 @get_int_from_creg(i1* %0)
-  %21 = call i64 @get_int_from_creg(i1* %0)
-  %22 = call i64 @get_int_from_creg(i1* %1)
-  %23 = add i64 %21, %22
-  call void @set_creg_to_int(i1* %2, i64 %23)
-  %24 = call i64 @get_int_from_creg(i1* %0)
+  %20 = call i64 @get_int_from_creg(i1* %1)
+  %21 = mul i64 %19, %20
+  call void @set_creg_to_int(i1* %2, i64 %21)
+  %22 = call i64 @get_int_from_creg(i1* %0)
+  %23 = call i64 @get_int_from_creg(i1* %1)
+  %24 = shl i64 %22, %23
+  call void @set_creg_to_int(i1* %2, i64 %24)
   %25 = call i64 @get_int_from_creg(i1* %0)
-  %26 = call i64 @get_int_from_creg(i1* %0)
-  %27 = call i64 @get_int_from_creg(i1* %1)
-  %28 = sub i64 %26, %27
-  call void @set_creg_to_int(i1* %2, i64 %28)
-  %29 = call i64 @get_int_from_creg(i1* %0)
-  %30 = call i64 @get_int_from_creg(i1* %0)
+  %26 = call i64 @get_int_from_creg(i1* %1)
+  %27 = lshr i64 %25, %26
+  call void @set_creg_to_int(i1* %2, i64 %27)
+  %28 = call i64 @get_int_from_creg(i1* %0)
+  %29 = call i64 @get_int_from_creg(i1* %1)
+  %30 = icmp eq i64 %28, %29
+  call void @set_creg_bit(i1* %2, i64 0, i1 %30)
   %31 = call i64 @get_int_from_creg(i1* %0)
   %32 = call i64 @get_int_from_creg(i1* %1)
-  %33 = mul i64 %31, %32
-  call void @set_creg_to_int(i1* %2, i64 %33)
+  %33 = icmp ne i64 %31, %32
+  call void @set_creg_bit(i1* %2, i64 0, i1 %33)
   %34 = call i64 @get_int_from_creg(i1* %0)
-  %35 = call i64 @get_int_from_creg(i1* %0)
-  %36 = call i64 @get_int_from_creg(i1* %0)
-  %37 = call i64 @get_int_from_creg(i1* %1)
-  %38 = shl i64 %36, %37
-  call void @set_creg_to_int(i1* %2, i64 %38)
-  %39 = call i64 @get_int_from_creg(i1* %0)
+  %35 = call i64 @get_int_from_creg(i1* %1)
+  %36 = icmp ugt i64 %34, %35
+  call void @set_creg_bit(i1* %2, i64 0, i1 %36)
+  %37 = call i64 @get_int_from_creg(i1* %0)
+  %38 = call i64 @get_int_from_creg(i1* %1)
+  %39 = icmp uge i64 %37, %38
+  call void @set_creg_bit(i1* %2, i64 0, i1 %39)
   %40 = call i64 @get_int_from_creg(i1* %0)
-  %41 = call i64 @get_int_from_creg(i1* %0)
-  %42 = call i64 @get_int_from_creg(i1* %1)
-  %43 = lshr i64 %41, %42
-  call void @set_creg_to_int(i1* %2, i64 %43)
-  %44 = call i64 @get_int_from_creg(i1* %0)
-  %45 = call i64 @get_int_from_creg(i1* %0)
-  %46 = call i64 @get_int_from_creg(i1* %0)
-  %47 = call i64 @get_int_from_creg(i1* %1)
-  %48 = icmp eq i64 %46, %47
-  call void @set_creg_bit(i1* %2, i64 0, i1 %48)
-  %49 = call i64 @get_int_from_creg(i1* %0)
-  %50 = call i64 @get_int_from_creg(i1* %0)
-  %51 = call i64 @get_int_from_creg(i1* %0)
-  %52 = call i64 @get_int_from_creg(i1* %1)
-  %53 = icmp ne i64 %51, %52
-  call void @set_creg_bit(i1* %2, i64 0, i1 %53)
-  %54 = call i64 @get_int_from_creg(i1* %0)
-  %55 = call i64 @get_int_from_creg(i1* %0)
-  %56 = call i64 @get_int_from_creg(i1* %0)
-  %57 = call i64 @get_int_from_creg(i1* %1)
-  %58 = icmp ugt i64 %56, %57
-  call void @set_creg_bit(i1* %2, i64 0, i1 %58)
-  %59 = call i64 @get_int_from_creg(i1* %0)
-  %60 = call i64 @get_int_from_creg(i1* %0)
-  %61 = call i64 @get_int_from_creg(i1* %0)
-  %62 = call i64 @get_int_from_creg(i1* %1)
-  %63 = icmp uge i64 %61, %62
-  call void @set_creg_bit(i1* %2, i64 0, i1 %63)
-  %64 = call i64 @get_int_from_creg(i1* %0)
-  %65 = call i64 @get_int_from_creg(i1* %0)
-  %66 = call i64 @get_int_from_creg(i1* %0)
-  %67 = call i64 @get_int_from_creg(i1* %1)
-  %68 = icmp ult i64 %66, %67
-  call void @set_creg_bit(i1* %2, i64 0, i1 %68)
-  %69 = call i64 @get_int_from_creg(i1* %0)
-  %70 = call i64 @get_int_from_creg(i1* %0)
-  %71 = call i64 @get_int_from_creg(i1* %0)
-  %72 = call i64 @get_int_from_creg(i1* %1)
-  %73 = icmp ule i64 %71, %72
-  call void @set_creg_bit(i1* %2, i64 0, i1 %73)
+  %41 = call i64 @get_int_from_creg(i1* %1)
+  %42 = icmp ult i64 %40, %41
+  call void @set_creg_bit(i1* %2, i64 0, i1 %42)
+  %43 = call i64 @get_int_from_creg(i1* %0)
+  %44 = call i64 @get_int_from_creg(i1* %1)
+  %45 = icmp ule i64 %43, %44
+  call void @set_creg_bit(i1* %2, i64 0, i1 %45)
   call void @__quantum__rt__tuple_start_record_output()
-  %74 = call i64 @get_int_from_creg(i1* %0)
-  call void @__quantum__rt__int_record_output(i64 %74, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @0, i32 0, i32 0))
-  %75 = call i64 @get_int_from_creg(i1* %1)
-  call void @__quantum__rt__int_record_output(i64 %75, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @1, i32 0, i32 0))
-  %76 = call i64 @get_int_from_creg(i1* %2)
-  call void @__quantum__rt__int_record_output(i64 %76, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @2, i32 0, i32 0))
-  %77 = call i64 @get_int_from_creg(i1* %3)
-  call void @__quantum__rt__int_record_output(i64 %77, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @3, i32 0, i32 0))
+  %46 = call i64 @get_int_from_creg(i1* %0)
+  call void @__quantum__rt__int_record_output(i64 %46, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @0, i32 0, i32 0))
+  %47 = call i64 @get_int_from_creg(i1* %1)
+  call void @__quantum__rt__int_record_output(i64 %47, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @1, i32 0, i32 0))
+  %48 = call i64 @get_int_from_creg(i1* %2)
+  call void @__quantum__rt__int_record_output(i64 %48, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @2, i32 0, i32 0))
+  %49 = call i64 @get_int_from_creg(i1* %3)
+  call void @__quantum__rt__int_record_output(i64 %49, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @3, i32 0, i32 0))
   call void @__quantum__rt__tuple_end_record_output()
   ret void
 }
@@ -122,6 +95,8 @@ declare i1 @__quantum__qis__read_result__body(%Result*)
 declare i1* @create_creg(i64)
 
 declare i64 @get_int_from_creg(i1*)
+
+declare void @mz_to_creg_bit(%Qubit*, i1*, i64)
 
 declare void @__quantum__rt__int_record_output(i64, i8*)
 
