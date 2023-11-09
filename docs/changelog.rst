@@ -1,12 +1,17 @@
 Changelog
 ~~~~~~~~~
 
+0.6.0 (unreleased)
+------------------
+
+* update measurement to write to register directly
+* remove unused ssa variables generated in output
+
 0.5.0 (unreleased)
 ------------------
 
 * updated pyqir version requirement to 0.9.0.
 * removed dependency of pyqir-generator, pyqir-evaluator and pyqir-parser
-* update measurement to write to register directly
 
 0.4.0 (October 2023)
 --------------------

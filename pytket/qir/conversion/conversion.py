@@ -602,6 +602,7 @@ class QirGenerator:
                         lower_qir,
                         self._get_i64_ssa_reg(registername),
                     )
+
                     upper_cond = module.module.builder.icmp(
                         pyqir.IntPredicate.SGT,
                         self._get_i64_ssa_reg(registername),
@@ -874,9 +875,8 @@ class QirGenerator:
                 result_index = (
                     0  # defines the default value for ops that returns bool, see below
                 )
+
                 outputs = command.args[-1].reg_name
-                ssa_left = (self._get_i64_ssa_reg(list(self.ssa_vars)[0]),)
-                ssa_right = (self._get_i64_ssa_reg(list(self.ssa_vars)[0]),)
 
                 if type(op.get_exp()) in _TK_CLOPS_TO_PYQIR_REG:
                     # classical ops acting on registers returning register
