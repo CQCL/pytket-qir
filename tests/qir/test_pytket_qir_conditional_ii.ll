@@ -16,34 +16,28 @@ entry:
   %2 = call i1* @create_creg(i64 5)
   %3 = call i1* @create_creg(i64 5)
   %4 = call i64 @get_int_from_creg(i1* %0)
-  %5 = call i64 @get_int_from_creg(i1* %0)
-  %6 = call i64 @get_int_from_creg(i1* %0)
-  %7 = call i64 @get_int_from_creg(i1* %1)
-  %8 = or i64 %6, %7
-  call void @set_creg_to_int(i1* %2, i64 %8)
+  %5 = call i64 @get_int_from_creg(i1* %1)
+  %6 = or i64 %4, %5
+  call void @set_creg_to_int(i1* %2, i64 %6)
   call void @__quantum__qis__h__body(%Qubit* null)
   call void @__quantum__qis__h__body(%Qubit* inttoptr (i64 1 to %Qubit*))
   call void @__quantum__qis__h__body(%Qubit* inttoptr (i64 2 to %Qubit*))
-  %9 = call i64 @get_int_from_creg(i1* %0)
-  %10 = call i64 @get_int_from_creg(i1* %0)
-  %11 = call i64 @get_int_from_creg(i1* %2)
-  %12 = call i64 @get_int_from_creg(i1* %1)
-  %13 = or i64 %11, %12
-  call void @set_creg_to_int(i1* %3, i64 %13)
+  %7 = call i64 @get_int_from_creg(i1* %2)
+  %8 = call i64 @get_int_from_creg(i1* %1)
+  %9 = or i64 %7, %8
+  call void @set_creg_to_int(i1* %3, i64 %9)
   call void @__quantum__qis__h__body(%Qubit* null)
-  %14 = call i1 @get_creg_bit(i1* %0, i64 4)
-  br i1 %14, label %then, label %else
+  %10 = call i1 @get_creg_bit(i1* %0, i64 4)
+  br i1 %10, label %then, label %else
 
 then:                                             ; preds = %entry
   br label %continue
 
 else:                                             ; preds = %entry
-  %15 = call i64 @get_int_from_creg(i1* %0)
-  %16 = call i64 @get_int_from_creg(i1* %0)
-  %17 = call i64 @get_int_from_creg(i1* %2)
-  %18 = call i64 @get_int_from_creg(i1* %1)
-  %19 = or i64 %17, %18
-  call void @set_creg_to_int(i1* %3, i64 %19)
+  %11 = call i64 @get_int_from_creg(i1* %2)
+  %12 = call i64 @get_int_from_creg(i1* %1)
+  %13 = or i64 %11, %12
+  call void @set_creg_to_int(i1* %3, i64 %13)
   br label %continue
 
 continue:                                         ; preds = %else, %then
@@ -51,14 +45,14 @@ continue:                                         ; preds = %else, %then
   call void @mz_to_creg_bit(%Qubit* inttoptr (i64 1 to %Qubit*), i1* %3, i64 3)
   call void @mz_to_creg_bit(%Qubit* null, i1* %3, i64 4)
   call void @__quantum__rt__tuple_start_record_output()
-  %20 = call i64 @get_int_from_creg(i1* %0)
-  call void @__quantum__rt__int_record_output(i64 %20, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @0, i32 0, i32 0))
-  %21 = call i64 @get_int_from_creg(i1* %1)
-  call void @__quantum__rt__int_record_output(i64 %21, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @1, i32 0, i32 0))
-  %22 = call i64 @get_int_from_creg(i1* %2)
-  call void @__quantum__rt__int_record_output(i64 %22, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @2, i32 0, i32 0))
-  %23 = call i64 @get_int_from_creg(i1* %3)
-  call void @__quantum__rt__int_record_output(i64 %23, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @3, i32 0, i32 0))
+  %14 = call i64 @get_int_from_creg(i1* %0)
+  call void @__quantum__rt__int_record_output(i64 %14, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @0, i32 0, i32 0))
+  %15 = call i64 @get_int_from_creg(i1* %1)
+  call void @__quantum__rt__int_record_output(i64 %15, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @1, i32 0, i32 0))
+  %16 = call i64 @get_int_from_creg(i1* %2)
+  call void @__quantum__rt__int_record_output(i64 %16, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @2, i32 0, i32 0))
+  %17 = call i64 @get_int_from_creg(i1* %3)
+  call void @__quantum__rt__int_record_output(i64 %17, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @3, i32 0, i32 0))
   call void @__quantum__rt__tuple_end_record_output()
   ret void
 }
