@@ -11,3 +11,5 @@ obj
 docs/extensions
 .ipynb_checkpoints
 pytket/qir/_metadata.py
+# nix
+result
