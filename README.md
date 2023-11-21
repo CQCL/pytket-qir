@@ -3,9 +3,9 @@
 ## This is currently work in progress
 
 This repository contains the pytket-qir extension, using Quantinuum's
-[pytket](https://cqcl.github.io/tket/pytket/api/index.html) quantum SDK.
+[pytket](https://tket.quantinuum.com/api-docs/index.html) quantum SDK.
 
-[Pytket](https://cqcl.github.io/tket/pytket/api/index.html) is a python module for interfacing
+[Pytket](https://tket.quantinuum.com/api-docs/index.html) is a python module for interfacing
 with tket, a quantum computing toolkit and optimising compiler developed by Quantinuum.
 
 `pytket-qir` is an extension to `pytket` that allows `pytket` circuits to
