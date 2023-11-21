@@ -34,7 +34,7 @@ setup(
     author_email="tket-support@cambridgequantum.com",
     python_requires=">=3.9",
     project_urls={
-        "Documentation": "https://cqcl.github.io/pytket-qir/api/index.html",
+        "Documentation": "https://tket.quantinuum.com/extensions/pytket-qir/api/index.html",
         "Source": "https://github.com/CQCL/pytket-qir",
         "Tracker": "https://github.com/CQCL/pytket-qir/issues",
     },
