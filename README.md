@@ -16,7 +16,9 @@ be converted to qir.
 `pytket-qir` is available for Python 3.9, 3.10 and 3.11, on Linux, MacOS
 and Windows. To install, run:
 
-```pip install pytket-qir```
+```shell
+pip install pytket-qir
+```
 
 This will install `pytket` if it isn't already installed, and add new classes
 and methods into the `pytket.extensions` namespace.
