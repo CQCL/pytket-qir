@@ -1,9 +1,10 @@
 Changelog
 ~~~~~~~~~
 
-0.6.0 (unreleased)
-------------------
+0.6.0 (November 2023)
+---------------------
 
+* Updated pytket version requirement to 1.22.
 * update measurement to write to register directly
 * remove unused ssa variables generated in output
 
