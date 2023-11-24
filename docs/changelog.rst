@@ -1,11 +1,18 @@
 Changelog
 ~~~~~~~~~
 
+0.6.0 (November 2023)
+---------------------
+
+* Updated pytket version requirement to 1.22.
+* update measurement to write to register directly
+* remove unused ssa variables generated in output
+
 0.5.0 (November 2023)
 ---------------------
 
-* Updated pyqir version requirement to 0.9.0.
-* removed depencency of pyqir-generator, pyqir-evaluator and pyqir-parser
+* updated pyqir version requirement to 0.9.0.
+* removed dependency of pyqir-generator, pyqir-evaluator and pyqir-parser
 
 0.4.0 (October 2023)
 --------------------
