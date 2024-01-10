@@ -1,9 +1,10 @@
 Changelog
 ~~~~~~~~~
 
-0.7.0 (Unreleased)
-------------------
+0.7.0 (January 2024)
+--------------------
 
+* Updated pytket version requirement to 1.23.
 * updated pyqir version requirement to 0.10.0.
 
 0.6.0 (November 2023)
