@@ -50,7 +50,7 @@ declare i32 @new_function() #1
 
 declare void @__quantum__qis__h__body(%Qubit*)
 
-attributes #0 = { "entry_point" "num_required_qubits"="1" "num_required_results"="1" "output_labeling_schema" "qir_profiles"="custom" }
+attributes #0 = { "entry_point" "output_labeling_schema" "qir_profiles"="custom" "required_num_qubits"="1" "required_num_results"="1" }
 
 attributes #1 = { "wasm" }
 

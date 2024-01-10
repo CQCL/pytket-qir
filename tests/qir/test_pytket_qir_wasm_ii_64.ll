@@ -54,7 +54,7 @@ declare void @init() #1
 
 declare i64 @add_something(i64) #1
 
-attributes #0 = { "entry_point" "num_required_qubits"="6" "num_required_results"="6" "output_labeling_schema" "qir_profiles"="custom" }
+attributes #0 = { "entry_point" "output_labeling_schema" "qir_profiles"="custom" "required_num_qubits"="6" "required_num_results"="6" }
 
 attributes #1 = { "wasm" }
 
