@@ -46,7 +46,7 @@ declare void @__quantum__qis__barrier1__body(%Qubit*)
 
 declare void @__quantum__qis__barrier4__body(%Qubit*, %Qubit*, %Qubit*, %Qubit*)
 
-attributes #0 = { "entry_point" "num_required_qubits"="5" "num_required_results"="5" "output_labeling_schema" "qir_profiles"="custom" }
+attributes #0 = { "entry_point" "output_labeling_schema" "qir_profiles"="custom" "required_num_qubits"="5" "required_num_results"="5" }
 
 !llvm.module.flags = !{!0, !1, !2, !3}
 

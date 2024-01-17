@@ -1,4 +1,4 @@
-# Copyright 2020-2023 Cambridge Quantum Computing
+# Copyright 2020-2024 Cambridge Quantum Computing
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ setup(
     author_email="tket-support@cambridgequantum.com",
     python_requires=">=3.9",
     project_urls={
-        "Documentation": "https://cqcl.github.io/pytket-qir/api/index.html",
+        "Documentation": "https://tket.quantinuum.com/extensions/pytket-qir/index.html",
         "Source": "https://github.com/CQCL/pytket-qir",
         "Tracker": "https://github.com/CQCL/pytket-qir/issues",
     },
@@ -45,8 +45,8 @@ setup(
     packages=find_namespace_packages(include=["pytket.*"]),
     include_package_data=True,
     install_requires=[
-        "pytket ~= 1.21",
-        "pyqir == 0.9.0",
+        "pytket ~= 1.23",
+        "pyqir == 0.10.0",
     ],
     classifiers=[
         "Environment :: Console",
