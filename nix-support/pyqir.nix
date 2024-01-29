@@ -1,22 +1,12 @@
-# adapted from
-# https://github.com/NixOS/nixpkgs/pull/237604/files
 self: super:
-#{ lib
-#, buildPythonPackage
-#, pythonOlder
-#, fetchFromGitHub
-#, rustPlatform
-#, libxml2
-#, llvm # LLVM version provided must strictly match pyqir support list
-#}:
 let
   lib = super.lib;
   llvm = super.llvm_14;
   llvm-v-major = lib.versions.major llvm.version;
   llvm-v-minor = builtins.substring 0 1 (lib.versions.minor llvm.version);
-  pyqir-version = "0.9.0";
-  pyqir-hash = sha256:oqkv6gOIazwkH81GomCXdmHXlG008KdK3b9+hUGCtmE=;
-  pyqir-cargo-hash = sha256:bTQm8cpvoTfa8+N38UB01AZl1LZMXsMXYbDa6f0Lj9U=;
+  pyqir-version = "0.10.0";
+  pyqir-hash = sha256:dZd+U3vyHb9rrNB90XiLn6fAbsg3Xk9Htnw5Ce/vra4=;
+  pyqir-cargo-hash = sha256:U964/0ekTVgl5CCU4xgExgFhSIP1RKocNbjScWw4BTM=;
 in
 {
   pyqir = super.python3Packages.buildPythonPackage rec {
@@ -51,12 +41,5 @@ in
     pythonImportsCheck = [ "pyqir" ];
 
     passthru.llvm = llvm;
-
-    meta = with lib; {
-      description = "API for parsing and generating Quantum Intermediate Representation (QIR)";
-      homepage = "https://github.com/qir-alliance/pyqir";
-      license = licenses.mit;
-      maintainers = with maintainers; [ evilmav ];
-    };
   };
 }

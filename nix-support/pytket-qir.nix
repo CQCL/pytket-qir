@@ -17,22 +17,24 @@ in {
       installPhase = ''
         mkdir -p $out;
         cp -r ${../pytket} $out/pytket;
-        cp -r ${../tests} $out/tests;
         cp -r ${../setup.py} $out/setup.py;
         cp -r ${../README.md} $out/README.md; # required for setup's long description
         cp -r ${../pytest.ini} $out/pytest.ini;
         cp -r ${../mypy.ini} $out/mypy.ini;
         cp -r ${../_metadata.py} $out/_metadata.py;
+        cp -r ${../tests} $out/tests;
       '';
     };
     propagatedBuildInputs = [ super.pytket self.pyqir ];
     checkInputs = with super.python3Packages; [ pytest mypy ];
     checkPhase = ''
       export HOME=$TMPDIR;
-      #python -m mypy --config-file=mypy.ini --no-incremental -p pytket -p tests
-      cd tests;
-      python -m pytest .
 
+      # mypy fails with scipy errors
+      python -m mypy --config-file=mypy.ini --no-incremental -p pytket -p tests
+
+      cd tests;
+      python -m pytest -s .
     '';
   };
 }
