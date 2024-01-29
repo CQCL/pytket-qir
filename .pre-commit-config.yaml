@@ -42,6 +42,6 @@ repos:
         args:
           [
             "--jobs=0",         # 0 auto-detects CPU count
-            "--py-version=3.9",
+            "--py-version=3.10",
             "-sn",              # Don't display the score
           ]
