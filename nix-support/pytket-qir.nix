@@ -17,12 +17,27 @@ in {
       installPhase = ''
         mkdir -p $out;
         cp -r ${../pytket} $out/pytket;
-        cp -r ${../setup.py} $out/setup.py;
-        cp -r ${../README.md} $out/README.md; # required for setup's long description
-        cp -r ${../pytest.ini} $out/pytest.ini;
-        cp -r ${../mypy.ini} $out/mypy.ini;
-        cp -r ${../_metadata.py} $out/_metadata.py;
         cp -r ${../tests} $out/tests;
+
+        cp ${../setup.py} $out/setup.py;
+        cp ${../README.md} $out/README.md; # required for setup's long description
+        cp ${../pytest.ini} $out/pytest.ini;
+        cp ${../_metadata.py} $out/_metadata.py;
+        
+        # on nix versions of scipy and ipython, stubs are missing.
+        # adjust mypy.ini to ignore these errors.
+        (
+          cat ${../mypy.ini};
+          cat <<EOF
+[mypy-scipy.*]
+ignore_missing_imports = True
+ignore_errors = True
+
+[mypy-IPython.display.*]
+ignore_missing_imports = True
+ignore_errors = True
+EOF
+        ) >> $out/mypy.ini;
       '';
     };
     propagatedBuildInputs = [ super.pytket self.pyqir ];
@@ -30,7 +45,6 @@ in {
     checkPhase = ''
       export HOME=$TMPDIR;
 
-      # mypy fails with scipy errors
       python -m mypy --config-file=mypy.ini --no-incremental -p pytket -p tests
 
       cd tests;
