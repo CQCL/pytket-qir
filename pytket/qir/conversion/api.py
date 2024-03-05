@@ -77,8 +77,10 @@ def pytket_to_qir(
 
     for creg in circ.c_registers:
         if creg.size > 64:
-            raise ValueError("""classical registers must not have more than 64 bits,
- you could try to set cut_pytket_register=True in the conversion""")
+            raise ValueError(
+                """classical registers must not have more than 64 bits,
+ you could try to set cut_pytket_register=True in the conversion"""
+            )
 
     m = tketqirModule(
         name=name,
