@@ -24,8 +24,8 @@ from pytket.circuit import (
     if_not_bit,
     reg_eq,
 )
-from pytket.qir.conversion.api import QIRFormat, pytket_to_qir
-
+from pytket.qir.conversion.api import QIRFormat, pytket_to_qir, _scratch_reg_resize_pass
+from pytket.transform import Transform
 
 def test_pytket_qir_conditional() -> None:
     # test conditional handling
@@ -227,6 +227,18 @@ def test_pytket_qir_conditional_10() -> None:
     )
 
     check_qir_result(result, "test_pytket_qir_conditional_10")
+
+
+def test_pytket_qir_conditional_10_b() -> None:
+    box_circ = Circuit(1)
+    box_c = box_circ.add_c_register("c", 5)
+
+    box_circ.add_classicalexpbox_register(box_c | box_c, box_c)  # type: ignore
+
+    cbox = CircBox(box_circ)
+    d = Circuit(1, 5)
+    d.add_circbox(cbox, [0, 0, 1, 2, 3, 4])
+    Transform.DecomposeBoxes().apply(d)
 
 
 def test_pytket_qir_conditional_11() -> None:
