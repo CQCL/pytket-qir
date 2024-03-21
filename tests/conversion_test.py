@@ -123,10 +123,10 @@ def test_pytket_qir_6() -> None:
 def test_pytket_qir_7() -> None:
     # test calssical exp box handling
     circ = Circuit(2)
-    a = circ.add_c_register("a", 3)
-    b = circ.add_c_register("b", 3)
-    c = circ.add_c_register("c", 3)
-    d = circ.add_c_register("d", 3)
+    a = circ.add_c_register("A", 3)
+    b = circ.add_c_register("B", 3)
+    c = circ.add_c_register("C", 3)
+    d = circ.add_c_register("D", 3)
     circ.add_classicalexpbox_register(a & d, c)  # type: ignore
     circ.add_classicalexpbox_register(a | b, c)  # type: ignore
     circ.add_classicalexpbox_register(a ^ b, c)  # type: ignore
