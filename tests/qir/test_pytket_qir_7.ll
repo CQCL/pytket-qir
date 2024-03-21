@@ -4,10 +4,10 @@ source_filename = "test_pytket_qir_7"
 %Result = type opaque
 %Qubit = type opaque
 
-@0 = internal constant [2 x i8] c"a\00"
-@1 = internal constant [2 x i8] c"b\00"
-@2 = internal constant [2 x i8] c"c\00"
-@3 = internal constant [2 x i8] c"d\00"
+@0 = internal constant [2 x i8] c"A\00"
+@1 = internal constant [2 x i8] c"B\00"
+@2 = internal constant [2 x i8] c"C\00"
+@3 = internal constant [2 x i8] c"D\00"
 
 define void @main() #0 {
 entry:
