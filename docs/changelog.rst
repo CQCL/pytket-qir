@@ -1,6 +1,12 @@
 Changelog
 ~~~~~~~~~
 
+0.11.0 (unreleased)
+-------------------
+
+* Updated pytket version requirement to 1.28.
+* add support for BitWiseOp.ONE
+
 0.10.1 (April 2024)
 -------------------
 
