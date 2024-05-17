@@ -31,7 +31,7 @@ setup(
     name="pytket-qir",
     version=metadata["__extension_version__"],
     author="TKET development team",
-    author_email="tket-support@cambridgequantum.com",
+    author_email="tket-support@quantinuum.com",
     python_requires=">=3.10",
     project_urls={
         "Documentation": "https://tket.quantinuum.com/extensions/pytket-qir/index.html",
@@ -45,7 +45,7 @@ setup(
     packages=find_namespace_packages(include=["pytket.*"]),
     include_package_data=True,
     install_requires=[
-        "pytket ~= 1.27",
+        "pytket ~= 1.28",
         "pyqir == 0.10.0",
     ],
     classifiers=[

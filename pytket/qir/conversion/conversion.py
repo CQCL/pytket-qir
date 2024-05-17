@@ -43,9 +43,11 @@ from pytket.circuit.logic_exp import (
     BitAnd,
     BitEq,
     BitNeq,
+    BitOne,
     BitOr,
     BitWiseOp,
     BitXor,
+    BitZero,
     RegAdd,
     RegAnd,
     RegEq,
@@ -95,6 +97,11 @@ _TK_CLOPS_TO_PYQIR_BIT: dict = {
     BitXor: lambda b: b.xor,
     BitNeq: lambda b: partial(b.icmp, IntPredicate.NE),
     BitEq: lambda b: partial(b.icmp, IntPredicate.EQ),
+}
+
+_TK_CLOPS_TO_PYQIR_BIT_NO_PARAM: dict = {
+    BitOne: 1,
+    BitZero: 0,
 }
 
 
@@ -555,7 +562,7 @@ class QirGenerator:
 
             return output_instruction  # type: ignore
         else:
-            raise ValueError(f"unsupported bisewise operation {type(bit)}")
+            raise ValueError(f"unsupported bitwise operation {type(bit)}")
 
     def get_wasm_sar(self) -> dict[str, str]:
         return self.wasm_sar_dict
@@ -898,6 +905,15 @@ class QirGenerator:
                         module.builder
                     )(ssa_left, ssa_right)
 
+                elif type(op.get_exp()) in _TK_CLOPS_TO_PYQIR_BIT_NO_PARAM:
+                    # classical ops without parameters
+                    output_instruction = pyqir.const(
+                        self.qir_bool_type,
+                        _TK_CLOPS_TO_PYQIR_BIT_NO_PARAM[type(op.get_exp())],
+                    )
+                    returntypebool = True
+                    result_index = command.args[-1].index[0]
+
                 elif type(op.get_exp()) in _TK_CLOPS_TO_PYQIR_BIT:
                     # classical ops acting on bits returning bit
                     ssa_left = cast(  # type: ignore
@@ -911,7 +927,7 @@ class QirGenerator:
 
                     # add function to module
                     returntypebool = True
-                    result_index = command.args[-1].index[0]  # todo
+                    result_index = command.args[-1].index[0]
                     output_instruction = _TK_CLOPS_TO_PYQIR_BIT[type(op.get_exp())](
                         module.builder
                     )(ssa_left, ssa_right)
