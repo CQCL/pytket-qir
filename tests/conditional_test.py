@@ -24,6 +24,7 @@ from pytket.circuit import (
     if_not_bit,
     reg_eq,
 )
+from pytket.circuit.logic_exp import BitWiseOp, create_bit_logic_exp
 from pytket.qir.conversion.api import QIRFormat, pytket_to_qir
 
 
@@ -260,6 +261,23 @@ def test_pytket_qir_conditional_11() -> None:
     )
 
     check_qir_result(result, "test_pytket_qir_conditional_11")
+
+
+def test_pytket_qir_conditional_12() -> None:
+    # test conditional with no register
+
+    circ = Circuit(7, name="testcirc")
+
+    exp = create_bit_logic_exp(BitWiseOp.ONE, [])
+    circ.H(0, condition=exp)
+
+    result = pytket_to_qir(
+        circ,
+        name="test_pytket_qir_conditional_12",
+        qir_format=QIRFormat.STRING,
+    )
+
+    check_qir_result(result, "test_pytket_qir_conditional_12")
 
 
 if __name__ == "__main__":

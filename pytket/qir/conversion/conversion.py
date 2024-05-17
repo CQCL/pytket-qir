@@ -60,6 +60,7 @@ from pytket.circuit.logic_exp import (
     RegRsh,
     RegSub,
     RegXor,
+    BitOne,
 )
 from pytket.qasm.qasm import _retrieve_registers
 from pytket.transform import Transform
@@ -96,6 +97,10 @@ _TK_CLOPS_TO_PYQIR_BIT: dict = {
     BitNeq: lambda b: partial(b.icmp, IntPredicate.NE),
     BitEq: lambda b: partial(b.icmp, IntPredicate.EQ),
 }
+
+_TK_CLOPS_TO_PYQIR_BIT_VOID: list = [
+    BitOne,
+]
 
 
 class QirGenerator:
@@ -897,6 +902,10 @@ class QirGenerator:
                     output_instruction = _TK_CLOPS_TO_PYQIR_REG[type(op.get_exp())](
                         module.builder
                     )(ssa_left, ssa_right)
+
+                elif type(op.get_exp()) in _TK_CLOPS_TO_PYQIR_BIT_VOID:
+                    # classical ops without parameters
+                    output_instruction = pyqir.const(self.qir_int_type, 1)
 
                 elif type(op.get_exp()) in _TK_CLOPS_TO_PYQIR_BIT:
                     # classical ops acting on bits returning bit
