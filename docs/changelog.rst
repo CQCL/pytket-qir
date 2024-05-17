@@ -1,8 +1,8 @@
 Changelog
 ~~~~~~~~~
 
-0.11.0 (unreleased)
--------------------
+0.11.0 (May 2024)
+-----------------
 
 * Updated pytket version requirement to 1.28.
 * add support for BitWiseOp.ONE, BitWiseOp.ZERO in conversion
