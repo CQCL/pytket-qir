@@ -43,6 +43,7 @@ from pytket.circuit.logic_exp import (
     BitAnd,
     BitEq,
     BitNeq,
+    BitOne,
     BitOr,
     BitWiseOp,
     BitXor,
@@ -60,7 +61,6 @@ from pytket.circuit.logic_exp import (
     RegRsh,
     RegSub,
     RegXor,
-    BitOne,
 )
 from pytket.qasm.qasm import _retrieve_registers
 from pytket.transform import Transform
@@ -98,7 +98,7 @@ _TK_CLOPS_TO_PYQIR_BIT: dict = {
     BitEq: lambda b: partial(b.icmp, IntPredicate.EQ),
 }
 
-_TK_CLOPS_TO_PYQIR_BIT_VOID: list = [
+_TK_CLOPS_TO_PYQIR_BIT_NO_PARAM: list = [
     BitOne,
 ]
 
@@ -903,7 +903,7 @@ class QirGenerator:
                         module.builder
                     )(ssa_left, ssa_right)
 
-                elif type(op.get_exp()) in _TK_CLOPS_TO_PYQIR_BIT_VOID:
+                elif type(op.get_exp()) in _TK_CLOPS_TO_PYQIR_BIT_NO_PARAM:
                     # classical ops without parameters
                     output_instruction = pyqir.const(self.qir_int_type, 1)
 
