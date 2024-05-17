@@ -270,6 +270,8 @@ def test_pytket_qir_conditional_12() -> None:
 
     exp = create_bit_logic_exp(BitWiseOp.ONE, [])
     circ.H(0, condition=exp)
+    exp2 = create_bit_logic_exp(BitWiseOp.ZERO, [])
+    circ.H(0, condition=exp2)
 
     result = pytket_to_qir(
         circ,
