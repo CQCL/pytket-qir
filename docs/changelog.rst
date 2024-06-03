@@ -1,6 +1,11 @@
 Changelog
 ~~~~~~~~~
 
+0.12.0
+------
+
+* updated pyqir version requirement to 0.10.2.
+
 0.11.0 (May 2024)
 -----------------
 
