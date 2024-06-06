@@ -4,11 +4,10 @@ on:
   pull_request:
     branches:
       - main
-      - develop
 
   push:
     branches:
-      - develop
+      - main
       - 'wheel/**'
       - 'runci/**'
 
