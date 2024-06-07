@@ -5,11 +5,11 @@
         "systems": "systems"
       },
       "locked": {
-        "lastModified": 1705309234,
-        "narHash": "sha256-uNRRNRKmJyCRC/8y1RqBkqWBLM034y4qN7EprSdmgyA=",
+        "lastModified": 1710146030,
+        "narHash": "sha256-SZ5L6eA7HJ/nmkzGG7/ISclqe6oZdOZTNoesiInkXPQ=",
         "owner": "numtide",
         "repo": "flake-utils",
-        "rev": "1ef2e671c3b0c19053962c07dbda38332dcebf26",
+        "rev": "b1d9ab70662946ef0850d488da1c9019f3a9752a",
         "type": "github"
       },
       "original": {
@@ -23,11 +23,11 @@
         "systems": "systems_2"
       },
       "locked": {
-        "lastModified": 1694529238,
-        "narHash": "sha256-zsNZZGTGnMOf9YpHKJqMSsa0dXbfmxeoJ7xHlrt+xmY=",
+        "lastModified": 1710146030,
+        "narHash": "sha256-SZ5L6eA7HJ/nmkzGG7/ISclqe6oZdOZTNoesiInkXPQ=",
         "owner": "numtide",
         "repo": "flake-utils",
-        "rev": "ff7b65b44d01cf9ba6a71320833626af21126384",
+        "rev": "b1d9ab70662946ef0850d488da1c9019f3a9752a",
         "type": "github"
       },
       "original": {
@@ -38,11 +38,11 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1706544858,
-        "narHash": "sha256-RbciZRV9M/PZYzP72CHMDGE+M8zVrGsmlhXjvK4QGTk=",
+        "lastModified": 1712940319,
+        "narHash": "sha256-QN9FhrpcHQLfc6CJmgNOD2vXz9/aGTEqDYTWtdc/mi0=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "58c2a31a59bc10db8ce70727f418b45b6b41785a",
+        "rev": "623ac957cb99a5647c9cf127ed6b5b9edfbba087",
         "type": "github"
       },
       "original": {
@@ -54,7 +54,10 @@
     "root": {
       "inputs": {
         "flake-utils": "flake-utils",
-        "nixpkgs": "nixpkgs",
+        "nixpkgs": [
+          "tket",
+          "nixpkgs"
+        ],
         "tket": "tket"
       }
     },
@@ -91,16 +94,14 @@
     "tket": {
       "inputs": {
         "flake-utils": "flake-utils_2",
-        "nixpkgs": [
-          "nixpkgs"
-        ]
+        "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1706528900,
-        "narHash": "sha256-rbgQwjXUndBkAKlYeB4LTlfXmm+RTAcJ2xtVtGbrM98=",
+        "lastModified": 1717667389,
+        "narHash": "sha256-KVGI2X2N7jiqjF2Q4QsGMr0Lx8yNFOfS5QaSHAZ4Ndk=",
         "owner": "CQCL",
         "repo": "tket",
-        "rev": "3e556dce5cb6defc473fb8d44607f81b71593491",
+        "rev": "48f766987b017e78682d1a2671edb3bca147db6d",
         "type": "github"
       },
       "original": {
