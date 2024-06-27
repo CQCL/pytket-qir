@@ -65,8 +65,10 @@ def pytket_to_qir(
     :param int_type: size of each integer, allowed value 32 and 64
     :param cut_pytket_register: breaks up the internal scratch bit registers
       into smaller registers, default value false
-    :param compile_circuit: decomposes all boxes in the circuit and rebases to the required gateset
-    :param check_input: checks if the circuit fulfils the requirements for the conversion
+    :param compile_circuit: decomposes all boxes in the circuit and
+      rebases to the required gateset
+    :param check_input: checks if the circuit fulfils the requirements
+      for the conversion
     """
 
     if compile_circuit:

@@ -440,7 +440,7 @@ class QirGenerator:
         )
         return ssa_var
 
-    def _to_qis_qubits(self, qubits: list[Qubit]) -> Sequence[Qubit]:
+    def _to_qis_qubits(self, qubits: list[Qubit]) -> list[Qubit]:
         return [self.module.module.qubits[qubit.index[0]] for qubit in qubits]
 
     def _to_qis_results(self, bits: list[Bit]) -> Optional[Value]:
@@ -471,7 +471,9 @@ class QirGenerator:
         else:
             return cast(Value, self.ssa_vars[reg_name])  # type: ignore
 
-    def _get_c_regs_from_com(self, op, args) -> tuple[list[str], list[str]]:
+    def _get_c_regs_from_com(
+        self, op: Op, args: Union[Bit, Qubit]
+    ) -> tuple[list[str], list[str]]:
         """Get classical registers from command op types."""
         inputs: list[str] = []
         outputs: list[str] = []
@@ -547,7 +549,9 @@ class QirGenerator:
     def get_wasm_sar(self) -> dict[str, str]:
         return self.wasm_sar_dict
 
-    def conv_RangePredicateOp(self, op, args):
+    def conv_RangePredicateOp(
+        self, op: RangePredicateOp, args: Union[Bit, Qubit]
+    ) -> None:
         # special case handling for REG_EQ
 
         if op.lower == op.upper:
@@ -603,8 +607,7 @@ class QirGenerator:
                 ],
             )
 
-    def conv_conditional(self, command):
-        op = command.op
+    def conv_conditional(self, command: Command, op: Conditional) -> None:
         condition_name = command.args[0].reg_name
 
         if op.op.type == OpType.CircBox:
@@ -758,7 +761,7 @@ class QirGenerator:
                     true=lambda: condition_block(),
                 )
 
-    def conv_WASMOp(self, op, args):
+    def conv_WASMOp(self, op: WASMOp, args: Union[Bit, Qubit]) -> None:
         paramreg, resultreg = self._get_c_regs_from_com(op, args)
 
         paramssa = [self._get_i64_ssa_reg(p) for p in paramreg]
@@ -774,7 +777,7 @@ class QirGenerator:
                 [self.ssa_vars[resultreg[0]], result],
             )
 
-    def conv_ZZPhase(self, qubits, op):
+    def conv_ZZPhase(self, qubits: list[Qubit], op: Op) -> None:
         if OpType.ZZPhase not in self.additional_quantum_gates:
             self.additional_quantum_gates[
                 OpType.ZZPhase
@@ -802,7 +805,7 @@ class QirGenerator:
             ],
         )
 
-    def conv_phasedx(self, qubits, op):
+    def conv_phasedx(self, qubits: list[Qubit], op: Op) -> None:
         if OpType.PhasedX not in self.additional_quantum_gates:
             self.additional_quantum_gates[
                 OpType.PhasedX
@@ -833,7 +836,7 @@ class QirGenerator:
             ],
         )
 
-    def conv_tk2(self, qubits, op):
+    def conv_tk2(self, qubits: list[Qubit], op: Op) -> None:
         if OpType.TK2 not in self.additional_quantum_gates:
             self.additional_quantum_gates[
                 OpType.TK2
@@ -871,7 +874,7 @@ class QirGenerator:
             ],
         )
 
-    def conv_zzmax(self, qubits):
+    def conv_zzmax(self, qubits: list[Qubit]) -> None:
         if OpType.ZZMax not in self.additional_quantum_gates:
             self.additional_quantum_gates[
                 OpType.ZZMax
@@ -894,7 +897,7 @@ class QirGenerator:
             ],
         )
 
-    def conv_measure(self, bits, qubits):
+    def conv_measure(self, bits: list[Bit], qubits: list[Qubit]) -> None:
         self.module.builder.call(
             self.mz_to_creg_bit,
             [
@@ -904,7 +907,7 @@ class QirGenerator:
             ],
         )
 
-    def conv_classicalexpbox(self, op, args):
+    def conv_classicalexpbox(self, op: ClassicalExpBox, args: list) -> None:
         returntypebool = False
         result_index = (
             0  # defines the default value for ops that returns bool, see below
@@ -1004,7 +1007,7 @@ class QirGenerator:
                 [self.ssa_vars[outputs], output_instruction],
             )
 
-    def conv_SetBitsOp(self, bits, op):
+    def conv_SetBitsOp(self, bits: list[Bit], op: SetBitsOp) -> None:
         assert len(op.values) == len(bits)
 
         for b, v in zip(bits, op.values):
@@ -1019,7 +1022,7 @@ class QirGenerator:
                 ],
             )
 
-    def conv_CopyBitsOp(self, args):
+    def conv_CopyBitsOp(self, args: list) -> None:
         assert len(args) % 2 == 0
         half_length = len(args) // 2
 
@@ -1027,8 +1030,8 @@ class QirGenerator:
             output_instruction = self.module.builder.call(
                 self.get_creg_bit,
                 [
-                    self.ssa_vars[i.reg_name],  # type: ignore
-                    pyqir.const(self.qir_int_type, i.index[0]),  # type: ignore
+                    self.ssa_vars[i.reg_name],
+                    pyqir.const(self.qir_int_type, i.index[0]),
                 ],
             )
 
@@ -1041,7 +1044,7 @@ class QirGenerator:
                 ],
             )
 
-    def conv_BarrierOp(self, qubits, op):
+    def conv_BarrierOp(self, qubits: list[Qubit], op: BarrierOp) -> None:
         assert qubits[0].reg_name == "q"
 
         qir_qubits = self._to_qis_qubits(qubits)
@@ -1062,30 +1065,32 @@ class QirGenerator:
         else:
             raise ValueError("op is not supported yet")
 
-    def conv_other(self, bits, qubits, op, args):
+    def conv_other(
+        self, bits: list[Bit], qubits: list[Qubit], op: Op, args: list
+    ) -> None:
         optype, params = self._get_optype_and_params(op)
         pi_params = [p * math.pi for p in params]
-        qubits = self._to_qis_qubits(qubits)
+        qubits_qis = self._to_qis_qubits(qubits)
         results = self._to_qis_results(bits)
-        bits: Optional[Sequence[Value]] = None
+        bits_qis: Optional[Sequence[Value]] = None
         if type(optype) == BitWiseOp:
-            bits = self._to_qis_bits(args)
+            bits_qis = self._to_qis_bits(args)
         gate = self.module.gateset.tk_to_gateset(optype)
         if gate.func_spec != FuncSpec.BODY:
             func_name = gate.func_name.value + "_" + gate.func_spec.value
             get_gate = getattr(self.module.qis, func_name)
         else:
             get_gate = getattr(self.module.qis, gate.func_name.value)
-        if bits:
-            get_gate(*bits)
+        if bits_qis:
+            get_gate(*bits_qis)
         elif params:
-            get_gate(*pi_params, *qubits)
+            get_gate(*pi_params, *qubits_qis)
         elif results:
-            get_gate(*qubits, results)
+            get_gate(*qubits_qis, results)
         else:
-            get_gate(*qubits)
+            get_gate(*qubits_qis)
 
-    def command_to_module(self, op, args) -> tketqirModule:
+    def command_to_module(self, op: Op, args: list) -> tketqirModule:
         """Populate a PyQir module from a pytket command."""
         qubits = [q for q in args if q.type == UnitType.qubit]
         bits = [b for b in args if b.type == UnitType.bit]
@@ -1144,7 +1149,7 @@ class QirGenerator:
             op = command.op
 
             if isinstance(op, Conditional):
-                self.conv_conditional(command)
+                self.conv_conditional(command, op)
 
             else:
                 self.command_to_module(op, command.args)
