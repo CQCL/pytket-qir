@@ -65,6 +65,7 @@ from pytket.circuit.logic_exp import (
 )
 from pytket.qasm.qasm import _retrieve_registers
 from pytket.transform import Transform
+from pytket.unit_id import UnitType
 
 from .gatesets import (
     FuncSpec,
@@ -411,36 +412,17 @@ class QirGenerator:
             return circuit
         return None
 
-    def _rebase_op_to_gateset(self, op: Op, args: list) -> Optional[Circuit]:
+    def _decompose_conditional_circ_box(self, op: Op, args: list) -> Optional[Circuit]:
         """Rebase an op to the target gateset if needed."""
-        optype = op.type
-        if (
-            op.type == OpType.ClassicalExpBox
-            or op.type == OpType.SetBits
-            or op.type == OpType.CopyBits
-        ):
-            circuit = Circuit(self.circuit.n_qubits)
-            for cr in self.circuit.c_registers:
-                circuit.add_c_register(cr.name, cr.size)
+        circuit = Circuit(self.circuit.n_qubits)
+        arg_names = set([b.reg_name for b in args if type(b) == Bit])
+        for cr_name in arg_names:
+            circuit.add_c_register(self.circuit.get_c_register(cr_name))
 
-            circuit.add_gate(op, args)
-            return circuit
-        elif op.type == OpType.CircBox:
-            circuit = Circuit(self.circuit.n_qubits, self.circuit.n_bits)
-            circuit.add_circbox(op, args)
-            Transform.DecomposeBoxes().apply(circuit)
+        circuit.add_circbox(op, args)
+        Transform.DecomposeBoxes().apply(circuit)
 
-            return circuit
-
-        else:
-            params = op.params
-            circuit = Circuit(self.circuit.n_qubits)
-            for cr in self.circuit.c_registers:
-                circuit.add_c_register(cr.name, cr.size)
-            circuit.add_gate(optype, params, args)
-            if not self.getset_predicate.verify(circuit):
-                raise ValueError(f"Gate not supported {optype}, {params}")
-            return circuit
+        return circuit
 
     def _get_optype_and_params(self, op: Op) -> tuple[OpType, Sequence[float]]:
         optype: OpType = op.type
@@ -489,10 +471,8 @@ class QirGenerator:
         else:
             return cast(Value, self.ssa_vars[reg_name])  # type: ignore
 
-    def _get_c_regs_from_com(self, command: Command) -> tuple[list[str], list[str]]:
+    def _get_c_regs_from_com(self, op, args) -> tuple[list[str], list[str]]:
         """Get classical registers from command op types."""
-        op = command.op
-        args = command.args
         inputs: list[str] = []
         outputs: list[str] = []
 
@@ -567,8 +547,546 @@ class QirGenerator:
     def get_wasm_sar(self) -> dict[str, str]:
         return self.wasm_sar_dict
 
+    def conv_RangePredicateOp(self, op, args):
+        # special case handling for REG_EQ
+
+        if op.lower == op.upper:
+            registername = args[0].reg_name
+
+            result = self.module.module.builder.icmp(
+                pyqir.IntPredicate.EQ,
+                pyqir.const(self.qir_int_type, op.lower),
+                self._get_i64_ssa_reg(registername),
+            )
+
+            condition_bit_index = args[-1].index[0]
+            result_registername = args[-1].reg_name
+
+            self.module.builder.call(
+                self.set_creg_bit,
+                [
+                    self.ssa_vars[result_registername],
+                    pyqir.const(self.qir_int_type, condition_bit_index),
+                    result,
+                ],
+            )
+
+        else:
+            lower_qir = pyqir.const(self.qir_int_type, op.lower)
+            upper_qir = pyqir.const(self.qir_int_type, op.upper)
+
+            registername = args[0].reg_name
+
+            lower_cond = self.module.module.builder.icmp(
+                pyqir.IntPredicate.SGT,
+                lower_qir,
+                self._get_i64_ssa_reg(registername),
+            )
+
+            upper_cond = self.module.module.builder.icmp(
+                pyqir.IntPredicate.SGT,
+                self._get_i64_ssa_reg(registername),
+                upper_qir,
+            )
+
+            result = self.module.module.builder.and_(lower_cond, upper_cond)
+
+            condition_bit_index = args[-1].index[0]
+            registername = args[-1].reg_name
+
+            self.module.builder.call(
+                self.set_creg_bit,
+                [
+                    self.ssa_vars[registername],
+                    pyqir.const(self.qir_int_type, condition_bit_index),
+                    result,
+                ],
+            )
+
+    def conv_conditional(self, command):
+        op = command.op
+        condition_name = command.args[0].reg_name
+        
+        if op.op.type == OpType.CircBox:
+            conditional_circuit = self._decompose_conditional_circ_box(
+                op.op, command.args[op.width :]
+            )
+            
+            condition_name = command.args[0].reg_name
+
+            if op.width == 1:  # only one conditional bit
+                condition_bit_index = command.args[0].index[0]
+
+                def condition_block_true() -> None:
+                    """
+                    Populate recursively the module with the contents of the
+                    conditional sub-circuit when the condition is True.
+                    """
+                    if op.value == 1:
+                        self.subcircuit_to_module(conditional_circuit)
+
+                def condition_block_false() -> None:
+                    """
+                    Populate recursively the module with the contents of the
+                    conditional sub-circuit when the condition is False.
+                    """
+                    if op.value == 0:
+                        self.subcircuit_to_module(conditional_circuit)
+
+                assert condition_name in self.ssa_vars
+
+                ssabool = self.module.builder.call(
+                    self.get_creg_bit,
+                    [
+                        self.ssa_vars[condition_name],
+                        pyqir.const(self.qir_int_type, condition_bit_index),
+                    ],
+                )
+
+                self.module.module.builder.if_(
+                    ssabool,
+                    true=lambda: condition_block_true(),
+                    false=lambda: condition_block_false(),
+                )
+
+            else:
+                for i in range(op.width):
+                    if command.args[i].reg_name != condition_name:
+                        raise ValueError(
+                            "conditional can only work with one entire register"
+                        )
+
+                for i in range(op.width - 1):
+                    if command.args[i].index[0] >= command.args[i + 1].index[0]:
+                        raise ValueError(
+                            "conditional can only work with one entire register"
+                        )
+
+                if self.circuit.get_c_register(condition_name).size != op.width:
+                    raise ValueError("conditional can only work with one entire register")
+
+                def condition_block() -> None:
+                    """
+                    Populate recursively the module with the contents of the
+                    conditional sub-circuit when the condition is True.
+                    """
+                    self.subcircuit_to_module(conditional_circuit)
+
+                ssabool = self.module.module.builder.icmp(
+                    pyqir.IntPredicate.EQ,
+                    pyqir.const(self.qir_int_type, op.value),
+                    self._get_i64_ssa_reg(condition_name),
+                )
+
+                self.module.module.builder.if_(
+                    ssabool,
+                    true=lambda: condition_block(),
+                )
+        else:
+            condition_name = command.args[0].reg_name
+
+            if op.width == 1:  # only one conditional bit
+                condition_bit_index = command.args[0].index[0]
+
+                def condition_block_true() -> None:
+                    """
+                    Populate recursively the module with the contents of the
+                    conditional sub-circuit when the condition is True.
+                    """
+                    if op.value == 1:
+                        self.command_to_module(op.op, command.args[op.width :])
+
+                def condition_block_false() -> None:
+                    """
+                    Populate recursively the module with the contents of the
+                    conditional sub-circuit when the condition is False.
+                    """
+                    if op.value == 0:
+                        self.command_to_module(op.op, command.args[op.width :])
+
+                assert condition_name in self.ssa_vars
+
+                ssabool = self.module.builder.call(
+                    self.get_creg_bit,
+                    [
+                        self.ssa_vars[condition_name],
+                        pyqir.const(self.qir_int_type, condition_bit_index),
+                    ],
+                )
+
+                self.module.module.builder.if_(
+                    ssabool,
+                    true=lambda: condition_block_true(),
+                    false=lambda: condition_block_false(),
+                )
+
+            else:
+                for i in range(op.width):
+                    if command.args[i].reg_name != condition_name:
+                        raise ValueError(
+                            "conditional can only work with one entire register"
+                        )
+
+                for i in range(op.width - 1):
+                    if command.args[i].index[0] >= command.args[i + 1].index[0]:
+                        raise ValueError(
+                            "conditional can only work with one entire register"
+                        )
+
+                if self.circuit.get_c_register(condition_name).size != op.width:
+                    raise ValueError("conditional can only work with one entire register")
+
+                def condition_block() -> None:
+                    """
+                    Populate recursively the module with the contents of the
+                    conditional sub-circuit when the condition is True.
+                    """
+                    self.command_to_module(op.op, command.args[op.width :])
+
+                ssabool = self.module.module.builder.icmp(
+                    pyqir.IntPredicate.EQ,
+                    pyqir.const(self.qir_int_type, op.value),
+                    self._get_i64_ssa_reg(condition_name),
+                )
+
+                self.module.module.builder.if_(
+                    ssabool,
+                    true=lambda: condition_block(),
+                )
+
+
+    def conv_WASMOp(self, op, args):
+        paramreg, resultreg = self._get_c_regs_from_com(op, args)
+
+        paramssa = [self._get_i64_ssa_reg(p) for p in paramreg]
+
+        result = self.module.builder.call(
+            self.wasm[op.func_name],
+            [*paramssa],
+        )
+
+        if len(resultreg) == 1:
+            self.module.builder.call(
+                self.set_creg_to_int,
+                [self.ssa_vars[resultreg[0]], result],
+            )
+
+    def conv_ZZPhase(self, qubits, op):
+
+        if OpType.ZZPhase not in self.additional_quantum_gates:
+            self.additional_quantum_gates[
+                OpType.ZZPhase
+            ] = self.module.module.add_external_function(
+                "__quantum__qis__rzz__body",
+                pyqir.FunctionType(
+                    pyqir.Type.void(self.module.module.context),
+                    [
+                        pyqir.Type.double(self.module.module.context),
+                        pyqir.qubit_type(self.module.module.context),
+                        pyqir.qubit_type(self.module.module.context),
+                    ],
+                ),
+            )
+
+        self.module.builder.call(
+            self.additional_quantum_gates[OpType.ZZPhase],
+            [
+                pyqir.const(
+                    pyqir.Type.double(self.module.module.context),
+                    (float(op.params[0]) * math.pi),
+                ),
+                self.module.module.qubits[qubits[0].index[0]],
+                self.module.module.qubits[qubits[1].index[0]],
+            ],
+        )
+
+    def conv_phasedx(self, qubits, op):
+
+        if OpType.PhasedX not in self.additional_quantum_gates:
+            self.additional_quantum_gates[
+                OpType.PhasedX
+            ] = self.module.module.add_external_function(
+                "__quantum__qis__phasedx__body",
+                pyqir.FunctionType(
+                    pyqir.Type.void(self.module.module.context),
+                    [
+                        pyqir.Type.double(self.module.module.context),
+                        pyqir.Type.double(self.module.module.context),
+                        pyqir.qubit_type(self.module.module.context),
+                    ],
+                ),
+            )
+
+        self.module.builder.call(
+            self.additional_quantum_gates[OpType.PhasedX],
+            [
+                pyqir.const(
+                    pyqir.Type.double(self.module.module.context),
+                    (float(op.params[0]) * math.pi),
+                ),
+                pyqir.const(
+                    pyqir.Type.double(self.module.module.context),
+                    (float(op.params[1]) * math.pi),
+                ),
+                self.module.module.qubits[qubits[0].index[0]],
+            ],
+        )
+
+    def conv_tk2(self, qubits, op):
+
+        if OpType.TK2 not in self.additional_quantum_gates:
+            self.additional_quantum_gates[
+                OpType.TK2
+            ] = self.module.module.add_external_function(
+                "__quantum__qis__rxxyyzz__body",
+                pyqir.FunctionType(
+                    pyqir.Type.void(self.module.module.context),
+                    [
+                        pyqir.Type.double(self.module.module.context),
+                        pyqir.Type.double(self.module.module.context),
+                        pyqir.Type.double(self.module.module.context),
+                        pyqir.qubit_type(self.module.module.context),
+                        pyqir.qubit_type(self.module.module.context),
+                    ],
+                ),
+            )
+
+        self.module.builder.call(
+            self.additional_quantum_gates[OpType.TK2],
+            [
+                pyqir.const(
+                    pyqir.Type.double(self.module.module.context),
+                    (float(op.params[0]) * math.pi),
+                ),
+                pyqir.const(
+                    pyqir.Type.double(self.module.module.context),
+                    (float(op.params[1]) * math.pi),
+                ),
+                pyqir.const(
+                    pyqir.Type.double(self.module.module.context),
+                    (float(op.params[2]) * math.pi),
+                ),
+                self.module.module.qubits[qubits[0].index[0]],
+                self.module.module.qubits[qubits[1].index[0]],
+            ],
+        )
+
+    def conv_zzmax(self, qubits):
+        if OpType.ZZMax not in self.additional_quantum_gates:
+            self.additional_quantum_gates[
+                OpType.ZZMax
+            ] = self.module.module.add_external_function(
+                "__quantum__qis__zzmax__body",
+                pyqir.FunctionType(
+                    pyqir.Type.void(self.module.module.context),
+                    [
+                        pyqir.qubit_type(self.module.module.context),
+                        pyqir.qubit_type(self.module.module.context),
+                    ],
+                ),
+            )
+
+        self.module.builder.call(
+            self.additional_quantum_gates[OpType.ZZMax],
+            [
+                self.module.module.qubits[qubits[0].index[0]],
+                self.module.module.qubits[qubits[1].index[0]],
+            ],
+        )
+
+    def conv_measure(self, bits, qubits):
+        self.module.builder.call(
+            self.mz_to_creg_bit,
+            [
+                self.module.module.qubits[qubits[0].index[0]],
+                self.ssa_vars[bits[0].reg_name],
+                pyqir.const(self.qir_int_type, bits[0].index[0]),
+            ],
+        )
+
+    def conv_classicalexpbox(self, op, args):
+        returntypebool = False
+        result_index = (
+            0  # defines the default value for ops that returns bool, see below
+        )
+
+        outputs = args[-1].reg_name
+
+        if type(op.get_exp()) in _TK_CLOPS_TO_PYQIR_REG:
+            # classical ops acting on registers returning register
+            ssa_left = cast(  # type: ignore
+                Value,
+                self._get_ssa_from_cl_reg_op(
+                    op.get_exp().args[0], self.module  # type: ignore
+                ),
+            )
+            ssa_right = cast(  # type: ignore
+                Value,
+                self._get_ssa_from_cl_reg_op(
+                    op.get_exp().args[1], self.module  # type: ignore
+                ),
+            )
+
+            # add function to module
+            output_instruction = _TK_CLOPS_TO_PYQIR_REG[type(op.get_exp())](
+                self.module.builder
+            )(ssa_left, ssa_right)
+
+        elif type(op.get_exp()) in _TK_CLOPS_TO_PYQIR_BIT_NO_PARAM:
+            # classical ops without parameters
+            output_instruction = pyqir.const(
+                self.qir_bool_type,
+                _TK_CLOPS_TO_PYQIR_BIT_NO_PARAM[type(op.get_exp())],
+            )
+            returntypebool = True
+            result_index = args[-1].index[0]
+
+        elif type(op.get_exp()) in _TK_CLOPS_TO_PYQIR_BIT:
+            # classical ops acting on bits returning bit
+            ssa_left = cast(  # type: ignore
+                Value,
+                self._get_ssa_from_cl_bit_op(op.get_exp().args[0], self.module),
+            )
+            ssa_right = cast(  # type: ignore
+                Value,
+                self._get_ssa_from_cl_bit_op(op.get_exp().args[1], self.module),
+            )
+
+            # add function to module
+            returntypebool = True
+            result_index = args[-1].index[0]
+            output_instruction = _TK_CLOPS_TO_PYQIR_BIT[type(op.get_exp())](
+                self.module.builder
+            )(ssa_left, ssa_right)
+
+        elif type(op.get_exp()) in _TK_CLOPS_TO_PYQIR_REG_BOOL:
+            # classical ops acting on registers returning bit
+            ssa_left = cast(  # type: ignore
+                Value,
+                self._get_ssa_from_cl_reg_op(
+                    op.get_exp().args[0], self.module  # type: ignore
+                ),
+            )
+            ssa_right = cast(  # type: ignore
+                Value,
+                self._get_ssa_from_cl_reg_op(
+                    op.get_exp().args[1], self.module  # type: ignore
+                ),
+            )
+
+            # add function to module
+            returntypebool = True
+            output_instruction = _TK_CLOPS_TO_PYQIR_REG_BOOL[type(op.get_exp())](
+                self.module.builder
+            )(ssa_left, ssa_right)
+
+        else:
+            raise ValueError(f"unexpected classical op {type(op.get_exp())}")
+
+        if returntypebool:
+            # the return value of the some classical ops is bool in qir,
+            # so the return value can only be written to one entry
+            # of the register this implementation write the value
+            # to the 0-th entry
+            # of the register, this could be changed to a user given value
+
+            self.module.builder.call(
+                self.set_creg_bit,
+                [
+                    self.ssa_vars[outputs],
+                    pyqir.const(self.qir_int_type, result_index),
+                    output_instruction,
+                ],
+            )
+        else:
+            self.module.builder.call(
+                self.set_creg_to_int,
+                [self.ssa_vars[outputs], output_instruction],
+            )
+
+    def conv_SetBitsOp(self, bits, op):
+        assert len(op.values) == len(bits)
+
+        for b, v in zip(bits, op.values):
+            output_instruction = pyqir.const(self.qir_bool_type, int(v))
+
+            self.module.builder.call(
+                self.set_creg_bit,
+                [
+                    self.ssa_vars[b.reg_name],
+                    pyqir.const(self.qir_int_type, b.index[0]),
+                    output_instruction,
+                ],
+            )
+
+    def conv_CopyBitsOp(self, args):
+        assert len(args) % 2 == 0
+        half_length = len(args) // 2
+
+        for i, o in zip(args[:half_length], args[half_length:]):
+            output_instruction = self.module.builder.call(
+                self.get_creg_bit,
+                [
+                    self.ssa_vars[i.reg_name],  # type: ignore
+                    pyqir.const(self.qir_int_type, i.index[0]),  # type: ignore
+                ],
+            )
+
+            self.module.builder.call(
+                self.set_creg_bit,
+                [
+                    self.ssa_vars[o.reg_name],
+                    pyqir.const(self.qir_int_type, o.index[0]),
+                    output_instruction,
+                ],
+            )
+
+    def conv_BarrierOp(self, qubits, op):
+        assert qubits[0].reg_name == "q"
+
+        qir_qubits = self._to_qis_qubits(qubits)
+
+        if op.data == "":
+            self._add_barrier_op(self.module, len(qubits), qir_qubits)
+        elif op.data[0:5] == "order":
+            self._add_order_op(self.module, len(qubits), qir_qubits)
+        elif op.data[0:5] == "group":
+            self._add_group_op(self.module, len(qubits), qir_qubits)
+        elif op.data[0:5] == "sleep":
+            self._add_sleep_op(
+                self.module,
+                len(qubits),
+                qir_qubits,
+                float(op.data[6:-1]),
+            )
+        else:
+            raise ValueError("op is not supported yet")
+
+    def conv_other(self, bits, qubits, op, args):
+        optype, params = self._get_optype_and_params(op)
+        pi_params = [p * math.pi for p in params]
+        qubits = self._to_qis_qubits(qubits)
+        results = self._to_qis_results(bits)
+        bits: Optional[Sequence[Value]] = None
+        if type(optype) == BitWiseOp:
+            bits = self._to_qis_bits(args)
+        gate = self.module.gateset.tk_to_gateset(optype)
+        if gate.func_spec != FuncSpec.BODY:
+            func_name = gate.func_name.value + "_" + gate.func_spec.value
+            get_gate = getattr(self.module.qis, func_name)
+        else:
+            get_gate = getattr(self.module.qis, gate.func_name.value)
+        if bits:
+            get_gate(*bits)
+        elif params:
+            get_gate(*pi_params, *qubits)
+        elif results:
+            get_gate(*qubits, results)
+        else:
+            get_gate(*qubits)
+
     def circuit_to_module(
-        self, circuit: Circuit, module: tketqirModule, record_output: bool = False
+        self, circuit: Circuit, record_output: bool = False
     ) -> tketqirModule:
         """Populate a PyQir module from a pytket circuit."""
 
@@ -576,495 +1094,48 @@ class QirGenerator:
             op = command.op
 
             if isinstance(op, RangePredicateOp):
-                # special case handling for REG_EQ
-                if op.lower == op.upper:
-                    registername = command.args[0].reg_name
-
-                    result = module.module.builder.icmp(
-                        pyqir.IntPredicate.EQ,
-                        pyqir.const(self.qir_int_type, op.lower),
-                        self._get_i64_ssa_reg(registername),
-                    )
-
-                    condition_bit_index = command.args[-1].index[0]
-                    result_registername = command.args[-1].reg_name
-
-                    self.module.builder.call(
-                        self.set_creg_bit,
-                        [
-                            self.ssa_vars[result_registername],
-                            pyqir.const(self.qir_int_type, condition_bit_index),
-                            result,
-                        ],
-                    )
-
-                else:
-                    lower_qir = pyqir.const(self.qir_int_type, op.lower)
-                    upper_qir = pyqir.const(self.qir_int_type, op.upper)
-
-                    registername = command.args[0].reg_name
-
-                    lower_cond = module.module.builder.icmp(
-                        pyqir.IntPredicate.SGT,
-                        lower_qir,
-                        self._get_i64_ssa_reg(registername),
-                    )
-
-                    upper_cond = module.module.builder.icmp(
-                        pyqir.IntPredicate.SGT,
-                        self._get_i64_ssa_reg(registername),
-                        upper_qir,
-                    )
-
-                    result = module.module.builder.and_(lower_cond, upper_cond)
-
-                    condition_bit_index = command.args[-1].index[0]
-                    registername = command.args[-1].reg_name
-
-                    self.module.builder.call(
-                        self.set_creg_bit,
-                        [
-                            self.ssa_vars[registername],
-                            pyqir.const(self.qir_int_type, condition_bit_index),
-                            result,
-                        ],
-                    )
+                self.conv_RangePredicateOp(op, command.args)
 
             elif isinstance(op, Conditional):
-                conditional_circuit = self._rebase_op_to_gateset(
-                    op.op, command.args[op.width :]
-                )
-                condition_name = command.args[0].reg_name
-
-                if op.width == 1:  # only one conditional bit
-                    condition_bit_index = command.args[0].index[0]
-
-                    def condition_block_true() -> None:
-                        """
-                        Populate recursively the module with the contents of the
-                        conditional sub-circuit when the condition is True.
-                        """
-                        if op.value == 1:
-                            self.circuit_to_module(conditional_circuit, module)
-
-                    def condition_block_false() -> None:
-                        """
-                        Populate recursively the module with the contents of the
-                        conditional sub-circuit when the condition is False.
-                        """
-                        if op.value == 0:
-                            self.circuit_to_module(conditional_circuit, module)
-
-                    assert condition_name in self.ssa_vars
-
-                    ssabool = module.builder.call(
-                        self.get_creg_bit,
-                        [
-                            self.ssa_vars[condition_name],
-                            pyqir.const(self.qir_int_type, condition_bit_index),
-                        ],
-                    )
-
-                    module.module.builder.if_(
-                        ssabool,
-                        true=lambda: condition_block_true(),
-                        false=lambda: condition_block_false(),
-                    )
-
-                else:
-                    for i in range(op.width):
-                        if command.args[i].reg_name != condition_name:
-                            raise ValueError(
-                                "conditional can only work with one entire register"
-                            )
-
-                    for i in range(op.width - 1):
-                        if command.args[i].index[0] >= command.args[i + 1].index[0]:
-                            raise ValueError(
-                                "conditional can only work with one entire register"
-                            )
-
-                    if self.circuit.get_c_register(condition_name).size != op.width:
-                        raise ValueError(
-                            "conditional can only work with one entire register"
-                        )
-
-                    def condition_block() -> None:
-                        """
-                        Populate recursively the module with the contents of the
-                        conditional sub-circuit when the condition is True.
-                        """
-                        self.circuit_to_module(conditional_circuit, module)
-
-                    ssabool = module.module.builder.icmp(
-                        pyqir.IntPredicate.EQ,
-                        pyqir.const(self.qir_int_type, op.value),
-                        self._get_i64_ssa_reg(condition_name),
-                    )
-
-                    module.module.builder.if_(
-                        ssabool,
-                        true=lambda: condition_block(),
-                    )
+                self.conv_conditional(command)
 
             elif isinstance(op, WASMOp):
-                paramreg, resultreg = self._get_c_regs_from_com(command)
-
-                paramssa = [self._get_i64_ssa_reg(p) for p in paramreg]
-
-                result = self.module.builder.call(
-                    self.wasm[command.op.func_name],
-                    [*paramssa],
-                )
-
-                if len(resultreg) == 1:
-                    self.module.builder.call(
-                        self.set_creg_to_int,
-                        [self.ssa_vars[resultreg[0]], result],
-                    )
+                self.conv_WASMOp(op, command.args)
 
             elif op.type == OpType.ZZPhase:
-                assert len(command.bits) == 0
-                assert len(command.qubits) == 2
-                assert len(op.params) == 1
-
-                if OpType.ZZPhase not in self.additional_quantum_gates:
-                    self.additional_quantum_gates[
-                        OpType.ZZPhase
-                    ] = self.module.module.add_external_function(
-                        "__quantum__qis__rzz__body",
-                        pyqir.FunctionType(
-                            pyqir.Type.void(self.module.module.context),
-                            [
-                                pyqir.Type.double(self.module.module.context),
-                                pyqir.qubit_type(self.module.module.context),
-                                pyqir.qubit_type(self.module.module.context),
-                            ],
-                        ),
-                    )
-
-                self.module.builder.call(
-                    self.additional_quantum_gates[OpType.ZZPhase],
-                    [
-                        pyqir.const(
-                            pyqir.Type.double(self.module.module.context),
-                            (float(op.params[0]) * math.pi),
-                        ),
-                        module.module.qubits[command.qubits[0].index[0]],
-                        module.module.qubits[command.qubits[1].index[0]],
-                    ],
-                )
+                self.conv_ZZPhase(command.qubits, op)
 
             elif op.type == OpType.PhasedX:
-                assert len(command.bits) == 0
-                assert len(command.qubits) == 1
-                assert len(op.params) == 2
-
-                if OpType.PhasedX not in self.additional_quantum_gates:
-                    self.additional_quantum_gates[
-                        OpType.PhasedX
-                    ] = self.module.module.add_external_function(
-                        "__quantum__qis__phasedx__body",
-                        pyqir.FunctionType(
-                            pyqir.Type.void(self.module.module.context),
-                            [
-                                pyqir.Type.double(self.module.module.context),
-                                pyqir.Type.double(self.module.module.context),
-                                pyqir.qubit_type(self.module.module.context),
-                            ],
-                        ),
-                    )
-
-                self.module.builder.call(
-                    self.additional_quantum_gates[OpType.PhasedX],
-                    [
-                        pyqir.const(
-                            pyqir.Type.double(self.module.module.context),
-                            (float(op.params[0]) * math.pi),
-                        ),
-                        pyqir.const(
-                            pyqir.Type.double(self.module.module.context),
-                            (float(op.params[1]) * math.pi),
-                        ),
-                        module.module.qubits[command.qubits[0].index[0]],
-                    ],
-                )
+                self.conv_phasedx(command.qubits, op)
 
             elif op.type == OpType.TK2:
-                assert len(command.bits) == 0
-                assert len(command.qubits) == 2
-                assert len(op.params) == 3
-
-                if OpType.TK2 not in self.additional_quantum_gates:
-                    self.additional_quantum_gates[
-                        OpType.TK2
-                    ] = self.module.module.add_external_function(
-                        "__quantum__qis__rxxyyzz__body",
-                        pyqir.FunctionType(
-                            pyqir.Type.void(self.module.module.context),
-                            [
-                                pyqir.Type.double(self.module.module.context),
-                                pyqir.Type.double(self.module.module.context),
-                                pyqir.Type.double(self.module.module.context),
-                                pyqir.qubit_type(self.module.module.context),
-                                pyqir.qubit_type(self.module.module.context),
-                            ],
-                        ),
-                    )
-
-                self.module.builder.call(
-                    self.additional_quantum_gates[OpType.TK2],
-                    [
-                        pyqir.const(
-                            pyqir.Type.double(self.module.module.context),
-                            (float(op.params[0]) * math.pi),
-                        ),
-                        pyqir.const(
-                            pyqir.Type.double(self.module.module.context),
-                            (float(op.params[1]) * math.pi),
-                        ),
-                        pyqir.const(
-                            pyqir.Type.double(self.module.module.context),
-                            (float(op.params[2]) * math.pi),
-                        ),
-                        module.module.qubits[command.qubits[0].index[0]],
-                        module.module.qubits[command.qubits[1].index[0]],
-                    ],
-                )
+                self.conv_tk2(command.qubits, op)
 
             elif op.type == OpType.ZZMax:
-                assert len(command.bits) == 0
-                assert len(command.qubits) == 2
-                assert len(op.params) == 0
-
-                if OpType.ZZMax not in self.additional_quantum_gates:
-                    self.additional_quantum_gates[
-                        OpType.ZZMax
-                    ] = self.module.module.add_external_function(
-                        "__quantum__qis__zzmax__body",
-                        pyqir.FunctionType(
-                            pyqir.Type.void(self.module.module.context),
-                            [
-                                pyqir.qubit_type(self.module.module.context),
-                                pyqir.qubit_type(self.module.module.context),
-                            ],
-                        ),
-                    )
-
-                self.module.builder.call(
-                    self.additional_quantum_gates[OpType.ZZMax],
-                    [
-                        module.module.qubits[command.qubits[0].index[0]],
-                        module.module.qubits[command.qubits[1].index[0]],
-                    ],
-                )
+                self.conv_zzmax(command.qubits)
 
             elif op.type == OpType.Measure:
-                assert len(command.bits) == 1
-                assert len(command.qubits) == 1
-                assert command.qubits[0].reg_name == "q"
-
-                self.module.builder.call(
-                    self.mz_to_creg_bit,
-                    [
-                        module.module.qubits[command.qubits[0].index[0]],
-                        self.ssa_vars[command.bits[0].reg_name],
-                        pyqir.const(self.qir_int_type, command.bits[0].index[0]),
-                    ],
-                )
+                self.conv_measure(command.bits, command.qubits)
 
             elif op.type == OpType.Phase:
                 # ignore phase op
                 continue
 
             elif isinstance(op, ClassicalExpBox):
-                returntypebool = False
-                result_index = (
-                    0  # defines the default value for ops that returns bool, see below
-                )
-
-                outputs = command.args[-1].reg_name
-
-                if type(op.get_exp()) in _TK_CLOPS_TO_PYQIR_REG:
-                    # classical ops acting on registers returning register
-                    ssa_left = cast(  # type: ignore
-                        Value,
-                        self._get_ssa_from_cl_reg_op(
-                            op.get_exp().args[0], module  # type: ignore
-                        ),
-                    )
-                    ssa_right = cast(  # type: ignore
-                        Value,
-                        self._get_ssa_from_cl_reg_op(
-                            op.get_exp().args[1], module  # type: ignore
-                        ),
-                    )
-
-                    # add function to module
-                    output_instruction = _TK_CLOPS_TO_PYQIR_REG[type(op.get_exp())](
-                        module.builder
-                    )(ssa_left, ssa_right)
-
-                elif type(op.get_exp()) in _TK_CLOPS_TO_PYQIR_BIT_NO_PARAM:
-                    # classical ops without parameters
-                    output_instruction = pyqir.const(
-                        self.qir_bool_type,
-                        _TK_CLOPS_TO_PYQIR_BIT_NO_PARAM[type(op.get_exp())],
-                    )
-                    returntypebool = True
-                    result_index = command.args[-1].index[0]
-
-                elif type(op.get_exp()) in _TK_CLOPS_TO_PYQIR_BIT:
-                    # classical ops acting on bits returning bit
-                    ssa_left = cast(  # type: ignore
-                        Value,
-                        self._get_ssa_from_cl_bit_op(op.get_exp().args[0], module),
-                    )
-                    ssa_right = cast(  # type: ignore
-                        Value,
-                        self._get_ssa_from_cl_bit_op(op.get_exp().args[1], module),
-                    )
-
-                    # add function to module
-                    returntypebool = True
-                    result_index = command.args[-1].index[0]
-                    output_instruction = _TK_CLOPS_TO_PYQIR_BIT[type(op.get_exp())](
-                        module.builder
-                    )(ssa_left, ssa_right)
-
-                elif type(op.get_exp()) in _TK_CLOPS_TO_PYQIR_REG_BOOL:
-                    # classical ops acting on registers returning bit
-                    ssa_left = cast(  # type: ignore
-                        Value,
-                        self._get_ssa_from_cl_reg_op(
-                            op.get_exp().args[0], module  # type: ignore
-                        ),
-                    )
-                    ssa_right = cast(  # type: ignore
-                        Value,
-                        self._get_ssa_from_cl_reg_op(
-                            op.get_exp().args[1], module  # type: ignore
-                        ),
-                    )
-
-                    # add function to module
-                    returntypebool = True
-                    output_instruction = _TK_CLOPS_TO_PYQIR_REG_BOOL[
-                        type(op.get_exp())
-                    ](module.builder)(ssa_left, ssa_right)
-
-                else:
-                    raise ValueError(f"unexpected classical op {type(op.get_exp())}")
-
-                if returntypebool:
-                    # the return value of the some classical ops is bool in qir,
-                    # so the return value can only be written to one entry
-                    # of the register this implementation write the value
-                    # to the 0-th entry
-                    # of the register, this could be changed to a user given value
-
-                    self.module.builder.call(
-                        self.set_creg_bit,
-                        [
-                            self.ssa_vars[outputs],
-                            pyqir.const(self.qir_int_type, result_index),
-                            output_instruction,
-                        ],
-                    )
-                else:
-                    self.module.builder.call(
-                        self.set_creg_to_int,
-                        [self.ssa_vars[outputs], output_instruction],
-                    )
+                self.conv_classicalexpbox(op, command.args)
 
             elif isinstance(op, SetBitsOp):
-                assert len(command.op.values) == len(command.bits)
-                assert len(command.qubits) == 0
-
-                for b, v in zip(command.bits, command.op.values):
-                    output_instruction = pyqir.const(self.qir_bool_type, int(v))
-
-                    self.module.builder.call(
-                        self.set_creg_bit,
-                        [
-                            self.ssa_vars[b.reg_name],
-                            pyqir.const(self.qir_int_type, b.index[0]),
-                            output_instruction,
-                        ],
-                    )
+                self.conv_SetBitsOp(command.bits, op)
 
             elif isinstance(op, CopyBitsOp):
-                assert len(command.qubits) == 0
-                assert len(command.args) % 2 == 0
-                half_length = len(command.args) // 2
-
-                for i, o in zip(command.args[:half_length], command.args[half_length:]):
-                    output_instruction = self.module.builder.call(
-                        self.get_creg_bit,
-                        [
-                            self.ssa_vars[i.reg_name],  # type: ignore
-                            pyqir.const(self.qir_int_type, i.index[0]),  # type: ignore
-                        ],
-                    )
-
-                    self.module.builder.call(
-                        self.set_creg_bit,
-                        [
-                            self.ssa_vars[o.reg_name],
-                            pyqir.const(self.qir_int_type, o.index[0]),
-                            output_instruction,
-                        ],
-                    )
+                self.conv_CopyBitsOp(command.args)
 
             elif isinstance(op, BarrierOp):
-                assert command.qubits[0].reg_name == "q"
-
-                qir_qubits = self._to_qis_qubits(command.qubits)
-
-                if command.op.data == "":
-                    self._add_barrier_op(module, len(command.qubits), qir_qubits)
-                elif command.op.data[0:5] == "order":
-                    self._add_order_op(module, len(command.qubits), qir_qubits)
-                elif command.op.data[0:5] == "group":
-                    self._add_group_op(module, len(command.qubits), qir_qubits)
-                elif command.op.data[0:5] == "sleep":
-                    self._add_sleep_op(
-                        module,
-                        len(command.qubits),
-                        qir_qubits,
-                        float(command.op.data[6:-1]),
-                    )
-                else:
-                    raise ValueError("op is not supported yet")
+                self.conv_BarrierOp(command.qubits, op)
 
             else:
-                rebased_circ = self._rebase_command_to_gateset(
-                    command
-                )  # Check if the command must be rebased.
-                if rebased_circ is not None:
-                    self.circuit_to_module(rebased_circ, module)
-                else:
-                    optype, params = self._get_optype_and_params(op)
-                    pi_params = [p * math.pi for p in params]
-                    qubits = self._to_qis_qubits(command.qubits)
-                    results = self._to_qis_results(command.bits)
-                    bits: Optional[Sequence[Value]] = None
-                    if type(optype) == BitWiseOp:
-                        bits = self._to_qis_bits(command.args)
-                    gate = module.gateset.tk_to_gateset(optype)
-                    if gate.func_spec != FuncSpec.BODY:
-                        func_name = gate.func_name.value + "_" + gate.func_spec.value
-                        get_gate = getattr(module.qis, func_name)
-                    else:
-                        get_gate = getattr(module.qis, gate.func_name.value)
-                    if bits:
-                        get_gate(*bits)
-                    elif params:
-                        get_gate(*pi_params, *qubits)
-                    elif results:
-                        get_gate(*qubits, results)
-                    else:
-                        get_gate(*qubits)
+                self.conv_other(command.bits, command.qubits, op, command.args)
+
         if record_output:
             self.module.builder.call(
                 self.record_output_start,
@@ -1086,4 +1157,112 @@ class QirGenerator:
                 [],
             )
 
-        return module
+        return self.module
+
+    def subcircuit_to_module(
+        self,
+        circuit: Circuit,
+    ) -> tketqirModule:
+        """Populate a PyQir module from a pytket circuit."""
+
+        for command in circuit:
+            op = command.op
+
+            if isinstance(op, RangePredicateOp):
+                self.conv_RangePredicateOp(op, command.args)
+
+            elif isinstance(op, Conditional):
+                raise ValueError("conditional ops can't be converted from a circbox")
+
+            elif isinstance(op, WASMOp):
+                self.conv_WASMOp(op, command.args)
+
+            elif op.type == OpType.ZZPhase:
+                self.conv_ZZPhase(command.qubits, op)
+
+            elif op.type == OpType.PhasedX:
+                self.conv_phasedx(command.qubits, op)
+
+            elif op.type == OpType.TK2:
+                self.conv_tk2(command.qubits, op)
+
+            elif op.type == OpType.ZZMax:
+                self.conv_zzmax(command.qubits)
+
+            elif op.type == OpType.Measure:
+                self.conv_measure(command.bits, command.qubits)
+
+            elif op.type == OpType.Phase:
+                # ignore phase op
+                continue
+
+            elif isinstance(op, ClassicalExpBox):
+                self.conv_classicalexpbox(op, command.args)
+
+            elif isinstance(op, SetBitsOp):
+                self.conv_SetBitsOp(command.bits, op)
+
+            elif isinstance(op, CopyBitsOp):
+                self.conv_CopyBitsOp(command.args)
+
+            elif isinstance(op, BarrierOp):
+                self.conv_BarrierOp(command.qubits, op)
+
+            else:
+                self.conv_other(command.bits, command.qubits, op, command.args)
+
+        return self.module
+
+
+
+    def command_to_module(
+        self, op, args
+    ) -> tketqirModule:
+        """Populate a PyQir module from a pytket command."""
+        qubits = [q for q in args if q.type == UnitType.qubit]
+        bits = [b for b in args if b.type == UnitType.bit]
+
+        if isinstance(op, RangePredicateOp):
+            self.conv_RangePredicateOp(op, args)
+
+        elif isinstance(op, Conditional):
+            raise ValueError("conditional ops can't be converted from a circbox")
+
+        elif isinstance(op, WASMOp):
+            self.conv_WASMOp(op, args)
+
+        elif op.type == OpType.ZZPhase:
+            self.conv_ZZPhase(qubits, op)
+
+        elif op.type == OpType.PhasedX:
+            self.conv_phasedx(qubits, op)
+
+        elif op.type == OpType.TK2:
+            self.conv_tk2(qubits, op)
+
+        elif op.type == OpType.ZZMax:
+            self.conv_zzmax(qubits)
+
+        elif op.type == OpType.Measure:
+            self.conv_measure(bits, qubits)
+
+        elif op.type == OpType.Phase:
+            # ignore phase op
+            pass
+
+        elif isinstance(op, ClassicalExpBox):
+            self.conv_classicalexpbox(op, args)
+
+        elif isinstance(op, SetBitsOp):
+            self.conv_SetBitsOp(bits, op)
+
+        elif isinstance(op, CopyBitsOp):
+            self.conv_CopyBitsOp(args)
+
+        elif isinstance(op, BarrierOp):
+            self.conv_BarrierOp(qubits, op)
+
+        else:
+            self.conv_other(bits, qubits, op, args)
+
+        return self.module

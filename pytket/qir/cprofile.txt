@@ -1,0 +1,626 @@
+48756220 function calls (48441777 primitive calls) in 1809.791 seconds
+
+   Ordered by: cumulative time
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.168    0.168 1789.265 1789.265 api.py:48(pytket_to_qir)
+        1  941.320  941.320  941.364  941.364 {built-in method pytket._tket.passes.apply}
+        1  776.233  776.233  846.033  846.033 conversion.py:1088(circuit_to_module)
+    95782    2.044    0.000   63.458    0.001 conversion.py:606(conv_conditional)
+    95782   21.173    0.000   49.100    0.001 {method 'if_' of 'builtins.Builder' objects}
+    95782    0.041    0.000   27.809    0.000 conversion.py:719(<lambda>)
+    95782    1.570    0.000   27.768    0.000 conversion.py:691(condition_block_true)
+    95782    1.061    0.000   26.198    0.000 conversion.py:1218(command_to_module)
+        1    0.000    0.000   20.523   20.523 qasm.py:952(circuit_from_qasm)
+        1    0.000    0.000   20.523   20.523 qasm.py:991(circuit_from_qasm_io)
+        1    0.069    0.069   20.523   20.523 qasm.py:975(circuit_from_qasm_str)
+   186090   18.316    0.000   18.316    0.000 {method 'call' of 'builtins.Builder' objects}
+        1    0.000    0.000   17.537   17.537 lark.py:640(parse)
+        1    0.000    0.000   17.537   17.537 parser_frontends.py:100(parse)
+        1    0.000    0.000   17.537   17.537 lalr_parser.py:40(parse)
+        1    0.000    0.000   17.537   17.537 lalr_parser.py:83(parse)
+        1    0.362    0.362   17.537   17.537 lalr_parser.py:91(parse_from_state)
+   625068    4.260    0.000   10.842    0.000 lalr_parser_state.py:67(feed_token)
+    31277    0.236    0.000   10.702    0.000 conversion.py:1065(conv_other)
+   245130    8.831    0.000    8.831    0.000 {built-in method pyqir._native.const}
+    18694    1.375    0.000    8.449    0.000 conversion.py:803(conv_phasedx)
+    24960    0.020    0.000    6.731    0.000 _basicqis.py:81(rz)
+    24960    6.711    0.000    6.711    0.000 {built-in method pyqir._native.rz}
+   625068    0.433    0.000    6.334    0.000 lexer.py:661(lex)
+   625068    1.742    0.000    5.817    0.000 lexer.py:590(next_token)
+     8320    0.432    0.000    5.749    0.001 conversion.py:774(conv_ZZPhase)
+  1152748    1.019    0.000    4.687    0.000 parse_tree_builder.py:145(__call__)
+    83162    0.102    0.000    4.098    0.000 _simple.py:72(qubits)
+    83162    1.400    0.000    3.996    0.000 _simple.py:75(<listcomp>)
+        7    2.370    0.339    2.900    0.414 {built-in method pytket._tket.circuit.from_dict}
+    10505    0.079    0.000    2.486    0.000 conversion.py:907(conv_classicalexpbox)
+    31534    0.021    0.000    2.474    0.000 conversion.py:443(_to_qis_qubits)
+    31534    0.232    0.000    2.453    0.000 conversion.py:444(<listcomp>)
+   838875    0.458    0.000    2.252    0.000 lexer.py:587(match)
+  4657072    1.962    0.000    1.962    0.000 {built-in method pyqir._native.qubit}
+        7    0.066    0.009    1.830    0.261 qasm.py:908(prog)
+   904545    0.581    0.000    1.727    0.000 lexer.py:387(match)
+58284/21010    0.104    0.000    1.707    0.000 conversion.py:517(_get_ssa_from_cl_bit_op)
+        1    1.109    1.109    1.573    1.573 _simple.py:106(ir)
+    25219    0.133    0.000    1.348    0.000 conversion.py:1007(conv_SetBitsOp)
+     2159    0.020    0.000    1.263    0.001 conversion.py:897(conv_measure)
+  1045687    1.106    0.000    1.106    0.000 {method 'match' of 're.Pattern' objects}
+  1177018    0.313    0.000    1.005    0.000 parse_tree_builder.py:363(default_callback)
+     6317    0.005    0.000    0.957    0.000 _basicqis.py:55(reset)
+     6317    0.952    0.000    0.952    0.000 {built-in method pyqir._native.reset}
+   625145    0.296    0.000    0.846    0.000 lexer.py:202(__new__)
+    31277    0.812    0.000    0.812    0.000 conversion.py:427(_get_optype_and_params)
+      257    0.002    0.000    0.782    0.003 conversion.py:1044(conv_BarrierOp)
+5866071/5652835    0.647    0.000    0.763    0.000 {built-in method builtins.isinstance}
+    71660    0.132    0.000    0.760    0.000 qasm.py:717(assign)
+  1621845    0.577    0.000    0.720    0.000 lexer.py:265(__eq__)
+  1177018    0.458    0.000    0.692    0.000 visitors.py:171(__default__)
+  4702805    0.654    0.000    0.654    0.000 _simple.py:67(context)
+    75084    0.133    0.000    0.635    0.000 qasm.py:609(ifc)
+   838875    0.480    0.000    0.621    0.000 lexer.py:292(feed)
+   625145    0.426    0.000    0.550    0.000 lexer.py:213(_future_new)
+    29142    0.108    0.000    0.541    0.000 qasm.py:518(_logic_exp)
+29142/10505    0.210    0.000    0.530    0.000 logic_exp.py:243(from_dict)
+        7    0.516    0.074    0.516    0.074 qasm.py:921(<listcomp>)
+  1485857    0.353    0.000    0.478    0.000 grammar.py:124(__eq__)
+        1    0.464    0.464    0.464    0.464 {method 'verify' of 'builtins.Module' objects}
+    37542    0.200    0.000    0.428    0.000 qasm.py:597(cond)
+    10505    0.029    0.000    0.410    0.000 qasm.py:701(_cexpbox_dict)
+    16744    0.009    0.000    0.353    0.000 qasm.py:587(<lambda>)
+  4905545    0.335    0.000    0.335    0.000 {method 'append' of 'list' objects}
+    95782    0.329    0.000    0.329    0.000 conversion.py:1222(<listcomp>)
+3532151/3531116    0.299    0.000    0.300    0.000 {built-in method builtins.len}
+    16744    0.287    0.000    0.287    0.000 {method 'xor' of 'builtins.Builder' objects}
+   140782    0.135    0.000    0.248    0.000 qasm.py:226(_extract_reg)
+  1177018    0.234    0.000    0.234    0.000 tree.py:61(__init__)
+    58284    0.083    0.000    0.209    0.000 logic_exp.py:751(create_logic_exp)
+    20786    0.069    0.000    0.193    0.000 qasm.py:403(mixedcall)
+    79657    0.031    0.000    0.191    0.000 qasm.py:334(_get_arg)
+    10505    0.076    0.000    0.190    0.000 qasm.py:670(_calc_exp_io)
+    29142    0.124    0.000    0.185    0.000 qasm.py:544(_get_logic_args)
+    10345    0.184    0.000    0.184    0.000 {method 'or_' of 'builtins.Builder' objects}
+    10345    0.005    0.000    0.177    0.000 qasm.py:582(<lambda>)
+    79657    0.036    0.000    0.161    0.000 qasm.py:330(_get_uid)
+    95782    0.159    0.000    0.159    0.000 conversion.py:1223(<listcomp>)
+  1486209    0.156    0.000    0.156    0.000 grammar.py:121(__hash__)
+  1167436    0.152    0.000    0.152    0.000 {method 'group' of 're.Match' objects}
+   838875    0.124    0.000    0.144    0.000 lexer.py:581(scanner)
+   106618    0.042    0.000    0.132    0.000 typing.py:1327(__instancecheck__)
+   626279    0.124    0.000    0.124    0.000 {built-in method __new__ of type object at 0x866f00}
+   138317    0.020    0.000    0.122    0.000 {built-in method builtins.next}
+      257    0.001    0.000    0.119    0.000 conversion.py:319(_add_barrier_op)
+    95782    0.031    0.000    0.119    0.000 conversion.py:720(<lambda>)
+    65670    0.040    0.000    0.117    0.000 lexer.py:311(__call__)
+    87542    0.039    0.000    0.117    0.000 {built-in method builtins.all}
+29142/10505    0.060    0.000    0.110    0.000 logic_exp.py:225(to_dict)
+    18830    0.022    0.000    0.107    0.000 uuid.py:721(uuid4)
+    37542    0.064    0.000    0.103    0.000 logic_exp.py:767(create_predicate_exp)
+   134532    0.039    0.000    0.101    0.000 qasm.py:340(unroll_all_args)
+    58284    0.068    0.000    0.097    0.000 logic_exp.py:664(create_bit_logic_exp)
+        1    0.047    0.047    0.091    0.091 conversion.py:112(__init__)
+   106618    0.056    0.000    0.090    0.000 typing.py:1602(__subclasscheck__)
+29142/10505    0.059    0.000    0.089    0.000 logic_exp.py:200(all_inputs_ordered)
+    95782    0.087    0.000    0.087    0.000 conversion.py:699(condition_block_false)
+    31277    0.086    0.000    0.086    0.000 gatesets.py:148(<lambda>)
+    58284    0.036    0.000    0.085    0.000 logic_exp.py:249(<genexpr>)
+   625068    0.084    0.000    0.084    0.000 lalr_parser_state.py:46(position)
+    60445    0.067    0.000    0.067    0.000 {built-in method pytket._tket.unit_id.to_list}
+    50006    0.035    0.000    0.065    0.000 enum.py:688(__call__)
+   104253    0.049    0.000    0.064    0.000 enum.py:193(__get__)
+    18830    0.050    0.000    0.060    0.000 uuid.py:139(__init__)
+      106    0.001    0.000    0.057    0.001 conversion.py:1022(conv_CopyBitsOp)
+   213808    0.055    0.000    0.055    0.000 {method 'count' of 'str' objects}
+      514    0.004    0.000    0.045    0.000 qasm.py:379(barr)
+        1    0.017    0.017    0.044    0.044 api.py:174(trans)
+      257    0.003    0.000    0.040    0.000 qasm.py:380(<listcomp>)
+        1    0.000    0.000    0.038    0.038 qasm.py:1130(_retrieve_registers)
+     2053    0.037    0.000    0.037    0.000 {method 'and_' of 'builtins.Builder' objects}
+    12634    0.010    0.000    0.036    0.000 qasm.py:396(reset)
+    87426    0.024    0.000    0.035    0.000 qasm.py:527(<genexpr>)
+    50006    0.030    0.000    0.030    0.000 enum.py:1095(__new__)
+    63030    0.028    0.000    0.028    0.000 {built-in method pytket._tket.circuit.get_exp}
+    18830    0.028    0.000    0.028    0.000 uuid.py:280(__str__)
+        1    0.025    0.025    0.027    0.027 api.py:176(<listcomp>)
+     2053    0.001    0.000    0.026    0.000 qasm.py:580(<lambda>)
+    54937    0.026    0.000    0.026    0.000 qasm.py:352(margs)
+    45711    0.025    0.000    0.025    0.000 {built-in method double}
+    18830    0.024    0.000    0.024    0.000 {built-in method posix.urandom}
+        1    0.002    0.002    0.023    0.023 qasm.py:1136(<dictcomp>)
+    75028    0.018    0.000    0.023    0.000 qasm.py:525(<genexpr>)
+    95783    0.023    0.000    0.023    0.000 _simple.py:82(builder)
+    45886    0.018    0.000    0.023    0.000 qasm.py:528(<genexpr>)
+      869    0.013    0.000    0.022    0.000 {built-in method builtins.max}
+    47943    0.017    0.000    0.021    0.000 parse_tree_builder.py:20(__call__)
+       32    0.000    0.000    0.020    0.001 lexer.py:568(_build_scanner)
+        1    0.019    0.019    0.019    0.019 api.py:125(<listcomp>)
+   102117    0.018    0.000    0.018    0.000 enum.py:798(<genexpr>)
+   106703    0.012    0.000    0.018    0.000 {built-in method builtins.issubclass}
+      397    0.000    0.000    0.018    0.000 __init__.py:272(_compile)
+    37542    0.018    0.000    0.018    0.000 logic_exp.py:554(__init__)
+       33    0.000    0.000    0.017    0.001 _compiler.py:740(compile)
+       37    0.000    0.000    0.016    0.000 lexer.py:357(__init__)
+       37    0.000    0.000    0.016    0.000 lexer.py:368(_build_mres)
+        1    0.000    0.000    0.016    0.016 qasm.py:945(set_parser)
+        1    0.000    0.000    0.016    0.016 qasm.py:930(parser)
+        1    0.000    0.000    0.016    0.016 lark.py:270(__init__)
+    31277    0.016    0.000    0.016    0.000 conversion.py:1067(<listcomp>)
+       37    0.000    0.000    0.016    0.000 __init__.py:225(compile)
+    33488    0.014    0.000    0.014    0.000 logic_exp.py:427(__init__)
+      107    0.002    0.000    0.014    0.000 {built-in method builtins.any}
+     4318    0.003    0.000    0.014    0.000 qasm.py:375(meas)
+    18904    0.014    0.000    0.014    0.000 {built-in method fromkeys}
+        1    0.000    0.000    0.014    0.014 lark.py:527(_load)
+    37214    0.014    0.000    0.014    0.000 {built-in method builtins.getattr}
+    29142    0.014    0.000    0.014    0.000 enum.py:794(__iter__)
+    55652    0.013    0.000    0.013    0.000 {method 'rindex' of 'str' objects}
+    21729    0.012    0.000    0.013    0.000 qasm.py:1133(<genexpr>)
+       33    0.000    0.000    0.012    0.000 _parser.py:979(parse)
+   419/33    0.001    0.000    0.012    0.000 _parser.py:456(_parse_sub)
+    29142    0.012    0.000    0.012    0.000 enum.py:1197(__str__)
+  680/174    0.004    0.000    0.012    0.000 _parser.py:516(_parse)
+    10386    0.009    0.000    0.010    0.000 qasm.py:400(pars)
+    29148    0.010    0.000    0.010    0.000 typing.py:373(inner)
+     8322    0.010    0.000    0.010    0.000 qasm.py:263(f)
+        1    0.009    0.009    0.009    0.009 api.py:124(<listcomp>)
+    29235    0.009    0.000    0.009    0.000 {method 'update' of 'dict' objects}
+    21010    0.006    0.000    0.009    0.000 qasm.py:681(<genexpr>)
+    21728    0.008    0.000    0.008    0.000 qasm.py:1135(<lambda>)
+    98081    0.008    0.000    0.008    0.000 typing.py:2287(cast)
+    31277    0.008    0.000    0.008    0.000 enum.py:1257(value)
+    55644    0.008    0.000    0.008    0.000 qasm.py:912(<lambda>)
+    33408    0.008    0.000    0.008    0.000 qasm.py:692(<lambda>)
+    20690    0.007    0.000    0.007    0.000 logic_exp.py:415(__init__)
+    72975    0.007    0.000    0.007    0.000 enum.py:1252(name)
+2716/1902    0.003    0.000    0.007    0.000 utils.py:74(deserialize)
+    29144    0.007    0.000    0.007    0.000 {method 'split' of 'str' objects}
+        1    0.000    0.000    0.007    0.007 parser_frontends.py:30(_deserialize_parsing_frontend)
+    37542    0.006    0.000    0.006    0.000 qasm.py:654(<lambda>)
+   3736/9    0.001    0.000    0.006    0.001 utils.py:35(_deserialize)
+10513/10506    0.003    0.000    0.006    0.000 <frozen abc>:121(__subclasscheck__)
+        1    0.000    0.000    0.006    0.006 utils.py:112(deserialize)
+        1    0.000    0.000    0.006    0.006 utils.py:42(<dictcomp>)
+    10393    0.005    0.000    0.005    0.000 qasm.py:465(<listcomp>)
+    31277    0.005    0.000    0.005    0.000 conversion.py:446(_to_qis_results)
+       32    0.000    0.000    0.005    0.000 lexer.py:334(_create_unless)
+    46230    0.005    0.000    0.005    0.000 {built-in method builtins.iter}
+    35830    0.005    0.000    0.005    0.000 qasm.py:667(cop)
+       33    0.000    0.000    0.004    0.000 _compiler.py:573(_code)
+    16744    0.004    0.000    0.004    0.000 conversion.py:98(<lambda>)
+      679    0.002    0.000    0.004    0.000 conversion.py:458(_reg2ssa_var)
+    18830    0.004    0.000    0.004    0.000 {method 'count' of 'list' objects}
+        1    0.000    0.000    0.004    0.004 parser_frontends.py:48(__init__)
+        1    0.000    0.000    0.004    0.004 parser_frontends.py:150(create_contextual_lexer)
+   506/33    0.002    0.000    0.003    0.000 _compiler.py:37(_compile)
+        1    0.001    0.001    0.003    0.003 lexer.py:631(__init__)
+        1    0.000    0.000    0.003    0.003 auto_rebase.py:34(auto_rebase_pass)
+        1    0.003    0.003    0.003    0.003 {built-in method pytket._tket.passes.AutoRebase}
+10513/10506    0.003    0.000    0.003    0.000 {built-in method _abc._abc_subclasscheck}
+        1    0.000    0.000    0.003    0.003 qasm.py:904(incl)
+        1    0.000    0.000    0.003    0.003 qasm.py:239(_load_include_module)
+        1    0.000    0.000    0.003    0.003 __init__.py:108(import_module)
+      2/1    0.000    0.000    0.003    0.003 <frozen importlib._bootstrap>:1192(_gcd_import)
+      2/1    0.000    0.000    0.003    0.003 <frozen importlib._bootstrap>:1165(_find_and_load)
+      2/1    0.000    0.000    0.003    0.003 <frozen importlib._bootstrap>:1120(_find_and_load_unlocked)
+        6    0.000    0.000    0.003    0.000 qasm.py:835(gdef)
+        1    0.000    0.000    0.003    0.003 lalr_parser.py:27(deserialize)
+        1    0.000    0.000    0.003    0.003 lalr_analysis.py:60(deserialize)
+        1    0.000    0.000    0.003    0.003 lalr_analysis.py:63(<dictcomp>)
+    18833    0.003    0.000    0.003    0.000 {built-in method from_bytes}
+        2    0.000    0.000    0.003    0.001 <frozen importlib._bootstrap>:666(_load_unlocked)
+      4/3    0.000    0.000    0.003    0.001 <frozen importlib._bootstrap>:233(_call_with_frames_removed)
+      315    0.001    0.000    0.003    0.000 lalr_analysis.py:64(<dictcomp>)
+        1    0.000    0.000    0.003    0.003 <frozen importlib._bootstrap_external>:934(exec_module)
+    24057    0.003    0.000    0.003    0.000 {method 'startswith' of 'str' objects}
+        1    0.001    0.001    0.002    0.002 {built-in method builtins.exec}
+        1    0.000    0.000    0.002    0.002 api.py:169(_scratch_reg_resize_pass)
+        1    0.002    0.002    0.002    0.002 {built-in method pytket._tket.passes.CustomPass}
+    10505    0.002    0.000    0.002    0.000 qasm.py:283(_hashable_uid)
+      360    0.000    0.000    0.002    0.000 lexer.py:329(_get_match)
+      360    0.000    0.000    0.002    0.000 __init__.py:163(match)
+       84    0.000    0.000    0.002    0.000 lexer.py:526(__init__)
+        1    0.002    0.002    0.002    0.002 _qelib1_defs.py:1(<module>)
+        1    0.002    0.002    0.002    0.002 {method 'write' of '_io.TextIOWrapper' objects}
+      242    0.000    0.000    0.002    0.000 utils.py:44(<listcomp>)
+    10514    0.002    0.000    0.002    0.000 {built-in method from_iterable}
+    10345    0.002    0.000    0.002    0.000 conversion.py:97(<lambda>)
+        2    0.002    0.001    0.002    0.001 {built-in method _pickle.load}
+      679    0.001    0.000    0.002    0.000 qasm.py:361(creg)
+    10386    0.002    0.000    0.002    0.000 <string>:2(__init__)
+      229    0.000    0.000    0.002    0.000 <frozen codecs>:319(decode)
+        1    0.000    0.000    0.001    0.001 lark.py:470(_prepare_callbacks)
+     4106    0.001    0.000    0.001    0.000 logic_exp.py:409(__init__)
+     3596    0.001    0.000    0.001    0.000 _parser.py:168(__getitem__)
+      679    0.000    0.000    0.001    0.000 _simple.py:97(add_byte_string)
+     4497    0.001    0.000    0.001    0.000 _parser.py:240(__next)
+      229    0.001    0.000    0.001    0.000 {built-in method _codecs.utf_8_decode}
+  674/201    0.001    0.000    0.001    0.000 _parser.py:178(getwidth)
+      679    0.001    0.000    0.001    0.000 {built-in method pyqir._native.global_byte_string}
+     2041    0.001    0.000    0.001    0.000 _parser.py:261(get)
+      112    0.001    0.000    0.001    0.000 _compiler.py:243(_optimize_charset)
+      252    0.000    0.000    0.001    0.000 lexer.py:556(<genexpr>)
+        1    0.000    0.000    0.001    0.001 {method 'read' of '_io.TextIOWrapper' objects}
+     2302    0.001    0.000    0.001    0.000 _parser.py:256(match)
+        1    0.000    0.000    0.001    0.001 parse_tree_builder.py:332(__init__)
+      177    0.000    0.000    0.001    0.000 parse_tree_builder.py:340(_init_builders)
+       33    0.000    0.000    0.001    0.000 _compiler.py:511(_compile_info)
+      679    0.000    0.000    0.001    0.000 conversion.py:436(_get_i64_ssa_reg)
+       13    0.001    0.000    0.001    0.000 _simple.py:87(add_external_function)
+        1    0.000    0.000    0.001    0.001 module.py:35(__init__)
+        1    0.001    0.001    0.001    0.001 _simple.py:29(__init__)
+       85    0.000    0.000    0.001    0.000 {method 'sort' of 'list' objects}
+      176    0.000    0.000    0.001    0.000 parse_tree_builder.py:162(maybe_create_child_filter)
+      459    0.000    0.000    0.001    0.000 lexer.py:81(to_regexp)
+      168    0.000    0.000    0.001    0.000 _parser.py:98(closegroup)
+      168    0.000    0.000    0.001    0.000 _parser.py:274(getuntil)
+      599    0.000    0.000    0.001    0.000 lexer.py:559(<lambda>)
+     2716    0.001    0.000    0.001    0.000 utils.py:77(<dictcomp>)
+       84    0.000    0.000    0.001    0.000 copy.py:66(copy)
+        1    0.000    0.000    0.001    0.001 parse_tree_builder.py:358(create_callback)
+        6    0.000    0.000    0.000    0.000 qasm.py:848(<dictcomp>)
+     1653    0.000    0.000    0.000    0.000 _parser.py:164(__len__)
+        6    0.000    0.000    0.000    0.000 {built-in method pytket._tket.circuit.to_dict}
+    16/12    0.000    0.000    0.000    0.000 cache.py:69(wrapper)
+       58    0.000    0.000    0.000    0.000 {method 'join' of 'str' objects}
+        6    0.000    0.000    0.000    0.000 decorators.py:224(_func)
+        6    0.000    0.000    0.000    0.000 decorators.py:99(binary_op_wrapper)
+        6    0.000    0.000    0.000    0.000 expr.py:215(__mul__)
+     2053    0.000    0.000    0.000    0.000 conversion.py:96(<lambda>)
+     1090    0.000    0.000    0.000    0.000 _parser.py:176(append)
+      176    0.000    0.000    0.000    0.000 grammar.py:112(_deserialize)
+     1098    0.000    0.000    0.000    0.000 _parser.py:293(tell)
+      168    0.000    0.000    0.000    0.000 _parser.py:86(opengroup)
+      2/1    0.000    0.000    0.000    0.000 operations.py:52(__new__)
+      258    0.000    0.000    0.000    0.000 lexer.py:375(<genexpr>)
+      459    0.000    0.000    0.000    0.000 __init__.py:253(escape)
+       66    0.000    0.000    0.000    0.000 enum.py:1525(__and__)
+        1    0.000    0.000    0.000    0.000 {method 'close' of '_io.TextIOWrapper' objects}
+      721    0.000    0.000    0.000    0.000 lexer.py:98(to_regexp)
+        6    0.000    0.000    0.000    0.000 {built-in method pytket._tket.circuit.symbol_substitution}
+       64    0.000    0.000    0.000    0.000 _compiler.py:386(_mk_bitmap)
+  768/183    0.000    0.000    0.000    0.000 {built-in method builtins.hash}
+       38    0.000    0.000    0.000    0.000 {method 'add' of 'set' objects}
+        1    0.000    0.000    0.000    0.000 mul.py:197(flatten)
+     2849    0.000    0.000    0.000    0.000 {built-in method builtins.setattr}
+     1200    0.000    0.000    0.000    0.000 {built-in method builtins.min}
+      267    0.000    0.000    0.000    0.000 _parser.py:453(_uniq)
+        2    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:1054(_find_spec)
+       83    0.000    0.000    0.000    0.000 lexer.py:651(<listcomp>)
+        1    0.000    0.000    0.000    0.000 tempfile.py:314(gettempdir)
+      218    0.000    0.000    0.000    0.000 _parser.py:172(__setitem__)
+        1    0.000    0.000    0.000    0.000 tempfile.py:302(_gettempdir)
+        1    0.000    0.000    0.000    0.000 tempfile.py:184(_get_default_tempdir)
+        1    0.000    0.000    0.000    0.000 lark.py:543(<listcomp>)
+      925    0.000    0.000    0.000    0.000 _parser.py:113(__init__)
+        1    0.000    0.000    0.000    0.000 {built-in method pyqir._native.qir_module}
+        4    0.000    0.000    0.000    0.000 {built-in method io.open}
+        2    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:1499(find_spec)
+        6    0.000    0.000    0.000    0.000 qasm.py:849(<dictcomp>)
+        2    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:1467(_get_spec)
+       84    0.000    0.000    0.000    0.000 copy.py:259(_reconstruct)
+       32    0.000    0.000    0.000    0.000 utils.py:23(classify)
+       78    0.000    0.000    0.000    0.000 _parser.py:376(_escape)
+      585    0.000    0.000    0.000    0.000 grammar.py:25(__hash__)
+      117    0.000    0.000    0.000    0.000 _compiler.py:398(_simple)
+     1180    0.000    0.000    0.000    0.000 lexer.py:70(_get_flags)
+       64    0.000    0.000    0.000    0.000 _compiler.py:388(<listcomp>)
+      599    0.000    0.000    0.000    0.000 lexer.py:394(_regexp_has_newline)
+        1    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:1007(get_code)
+       12    0.000    0.000    0.000    0.000 {built-in method pytket._tket.unit_id.from_list}
+      683    0.000    0.000    0.000    0.000 lexer.py:528(<genexpr>)
+        1    0.000    0.000    0.000    0.000 parser_frontends.py:153(<dictcomp>)
+      459    0.000    0.000    0.000    0.000 {method 'translate' of 'str' objects}
+        2    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:1607(find_spec)
+        2    0.000    0.000    0.000    0.000 assumptions.py:497(getit)
+      112    0.000    0.000    0.000    0.000 _compiler.py:216(_compile_charset)
+        1    0.000    0.000    0.000    0.000 assumptions.py:509(_ask)
+      198    0.000    0.000    0.000    0.000 enum.py:1507(_get_value)
+      402    0.000    0.000    0.000    0.000 _parser.py:83(groups)
+     1161    0.000    0.000    0.000    0.000 {built-in method builtins.hasattr}
+        6    0.000    0.000    0.000    0.000 _print_helpers.py:27(__str__)
+      291    0.000    0.000    0.000    0.000 parse_tree_builder.py:158(_should_expand)
+      256    0.000    0.000    0.000    0.000 lexer.py:111(max_width)
+      737    0.000    0.000    0.000    0.000 {method 'get' of 'dict' objects}
+      343    0.000    0.000    0.000    0.000 lexer.py:88(max_width)
+      168    0.000    0.000    0.000    0.000 _parser.py:304(checkgroupname)
+        6    0.000    0.000    0.000    0.000 printer.py:371(__call__)
+      494    0.000    0.000    0.000    0.000 {method 'find' of 'bytearray' objects}
+        2    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:1127(get_data)
+        6    0.000    0.000    0.000    0.000 str.py:980(sstr)
+        1    0.000    0.000    0.000    0.000 load_grammar.py:1389(verify_used_files)
+       32    0.000    0.000    0.000    0.000 _compiler.py:467(_get_charset_prefix)
+        6    0.000    0.000    0.000    0.000 symbol.py:285(__new__)
+      771    0.000    0.000    0.000    0.000 {built-in method builtins.ord}
+        1    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:727(_compile_bytecode)
+       84    0.000    0.000    0.000    0.000 {method '__reduce_ex__' of 'object' objects}
+        1    0.000    0.000    0.000    0.000 pkgutil.py:600(get_data)
+        1    0.000    0.000    0.000    0.000 {built-in method marshal.loads}
+       33    0.000    0.000    0.000    0.000 _parser.py:231(__init__)
+        1    0.000    0.000    0.000    0.000 lark.py:517(_deserialize_lexer_conf)
+      686    0.000    0.000    0.000    0.000 {method 'encode' of 'str' objects}
+       29    0.000    0.000    0.000    0.000 random.py:376(shuffle)
+       12    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:140(_path_stat)
+        1    0.000    0.000    0.000    0.000 typing.py:1586(__getitem__)
+        1    0.000    0.000    0.000    0.000 tempfile.py:154(__next__)
+        2    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:169(__enter__)
+       81    0.000    0.000    0.000    0.000 <frozen abc>:117(__instancecheck__)
+        2    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:566(module_from_spec)
+        5    0.000    0.000    0.000    0.000 sympify.py:500(_sympify)
+        2    0.000    0.000    0.000    0.000 {method 'read' of '_io.BufferedReader' objects}
+       12    0.000    0.000    0.000    0.000 {built-in method posix.stat}
+        2    0.000    0.000    0.000    0.000 lark.py:191(__init__)
+        2    0.000    0.000    0.000    0.000 mul.py:467(_gather)
+        1    0.000    0.000    0.000    0.000 {built-in method pytket._tket.passes.DecomposeBoxes}
+      123    0.000    0.000    0.000    0.000 parse_tree_builder.py:187(<listcomp>)
+       84    0.000    0.000    0.000    0.000 copyreg.py:104(__newobj__)
+        1    0.000    0.000    0.000    0.000 _entry_point.py:10(entry_point)
+        6    0.000    0.000    0.000    0.000 printer.py:290(doprint)
+        2    0.000    0.000    0.000    0.000 numbers.py:2249(__eq__)
+        1    0.000    0.000    0.000    0.000 {built-in method posix.open}
+        5    0.000    0.000    0.000    0.000 {method '__exit__' of '_io._IOBase' objects}
+      237    0.000    0.000    0.000    0.000 {method 'extend' of 'list' objects}
+       33    0.000    0.000    0.000    0.000 {built-in method _sre.compile}
+       33    0.000    0.000    0.000    0.000 _compiler.py:436(_get_literal_prefix)
+        2    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:179(_get_module_lock)
+      221    0.000    0.000    0.000    0.000 lexer.py:335(<lambda>)
+        2    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:493(_init_module_attrs)
+      168    0.000    0.000    0.000    0.000 _compiler.py:31(_combine_flags)
+        8    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:150(_path_is_mode_type)
+        1    0.000    0.000    0.000    0.000 numbers.py:3430(__eq__)
+        1    0.000    0.000    0.000    0.000 symbol.py:344(__xnew_cached_)
+      424    0.000    0.000    0.000    0.000 {method 'items' of 'dict' objects}
+       37    0.000    0.000    0.000    0.000 lexer.py:364(<setcomp>)
+        1    0.000    0.000    0.000    0.000 parser_frontends.py:127(_get_lexer_callbacks)
+        2    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:1424(_path_importer_cache)
+        1    0.000    0.000    0.000    0.000 cProfile.py:41(print_stats)
+        8    0.000    0.000    0.000    0.000 qasm.py:319(_reset_context)
+        2    0.000    0.000    0.000    0.000 numbers.py:1878(__eq__)
+        6    0.000    0.000    0.000    0.000 {built-in method pytket._tket.circuit.rename_units}
+      256    0.000    0.000    0.000    0.000 lexer.py:102(_get_width)
+        6    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:159(_path_isfile)
+        1    0.000    0.000    0.000    0.000 symbol.py:298(__xnew__)
+        5    0.000    0.000    0.000    0.000 sympify.py:99(sympify)
+       81    0.000    0.000    0.000    0.000 {built-in method _abc._abc_instancecheck}
+        6    0.000    0.000    0.000    0.000 printer.py:258(__init__)
+        1    0.000    0.000    0.000    0.000 {built-in method posix.unlink}
+        1    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:1411(_path_hooks)
+        6    0.000    0.000    0.000    0.000 printer.py:294(_print)
+        1    0.000    0.000    0.000    0.000 tempfile.py:143(rng)
+       66    0.000    0.000    0.000    0.000 _compiler.py:570(isstring)
+        1    0.000    0.000    0.000    0.000 {built-in method builtins.print}
+        2    0.000    0.000    0.000    0.000 {built-in method io.open_code}
+        1    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:1658(_fill_cache)
+        2    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:71(__init__)
+      168    0.000    0.000    0.000    0.000 {method 'isidentifier' of 'str' objects}
+       17    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:126(_path_join)
+        1    0.000    0.000    0.000    0.000 typing.py:1595(copy_with)
+       32    0.000    0.000    0.000    0.000 lexer.py:352(<listcomp>)
+        1    0.000    0.000    0.000    0.000 pstats.py:108(__init__)
+      221    0.000    0.000    0.000    0.000 parse_tree_builder.py:182(<genexpr>)
+        2    0.000    0.000    0.000    0.000 load_grammar.py:1419(sha256_digest)
+       27    0.000    0.000    0.000    0.000 random.py:235(_randbelow_with_getrandbits)
+        1    0.000    0.000    0.000    0.000 {built-in method posix.listdir}
+        1    0.000    0.000    0.000    0.000 typing.py:1376(__init__)
+        1    0.000    0.000    0.000    0.000 random.py:119(__init__)
+       33    0.000    0.000    0.000    0.000 _parser.py:963(fix_flags)
+        1    0.000    0.000    0.000    0.000 lark.py:233(deserialize)
+        4    0.000    0.000    0.000    0.000 {built-in method _thread.allocate_lock}
+        2    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:392(cached)
+       33    0.000    0.000    0.000    0.000 _parser.py:77(__init__)
+        1    0.000    0.000    0.000    0.000 random.py:128(seed)
+        1    0.000    0.000    0.000    0.000 tempfile.py:157(_candidate_tempdir_list)
+       64    0.000    0.000    0.000    0.000 {method 'translate' of 'bytearray' objects}
+        2    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:437(cache_from_source)
+        1    0.000    0.000    0.000    0.000 pstats.py:118(init)
+      321    0.000    0.000    0.000    0.000 {method 'keys' of 'dict' objects}
+       62    0.000    0.000    0.000    0.000 qasm.py:359(<genexpr>)
+        1    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:567(_get_cached)
+      123    0.000    0.000    0.000    0.000 parse_tree_builder.py:141(__init__)
+        1    0.000    0.000    0.000    0.000 assumptions.py:469(__init__)
+        7    0.000    0.000    0.000    0.000 qasm.py:300(__init__)
+        4    0.000    0.000    0.000    0.000 <frozen _collections_abc>:771(get)
+        6    0.000    0.000    0.000    0.000 symbol.py:254(_sanitize)
+        1    0.000    0.000    0.000    0.000 {built-in method posix.write}
+        1    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:1699(path_hook_for_FileFinder)
+        1    0.000    0.000    0.000    0.000 basic.py:2007(_exec_constructor_postprocessors)
+        1    0.000    0.000    0.000    0.000 utils.py:246(open)
+        3    0.000    0.000    0.000    0.000 typing.py:1591(<genexpr>)
+       17    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:128(<listcomp>)
+        1    0.000    0.000    0.000    0.000 <frozen posixpath>:117(splitext)
+        2    0.000    0.000    0.000    0.000 {built-in method _hashlib.openssl_sha256}
+       20    0.000    0.000    0.000    0.000 basic.py:189(__hash__)
+        1    0.000    0.000    0.000    0.000 random.py:480(choices)
+        1    0.000    0.000    0.000    0.000 mul.py:33(_mulsort)
+        7    0.000    0.000    0.000    0.000 qasm.py:918(<listcomp>)
+        5    0.000    0.000    0.000    0.000 {built-in method pyqir._native.add_string_attribute}
+        4    0.000    0.000    0.000    0.000 <frozen os>:674(__getitem__)
+        1    0.000    0.000    0.000    0.000 <frozen posixpath>:397(abspath)
+        6    0.000    0.000    0.000    0.000 printer.py:250(_get_initial_settings)
+        1    0.000    0.000    0.000    0.000 expr.py:893(_eval_is_extended_negative)
+        1    0.000    0.000    0.000    0.000 {function Random.seed at 0x740b8b2ca660}
+        1    0.000    0.000    0.000    0.000 getpass.py:154(getuser)
+       65    0.000    0.000    0.000    0.000 _compiler.py:428(_get_iscased)
+        7    0.000    0.000    0.000    0.000 typing.py:1320(__setattr__)
+       25    0.000    0.000    0.000    0.000 qasm.py:358(args)
+        1    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:1602(_get_spec)
+        2    0.000    0.000    0.000    0.000 typing.py:168(_type_check)
+        3    0.000    0.000    0.000    0.000 <frozen _collections_abc>:362(__subclasshook__)
+        1    0.000    0.000    0.000    0.000 parser_frontends.py:96(_make_lexer_thread)
+        1    0.000    0.000    0.000    0.000 pstats.py:137(load_stats)
+        7    0.000    0.000    0.000    0.000 numbers.py:3880(__hash__)
+        1    0.000    0.000    0.000    0.000 typing.py:1279(__init__)
+        1    0.000    0.000    0.000    0.000 {built-in method posix.close}
+        2    0.000    0.000    0.000    0.000 expr.py:851(_eval_is_extended_positive_negative)
+        2    0.000    0.000    0.000    0.000 <frozen posixpath>:71(join)
+        3    0.000    0.000    0.000    0.000 <frozen os>:773(getenv)
+       10    0.000    0.000    0.000    0.000 {built-in method void}
+        1    0.000    0.000    0.000    0.000 facts.py:599(deduce_all_facts)
+        6    0.000    0.000    0.000    0.000 {built-in method pyqir._native.qubit_type}
+        7    0.000    0.000    0.000    0.000 qasm.py:924(<listcomp>)
+        2    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:173(__exit__)
+        1    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:1562(__init__)
+        1    0.000    0.000    0.000    0.000 numbers.py:3596(__eq__)
+        1    0.000    0.000    0.000    0.000 random.py:493(<listcomp>)
+        2    0.000    0.000    0.000    0.000 mul.py:478(<listcomp>)
+        2    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:164(_path_isdir)
+       19    0.000    0.000    0.000    0.000 qasm.py:506(gatecall)
+        1    0.000    0.000    0.000    0.000 common.py:60(_deserialize)
+        1    0.000    0.000    0.000    0.000 basic.py:240(compare)
+       30    0.000    0.000    0.000    0.000 lark.py:220(__getattr__)
+        2    0.000    0.000    0.000    0.000 <frozen codecs>:309(__init__)
+        1    0.000    0.000    0.000    0.000 <frozen zipimport>:64(__init__)
+        1    0.000    0.000    0.000    0.000 <frozen posixpath>:60(isabs)
+        4    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:1207(_handle_fromlist)
+        1    0.000    0.000    0.000    0.000 lexer.py:439(from_text)
+        3    0.000    0.000    0.000    0.000 <frozen _collections_abc>:78(_check_methods)
+        1    0.000    0.000    0.000    0.000 {built-in method _warnings.warn}
+        1    0.000    0.000    0.000    0.000 common.py:61(<dictcomp>)
+        2    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:132(_path_split)
+        1    0.000    0.000    0.000    0.000 qasm.py:371(qreg)
+        2    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:100(acquire)
+       32    0.000    0.000    0.000    0.000 {method 'values' of 'dict' objects}
+        1    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:1311(__iter__)
+        7    0.000    0.000    0.000    0.000 typing.py:1266(_is_dunder)
+        5    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:405(parent)
+        1    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:642(_classify_pyc)
+        5    0.000    0.000    0.000    0.000 {method 'setdefault' of 'dict' objects}
+        1    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:1276(__init__)
+        1    0.000    0.000    0.000    0.000 lark.py:549(<dictcomp>)
+        1    0.000    0.000    0.000    0.000 {method 'readline' of '_io.BufferedReader' objects}
+        2    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:125(release)
+       30    0.000    0.000    0.000    0.000 {method 'update' of 'set' objects}
+        1    0.000    0.000    0.000    0.000 <frozen genericpath>:121(_splitext)
+        1    0.000    0.000    0.000    0.000 cProfile.py:51(create_stats)
+        1    0.000    0.000    0.000    0.000 <frozen posixpath>:150(dirname)
+        2    0.000    0.000    0.000    0.000 numbers.py:2211(__mul__)
+        1    0.000    0.000    0.000    0.000 qasm.py:255(<dictcomp>)
+        2    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:1293(_get_parent_path)
+        1    0.000    0.000    0.000    0.000 symbol.py:361(_hashable_content)
+        1    0.000    0.000    0.000    0.000 basic.py:36(_old_compare)
+        1    0.000    0.000    0.000    0.000 copyreg.py:113(_slotnames)
+        1    0.000    0.000    0.000    0.000 __init__.py:1467(debug)
+        2    0.000    0.000    0.000    0.000 basic.py:162(__new__)
+        2    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:920(find_spec)
+        1    0.000    0.000    0.000    0.000 operations.py:108(_from_args)
+       51    0.000    0.000    0.000    0.000 {method 'getrandbits' of '_random.Random' objects}
+        1    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:1146(path_stats)
+       14    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:244(_verbose_message)
+        1    0.000    0.000    0.000    0.000 parse_tree_builder.py:83(make_propagate_positions)
+       14    0.000    0.000    0.000    0.000 {method 'rpartition' of 'str' objects}
+        5    0.000    0.000    0.000    0.000 operations.py:63(<genexpr>)
+       37    0.000    0.000    0.000    0.000 {method 'rstrip' of 'str' objects}
+        3    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:84(_unpack_uint32)
+        1    0.000    0.000    0.000    0.000 parser_frontends.py:116(_validate_frontend_args)
+        1    0.000    0.000    0.000    0.000 {method 'erase' of 'builtins.Instruction' objects}
+        1    0.000    0.000    0.000    0.000 expr.py:890(_eval_is_extended_positive)
+        1    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:778(spec_from_file_location)
+        4    0.000    0.000    0.000    0.000 <frozen os>:756(encode)
+        1    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:675(_validate_timestamp_pyc)
+        2    0.000    0.000    0.000    0.000 numbers.py:1039(__new__)
+        2    0.000    0.000    0.000    0.000 {method 'hexdigest' of '_hashlib.HASH' objects}
+        1    0.000    0.000    0.000    0.000 <string>:1(<lambda>)
+        2    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:198(cb)
+        1    0.000    0.000    0.000    0.000 {built-in method pytket._tket.passes.FlattenRelabelRegistersPass}
+        8    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:1030(__exit__)
+        2    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:748(find_spec)
+        6    0.000    0.000    0.000    0.000 logic.py:92(fuzzy_bool)
+       22    0.000    0.000    0.000    0.000 {method 'pop' of 'dict' objects}
+        5    0.000    0.000    0.000    0.000 lark.py:314(<genexpr>)
+        1    0.000    0.000    0.000    0.000 lexer.py:252(new_borrow_pos)
+        1    0.000    0.000    0.000    0.000 {built-in method posix.getcwd}
+        1    0.000    0.000    0.000    0.000 lexer.py:416(__init__)
+        1    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:1297(_recalculate)
+        9    0.000    0.000    0.000    0.000 {method 'copy' of 'dict' objects}
+        6    0.000    0.000    0.000    0.000 numbers.py:2295(__hash__)
+        8    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:1026(__enter__)
+        7    0.000    0.000    0.000    0.000 visitors.py:108(__init__)
+        3    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:357(__init__)
+        1    0.000    0.000    0.000    0.000 <frozen posixpath>:389(normpath)
+       27    0.000    0.000    0.000    0.000 {method 'bit_length' of 'int' objects}
+        5    0.000    0.000    0.000    0.000 {method 'rfind' of 'str' objects}
+        2    0.000    0.000    0.000    0.000 basic.py:2021(<genexpr>)
+        2    0.000    0.000    0.000    0.000 {built-in method pyqir._native.result_type}
+        4    0.000    0.000    0.000    0.000 <frozen posixpath>:41(_get_sep)
+        1    0.000    0.000    0.000    0.000 <frozen importlib.util>:74(find_spec)
+        6    0.000    0.000    0.000    0.000 str.py:845(_print_Symbol)
+        7    0.000    0.000    0.000    0.000 basic.py:786(args)
+        1    0.000    0.000    0.000    0.000 <frozen os>:760(decode)
+        2    0.000    0.000    0.000    0.000 typing.py:159(_type_convert)
+        2    0.000    0.000    0.000    0.000 {method 'mro' of 'type' objects}
+        8    0.000    0.000    0.000    0.000 {method 'endswith' of 'str' objects}
+        2    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:1283(_find_parent_path_names)
+        4    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:134(<genexpr>)
+        2    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:48(_new_module)
+        2    0.000    0.000    0.000    0.000 __init__.py:82(find_spec)
+        2    0.000    0.000    0.000    0.000 operations.py:91(<listcomp>)
+        4    0.000    0.000    0.000    0.000 exceptions.py:19(assert_config)
+       12    0.000    0.000    0.000    0.000 {built-in method _imp.acquire_lock}
+        1    0.000    0.000    0.000    0.000 _compiler.py:407(_generate_overlap_table)
+       12    0.000    0.000    0.000    0.000 {built-in method _imp.release_lock}
+        1    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:599(_check_name_wrapper)
+        2    0.000    0.000    0.000    0.000 <frozen codecs>:260(__init__)
+        5    0.000    0.000    0.000    0.000 lexer.py:308(__init__)
+        2    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:180(_path_isabs)
+        8    0.000    0.000    0.000    0.000 {method 'random' of '_random.Random' objects}
+        2    0.000    0.000    0.000    0.000 {built-in method _imp.find_frozen}
+        1    0.000    0.000    0.000    0.000 parser_frontends.py:86(_verify_start)
+       11    0.000    0.000    0.000    0.000 {built-in method posix.fspath}
+        1    0.000    0.000    0.000    0.000 {method 'ret' of 'builtins.Builder' objects}
+        2    0.000    0.000    0.000    0.000 facts.py:582(_tell)
+        2    0.000    0.000    0.000    0.000 {built-in method _imp.is_builtin}
+        2    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:1101(_sanity_check)
+        1    0.000    0.000    0.000    0.000 typing.py:251(_collect_parameters)
+        1    0.000    0.000    0.000    0.000 <frozen os>:818(fsdecode)
+        8    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:1568(<genexpr>)
+        1    0.000    0.000    0.000    0.000 {method 'insert_at_end' of 'builtins.Builder' objects}
+        1    0.000    0.000    0.000    0.000 __init__.py:1734(isEnabledFor)
+        2    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:165(__init__)
+        1    0.000    0.000    0.000    0.000 <frozen codecs>:186(__init__)
+        1    0.000    0.000    0.000    0.000 lalr_parser_state.py:22(__init__)
+        2    0.000    0.000    0.000    0.000 {method 'decode' of 'bytes' objects}
+        1    0.000    0.000    0.000    0.000 {built-in method posix.getpid}
+        1    0.000    0.000    0.000    0.000 lalr_parser_state.py:40(__init__)
+        1    0.000    0.000    0.000    0.000 facts.py:579(__init__)
+        1    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:1097(__init__)
+        8    0.000    0.000    0.000    0.000 {built-in method math.floor}
+        1    0.000    0.000    0.000    0.000 lalr_analysis.py:39(__init__)
+        1    0.000    0.000    0.000    0.000 {built-in method builtins.sorted}
+        1    0.000    0.000    0.000    0.000 typing.py:284(_check_generic)
+        2    0.000    0.000    0.000    0.000 {method 'pop' of 'list' objects}
+        1    0.000    0.000    0.000    0.000 qasm.py:270(f)
+        4    0.000    0.000    0.000    0.000 {method '__exit__' of '_thread.lock' objects}
+        4    0.000    0.000    0.000    0.000 {built-in method _thread.get_ident}
+        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+        3    0.000    0.000    0.000    0.000 typing.py:1381(<genexpr>)
+        1    0.000    0.000    0.000    0.000 contextlib.py:440(__init__)
+        4    0.000    0.000    0.000    0.000 parse_tree_builder.py:17(__init__)
+        1    0.000    0.000    0.000    0.000 {method 'acquire' of '_thread.lock' objects}
+        1    0.000    0.000    0.000    0.000 symbol.py:373(assumptions0)
+        2    0.000    0.000    0.000    0.000 {method 'index' of 'list' objects}
+        2    0.000    0.000    0.000    0.000 expr.py:2009(as_base_exp)
+        1    0.000    0.000    0.000    0.000 lexer.py:279(__init__)
+        1    0.000    0.000    0.000    0.000 {built-in method posix._path_normpath}
+        1    0.000    0.000    0.000    0.000 lexer.py:443(lex)
+        1    0.000    0.000    0.000    0.000 lexer.py:435(__init__)
+        2    0.000    0.000    0.000    0.000 inspect.py:729(getmro)
+        1    0.000    0.000    0.000    0.000 _basicqis.py:12(__init__)
+        2    0.000    0.000    0.000    0.000 numbers.py:2045(as_coeff_Mul)
+        1    0.000    0.000    0.000    0.000 lalr_parser.py:78(__init__)
+        1    0.000    0.000    0.000    0.000 {method 'insert' of 'list' objects}
+        1    0.000    0.000    0.000    0.000 qasm.py:901(oqasm)
+        3    0.000    0.000    0.000    0.000 basic.py:112(__sympy__)
+        1    0.000    0.000    0.000    0.000 {method 'get' of 'mappingproxy' objects}
+        2    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:413(has_location)
+        1    0.000    0.000    0.000    0.000 {method 'release' of '_thread.lock' objects}
+        1    0.000    0.000    0.000    0.000 contextlib.py:446(__exit__)
+        1    0.000    0.000    0.000    0.000 {built-in method builtins.callable}
+        1    0.000    0.000    0.000    0.000 {method 'rstrip' of 'bytes' objects}
+        2    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:71(_relax_case)
+        1    0.000    0.000    0.000    0.000 {built-in method _imp._fix_co_filename}
+        1    0.000    0.000    0.000    0.000 mul.py:555(<listcomp>)
+        1    0.000    0.000    0.000    0.000 numbers.py:3117(__bool__)
+        1    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:1122(get_filename)
+        1    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:931(create_module)
+        1    0.000    0.000    0.000    0.000 mul.py:653(<listcomp>)
+        1    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:1363(exec_module)
+        1    0.000    0.000    0.000    0.000 contextlib.py:443(__enter__)
+

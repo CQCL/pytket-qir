@@ -22,8 +22,14 @@ from typing import Optional, Union
 import pyqir
 
 from pytket import wasm
-from pytket.circuit import Bit, Circuit, UnitID
-from pytket.passes import CustomPass
+from pytket.circuit import Bit, Circuit, OpType, UnitID
+from pytket.passes import (
+    CustomPass,
+    DecomposeBoxes,
+    FlattenRelabelRegistersPass,
+    SequencePass,
+    auto_rebase_pass,
+)
 from pytket.unit_id import _TEMP_BIT_NAME
 
 from .conversion import QirGenerator
@@ -44,8 +50,10 @@ def pytket_to_qir(
     name: str = "Generated from input pytket circuit",
     qir_format: QIRFormat = QIRFormat.BINARY,
     wfh: Optional[wasm.WasmFileHandler] = None,
-    int_type: int = 64,
+    int_type: int = 32,
     cut_pytket_register: bool = False,
+    compile_circuit: bool = False,
+    check_input: bool = True,
 ) -> Union[str, bytes, None]:
     """converts given pytket circuit to qir
 
@@ -59,28 +67,64 @@ def pytket_to_qir(
       into smaller registers, default value false
     """
 
-    if len(circ.q_registers) > 1 or (
-        len(circ.q_registers) == 1 and circ.q_registers[0].name != "q"
-    ):
-        raise ValueError(
-            """The circuit that should be converted should only have the default
-            quantum register. You can convert it using the pytket
-            compiler pass `FlattenRelabelRegistersPass`."""
+    if compile_circuit:
+        seqpass = SequencePass(
+            [
+                DecomposeBoxes(),
+                _scratch_reg_resize_pass(int_type),
+                auto_rebase_pass(
+                    set(
+                        [
+                            OpType.Measure,
+                            OpType.Reset,
+                            OpType.PhasedX,
+                            OpType.Barrier,
+                            OpType.WASM,
+                            OpType.SetBits,
+                            OpType.CopyBits,
+                            OpType.RangePredicate,
+                            OpType.ExplicitPredicate,
+                            OpType.ExplicitModifier,
+                            OpType.MultiBit,
+                            OpType.Rz,
+                            OpType.ClassicalExpBox,
+                            OpType.ZZPhase,
+                        ]
+                    )
+                ),
+                FlattenRelabelRegistersPass("q"),
+            ]
         )
-
-    if int_type != 32 and int_type != 64:
-        raise ValueError("the integer size must be 32 or 64")
-
-    if cut_pytket_register:
+        seqpass.apply(circ)
+    elif cut_pytket_register:
         cpass = _scratch_reg_resize_pass(int_type)
         cpass.apply(circ)  # type: ignore
 
-    for creg in circ.c_registers:
-        if creg.size > 64:
+    if check_input:
+        if len(circ.q_registers) > 1 or (
+            len(circ.q_registers) == 1 and circ.q_registers[0].name != "q"
+        ):
             raise ValueError(
-                """classical registers must not have more than 64 bits, \
-you could try to set cut_pytket_register=True in the conversion"""
+                """The circuit that should be converted should only have the default
+                quantum register. You can convert it using the pytket
+                compiler pass `FlattenRelabelRegistersPass`."""
             )
+
+        if int_type != 32 and int_type != 64:
+            raise ValueError("the integer size must be 32 or 64")
+
+
+        for creg in circ.c_registers:
+            if creg.size > 64:
+                raise ValueError(
+                    """classical registers must not have more than 64 bits, \
+you could try to set cut_pytket_register=True in the conversion"""
+                )
+            
+        set_circ_register = set([creg.name for creg in circ.c_registers])
+        for b in set([b.reg_name for b in circ.bits]):
+            if b not in set_circ_register:
+                raise ValueError(f"Used register {b} in not a valid register")
 
     m = tketqirModule(
         name=name,
@@ -92,9 +136,7 @@ you could try to set cut_pytket_register=True in the conversion"""
         circuit=circ, module=m, wasm_int_type=int_type, qir_int_type=int_type, wfh=wfh
     )
 
-    populated_module = qir_generator.circuit_to_module(
-        qir_generator.circuit, qir_generator.module, True
-    )
+    populated_module = qir_generator.circuit_to_module(qir_generator.circuit, True)
 
     if wfh is not None:
         wasm_sar_dict: dict[str, str] = qir_generator.get_wasm_sar()
