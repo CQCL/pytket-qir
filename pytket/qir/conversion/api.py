@@ -22,13 +22,9 @@ from typing import Optional, Union
 import pyqir
 
 from pytket import wasm
-from pytket.circuit import Bit, Circuit, OpType, UnitID
+from pytket.circuit import Bit, Circuit, UnitID
 from pytket.passes import (
     CustomPass,
-    DecomposeBoxes,
-    FlattenRelabelRegistersPass,
-    SequencePass,
-    auto_rebase_pass,
 )
 from pytket.unit_id import _TEMP_BIT_NAME
 
@@ -65,42 +61,11 @@ def pytket_to_qir(
     :param int_type: size of each integer, allowed value 32 and 64
     :param cut_pytket_register: breaks up the internal scratch bit registers
       into smaller registers, default value false
-    :param compile_circuit: decomposes all boxes in the circuit and
-      rebases to the required gateset
     :param check_input: checks if the circuit fulfils the requirements
       for the conversion
     """
 
-    if compile_circuit:
-        seqpass = SequencePass(
-            [
-                DecomposeBoxes(),
-                _scratch_reg_resize_pass(int_type),
-                auto_rebase_pass(
-                    set(
-                        [
-                            OpType.Measure,
-                            OpType.Reset,
-                            OpType.PhasedX,
-                            OpType.Barrier,
-                            OpType.WASM,
-                            OpType.SetBits,
-                            OpType.CopyBits,
-                            OpType.RangePredicate,
-                            OpType.ExplicitPredicate,
-                            OpType.ExplicitModifier,
-                            OpType.MultiBit,
-                            OpType.Rz,
-                            OpType.ClassicalExpBox,
-                            OpType.ZZPhase,
-                        ]
-                    )
-                ),
-                FlattenRelabelRegistersPass("q"),
-            ]
-        )
-        seqpass.apply(circ)
-    elif cut_pytket_register:
+    if cut_pytket_register:
         cpass = _scratch_reg_resize_pass(int_type)
         cpass.apply(circ)  # type: ignore
 
