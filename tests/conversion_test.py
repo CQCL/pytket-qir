@@ -263,7 +263,9 @@ def test_pytket_qir_14() -> None:
     c.X(0, condition=reg_leq(a, 1))
     c.Phase(0, condition=a[0])
 
-    result = pytket_to_qir(c, name="test_pytket_qir_14", qir_format=QIRFormat.STRING)
+    result = pytket_to_qir(
+        c, name="test_pytket_qir_14", int_type=64, qir_format=QIRFormat.STRING
+    )
 
     check_qir_result(result, "test_pytket_qir_14")
 
@@ -302,7 +304,9 @@ def test_pytket_qir_14_b() -> None:
     c.X(0, condition=reg_leq(a, 1))
     c.Phase(0, condition=a[0])
 
-    result = pytket_to_qir(c, name="test_pytket_qir_14_b", qir_format=QIRFormat.STRING)
+    result = pytket_to_qir(
+        c, name="test_pytket_qir_14_b", int_type=64, qir_format=QIRFormat.STRING
+    )
 
     check_qir_result(result, "test_pytket_qir_14_b")
 

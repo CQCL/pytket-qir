@@ -17,7 +17,7 @@ import pyqir
 import pytest
 from utilities import check_qir_result  # type: ignore
 
-from pytket.circuit import Circuit
+from pytket.circuit import Bit, Circuit
 from pytket.qir.conversion.api import (
     QIRFormat,
     pytket_to_qir,
@@ -66,6 +66,17 @@ def test_pytket_api_creg() -> None:
     circ.H(0)
 
     circ.add_c_register("c2", 100)
+
+    with pytest.raises(ValueError):
+        pytket_to_qir(circ)
+
+
+def test_pytket_api_creg_ii() -> None:
+    circ = Circuit(3)
+    circ.H(0)
+
+    circ.add_bit(Bit("c2", 3))
+    circ.add_bit(Bit("c2", 1))
 
     with pytest.raises(ValueError):
         pytket_to_qir(circ)

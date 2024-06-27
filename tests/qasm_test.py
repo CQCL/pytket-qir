@@ -14,7 +14,7 @@
 
 from utilities import check_qir_result  # type: ignore
 
-from pytket.qasm import circuit_from_qasm_str
+from pytket.qasm import circuit_from_qasm, circuit_from_qasm_str
 from pytket.qir.conversion.api import QIRFormat, pytket_to_qir
 
 
@@ -57,6 +57,74 @@ def test_pytket_qir_qasm_ii() -> None:
         check_qir_result(result, "test_pytket_qir_qasm")
 
 
+def test_pytket_qir_qasm_long() -> None:
+    try:
+        n = 7500
+
+        newfile = ""
+        with open("test_pytket_qir_qasm_long.qasm") as qfile:
+            count = 0
+            for line in qfile:
+                count = count + 1
+                if count < n:
+                    newfile += line
+
+        with open("test_pytket_qir_qasm_long_x.qasm", "w") as f:
+            f.write(newfile)
+
+        c = circuit_from_qasm("test_pytket_qir_qasm_long_x.qasm")
+
+        result = pytket_to_qir(
+            c,
+            name="test_pytket_qir_qasm_long",
+            qir_format=QIRFormat.STRING,
+            cut_pytket_register=True,
+            compile_circuit=True,
+        )
+
+        check_qir_result(result, "test_pytket_qir_qasm_long")
+    except FileNotFoundError:
+        with open("qec.qasm") as my_file:
+            circ = circuit_from_qasm_str(my_file.read())
+        result = pytket_to_qir(
+            circ,
+            name="test_pytket_qir_qasm",
+            qir_format=QIRFormat.STRING,
+            cut_pytket_register=True,
+        )
+        check_qir_result(result, "test_pytket_qir_qasm")
+
+
 if __name__ == "__main__":
-    test_pytket_qir_qasm()
-    test_pytket_qir_qasm_ii()
+    # test_pytket_qir_qasm()
+    # test_pytket_qir_qasm_ii()
+    # test_pytket_qir_qasm_long()
+    import cProfile
+    from pstats import SortKey
+
+    with cProfile.Profile() as pr:
+        n = 60000
+
+        newfile = ""
+        with open("test_pytket_qir_qasm_long.qasm") as qfile:
+            count = 0
+            for line in qfile:
+                count = count + 1
+                if count < n:
+                    newfile += line
+
+        with open("test_pytket_qir_qasm_long_x.qasm", "w") as f:
+            f.write(newfile)
+
+        c = circuit_from_qasm("test_pytket_qir_qasm_long_x.qasm")
+
+        result = pytket_to_qir(
+            c,
+            name="test_pytket_qir_qasm_long",
+            qir_format=QIRFormat.STRING,
+            cut_pytket_register=True,
+            compile_circuit=True,
+            check_input=False,
+        )
+
+        pr.print_stats(sort=SortKey.CUMULATIVE)

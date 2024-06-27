@@ -1,10 +1,17 @@
 Changelog
 ~~~~~~~~~
 
+
 0.12.0
 ------
 
 * updated pyqir version requirement to 0.10.2.
+* Update version requirements on dependencies, removing all upper bounds.
+* speed up conversion
+* add `check_input` parameter for additional checks of the circuit
+* add `compile_circuit` parameter for the automatic compilation of the
+  circuit to the required gateset and register format
+* Updated pytket version requirement to 1.29.2
 
 0.11.0 (May 2024)
 -----------------
