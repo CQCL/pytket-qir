@@ -73,12 +73,13 @@ def test_pytket_api_creg() -> None:
 
 def test_pytket_api_creg_ii() -> None:
     circ = Circuit(3)
-    circ.H(0)
 
     circ.add_bit(Bit("c2", 3))
     circ.add_bit(Bit("c2", 1))
 
-    with pytest.raises(ValueError):
+    circ.H(0, condition=Bit("c2", 1))
+
+    with pytest.raises(AssertionError):
         pytket_to_qir(circ)
 
 

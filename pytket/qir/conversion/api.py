@@ -48,7 +48,6 @@ def pytket_to_qir(
     wfh: Optional[wasm.WasmFileHandler] = None,
     int_type: int = 64,
     cut_pytket_register: bool = False,
-    compile_circuit: bool = False,
     check_input: bool = True,
 ) -> Union[str, bytes, None]:
     """converts given pytket circuit to qir
@@ -69,30 +68,24 @@ def pytket_to_qir(
         cpass = _scratch_reg_resize_pass(int_type)
         cpass.apply(circ)  # type: ignore
 
-    if check_input:
-        if len(circ.q_registers) > 1 or (
-            len(circ.q_registers) == 1 and circ.q_registers[0].name != "q"
-        ):
+    if len(circ.q_registers) > 1 or (
+        len(circ.q_registers) == 1 and circ.q_registers[0].name != "q"
+    ):
+        raise ValueError(
+            """The circuit that should be converted should only have the default
+            quantum register. You can convert it using the pytket
+            compiler pass `FlattenRelabelRegistersPass`."""
+        )
+
+    if int_type != 32 and int_type != 64:
+        raise ValueError("the integer size must be 32 or 64")
+
+    for creg in circ.c_registers:
+        if creg.size > int_type:
             raise ValueError(
-                """The circuit that should be converted should only have the default
-                quantum register. You can convert it using the pytket
-                compiler pass `FlattenRelabelRegistersPass`."""
-            )
-
-        if int_type != 32 and int_type != 64:
-            raise ValueError("the integer size must be 32 or 64")
-
-        for creg in circ.c_registers:
-            if creg.size > 64:
-                raise ValueError(
-                    """classical registers must not have more than 64 bits, \
+                f"""classical registers must not have more than {int_type} bits, \
 you could try to set cut_pytket_register=True in the conversion"""
-                )
-
-        set_circ_register = set([creg.name for creg in circ.c_registers])
-        for b in set([b.reg_name for b in circ.bits]):
-            if b not in set_circ_register:
-                raise ValueError(f"Used register {b} in not a valid register")
+            )
 
     m = tketqirModule(
         name=name,

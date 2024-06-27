@@ -7,7 +7,6 @@ Changelog
 * updated pyqir version requirement to 0.10.2.
 * Update version requirements on dependencies, removing all upper bounds.
 * speed up conversion
-* add `check_input` parameter for additional checks of the circuit
 * Updated pytket version requirement to 1.29.2
 
 0.11.0 (May 2024)
