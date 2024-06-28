@@ -316,6 +316,11 @@ class QirGenerator:
         for creg in self.circuit.c_registers:
             self._reg2ssa_var(creg, qir_int_type)
 
+    def get_ssa_vars(self, reg_name: str) -> Value:
+        if reg_name not in self.ssa_vars:
+            raise ValueError(f"{reg_name} is not a valid register")
+        return self.ssa_vars[reg_name]
+
     def _add_barrier_op(
         self, module: tketqirModule, index: int, qir_qubits: Sequence
     ) -> None:
@@ -436,7 +441,7 @@ class QirGenerator:
     def _get_i64_ssa_reg(self, name: str) -> Value:
         ssa_var = self.module.builder.call(
             self.get_int_from_creg,
-            [self.ssa_vars[name]],
+            [self.get_ssa_vars(name)],
         )
         return ssa_var
 
@@ -523,7 +528,7 @@ class QirGenerator:
             result = module.builder.call(
                 self.get_creg_bit,
                 [
-                    self.ssa_vars[bit.reg_name],
+                    self.get_ssa_vars(bit.reg_name),
                     pyqir.const(self.qir_int_type, bit.index[0]),
                 ],
             )
@@ -569,7 +574,7 @@ class QirGenerator:
             self.module.builder.call(
                 self.set_creg_bit,
                 [
-                    self.ssa_vars[result_registername],
+                    self.get_ssa_vars(result_registername),
                     pyqir.const(self.qir_int_type, condition_bit_index),
                     result,
                 ],
@@ -601,7 +606,7 @@ class QirGenerator:
             self.module.builder.call(
                 self.set_creg_bit,
                 [
-                    self.ssa_vars[registername],
+                    self.get_ssa_vars(registername),
                     pyqir.const(self.qir_int_type, condition_bit_index),
                     result,
                 ],
@@ -636,12 +641,10 @@ class QirGenerator:
                     if op.value == 0:
                         self.subcircuit_to_module(conditional_circuit)
 
-                assert condition_name in self.ssa_vars
-
                 ssabool = self.module.builder.call(
                     self.get_creg_bit,
                     [
-                        self.ssa_vars[condition_name],
+                        self.get_ssa_vars(condition_name),
                         pyqir.const(self.qir_int_type, condition_bit_index),
                     ],
                 )
@@ -709,12 +712,10 @@ class QirGenerator:
                     if op.value == 0:
                         self.command_to_module(op.op, command.args[op.width :])
 
-                assert condition_name in self.ssa_vars
-
                 ssabool = self.module.builder.call(
                     self.get_creg_bit,
                     [
-                        self.ssa_vars[condition_name],
+                        self.get_ssa_vars(condition_name),
                         pyqir.const(self.qir_int_type, condition_bit_index),
                     ],
                 )
@@ -774,7 +775,7 @@ class QirGenerator:
         if len(resultreg) == 1:
             self.module.builder.call(
                 self.set_creg_to_int,
-                [self.ssa_vars[resultreg[0]], result],
+                [self.get_ssa_vars(resultreg[0]), result],
             )
 
     def conv_ZZPhase(self, qubits: list[Qubit], op: Op) -> None:
@@ -902,7 +903,7 @@ class QirGenerator:
             self.mz_to_creg_bit,
             [
                 self.module.module.qubits[qubits[0].index[0]],
-                self.ssa_vars[bits[0].reg_name],
+                self.get_ssa_vars(bits[0].reg_name),
                 pyqir.const(self.qir_int_type, bits[0].index[0]),
             ],
         )
@@ -996,7 +997,7 @@ class QirGenerator:
             self.module.builder.call(
                 self.set_creg_bit,
                 [
-                    self.ssa_vars[outputs],
+                    self.get_ssa_vars(outputs),
                     pyqir.const(self.qir_int_type, result_index),
                     output_instruction,
                 ],
@@ -1004,7 +1005,7 @@ class QirGenerator:
         else:
             self.module.builder.call(
                 self.set_creg_to_int,
-                [self.ssa_vars[outputs], output_instruction],
+                [self.get_ssa_vars(outputs), output_instruction],
             )
 
     def conv_SetBitsOp(self, bits: list[Bit], op: SetBitsOp) -> None:
@@ -1016,7 +1017,7 @@ class QirGenerator:
             self.module.builder.call(
                 self.set_creg_bit,
                 [
-                    self.ssa_vars[b.reg_name],
+                    self.get_ssa_vars(b.reg_name),
                     pyqir.const(self.qir_int_type, b.index[0]),
                     output_instruction,
                 ],
@@ -1030,7 +1031,7 @@ class QirGenerator:
             output_instruction = self.module.builder.call(
                 self.get_creg_bit,
                 [
-                    self.ssa_vars[i.reg_name],
+                    self.get_ssa_vars(i.reg_name),
                     pyqir.const(self.qir_int_type, i.index[0]),
                 ],
             )
@@ -1038,7 +1039,7 @@ class QirGenerator:
             self.module.builder.call(
                 self.set_creg_bit,
                 [
-                    self.ssa_vars[o.reg_name],
+                    self.get_ssa_vars(o.reg_name),
                     pyqir.const(self.qir_int_type, o.index[0]),
                     output_instruction,
                 ],

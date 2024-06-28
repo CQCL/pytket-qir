@@ -8,6 +8,8 @@ Changelog
 * Update version requirements on dependencies, removing all upper bounds.
 * speed up conversion
 * Updated pytket version requirement to 1.29.2
+* add additional `check_circuit` function for checking the
+  circuit before converting
 
 0.11.0 (May 2024)
 -----------------

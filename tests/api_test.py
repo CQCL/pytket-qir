@@ -18,8 +18,10 @@ import pytest
 from utilities import check_qir_result  # type: ignore
 
 from pytket.circuit import Bit, Circuit
+from pytket.passes import FlattenRelabelRegistersPass
 from pytket.qir.conversion.api import (
     QIRFormat,
+    check_circuit,
     pytket_to_qir,
 )
 
@@ -71,7 +73,7 @@ def test_pytket_api_creg() -> None:
         pytket_to_qir(circ)
 
 
-def test_pytket_api_creg_ii() -> None:
+def test_pytket_api_creg_2() -> None:
     circ = Circuit(3)
 
     circ.add_bit(Bit("c2", 3))
@@ -79,8 +81,37 @@ def test_pytket_api_creg_ii() -> None:
 
     circ.H(0, condition=Bit("c2", 1))
 
-    with pytest.raises(AssertionError):
+    with pytest.raises(ValueError):
         pytket_to_qir(circ)
+
+
+def test_pytket_api_creg_3() -> None:
+    circ = Circuit(3)
+
+    circ.add_bit(Bit("c2", 3))
+    circ.add_bit(Bit("c2", 1))
+
+    circ.H(0, condition=Bit("c2", 1))
+
+    with pytest.raises(ValueError):
+        check_circuit(circ)
+
+
+def test_pytket_api_creg_4() -> None:
+    circ = Circuit(3)
+
+    circ.add_bit(Bit("c2", 0))
+    circ.add_bit(Bit("c2", 1))
+    circ.add_bit(Bit("c2", 2))
+    circ.add_bit(Bit("c2", 3))
+
+    circ.H(0, condition=Bit("c2", 2))
+    check_circuit(circ)
+
+    FlattenRelabelRegistersPass("q").apply(circ)
+
+    with pytest.raises(ValueError):
+        check_circuit(circ)
 
 
 def test_pytket_qir_module() -> None:
