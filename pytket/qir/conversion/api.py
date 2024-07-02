@@ -136,7 +136,7 @@ def check_circuit(
     int_type: int = 64,
 ) -> None:
     """Checks the validity of the circuit.
-    
+
     Running this check before conversion is recommended for big circuits that
     take a long time to be converted.
 
