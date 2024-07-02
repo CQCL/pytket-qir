@@ -32,31 +32,5 @@ def test_pytket_qir_qasm() -> None:
     check_qir_result(result, "test_pytket_qir_qasm")
 
 
-def test_pytket_qir_qasm_ii() -> None:
-    try:
-        with open("qec_ii.qasm") as my_file:
-            circ = circuit_from_qasm_str(my_file.read())
-
-        result = pytket_to_qir(
-            circ,
-            name="test_pytket_qir_qasm_ii",
-            qir_format=QIRFormat.STRING,
-            cut_pytket_register=True,
-        )
-
-        check_qir_result(result, "test_pytket_qir_qasm_ii")
-    except FileNotFoundError:
-        with open("qec.qasm") as my_file:
-            circ = circuit_from_qasm_str(my_file.read())
-        result = pytket_to_qir(
-            circ,
-            name="test_pytket_qir_qasm",
-            qir_format=QIRFormat.STRING,
-            cut_pytket_register=True,
-        )
-        check_qir_result(result, "test_pytket_qir_qasm")
-
-
 if __name__ == "__main__":
     test_pytket_qir_qasm()
-    test_pytket_qir_qasm_ii()

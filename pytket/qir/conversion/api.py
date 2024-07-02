@@ -23,7 +23,9 @@ import pyqir
 
 from pytket import wasm
 from pytket.circuit import Bit, Circuit, UnitID
-from pytket.passes import CustomPass
+from pytket.passes import (
+    CustomPass,
+)
 from pytket.unit_id import _TEMP_BIT_NAME
 
 from .conversion import QirGenerator
@@ -59,28 +61,11 @@ def pytket_to_qir(
       into smaller registers, default value false
     """
 
-    if len(circ.q_registers) > 1 or (
-        len(circ.q_registers) == 1 and circ.q_registers[0].name != "q"
-    ):
-        raise ValueError(
-            """The circuit that should be converted should only have the default
-            quantum register. You can convert it using the pytket
-            compiler pass `FlattenRelabelRegistersPass`."""
-        )
-
-    if int_type != 32 and int_type != 64:
-        raise ValueError("the integer size must be 32 or 64")
-
     if cut_pytket_register:
         cpass = _scratch_reg_resize_pass(int_type)
         cpass.apply(circ)  # type: ignore
 
-    for creg in circ.c_registers:
-        if creg.size > 64:
-            raise ValueError(
-                """classical registers must not have more than 64 bits, \
-you could try to set cut_pytket_register=True in the conversion"""
-            )
+    check_circuit(circ, int_type)
 
     m = tketqirModule(
         name=name,
@@ -92,9 +77,7 @@ you could try to set cut_pytket_register=True in the conversion"""
         circuit=circ, module=m, wasm_int_type=int_type, qir_int_type=int_type, wfh=wfh
     )
 
-    populated_module = qir_generator.circuit_to_module(
-        qir_generator.circuit, qir_generator.module, True
-    )
+    populated_module = qir_generator.circuit_to_module(qir_generator.circuit, True)
 
     if wfh is not None:
         wasm_sar_dict: dict[str, str] = qir_generator.get_wasm_sar()
@@ -122,6 +105,44 @@ you could try to set cut_pytket_register=True in the conversion"""
             return populated_module.module.ir()
         else:
             assert not "unsupported return type"  # type: ignore
+
+
+def check_circuit(
+    circuit: Circuit,
+    int_type: int = 64,
+) -> None:
+    """Checks the validity of the circuit.
+
+    Running this check before conversion is recommended for big circuits that
+    take a long time to be converted.
+
+    :param circuit: given circuit
+    :param int_type: integer bit width (32 or 64)
+    :raises ValueError: with a suggestion on how to resolve the problems
+    """
+    if len(circuit.q_registers) > 1 or (
+        len(circuit.q_registers) == 1 and circuit.q_registers[0].name != "q"
+    ):
+        raise ValueError(
+            """The circuit that should be converted should only have the default
+            quantum register. You can convert it using the pytket
+            compiler pass `FlattenRelabelRegistersPass`."""
+        )
+
+    if int_type != 32 and int_type != 64:
+        raise ValueError("the integer size must be 32 or 64")
+
+    for creg in circuit.c_registers:
+        if creg.size > int_type:
+            raise ValueError(
+                f"""classical registers must not have more than {int_type} bits, \
+you could try to set cut_pytket_register=True in the conversion"""
+            )
+
+    set_circ_register = set([creg.name for creg in circuit.c_registers])
+    for b in set([b.reg_name for b in circuit.bits]):
+        if b not in set_circ_register:
+            raise ValueError(f"Used register {b} in not a valid register")
 
 
 def _scratch_reg_resize_pass(max_size: int) -> CustomPass:  # type: ignore
