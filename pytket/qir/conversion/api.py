@@ -135,12 +135,14 @@ def check_circuit(
     circuit: Circuit,
     int_type: int = 64,
 ) -> None:
-    """runs the checks for the conversion. Running this check
-     is recomended for big circuits that take a long time to be converted.
-    This functions will throw error with suggestion on how to resolve the
-    problems.
+    """Checks the validity of the circuit.
+    
+    Running this check before conversion is recommended for big circuits that
+    take a long time to be converted.
+
     :param circuit: given circuit
-    :param int_type: size of each integer, allowed value 32 and 64
+    :param int_type: integer bit width (32 or 64)
+    :raises ValueError: with a suggestion on how to resolve the problems
     """
     _check_circuit_before_conversion(circuit, int_type)
 
