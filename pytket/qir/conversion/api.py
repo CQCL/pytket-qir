@@ -65,7 +65,7 @@ def pytket_to_qir(
         cpass = _scratch_reg_resize_pass(int_type)
         cpass.apply(circ)  # type: ignore
 
-    _check_circuit_before_conversion(circ, int_type)
+    check_circuit(circ, int_type)
 
     m = tketqirModule(
         name=name,
@@ -107,10 +107,19 @@ def pytket_to_qir(
             assert not "unsupported return type"  # type: ignore
 
 
-def _check_circuit_before_conversion(
+def check_circuit(
     circuit: Circuit,
     int_type: int = 64,
 ) -> None:
+    """Checks the validity of the circuit.
+
+    Running this check before conversion is recommended for big circuits that
+    take a long time to be converted.
+
+    :param circuit: given circuit
+    :param int_type: integer bit width (32 or 64)
+    :raises ValueError: with a suggestion on how to resolve the problems
+    """
     if len(circuit.q_registers) > 1 or (
         len(circuit.q_registers) == 1 and circuit.q_registers[0].name != "q"
     ):
@@ -129,22 +138,6 @@ def _check_circuit_before_conversion(
                 f"""classical registers must not have more than {int_type} bits, \
 you could try to set cut_pytket_register=True in the conversion"""
             )
-
-
-def check_circuit(
-    circuit: Circuit,
-    int_type: int = 64,
-) -> None:
-    """Checks the validity of the circuit.
-
-    Running this check before conversion is recommended for big circuits that
-    take a long time to be converted.
-
-    :param circuit: given circuit
-    :param int_type: integer bit width (32 or 64)
-    :raises ValueError: with a suggestion on how to resolve the problems
-    """
-    _check_circuit_before_conversion(circuit, int_type)
 
     set_circ_register = set([creg.name for creg in circuit.c_registers])
     for b in set([b.reg_name for b in circuit.bits]):
