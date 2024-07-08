@@ -130,9 +130,9 @@ class QirGenerator:
         self.target_gateset = self.module.gateset.base_gateset
 
         self.wasm_sar_dict: dict[str, str] = {}
-        self.wasm_sar_dict[
-            "!llvm.module.flags"
-        ] = 'attributes #1 = { "wasm" }\n\n!llvm.module.flags'
+        self.wasm_sar_dict["!llvm.module.flags"] = (
+            'attributes #1 = { "wasm" }\n\n!llvm.module.flags'
+        )
         self.int_type_str = f"i{qir_int_type}"
 
         self.target_gateset.add(OpType.PhasedX)
@@ -780,18 +780,18 @@ class QirGenerator:
 
     def conv_ZZPhase(self, qubits: list[Qubit], op: Op) -> None:
         if OpType.ZZPhase not in self.additional_quantum_gates:
-            self.additional_quantum_gates[
-                OpType.ZZPhase
-            ] = self.module.module.add_external_function(
-                "__quantum__qis__rzz__body",
-                pyqir.FunctionType(
-                    pyqir.Type.void(self.module.module.context),
-                    [
-                        pyqir.Type.double(self.module.module.context),
-                        pyqir.qubit_type(self.module.module.context),
-                        pyqir.qubit_type(self.module.module.context),
-                    ],
-                ),
+            self.additional_quantum_gates[OpType.ZZPhase] = (
+                self.module.module.add_external_function(
+                    "__quantum__qis__rzz__body",
+                    pyqir.FunctionType(
+                        pyqir.Type.void(self.module.module.context),
+                        [
+                            pyqir.Type.double(self.module.module.context),
+                            pyqir.qubit_type(self.module.module.context),
+                            pyqir.qubit_type(self.module.module.context),
+                        ],
+                    ),
+                )
             )
 
         self.module.builder.call(
@@ -808,18 +808,18 @@ class QirGenerator:
 
     def conv_phasedx(self, qubits: list[Qubit], op: Op) -> None:
         if OpType.PhasedX not in self.additional_quantum_gates:
-            self.additional_quantum_gates[
-                OpType.PhasedX
-            ] = self.module.module.add_external_function(
-                "__quantum__qis__phasedx__body",
-                pyqir.FunctionType(
-                    pyqir.Type.void(self.module.module.context),
-                    [
-                        pyqir.Type.double(self.module.module.context),
-                        pyqir.Type.double(self.module.module.context),
-                        pyqir.qubit_type(self.module.module.context),
-                    ],
-                ),
+            self.additional_quantum_gates[OpType.PhasedX] = (
+                self.module.module.add_external_function(
+                    "__quantum__qis__phasedx__body",
+                    pyqir.FunctionType(
+                        pyqir.Type.void(self.module.module.context),
+                        [
+                            pyqir.Type.double(self.module.module.context),
+                            pyqir.Type.double(self.module.module.context),
+                            pyqir.qubit_type(self.module.module.context),
+                        ],
+                    ),
+                )
             )
 
         self.module.builder.call(
@@ -839,20 +839,20 @@ class QirGenerator:
 
     def conv_tk2(self, qubits: list[Qubit], op: Op) -> None:
         if OpType.TK2 not in self.additional_quantum_gates:
-            self.additional_quantum_gates[
-                OpType.TK2
-            ] = self.module.module.add_external_function(
-                "__quantum__qis__rxxyyzz__body",
-                pyqir.FunctionType(
-                    pyqir.Type.void(self.module.module.context),
-                    [
-                        pyqir.Type.double(self.module.module.context),
-                        pyqir.Type.double(self.module.module.context),
-                        pyqir.Type.double(self.module.module.context),
-                        pyqir.qubit_type(self.module.module.context),
-                        pyqir.qubit_type(self.module.module.context),
-                    ],
-                ),
+            self.additional_quantum_gates[OpType.TK2] = (
+                self.module.module.add_external_function(
+                    "__quantum__qis__rxxyyzz__body",
+                    pyqir.FunctionType(
+                        pyqir.Type.void(self.module.module.context),
+                        [
+                            pyqir.Type.double(self.module.module.context),
+                            pyqir.Type.double(self.module.module.context),
+                            pyqir.Type.double(self.module.module.context),
+                            pyqir.qubit_type(self.module.module.context),
+                            pyqir.qubit_type(self.module.module.context),
+                        ],
+                    ),
+                )
             )
 
         self.module.builder.call(
@@ -877,17 +877,17 @@ class QirGenerator:
 
     def conv_zzmax(self, qubits: list[Qubit]) -> None:
         if OpType.ZZMax not in self.additional_quantum_gates:
-            self.additional_quantum_gates[
-                OpType.ZZMax
-            ] = self.module.module.add_external_function(
-                "__quantum__qis__zzmax__body",
-                pyqir.FunctionType(
-                    pyqir.Type.void(self.module.module.context),
-                    [
-                        pyqir.qubit_type(self.module.module.context),
-                        pyqir.qubit_type(self.module.module.context),
-                    ],
-                ),
+            self.additional_quantum_gates[OpType.ZZMax] = (
+                self.module.module.add_external_function(
+                    "__quantum__qis__zzmax__body",
+                    pyqir.FunctionType(
+                        pyqir.Type.void(self.module.module.context),
+                        [
+                            pyqir.qubit_type(self.module.module.context),
+                            pyqir.qubit_type(self.module.module.context),
+                        ],
+                    ),
+                )
             )
 
         self.module.builder.call(
