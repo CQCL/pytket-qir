@@ -18,9 +18,9 @@ entry:
   %1 = call i1* @create_creg(i64 32)
   %2 = call i1* @create_creg(i64 32)
   %3 = call i1* @create_creg(i64 9)
-  %4 = call i1* @create_creg(i64 32)
-  %5 = call i1* @create_creg(i64 32)
-  %6 = call i1* @create_creg(i64 32)
+  %4 = call i1* @create_creg(i64 64)
+  %5 = call i1* @create_creg(i64 64)
+  %6 = call i1* @create_creg(i64 64)
   call void @set_creg_bit(i1* %0, i64 0, i1 true)
   call void @set_creg_bit(i1* %1, i64 0, i1 true)
   call void @set_creg_bit(i1* %1, i64 1, i1 true)
@@ -202,7 +202,7 @@ entry:
   %51 = call i64 @get_int_from_creg(i1* %0)
   %52 = icmp sgt i64 2, %51
   %53 = call i64 @get_int_from_creg(i1* %0)
-  %54 = icmp sgt i64 %53, 4294967295
+  %54 = icmp sgt i64 %53, -1
   %55 = and i1 %52, %54
   call void @set_creg_bit(i1* %3, i64 5, i1 %55)
   %56 = call i64 @get_int_from_creg(i1* %0)
@@ -211,7 +211,7 @@ entry:
   %58 = call i64 @get_int_from_creg(i1* %0)
   %59 = icmp sgt i64 1, %58
   %60 = call i64 @get_int_from_creg(i1* %0)
-  %61 = icmp sgt i64 %60, 4294967295
+  %61 = icmp sgt i64 %60, -1
   %62 = and i1 %59, %61
   call void @set_creg_bit(i1* %3, i64 7, i1 %62)
   %63 = call i64 @get_int_from_creg(i1* %0)

@@ -23,7 +23,7 @@ entry:
   %8 = call i64 @get_int_from_creg(i1* %0)
   %9 = icmp sgt i64 2, %8
   %10 = call i64 @get_int_from_creg(i1* %0)
-  %11 = icmp sgt i64 %10, 4294967295
+  %11 = icmp sgt i64 %10, -1
   %12 = and i1 %9, %11
   call void @set_creg_bit(i1* %1, i64 3, i1 %12)
   %13 = call i64 @get_int_from_creg(i1* %0)
@@ -35,7 +35,7 @@ entry:
   %18 = call i64 @get_int_from_creg(i1* %0)
   %19 = icmp sgt i64 1, %18
   %20 = call i64 @get_int_from_creg(i1* %0)
-  %21 = icmp sgt i64 %20, 4294967295
+  %21 = icmp sgt i64 %20, -1
   %22 = and i1 %19, %21
   call void @set_creg_bit(i1* %1, i64 5, i1 %22)
   %23 = call i1 @get_creg_bit(i1* %1, i64 0)
