@@ -110,8 +110,25 @@ def test_pytket_api_creg_4() -> None:
 
     FlattenRelabelRegistersPass("q").apply(circ)
 
+    check_circuit(circ)
+
+
+def test_pytket_api_creg_5() -> None:
+    circ = Circuit(3)
+
+    circ.add_bit(Bit("c2", 1))
+    circ.add_bit(Bit("c2", 2))
+    circ.add_bit(Bit("c2", 3))
+
+    circ.H(0, condition=Bit("c2", 2))
     with pytest.raises(ValueError):
         check_circuit(circ)
+
+    circ.add_bit(Bit("c2", 0))
+
+    FlattenRelabelRegistersPass("q").apply(circ)
+
+    check_circuit(circ)
 
 
 def test_pytket_qir_module() -> None:
