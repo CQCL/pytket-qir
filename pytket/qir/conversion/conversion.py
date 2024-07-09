@@ -516,7 +516,7 @@ class QirGenerator:
             return output_instruction  # type: ignore
         elif type(reg) == BitRegister:
             return self._get_i64_ssa_reg(reg.name)
-        elif type(reg) == int:
+        elif type(reg) is int:
             return pyqir.const(self.qir_int_type, reg)
         else:
             raise ValueError(f"unsupported classical register operation: {type(reg)}")
@@ -534,7 +534,7 @@ class QirGenerator:
             )
 
             return result
-        elif type(bit) == int:
+        elif type(bit) is int:
             return pyqir.const(self.qir_bool_type, bit)
         elif type(bit) in _TK_CLOPS_TO_PYQIR_BIT:
             assert len(bit.args) == 2
