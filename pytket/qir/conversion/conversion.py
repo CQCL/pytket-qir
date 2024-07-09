@@ -130,9 +130,9 @@ class QirGenerator:
         self.target_gateset = self.module.gateset.base_gateset
 
         self.wasm_sar_dict: dict[str, str] = {}
-        self.wasm_sar_dict[
-            "!llvm.module.flags"
-        ] = 'attributes #1 = { "wasm" }\n\n!llvm.module.flags'
+        self.wasm_sar_dict["!llvm.module.flags"] = (
+            'attributes #1 = { "wasm" }\n\n!llvm.module.flags'
+        )
         self.int_type_str = f"i{qir_int_type}"
 
         self.target_gateset.add(OpType.PhasedX)
@@ -516,7 +516,7 @@ class QirGenerator:
             return output_instruction  # type: ignore
         elif type(reg) == BitRegister:
             return self._get_i64_ssa_reg(reg.name)
-        elif type(reg) == int:
+        elif type(reg) is int:
             return pyqir.const(self.qir_int_type, reg)
         else:
             raise ValueError(f"unsupported classical register operation: {type(reg)}")
@@ -534,7 +534,7 @@ class QirGenerator:
             )
 
             return result
-        elif type(bit) == int:
+        elif type(bit) is int:
             return pyqir.const(self.qir_bool_type, bit)
         elif type(bit) in _TK_CLOPS_TO_PYQIR_BIT:
             assert len(bit.args) == 2
@@ -780,18 +780,18 @@ class QirGenerator:
 
     def conv_ZZPhase(self, qubits: list[Qubit], op: Op) -> None:
         if OpType.ZZPhase not in self.additional_quantum_gates:
-            self.additional_quantum_gates[
-                OpType.ZZPhase
-            ] = self.module.module.add_external_function(
-                "__quantum__qis__rzz__body",
-                pyqir.FunctionType(
-                    pyqir.Type.void(self.module.module.context),
-                    [
-                        pyqir.Type.double(self.module.module.context),
-                        pyqir.qubit_type(self.module.module.context),
-                        pyqir.qubit_type(self.module.module.context),
-                    ],
-                ),
+            self.additional_quantum_gates[OpType.ZZPhase] = (
+                self.module.module.add_external_function(
+                    "__quantum__qis__rzz__body",
+                    pyqir.FunctionType(
+                        pyqir.Type.void(self.module.module.context),
+                        [
+                            pyqir.Type.double(self.module.module.context),
+                            pyqir.qubit_type(self.module.module.context),
+                            pyqir.qubit_type(self.module.module.context),
+                        ],
+                    ),
+                )
             )
 
         self.module.builder.call(
@@ -808,18 +808,18 @@ class QirGenerator:
 
     def conv_phasedx(self, qubits: list[Qubit], op: Op) -> None:
         if OpType.PhasedX not in self.additional_quantum_gates:
-            self.additional_quantum_gates[
-                OpType.PhasedX
-            ] = self.module.module.add_external_function(
-                "__quantum__qis__phasedx__body",
-                pyqir.FunctionType(
-                    pyqir.Type.void(self.module.module.context),
-                    [
-                        pyqir.Type.double(self.module.module.context),
-                        pyqir.Type.double(self.module.module.context),
-                        pyqir.qubit_type(self.module.module.context),
-                    ],
-                ),
+            self.additional_quantum_gates[OpType.PhasedX] = (
+                self.module.module.add_external_function(
+                    "__quantum__qis__phasedx__body",
+                    pyqir.FunctionType(
+                        pyqir.Type.void(self.module.module.context),
+                        [
+                            pyqir.Type.double(self.module.module.context),
+                            pyqir.Type.double(self.module.module.context),
+                            pyqir.qubit_type(self.module.module.context),
+                        ],
+                    ),
+                )
             )
 
         self.module.builder.call(
@@ -839,20 +839,20 @@ class QirGenerator:
 
     def conv_tk2(self, qubits: list[Qubit], op: Op) -> None:
         if OpType.TK2 not in self.additional_quantum_gates:
-            self.additional_quantum_gates[
-                OpType.TK2
-            ] = self.module.module.add_external_function(
-                "__quantum__qis__rxxyyzz__body",
-                pyqir.FunctionType(
-                    pyqir.Type.void(self.module.module.context),
-                    [
-                        pyqir.Type.double(self.module.module.context),
-                        pyqir.Type.double(self.module.module.context),
-                        pyqir.Type.double(self.module.module.context),
-                        pyqir.qubit_type(self.module.module.context),
-                        pyqir.qubit_type(self.module.module.context),
-                    ],
-                ),
+            self.additional_quantum_gates[OpType.TK2] = (
+                self.module.module.add_external_function(
+                    "__quantum__qis__rxxyyzz__body",
+                    pyqir.FunctionType(
+                        pyqir.Type.void(self.module.module.context),
+                        [
+                            pyqir.Type.double(self.module.module.context),
+                            pyqir.Type.double(self.module.module.context),
+                            pyqir.Type.double(self.module.module.context),
+                            pyqir.qubit_type(self.module.module.context),
+                            pyqir.qubit_type(self.module.module.context),
+                        ],
+                    ),
+                )
             )
 
         self.module.builder.call(
@@ -877,17 +877,17 @@ class QirGenerator:
 
     def conv_zzmax(self, qubits: list[Qubit]) -> None:
         if OpType.ZZMax not in self.additional_quantum_gates:
-            self.additional_quantum_gates[
-                OpType.ZZMax
-            ] = self.module.module.add_external_function(
-                "__quantum__qis__zzmax__body",
-                pyqir.FunctionType(
-                    pyqir.Type.void(self.module.module.context),
-                    [
-                        pyqir.qubit_type(self.module.module.context),
-                        pyqir.qubit_type(self.module.module.context),
-                    ],
-                ),
+            self.additional_quantum_gates[OpType.ZZMax] = (
+                self.module.module.add_external_function(
+                    "__quantum__qis__zzmax__body",
+                    pyqir.FunctionType(
+                        pyqir.Type.void(self.module.module.context),
+                        [
+                            pyqir.qubit_type(self.module.module.context),
+                            pyqir.qubit_type(self.module.module.context),
+                        ],
+                    ),
+                )
             )
 
         self.module.builder.call(

@@ -32,7 +32,7 @@ def test_pytket_qir_BINARY() -> None:
 
     result = pytket_to_qir(circ, name="test_pytket_qir", qir_format=QIRFormat.BINARY)
 
-    assert type(result) == bytes
+    assert type(result) is bytes
 
 
 def test_pytket_qir() -> None:
