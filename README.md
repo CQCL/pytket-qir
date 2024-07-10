@@ -11,6 +11,9 @@ with tket, a quantum computing toolkit and optimising compiler developed by Quan
 `pytket-qir` is an extension to `pytket` that allows `pytket` circuits to
 be converted to qir.
 
+Some useful links:
+- [API Documentation](https://tket.quantinuum.com/extensions/pytket-qir/)
+
 ## Getting started
 
 `pytket-qir` is available for Python 3.10, 3.11 and 3.12, on Linux, MacOS
