@@ -1,13 +1,13 @@
 Changelog
 ~~~~~~~~~
 
-0.12.0
-------
+0.12.0 (July 2024)
+------------------
 
+* Updated pytket version requirement to 1.30.
 * updated pyqir version requirement to 0.10.3.
 * Update version requirements on dependencies, removing all upper bounds.
 * speed up conversion
-* Updated pytket version requirement to ==1.30.0rc0
 * add additional `check_circuit` function for checking the
   circuit before converting
 
