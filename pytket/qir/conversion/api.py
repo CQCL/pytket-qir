@@ -22,12 +22,10 @@ from typing import Optional, Union
 import pyqir
 
 from pytket import wasm
-from pytket.circuit import Bit, Circuit, UnitID
+from pytket.circuit import Circuit
 from pytket.passes import (
-    CustomPass,
     scratch_reg_resize_pass,
 )
-from pytket.unit_id import _TEMP_BIT_NAME
 
 from .conversion import QirGenerator
 from .module import tketqirModule
