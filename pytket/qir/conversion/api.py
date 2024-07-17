@@ -62,7 +62,7 @@ def pytket_to_qir(
 
     if cut_pytket_register:
         cpass = scratch_reg_resize_pass(int_type)
-        cpass.apply(circ)  # type: ignore
+        cpass.apply(circ)
 
     check_circuit(circ, int_type)
 
