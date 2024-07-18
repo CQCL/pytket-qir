@@ -212,731 +212,533 @@ entry:
   %134 = icmp eq i64 4, %133
   call void @set_creg_bit(i1* %2, i64 1, i1 %134)
   %135 = call i1 @get_creg_bit(i1* %1, i64 0)
-  br i1 %135, label %then, label %else
+  br i1 %135, label %condb0, label %contb0
 
-then:                                             ; preds = %entry
+condb0:                                           ; preds = %entry
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue
+  br label %contb0
 
-else:                                             ; preds = %entry
-  br label %continue
-
-continue:                                         ; preds = %else, %then
+contb0:                                           ; preds = %condb0, %entry
   %136 = call i1 @get_creg_bit(i1* %1, i64 1)
-  br i1 %136, label %then1, label %else2
+  br i1 %136, label %condb1, label %contb1
 
-then1:                                            ; preds = %continue
+condb1:                                           ; preds = %contb0
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue3
+  br label %contb1
 
-else2:                                            ; preds = %continue
-  br label %continue3
-
-continue3:                                        ; preds = %else2, %then1
+contb1:                                           ; preds = %condb1, %contb0
   %137 = call i1 @get_creg_bit(i1* %1, i64 2)
-  br i1 %137, label %then4, label %else5
+  br i1 %137, label %condb2, label %contb2
 
-then4:                                            ; preds = %continue3
+condb2:                                           ; preds = %contb1
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue6
+  br label %contb2
 
-else5:                                            ; preds = %continue3
-  br label %continue6
-
-continue6:                                        ; preds = %else5, %then4
+contb2:                                           ; preds = %condb2, %contb1
   %138 = call i1 @get_creg_bit(i1* %1, i64 3)
-  br i1 %138, label %then7, label %else8
+  br i1 %138, label %condb3, label %contb3
 
-then7:                                            ; preds = %continue6
+condb3:                                           ; preds = %contb2
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue9
+  br label %contb3
 
-else8:                                            ; preds = %continue6
-  br label %continue9
-
-continue9:                                        ; preds = %else8, %then7
+contb3:                                           ; preds = %condb3, %contb2
   %139 = call i1 @get_creg_bit(i1* %1, i64 4)
-  br i1 %139, label %then10, label %else11
+  br i1 %139, label %condb4, label %contb4
 
-then10:                                           ; preds = %continue9
+condb4:                                           ; preds = %contb3
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue12
+  br label %contb4
 
-else11:                                           ; preds = %continue9
-  br label %continue12
-
-continue12:                                       ; preds = %else11, %then10
+contb4:                                           ; preds = %condb4, %contb3
   %140 = call i1 @get_creg_bit(i1* %1, i64 5)
-  br i1 %140, label %then13, label %else14
+  br i1 %140, label %condb5, label %contb5
 
-then13:                                           ; preds = %continue12
+condb5:                                           ; preds = %contb4
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue15
+  br label %contb5
 
-else14:                                           ; preds = %continue12
-  br label %continue15
-
-continue15:                                       ; preds = %else14, %then13
+contb5:                                           ; preds = %condb5, %contb4
   %141 = call i1 @get_creg_bit(i1* %1, i64 6)
-  br i1 %141, label %then16, label %else17
+  br i1 %141, label %condb6, label %contb6
 
-then16:                                           ; preds = %continue15
+condb6:                                           ; preds = %contb5
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue18
+  br label %contb6
 
-else17:                                           ; preds = %continue15
-  br label %continue18
-
-continue18:                                       ; preds = %else17, %then16
+contb6:                                           ; preds = %condb6, %contb5
   %142 = call i1 @get_creg_bit(i1* %1, i64 7)
-  br i1 %142, label %then19, label %else20
+  br i1 %142, label %condb7, label %contb7
 
-then19:                                           ; preds = %continue18
+condb7:                                           ; preds = %contb6
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue21
+  br label %contb7
 
-else20:                                           ; preds = %continue18
-  br label %continue21
-
-continue21:                                       ; preds = %else20, %then19
+contb7:                                           ; preds = %condb7, %contb6
   %143 = call i1 @get_creg_bit(i1* %1, i64 8)
-  br i1 %143, label %then22, label %else23
+  br i1 %143, label %condb8, label %contb8
 
-then22:                                           ; preds = %continue21
+condb8:                                           ; preds = %contb7
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue24
+  br label %contb8
 
-else23:                                           ; preds = %continue21
-  br label %continue24
-
-continue24:                                       ; preds = %else23, %then22
+contb8:                                           ; preds = %condb8, %contb7
   %144 = call i1 @get_creg_bit(i1* %1, i64 9)
-  br i1 %144, label %then25, label %else26
+  br i1 %144, label %condb9, label %contb9
 
-then25:                                           ; preds = %continue24
+condb9:                                           ; preds = %contb8
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue27
+  br label %contb9
 
-else26:                                           ; preds = %continue24
-  br label %continue27
-
-continue27:                                       ; preds = %else26, %then25
+contb9:                                           ; preds = %condb9, %contb8
   %145 = call i1 @get_creg_bit(i1* %1, i64 10)
-  br i1 %145, label %then28, label %else29
+  br i1 %145, label %condb10, label %contb10
 
-then28:                                           ; preds = %continue27
+condb10:                                          ; preds = %contb9
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue30
+  br label %contb10
 
-else29:                                           ; preds = %continue27
-  br label %continue30
-
-continue30:                                       ; preds = %else29, %then28
+contb10:                                          ; preds = %condb10, %contb9
   %146 = call i1 @get_creg_bit(i1* %1, i64 11)
-  br i1 %146, label %then31, label %else32
+  br i1 %146, label %condb11, label %contb11
 
-then31:                                           ; preds = %continue30
+condb11:                                          ; preds = %contb10
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue33
+  br label %contb11
 
-else32:                                           ; preds = %continue30
-  br label %continue33
-
-continue33:                                       ; preds = %else32, %then31
+contb11:                                          ; preds = %condb11, %contb10
   %147 = call i1 @get_creg_bit(i1* %1, i64 12)
-  br i1 %147, label %then34, label %else35
+  br i1 %147, label %condb12, label %contb12
 
-then34:                                           ; preds = %continue33
+condb12:                                          ; preds = %contb11
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue36
+  br label %contb12
 
-else35:                                           ; preds = %continue33
-  br label %continue36
-
-continue36:                                       ; preds = %else35, %then34
+contb12:                                          ; preds = %condb12, %contb11
   %148 = call i1 @get_creg_bit(i1* %1, i64 13)
-  br i1 %148, label %then37, label %else38
+  br i1 %148, label %condb13, label %contb13
 
-then37:                                           ; preds = %continue36
+condb13:                                          ; preds = %contb12
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue39
+  br label %contb13
 
-else38:                                           ; preds = %continue36
-  br label %continue39
-
-continue39:                                       ; preds = %else38, %then37
+contb13:                                          ; preds = %condb13, %contb12
   %149 = call i1 @get_creg_bit(i1* %1, i64 14)
-  br i1 %149, label %then40, label %else41
+  br i1 %149, label %condb14, label %contb14
 
-then40:                                           ; preds = %continue39
+condb14:                                          ; preds = %contb13
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue42
+  br label %contb14
 
-else41:                                           ; preds = %continue39
-  br label %continue42
-
-continue42:                                       ; preds = %else41, %then40
+contb14:                                          ; preds = %condb14, %contb13
   %150 = call i1 @get_creg_bit(i1* %1, i64 15)
-  br i1 %150, label %then43, label %else44
+  br i1 %150, label %condb15, label %contb15
 
-then43:                                           ; preds = %continue42
+condb15:                                          ; preds = %contb14
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue45
+  br label %contb15
 
-else44:                                           ; preds = %continue42
-  br label %continue45
-
-continue45:                                       ; preds = %else44, %then43
+contb15:                                          ; preds = %condb15, %contb14
   %151 = call i1 @get_creg_bit(i1* %1, i64 16)
-  br i1 %151, label %then46, label %else47
+  br i1 %151, label %condb16, label %contb16
 
-then46:                                           ; preds = %continue45
+condb16:                                          ; preds = %contb15
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue48
+  br label %contb16
 
-else47:                                           ; preds = %continue45
-  br label %continue48
-
-continue48:                                       ; preds = %else47, %then46
+contb16:                                          ; preds = %condb16, %contb15
   %152 = call i1 @get_creg_bit(i1* %1, i64 17)
-  br i1 %152, label %then49, label %else50
+  br i1 %152, label %condb17, label %contb17
 
-then49:                                           ; preds = %continue48
+condb17:                                          ; preds = %contb16
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue51
+  br label %contb17
 
-else50:                                           ; preds = %continue48
-  br label %continue51
-
-continue51:                                       ; preds = %else50, %then49
+contb17:                                          ; preds = %condb17, %contb16
   %153 = call i1 @get_creg_bit(i1* %1, i64 18)
-  br i1 %153, label %then52, label %else53
+  br i1 %153, label %condb18, label %contb18
 
-then52:                                           ; preds = %continue51
+condb18:                                          ; preds = %contb17
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue54
+  br label %contb18
 
-else53:                                           ; preds = %continue51
-  br label %continue54
-
-continue54:                                       ; preds = %else53, %then52
+contb18:                                          ; preds = %condb18, %contb17
   %154 = call i1 @get_creg_bit(i1* %1, i64 19)
-  br i1 %154, label %then55, label %else56
+  br i1 %154, label %condb19, label %contb19
 
-then55:                                           ; preds = %continue54
+condb19:                                          ; preds = %contb18
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue57
+  br label %contb19
 
-else56:                                           ; preds = %continue54
-  br label %continue57
-
-continue57:                                       ; preds = %else56, %then55
+contb19:                                          ; preds = %condb19, %contb18
   %155 = call i1 @get_creg_bit(i1* %1, i64 20)
-  br i1 %155, label %then58, label %else59
+  br i1 %155, label %condb20, label %contb20
 
-then58:                                           ; preds = %continue57
+condb20:                                          ; preds = %contb19
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue60
+  br label %contb20
 
-else59:                                           ; preds = %continue57
-  br label %continue60
-
-continue60:                                       ; preds = %else59, %then58
+contb20:                                          ; preds = %condb20, %contb19
   %156 = call i1 @get_creg_bit(i1* %1, i64 21)
-  br i1 %156, label %then61, label %else62
+  br i1 %156, label %condb21, label %contb21
 
-then61:                                           ; preds = %continue60
+condb21:                                          ; preds = %contb20
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue63
+  br label %contb21
 
-else62:                                           ; preds = %continue60
-  br label %continue63
-
-continue63:                                       ; preds = %else62, %then61
+contb21:                                          ; preds = %condb21, %contb20
   %157 = call i1 @get_creg_bit(i1* %1, i64 22)
-  br i1 %157, label %then64, label %else65
+  br i1 %157, label %condb22, label %contb22
 
-then64:                                           ; preds = %continue63
+condb22:                                          ; preds = %contb21
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue66
+  br label %contb22
 
-else65:                                           ; preds = %continue63
-  br label %continue66
-
-continue66:                                       ; preds = %else65, %then64
+contb22:                                          ; preds = %condb22, %contb21
   %158 = call i1 @get_creg_bit(i1* %1, i64 23)
-  br i1 %158, label %then67, label %else68
+  br i1 %158, label %condb23, label %contb23
 
-then67:                                           ; preds = %continue66
+condb23:                                          ; preds = %contb22
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue69
+  br label %contb23
 
-else68:                                           ; preds = %continue66
-  br label %continue69
-
-continue69:                                       ; preds = %else68, %then67
+contb23:                                          ; preds = %condb23, %contb22
   %159 = call i1 @get_creg_bit(i1* %1, i64 24)
-  br i1 %159, label %then70, label %else71
+  br i1 %159, label %condb24, label %contb24
 
-then70:                                           ; preds = %continue69
+condb24:                                          ; preds = %contb23
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue72
+  br label %contb24
 
-else71:                                           ; preds = %continue69
-  br label %continue72
-
-continue72:                                       ; preds = %else71, %then70
+contb24:                                          ; preds = %condb24, %contb23
   %160 = call i1 @get_creg_bit(i1* %1, i64 25)
-  br i1 %160, label %then73, label %else74
+  br i1 %160, label %condb25, label %contb25
 
-then73:                                           ; preds = %continue72
+condb25:                                          ; preds = %contb24
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue75
+  br label %contb25
 
-else74:                                           ; preds = %continue72
-  br label %continue75
-
-continue75:                                       ; preds = %else74, %then73
+contb25:                                          ; preds = %condb25, %contb24
   %161 = call i1 @get_creg_bit(i1* %1, i64 26)
-  br i1 %161, label %then76, label %else77
+  br i1 %161, label %condb26, label %contb26
 
-then76:                                           ; preds = %continue75
+condb26:                                          ; preds = %contb25
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue78
+  br label %contb26
 
-else77:                                           ; preds = %continue75
-  br label %continue78
-
-continue78:                                       ; preds = %else77, %then76
+contb26:                                          ; preds = %condb26, %contb25
   %162 = call i1 @get_creg_bit(i1* %1, i64 27)
-  br i1 %162, label %then79, label %else80
+  br i1 %162, label %condb27, label %contb27
 
-then79:                                           ; preds = %continue78
+condb27:                                          ; preds = %contb26
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue81
+  br label %contb27
 
-else80:                                           ; preds = %continue78
-  br label %continue81
-
-continue81:                                       ; preds = %else80, %then79
+contb27:                                          ; preds = %condb27, %contb26
   %163 = call i1 @get_creg_bit(i1* %1, i64 28)
-  br i1 %163, label %then82, label %else83
+  br i1 %163, label %condb28, label %contb28
 
-then82:                                           ; preds = %continue81
+condb28:                                          ; preds = %contb27
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue84
+  br label %contb28
 
-else83:                                           ; preds = %continue81
-  br label %continue84
-
-continue84:                                       ; preds = %else83, %then82
+contb28:                                          ; preds = %condb28, %contb27
   %164 = call i1 @get_creg_bit(i1* %1, i64 29)
-  br i1 %164, label %then85, label %else86
+  br i1 %164, label %condb29, label %contb29
 
-then85:                                           ; preds = %continue84
+condb29:                                          ; preds = %contb28
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue87
+  br label %contb29
 
-else86:                                           ; preds = %continue84
-  br label %continue87
-
-continue87:                                       ; preds = %else86, %then85
+contb29:                                          ; preds = %condb29, %contb28
   %165 = call i1 @get_creg_bit(i1* %1, i64 30)
-  br i1 %165, label %then88, label %else89
+  br i1 %165, label %condb30, label %contb30
 
-then88:                                           ; preds = %continue87
+condb30:                                          ; preds = %contb29
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue90
+  br label %contb30
 
-else89:                                           ; preds = %continue87
-  br label %continue90
-
-continue90:                                       ; preds = %else89, %then88
+contb30:                                          ; preds = %condb30, %contb29
   %166 = call i1 @get_creg_bit(i1* %1, i64 31)
-  br i1 %166, label %then91, label %else92
+  br i1 %166, label %condb31, label %contb31
 
-then91:                                           ; preds = %continue90
+condb31:                                          ; preds = %contb30
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue93
+  br label %contb31
 
-else92:                                           ; preds = %continue90
-  br label %continue93
-
-continue93:                                       ; preds = %else92, %then91
+contb31:                                          ; preds = %condb31, %contb30
   %167 = call i1 @get_creg_bit(i1* %1, i64 32)
-  br i1 %167, label %then94, label %else95
+  br i1 %167, label %condb32, label %contb32
 
-then94:                                           ; preds = %continue93
+condb32:                                          ; preds = %contb31
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue96
+  br label %contb32
 
-else95:                                           ; preds = %continue93
-  br label %continue96
-
-continue96:                                       ; preds = %else95, %then94
+contb32:                                          ; preds = %condb32, %contb31
   %168 = call i1 @get_creg_bit(i1* %1, i64 33)
-  br i1 %168, label %then97, label %else98
+  br i1 %168, label %condb33, label %contb33
 
-then97:                                           ; preds = %continue96
+condb33:                                          ; preds = %contb32
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue99
+  br label %contb33
 
-else98:                                           ; preds = %continue96
-  br label %continue99
-
-continue99:                                       ; preds = %else98, %then97
+contb33:                                          ; preds = %condb33, %contb32
   %169 = call i1 @get_creg_bit(i1* %1, i64 34)
-  br i1 %169, label %then100, label %else101
+  br i1 %169, label %condb34, label %contb34
 
-then100:                                          ; preds = %continue99
+condb34:                                          ; preds = %contb33
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue102
+  br label %contb34
 
-else101:                                          ; preds = %continue99
-  br label %continue102
-
-continue102:                                      ; preds = %else101, %then100
+contb34:                                          ; preds = %condb34, %contb33
   %170 = call i1 @get_creg_bit(i1* %1, i64 35)
-  br i1 %170, label %then103, label %else104
+  br i1 %170, label %condb35, label %contb35
 
-then103:                                          ; preds = %continue102
+condb35:                                          ; preds = %contb34
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue105
+  br label %contb35
 
-else104:                                          ; preds = %continue102
-  br label %continue105
-
-continue105:                                      ; preds = %else104, %then103
+contb35:                                          ; preds = %condb35, %contb34
   %171 = call i1 @get_creg_bit(i1* %1, i64 36)
-  br i1 %171, label %then106, label %else107
+  br i1 %171, label %condb36, label %contb36
 
-then106:                                          ; preds = %continue105
+condb36:                                          ; preds = %contb35
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue108
+  br label %contb36
 
-else107:                                          ; preds = %continue105
-  br label %continue108
-
-continue108:                                      ; preds = %else107, %then106
+contb36:                                          ; preds = %condb36, %contb35
   %172 = call i1 @get_creg_bit(i1* %1, i64 37)
-  br i1 %172, label %then109, label %else110
+  br i1 %172, label %condb37, label %contb37
 
-then109:                                          ; preds = %continue108
+condb37:                                          ; preds = %contb36
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue111
+  br label %contb37
 
-else110:                                          ; preds = %continue108
-  br label %continue111
-
-continue111:                                      ; preds = %else110, %then109
+contb37:                                          ; preds = %condb37, %contb36
   %173 = call i1 @get_creg_bit(i1* %1, i64 38)
-  br i1 %173, label %then112, label %else113
+  br i1 %173, label %condb38, label %contb38
 
-then112:                                          ; preds = %continue111
+condb38:                                          ; preds = %contb37
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue114
+  br label %contb38
 
-else113:                                          ; preds = %continue111
-  br label %continue114
-
-continue114:                                      ; preds = %else113, %then112
+contb38:                                          ; preds = %condb38, %contb37
   %174 = call i1 @get_creg_bit(i1* %1, i64 39)
-  br i1 %174, label %then115, label %else116
+  br i1 %174, label %condb39, label %contb39
 
-then115:                                          ; preds = %continue114
+condb39:                                          ; preds = %contb38
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue117
+  br label %contb39
 
-else116:                                          ; preds = %continue114
-  br label %continue117
-
-continue117:                                      ; preds = %else116, %then115
+contb39:                                          ; preds = %condb39, %contb38
   %175 = call i1 @get_creg_bit(i1* %1, i64 40)
-  br i1 %175, label %then118, label %else119
+  br i1 %175, label %condb40, label %contb40
 
-then118:                                          ; preds = %continue117
+condb40:                                          ; preds = %contb39
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue120
+  br label %contb40
 
-else119:                                          ; preds = %continue117
-  br label %continue120
-
-continue120:                                      ; preds = %else119, %then118
+contb40:                                          ; preds = %condb40, %contb39
   %176 = call i1 @get_creg_bit(i1* %1, i64 41)
-  br i1 %176, label %then121, label %else122
+  br i1 %176, label %condb41, label %contb41
 
-then121:                                          ; preds = %continue120
+condb41:                                          ; preds = %contb40
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue123
+  br label %contb41
 
-else122:                                          ; preds = %continue120
-  br label %continue123
-
-continue123:                                      ; preds = %else122, %then121
+contb41:                                          ; preds = %condb41, %contb40
   %177 = call i1 @get_creg_bit(i1* %1, i64 42)
-  br i1 %177, label %then124, label %else125
+  br i1 %177, label %condb42, label %contb42
 
-then124:                                          ; preds = %continue123
+condb42:                                          ; preds = %contb41
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue126
+  br label %contb42
 
-else125:                                          ; preds = %continue123
-  br label %continue126
-
-continue126:                                      ; preds = %else125, %then124
+contb42:                                          ; preds = %condb42, %contb41
   %178 = call i1 @get_creg_bit(i1* %1, i64 43)
-  br i1 %178, label %then127, label %else128
+  br i1 %178, label %condb43, label %contb43
 
-then127:                                          ; preds = %continue126
+condb43:                                          ; preds = %contb42
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue129
+  br label %contb43
 
-else128:                                          ; preds = %continue126
-  br label %continue129
-
-continue129:                                      ; preds = %else128, %then127
+contb43:                                          ; preds = %condb43, %contb42
   %179 = call i1 @get_creg_bit(i1* %1, i64 44)
-  br i1 %179, label %then130, label %else131
+  br i1 %179, label %condb44, label %contb44
 
-then130:                                          ; preds = %continue129
+condb44:                                          ; preds = %contb43
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue132
+  br label %contb44
 
-else131:                                          ; preds = %continue129
-  br label %continue132
-
-continue132:                                      ; preds = %else131, %then130
+contb44:                                          ; preds = %condb44, %contb43
   %180 = call i1 @get_creg_bit(i1* %1, i64 45)
-  br i1 %180, label %then133, label %else134
+  br i1 %180, label %condb45, label %contb45
 
-then133:                                          ; preds = %continue132
+condb45:                                          ; preds = %contb44
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue135
+  br label %contb45
 
-else134:                                          ; preds = %continue132
-  br label %continue135
-
-continue135:                                      ; preds = %else134, %then133
+contb45:                                          ; preds = %condb45, %contb44
   %181 = call i1 @get_creg_bit(i1* %1, i64 46)
-  br i1 %181, label %then136, label %else137
+  br i1 %181, label %condb46, label %contb46
 
-then136:                                          ; preds = %continue135
+condb46:                                          ; preds = %contb45
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue138
+  br label %contb46
 
-else137:                                          ; preds = %continue135
-  br label %continue138
-
-continue138:                                      ; preds = %else137, %then136
+contb46:                                          ; preds = %condb46, %contb45
   %182 = call i1 @get_creg_bit(i1* %1, i64 47)
-  br i1 %182, label %then139, label %else140
+  br i1 %182, label %condb47, label %contb47
 
-then139:                                          ; preds = %continue138
+condb47:                                          ; preds = %contb46
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue141
+  br label %contb47
 
-else140:                                          ; preds = %continue138
-  br label %continue141
-
-continue141:                                      ; preds = %else140, %then139
+contb47:                                          ; preds = %condb47, %contb46
   %183 = call i1 @get_creg_bit(i1* %1, i64 48)
-  br i1 %183, label %then142, label %else143
+  br i1 %183, label %condb48, label %contb48
 
-then142:                                          ; preds = %continue141
+condb48:                                          ; preds = %contb47
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue144
+  br label %contb48
 
-else143:                                          ; preds = %continue141
-  br label %continue144
-
-continue144:                                      ; preds = %else143, %then142
+contb48:                                          ; preds = %condb48, %contb47
   %184 = call i1 @get_creg_bit(i1* %1, i64 49)
-  br i1 %184, label %then145, label %else146
+  br i1 %184, label %condb49, label %contb49
 
-then145:                                          ; preds = %continue144
+condb49:                                          ; preds = %contb48
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue147
+  br label %contb49
 
-else146:                                          ; preds = %continue144
-  br label %continue147
-
-continue147:                                      ; preds = %else146, %then145
+contb49:                                          ; preds = %condb49, %contb48
   %185 = call i1 @get_creg_bit(i1* %1, i64 50)
-  br i1 %185, label %then148, label %else149
+  br i1 %185, label %condb50, label %contb50
 
-then148:                                          ; preds = %continue147
+condb50:                                          ; preds = %contb49
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue150
+  br label %contb50
 
-else149:                                          ; preds = %continue147
-  br label %continue150
-
-continue150:                                      ; preds = %else149, %then148
+contb50:                                          ; preds = %condb50, %contb49
   %186 = call i1 @get_creg_bit(i1* %1, i64 51)
-  br i1 %186, label %then151, label %else152
+  br i1 %186, label %condb51, label %contb51
 
-then151:                                          ; preds = %continue150
+condb51:                                          ; preds = %contb50
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue153
+  br label %contb51
 
-else152:                                          ; preds = %continue150
-  br label %continue153
-
-continue153:                                      ; preds = %else152, %then151
+contb51:                                          ; preds = %condb51, %contb50
   %187 = call i1 @get_creg_bit(i1* %1, i64 52)
-  br i1 %187, label %then154, label %else155
+  br i1 %187, label %condb52, label %contb52
 
-then154:                                          ; preds = %continue153
+condb52:                                          ; preds = %contb51
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue156
+  br label %contb52
 
-else155:                                          ; preds = %continue153
-  br label %continue156
-
-continue156:                                      ; preds = %else155, %then154
+contb52:                                          ; preds = %condb52, %contb51
   %188 = call i1 @get_creg_bit(i1* %1, i64 53)
-  br i1 %188, label %then157, label %else158
+  br i1 %188, label %condb53, label %contb53
 
-then157:                                          ; preds = %continue156
+condb53:                                          ; preds = %contb52
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue159
+  br label %contb53
 
-else158:                                          ; preds = %continue156
-  br label %continue159
-
-continue159:                                      ; preds = %else158, %then157
+contb53:                                          ; preds = %condb53, %contb52
   %189 = call i1 @get_creg_bit(i1* %1, i64 54)
-  br i1 %189, label %then160, label %else161
+  br i1 %189, label %condb54, label %contb54
 
-then160:                                          ; preds = %continue159
+condb54:                                          ; preds = %contb53
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue162
+  br label %contb54
 
-else161:                                          ; preds = %continue159
-  br label %continue162
-
-continue162:                                      ; preds = %else161, %then160
+contb54:                                          ; preds = %condb54, %contb53
   %190 = call i1 @get_creg_bit(i1* %1, i64 55)
-  br i1 %190, label %then163, label %else164
+  br i1 %190, label %condb55, label %contb55
 
-then163:                                          ; preds = %continue162
+condb55:                                          ; preds = %contb54
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue165
+  br label %contb55
 
-else164:                                          ; preds = %continue162
-  br label %continue165
-
-continue165:                                      ; preds = %else164, %then163
+contb55:                                          ; preds = %condb55, %contb54
   %191 = call i1 @get_creg_bit(i1* %1, i64 56)
-  br i1 %191, label %then166, label %else167
+  br i1 %191, label %condb56, label %contb56
 
-then166:                                          ; preds = %continue165
+condb56:                                          ; preds = %contb55
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue168
+  br label %contb56
 
-else167:                                          ; preds = %continue165
-  br label %continue168
-
-continue168:                                      ; preds = %else167, %then166
+contb56:                                          ; preds = %condb56, %contb55
   %192 = call i1 @get_creg_bit(i1* %1, i64 57)
-  br i1 %192, label %then169, label %else170
+  br i1 %192, label %condb57, label %contb57
 
-then169:                                          ; preds = %continue168
+condb57:                                          ; preds = %contb56
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue171
+  br label %contb57
 
-else170:                                          ; preds = %continue168
-  br label %continue171
-
-continue171:                                      ; preds = %else170, %then169
+contb57:                                          ; preds = %condb57, %contb56
   %193 = call i1 @get_creg_bit(i1* %1, i64 58)
-  br i1 %193, label %then172, label %else173
+  br i1 %193, label %condb58, label %contb58
 
-then172:                                          ; preds = %continue171
+condb58:                                          ; preds = %contb57
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue174
+  br label %contb58
 
-else173:                                          ; preds = %continue171
-  br label %continue174
-
-continue174:                                      ; preds = %else173, %then172
+contb58:                                          ; preds = %condb58, %contb57
   %194 = call i1 @get_creg_bit(i1* %1, i64 59)
-  br i1 %194, label %then175, label %else176
+  br i1 %194, label %condb59, label %contb59
 
-then175:                                          ; preds = %continue174
+condb59:                                          ; preds = %contb58
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue177
+  br label %contb59
 
-else176:                                          ; preds = %continue174
-  br label %continue177
-
-continue177:                                      ; preds = %else176, %then175
+contb59:                                          ; preds = %condb59, %contb58
   %195 = call i1 @get_creg_bit(i1* %1, i64 60)
-  br i1 %195, label %then178, label %else179
+  br i1 %195, label %condb60, label %contb60
 
-then178:                                          ; preds = %continue177
+condb60:                                          ; preds = %contb59
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue180
+  br label %contb60
 
-else179:                                          ; preds = %continue177
-  br label %continue180
-
-continue180:                                      ; preds = %else179, %then178
+contb60:                                          ; preds = %condb60, %contb59
   %196 = call i1 @get_creg_bit(i1* %1, i64 61)
-  br i1 %196, label %then181, label %else182
+  br i1 %196, label %condb61, label %contb61
 
-then181:                                          ; preds = %continue180
+condb61:                                          ; preds = %contb60
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue183
+  br label %contb61
 
-else182:                                          ; preds = %continue180
-  br label %continue183
-
-continue183:                                      ; preds = %else182, %then181
+contb61:                                          ; preds = %condb61, %contb60
   %197 = call i1 @get_creg_bit(i1* %1, i64 62)
-  br i1 %197, label %then184, label %else185
+  br i1 %197, label %condb62, label %contb62
 
-then184:                                          ; preds = %continue183
+condb62:                                          ; preds = %contb61
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue186
+  br label %contb62
 
-else185:                                          ; preds = %continue183
-  br label %continue186
-
-continue186:                                      ; preds = %else185, %then184
+contb62:                                          ; preds = %condb62, %contb61
   %198 = call i1 @get_creg_bit(i1* %1, i64 63)
-  br i1 %198, label %then187, label %else188
+  br i1 %198, label %condb63, label %contb63
 
-then187:                                          ; preds = %continue186
+condb63:                                          ; preds = %contb62
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue189
+  br label %contb63
 
-else188:                                          ; preds = %continue186
-  br label %continue189
-
-continue189:                                      ; preds = %else188, %then187
+contb63:                                          ; preds = %condb63, %contb62
   %199 = call i1 @get_creg_bit(i1* %2, i64 0)
-  br i1 %199, label %then190, label %else191
+  br i1 %199, label %condb64, label %contb64
 
-then190:                                          ; preds = %continue189
+condb64:                                          ; preds = %contb63
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue192
+  br label %contb64
 
-else191:                                          ; preds = %continue189
-  br label %continue192
-
-continue192:                                      ; preds = %else191, %then190
+contb64:                                          ; preds = %condb64, %contb63
   %200 = call i1 @get_creg_bit(i1* %2, i64 1)
-  br i1 %200, label %then193, label %else194
+  br i1 %200, label %condb65, label %contb65
 
-then193:                                          ; preds = %continue192
+condb65:                                          ; preds = %contb64
   call void @__quantum__qis__x__body(%Qubit* null)
-  br label %continue195
+  br label %contb65
 
-else194:                                          ; preds = %continue192
-  br label %continue195
-
-continue195:                                      ; preds = %else194, %then193
+contb65:                                          ; preds = %condb65, %contb64
   call void @__quantum__rt__tuple_start_record_output()
   %201 = call i64 @get_int_from_creg(i1* %0)
   call void @__quantum__rt__int_record_output(i64 %201, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @0, i32 0, i32 0))

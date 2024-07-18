@@ -12,9 +12,9 @@ entry:
   %0 = call i1* @create_creg(i64 4)
   %1 = call i1* @create_creg(i64 5)
   %2 = call i1 @get_creg_bit(i1* %0, i64 0)
-  br i1 %2, label %then, label %else
+  br i1 %2, label %condb0, label %contb0
 
-then:                                             ; preds = %entry
+condb0:                                           ; preds = %entry
   %3 = call i64 @get_int_from_creg(i1* %1)
   %4 = call i64 @get_int_from_creg(i1* %1)
   %5 = or i64 %3, %4
@@ -24,12 +24,9 @@ then:                                             ; preds = %entry
   call void @__quantum__qis__y__body(%Qubit* inttoptr (i64 2 to %Qubit*))
   call void @__quantum__qis__h__body(%Qubit* inttoptr (i64 3 to %Qubit*))
   call void @__quantum__qis__h__body(%Qubit* null)
-  br label %continue
+  br label %contb0
 
-else:                                             ; preds = %entry
-  br label %continue
-
-continue:                                         ; preds = %else, %then
+contb0:                                           ; preds = %condb0, %entry
   call void @__quantum__rt__tuple_start_record_output()
   %6 = call i64 @get_int_from_creg(i1* %0)
   call void @__quantum__rt__int_record_output(i64 %6, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @0, i32 0, i32 0))

@@ -37,16 +37,13 @@ entry:
   %19 = sub i64 %17, %18
   call void @set_creg_to_int(i1* %2, i64 %19)
   %20 = call i1 @get_creg_bit(i1* %5, i64 0)
-  br i1 %20, label %then, label %else
+  br i1 %20, label %condb0, label %contb0
 
-then:                                             ; preds = %entry
+condb0:                                           ; preds = %entry
   call void @__quantum__qis__h__body(%Qubit* null)
-  br label %continue
+  br label %contb0
 
-else:                                             ; preds = %entry
-  br label %continue
-
-continue:                                         ; preds = %else, %then
+contb0:                                           ; preds = %condb0, %entry
   %21 = call i64 @get_int_from_creg(i1* %0)
   %22 = call i64 @get_int_from_creg(i1* %1)
   %23 = mul i64 %21, %22

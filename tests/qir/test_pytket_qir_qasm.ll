@@ -13,18 +13,15 @@ entry:
   %1 = call i1* @create_creg(i64 3)
   %2 = call i64 @get_int_from_creg(i1* %1)
   %3 = icmp eq i64 2, %2
-  br i1 %3, label %then, label %else
+  br i1 %3, label %condb0, label %contb0
 
-then:                                             ; preds = %entry
+condb0:                                           ; preds = %entry
   %4 = call i1 @get_creg_bit(i1* %0, i64 0)
   %5 = xor i1 %4, true
   call void @set_creg_bit(i1* %0, i64 0, i1 %5)
-  br label %continue
+  br label %contb0
 
-else:                                             ; preds = %entry
-  br label %continue
-
-continue:                                         ; preds = %else, %then
+contb0:                                           ; preds = %condb0, %entry
   call void @__quantum__rt__tuple_start_record_output()
   %6 = call i64 @get_int_from_creg(i1* %0)
   call void @__quantum__rt__int_record_output(i64 %6, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @0, i32 0, i32 0))
