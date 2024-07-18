@@ -420,7 +420,7 @@ class QirGenerator:
     def _decompose_conditional_circ_box(self, op: Op, args: list) -> Optional[Circuit]:
         """Rebase an op to the target gateset if needed."""
         circuit = Circuit(self.circuit.n_qubits)
-        arg_names = set([b.reg_name for b in args if type(b) == Bit])
+        arg_names = set([b.reg_name for b in args if type(b) is Bit])
         for cr_name in arg_names:
             circuit.add_c_register(self.circuit.get_c_register(cr_name))
 
@@ -514,7 +514,7 @@ class QirGenerator:
                 ssa_left, ssa_right
             )
             return output_instruction  # type: ignore
-        elif type(reg) == BitRegister:
+        elif type(reg) is BitRegister:
             return self._get_i64_ssa_reg(reg.name)
         elif type(reg) is int:
             return pyqir.const(self.qir_int_type, reg)
@@ -524,7 +524,7 @@ class QirGenerator:
     def _get_ssa_from_cl_bit_op(
         self, bit: Union[Bit, BitAnd, BitOr, BitXor], module: tketqirModule
     ) -> Value:
-        if type(bit) == Bit:
+        if type(bit) is Bit:
             result = module.builder.call(
                 self.get_creg_bit,
                 [
@@ -1074,7 +1074,7 @@ class QirGenerator:
         qubits_qis = self._to_qis_qubits(qubits)
         results = self._to_qis_results(bits)
         bits_qis: Optional[Sequence[Value]] = None
-        if type(optype) == BitWiseOp:
+        if type(optype) is BitWiseOp:
             bits_qis = self._to_qis_bits(args)
         gate = self.module.gateset.tk_to_gateset(optype)
         if gate.func_spec != FuncSpec.BODY:
