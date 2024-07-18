@@ -28,6 +28,7 @@ from pytket.passes import (
 )
 
 from .conversion import QirGenerator
+from .pconversion import PQirGenerator
 from .module import tketqirModule
 
 
@@ -47,6 +48,7 @@ def pytket_to_qir(
     wfh: Optional[wasm.WasmFileHandler] = None,
     int_type: int = 64,
     cut_pytket_register: bool = False,
+    profile = False,
 ) -> Union[str, bytes, None]:
     """converts given pytket circuit to qir
 
@@ -71,12 +73,20 @@ def pytket_to_qir(
         num_qubits=circ.n_qubits,
         num_results=circ.n_qubits,
     )
+    if not profile:
+        qir_generator = QirGenerator(
+            circuit=circ, module=m, wasm_int_type=int_type, qir_int_type=int_type, wfh=wfh
+        )
 
-    qir_generator = QirGenerator(
-        circuit=circ, module=m, wasm_int_type=int_type, qir_int_type=int_type, wfh=wfh
-    )
+        populated_module = qir_generator.circuit_to_module(qir_generator.circuit, True)
+    else:
+        qir_generator = PQirGenerator(
+            circuit=circ, module=m, wasm_int_type=int_type, qir_int_type=int_type, wfh=wfh
+        )
 
-    populated_module = qir_generator.circuit_to_module(qir_generator.circuit, True)
+        populated_module = qir_generator.circuit_to_module(qir_generator.circuit, True)
+
+    
 
     if wfh is not None:
         wasm_sar_dict: dict[str, str] = qir_generator.get_wasm_sar()
