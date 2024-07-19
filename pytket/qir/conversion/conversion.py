@@ -129,6 +129,8 @@ class QirGenerator:
         self.cregs = _retrieve_registers(self.circuit.bits, BitRegister)
         self.target_gateset = self.module.gateset.base_gateset
 
+        self.block_count = 0
+
         self.wasm_sar_dict: dict[str, str] = {}
         self.wasm_sar_dict["!llvm.module.flags"] = (
             'attributes #1 = { "wasm" }\n\n!llvm.module.flags'
@@ -312,6 +314,9 @@ class QirGenerator:
                 self.wasm_sar_dict[wasm_func_interface] = f"{wasm_func_interface} #1"
 
         self.additional_quantum_gates: dict[OpType, pyqir.Function] = {}
+
+        entry = self.module.module.entry_block
+        self.module.module.builder.insert_at_end(entry)
 
         for creg in self.circuit.c_registers:
             self._reg2ssa_var(creg, qir_int_type)
@@ -615,6 +620,16 @@ class QirGenerator:
     def conv_conditional(self, command: Command, op: Conditional) -> None:
         condition_name = command.args[0].reg_name
 
+        entry_point = self.module.module.entry_point
+
+        condb = pyqir.BasicBlock(
+            self.module.module.context, f"condb{self.block_count}", entry_point
+        )
+        contb = pyqir.BasicBlock(
+            self.module.module.context, f"contb{self.block_count}", entry_point
+        )
+        self.block_count = self.block_count + 1
+
         if op.op.type == OpType.CircBox:
             conditional_circuit = self._decompose_conditional_circ_box(
                 op.op, command.args[op.width :]
@@ -623,23 +638,8 @@ class QirGenerator:
             condition_name = command.args[0].reg_name
 
             if op.width == 1:  # only one conditional bit
+
                 condition_bit_index = command.args[0].index[0]
-
-                def condition_block_true() -> None:
-                    """
-                    Populate recursively the module with the contents of the
-                    conditional sub-circuit when the condition is True.
-                    """
-                    if op.value == 1:
-                        self.subcircuit_to_module(conditional_circuit)
-
-                def condition_block_false() -> None:
-                    """
-                    Populate recursively the module with the contents of the
-                    conditional sub-circuit when the condition is False.
-                    """
-                    if op.value == 0:
-                        self.subcircuit_to_module(conditional_circuit)
 
                 ssabool = self.module.builder.call(
                     self.get_creg_bit,
@@ -649,11 +649,18 @@ class QirGenerator:
                     ],
                 )
 
-                self.module.module.builder.if_(
-                    ssabool,
-                    true=lambda: condition_block_true(),
-                    false=lambda: condition_block_false(),
-                )
+                if op.value == 1:
+                    self.module.module.builder.condbr(ssabool, condb, contb)
+                    self.module.module.builder.insert_at_end(condb)
+                    self.subcircuit_to_module(conditional_circuit)
+
+                if op.value == 0:
+                    self.module.module.builder.condbr(ssabool, contb, condb)
+                    self.module.module.builder.insert_at_end(condb)
+                    self.subcircuit_to_module(conditional_circuit)
+
+                self.module.module.builder.br(contb)
+                self.module.module.builder.insert_at_end(contb)
 
             else:
                 for i in range(op.width):
@@ -673,45 +680,27 @@ class QirGenerator:
                         "conditional can only work with one entire register"
                     )
 
-                def condition_block() -> None:
-                    """
-                    Populate recursively the module with the contents of the
-                    conditional sub-circuit when the condition is True.
-                    """
-                    self.subcircuit_to_module(conditional_circuit)
-
                 ssabool = self.module.module.builder.icmp(
                     pyqir.IntPredicate.EQ,
                     pyqir.const(self.qir_int_type, op.value),
                     self._get_i64_ssa_reg(condition_name),
                 )
 
-                self.module.module.builder.if_(
-                    ssabool,
-                    true=lambda: condition_block(),
-                )
+                self.module.module.builder.condbr(ssabool, condb, contb)
+
+                self.module.module.builder.insert_at_end(condb)
+
+                self.subcircuit_to_module(conditional_circuit)
+
+                self.module.module.builder.br(contb)
+                self.module.module.builder.insert_at_end(contb)
+
         else:
             condition_name = command.args[0].reg_name
 
             if op.width == 1:  # only one conditional bit
                 condition_bit_index = command.args[0].index[0]
 
-                def condition_block_true() -> None:
-                    """
-                    Populate recursively the module with the contents of the
-                    conditional sub-circuit when the condition is True.
-                    """
-                    if op.value == 1:
-                        self.command_to_module(op.op, command.args[op.width :])
-
-                def condition_block_false() -> None:
-                    """
-                    Populate recursively the module with the contents of the
-                    conditional sub-circuit when the condition is False.
-                    """
-                    if op.value == 0:
-                        self.command_to_module(op.op, command.args[op.width :])
-
                 ssabool = self.module.builder.call(
                     self.get_creg_bit,
                     [
@@ -720,11 +709,18 @@ class QirGenerator:
                     ],
                 )
 
-                self.module.module.builder.if_(
-                    ssabool,
-                    true=lambda: condition_block_true(),
-                    false=lambda: condition_block_false(),
-                )
+                if op.value == 1:
+                    self.module.module.builder.condbr(ssabool, condb, contb)
+                    self.module.module.builder.insert_at_end(condb)
+                    self.command_to_module(op.op, command.args[op.width :])
+
+                if op.value == 0:
+                    self.module.module.builder.condbr(ssabool, contb, condb)
+                    self.module.module.builder.insert_at_end(condb)
+                    self.command_to_module(op.op, command.args[op.width :])
+
+                self.module.module.builder.br(contb)
+                self.module.module.builder.insert_at_end(contb)
 
             else:
                 for i in range(op.width):
@@ -744,23 +740,19 @@ class QirGenerator:
                         "conditional can only work with one entire register"
                     )
 
-                def condition_block() -> None:
-                    """
-                    Populate recursively the module with the contents of the
-                    conditional sub-circuit when the condition is True.
-                    """
-                    self.command_to_module(op.op, command.args[op.width :])
-
                 ssabool = self.module.module.builder.icmp(
                     pyqir.IntPredicate.EQ,
                     pyqir.const(self.qir_int_type, op.value),
                     self._get_i64_ssa_reg(condition_name),
                 )
 
-                self.module.module.builder.if_(
-                    ssabool,
-                    true=lambda: condition_block(),
-                )
+                self.module.module.builder.condbr(ssabool, condb, contb)
+                self.module.module.builder.insert_at_end(condb)
+
+                self.command_to_module(op.op, command.args[op.width :])
+
+                self.module.module.builder.br(contb)
+                self.module.module.builder.insert_at_end(contb)
 
     def conv_WASMOp(self, op: WASMOp, args: Union[Bit, Qubit]) -> None:
         paramreg, resultreg = self._get_c_regs_from_com(op, args)

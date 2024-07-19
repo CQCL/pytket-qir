@@ -19,16 +19,13 @@ entry:
   call void @set_creg_to_int(i1* %2, i64 %5)
   call void @__quantum__qis__h__body(%Qubit* null)
   %6 = call i1 @get_creg_bit(i1* %1, i64 4)
-  br i1 %6, label %then, label %else
+  br i1 %6, label %condb0, label %contb0
 
-then:                                             ; preds = %entry
+condb0:                                           ; preds = %entry
   call void @__quantum__qis__h__body(%Qubit* null)
-  br label %continue
+  br label %contb0
 
-else:                                             ; preds = %entry
-  br label %continue
-
-continue:                                         ; preds = %else, %then
+contb0:                                           ; preds = %condb0, %entry
   call void @__quantum__qis__h__body(%Qubit* null)
   call void @__quantum__rt__tuple_start_record_output()
   %7 = call i64 @get_int_from_creg(i1* %0)

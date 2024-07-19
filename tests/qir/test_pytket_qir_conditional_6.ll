@@ -13,16 +13,13 @@ entry:
   call void @__quantum__qis__h__body(%Qubit* inttoptr (i64 1 to %Qubit*))
   %1 = call i64 @get_int_from_creg(i1* %0)
   %2 = icmp eq i64 3, %1
-  br i1 %2, label %then, label %else
+  br i1 %2, label %condb0, label %contb0
 
-then:                                             ; preds = %entry
+condb0:                                           ; preds = %entry
   call void @__quantum__qis__phasedx__body(double 0x3FD41B2F769CF0E0, double 0x3FE41B2F769CF0E0, %Qubit* null)
-  br label %continue
+  br label %contb0
 
-else:                                             ; preds = %entry
-  br label %continue
-
-continue:                                         ; preds = %else, %then
+contb0:                                           ; preds = %condb0, %entry
   call void @__quantum__rt__tuple_start_record_output()
   %3 = call i64 @get_int_from_creg(i1* %0)
   call void @__quantum__rt__int_record_output(i64 %3, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @0, i32 0, i32 0))
