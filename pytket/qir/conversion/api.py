@@ -60,7 +60,7 @@ def pytket_to_qir(
     :param int_type: size of each integer, allowed value 32 and 64
     :param cut_pytket_register: breaks up the internal scratch bit registers
       into smaller registers, default value false
-    :param profile: generates qir corresponding to the standart profile
+    :param profile: generates QIR corresponding to the standard profile
     """
 
     if cut_pytket_register:
