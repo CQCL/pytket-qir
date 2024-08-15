@@ -32,7 +32,7 @@ def test_pytket_qir_wasm() -> None:
         int_type=32,
     )
 
-    check_qir_result(result, "test_pytket_qir_wasm")
+    check_qir_result(result, "ptest_pytket_qir_wasm")
 
 
 def test_pytket_qir_wasm_ii() -> None:
@@ -52,9 +52,10 @@ def test_pytket_qir_wasm_ii() -> None:
         qir_format=QIRFormat.STRING,
         wfh=w,
         int_type=32,
+        profile=True,
     )
 
-    check_qir_result(result, "test_pytket_qir_wasm_ii")
+    check_qir_result(result, "ptest_pytket_qir_wasm_ii")
 
 
 def test_pytket_qir_wasm_ii_64() -> None:
@@ -70,15 +71,18 @@ def test_pytket_qir_wasm_ii_64() -> None:
         qir_format=QIRFormat.STRING,
         wfh=w,
         int_type=64,
+        profile=True,
     )
 
-    check_qir_result(result, "test_pytket_qir_wasm_ii_64")
+    check_qir_result(result, "ptest_pytket_qir_wasm_ii_64")
 
 
 def test_pytket_qir_wasm_iii_64() -> None:
     w = wasm.WasmFileHandler("testfile.wasm", int_size=64)
     c = Circuit(6, 6)
     c.Measure(Qubit(0), Bit(0))
+    c.Measure(Qubit(1), Bit(1))
+    c.Measure(Qubit(2), Bit(2))
     c0 = c.add_c_register("c0", 3)
     c1 = c.add_c_register("c1", 4)
     c.add_wasm_to_reg("add_something", w, [c0], [c1])
@@ -89,9 +93,10 @@ def test_pytket_qir_wasm_iii_64() -> None:
         qir_format=QIRFormat.STRING,
         wfh=w,
         int_type=64,
+        profile=True,
     )
 
-    check_qir_result(result, "test_pytket_qir_wasm_iii_64")
+    check_qir_result(result, "ptest_pytket_qir_wasm_iii_64")
 
 
 if __name__ == "__main__":
