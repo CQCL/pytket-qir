@@ -132,11 +132,19 @@ class PQirGenerator:
         self.target_gateset = self.module.gateset.base_gateset
 
         self.block_count = 0
+        self.block_count_sb = 0
 
         self.wasm_sar_dict: dict[str, str] = {}
         self.wasm_sar_dict["!llvm.module.flags"] = (
             'attributes #1 = { "wasm" }\n\n!llvm.module.flags'
         )
+        self.wasm_sar_dict[
+            'attributes #1 = { "irreversible" }\n\nattributes #1 = { "wasm" }'
+        ] = 'attributes #1 = { "wasm" }\nattributes #2 = { "irreversible" }'
+        self.wasm_sar_dict[
+            "declare void @__quantum__qis__mz__body(%Qubit*, %Result* writeonly) #1"
+        ] = "declare void @__quantum__qis__mz__body(%Qubit*, %Result* writeonly) #2"
+
         self.int_type_str = f"i{qir_int_type}"
 
         self.target_gateset.add(OpType.PhasedX)
@@ -154,61 +162,12 @@ class PQirGenerator:
         )  # Keep track of set ssa variables.
         self.list_of_changed_cregs: list[str] = []
 
-        # i1 get_bit_from_int(i64 int, i64 index)
-        # todo remove this function
-        self.get_bit_from_int = self.module.module.add_external_function(
-            "get_bit_from_int",
-            pyqir.FunctionType(
-                pyqir.IntType(self.module.module.context, 1),
-                [self.qir_int_type, self.qir_int_type],
-            ),
-        )
-
-        # void set_bit_in_int(i64 int, i64 index, i1 value)
-        # todo remove this function
-        self.set_bit_in_int = self.module.module.add_external_function(
-            "set_bit_in_int",
-            pyqir.FunctionType(
-                self.qir_int_type,
-                [
-                    self.qir_int_type,
-                    self.qir_int_type,
-                    pyqir.IntType(self.module.module.context, 1),
-                ],
-            ),
-        )
-
         # __quantum__qis__read_result__body(result)
         self.read_bit_from_result = self.module.module.add_external_function(
             "__quantum__qis__read_result__body",
             pyqir.FunctionType(
                 pyqir.IntType(self.module.module.context, 1),
                 [pyqir.result_type(self.module.module.context)],
-            ),
-        )
-
-        # i64 create_int(i64 size)
-        # todo remove this function
-        self.create_int = self.module.module.add_external_function(
-            "create_int",
-            pyqir.FunctionType(
-                self.qir_int_type,
-                [self.qir_int_type],
-            ),
-        )
-
-        # void mz_to_int(qubit, i64 int, i64 index)
-        # measures one qubit to one bit in a int
-        # todo remove this function
-        self.mz_to_int = self.module.module.add_external_function(
-            "mz_to_int",
-            pyqir.FunctionType(
-                self.qir_int_type,
-                [
-                    pyqir.qubit_type(self.module.module.context),
-                    self.qir_int_type,
-                    self.qir_int_type,
-                ],
             ),
         )
 
@@ -286,10 +245,74 @@ class PQirGenerator:
         entry = self.module.module.entry_block
         self.module.module.builder.insert_at_end(entry)
         self.active_block = entry
+        self.active_block_main = entry
 
         for creg in self.circuit.c_registers:
             self._reg2ssa_var(creg)
             self.list_of_changed_cregs.append(creg)
+
+    def _get_bit_from_int(self, ssa_int: Value, index: int) -> Value:
+        index_ssa = pyqir.const(self.qir_int_type, 2**index)
+
+        result = self.module.module.builder.icmp(
+            pyqir.IntPredicate.EQ,
+            index_ssa,
+            self.module.module.builder.and_(index_ssa, ssa_int),
+        )
+
+        return result
+
+    def _set_bit_in_int(self, creg: str, index: int, ssa_bit: Value) -> None:
+
+        ssa_int = self.get_ssa_vars(creg)
+
+        index_ssa = pyqir.const(self.qir_int_type, 2**index)
+
+        # it would be better to do an invert here, but that is not (yet) available
+        ssa_int_all_1 = pyqir.const(self.qir_int_type, (2 ** (self.int_size - 1) - 1))
+
+        entry_point = self.module.module.entry_point
+
+        sb_0 = pyqir.BasicBlock(
+            self.module.module.context, f"sb_0_{self.block_count_sb}", entry_point
+        )
+        sb_1 = pyqir.BasicBlock(
+            self.module.module.context, f"sb_1_{self.block_count_sb}", entry_point
+        )
+
+        continue_block = pyqir.BasicBlock(
+            self.module.module.context,
+            f"{self.active_block_main.name}_{self.block_count_sb}",
+            entry_point,
+        )
+
+        self.block_count_sb = self.block_count_sb + 1
+        self.module.module.builder.condbr(ssa_bit, sb_1, sb_0)
+
+        # if bit 1
+        self.module.module.builder.insert_at_end(sb_1)
+        result_1 = self.module.module.builder.or_(index_ssa, ssa_int)
+        self.module.module.builder.br(continue_block)
+
+        # if bit 0
+        self.module.module.builder.insert_at_end(sb_0)
+        result_0 = self.module.module.builder.and_(
+            self.module.module.builder.xor(
+                index_ssa,
+                ssa_int_all_1,
+            ),
+            ssa_int,
+        )
+        self.module.module.builder.br(continue_block)
+
+        # phi and continue
+        self.active_block = continue_block
+        self.module.module.builder.insert_at_end(continue_block)
+        phi = self.module.module.builder.phi(self.qir_int_type)
+        phi.add_incoming(result_0, sb_0)
+        phi.add_incoming(result_1, sb_1)
+
+        self.set_ssa_vars(creg, phi)
 
     def get_ssa_vars(self, reg_name: str) -> Value:
         if reg_name not in self.ssa_vars:
@@ -447,9 +470,7 @@ class PQirGenerator:
                 raise ValueError(
                     f"Classical register should only have the size of {self.int_size}"
                 )
-            ssa_var = self.module.builder.call(
-                self.create_int, [pyqir.const(self.qir_int_type, len(bit_reg))]
-            )
+            ssa_var = pyqir.const(self.qir_int_type, 0)
             self.ssa_vars[reg_name] = [(ssa_var, self.active_block)]  # type: ignore
             return ssa_var
         else:
@@ -504,12 +525,8 @@ class PQirGenerator:
         self, bit: Union[Bit, BitAnd, BitOr, BitXor], module: tketqirModule
     ) -> Value:
         if type(bit) is Bit:
-            result = module.builder.call(
-                self.get_bit_from_int,
-                [
-                    self.get_ssa_vars(bit.reg_name),
-                    pyqir.const(self.qir_int_type, bit.index[0]),
-                ],
+            result = self._get_bit_from_int(
+                self.get_ssa_vars(bit.reg_name), bit.index[0]
             )
 
             return result
@@ -550,15 +567,7 @@ class PQirGenerator:
             condition_bit_index = args[-1].index[0]
             result_registername = args[-1].reg_name
 
-            ssa_int = self.module.builder.call(
-                self.set_bit_in_int,
-                [
-                    self.get_ssa_vars(result_registername),
-                    pyqir.const(self.qir_int_type, condition_bit_index),
-                    result,
-                ],
-            )
-            self.set_ssa_vars(result_registername, ssa_int)
+            self._set_bit_in_int(result_registername, condition_bit_index, result)
 
         else:
             lower_qir = pyqir.const(self.qir_int_type, op.lower)
@@ -583,15 +592,7 @@ class PQirGenerator:
             condition_bit_index = args[-1].index[0]
             registername = args[-1].reg_name
 
-            ssa_int = self.module.builder.call(
-                self.set_bit_in_int,
-                [
-                    self.get_ssa_vars(registername),
-                    pyqir.const(self.qir_int_type, condition_bit_index),
-                    result,
-                ],
-            )
-            self.set_ssa_vars(registername, ssa_int)
+            self._set_bit_in_int(registername, condition_bit_index, result)
 
     def conv_conditional(self, command: Command, op: Conditional) -> None:
         condition_name = command.args[0].reg_name
@@ -617,15 +618,13 @@ class PQirGenerator:
 
                 condition_bit_index = command.args[0].index[0]
 
-                ssabool = self.module.builder.call(
-                    self.get_bit_from_int,
-                    [
-                        self.get_ssa_vars(condition_name),
-                        pyqir.const(self.qir_int_type, condition_bit_index),
-                    ],
+                ssabool = self._get_bit_from_int(
+                    self.get_ssa_vars(condition_name), condition_bit_index
                 )
+
                 self.list_of_changed_cregs = []
                 self.active_block = condb
+                self.active_block_main = condb
 
                 if op.value == 1:
                     self.module.module.builder.condbr(ssabool, condb, contb)
@@ -641,6 +640,7 @@ class PQirGenerator:
                 self.module.module.builder.insert_at_end(contb)
 
                 self.active_block = contb
+                self.active_block_main = contb
 
                 for creg in set(self.list_of_changed_cregs):
                     phi = self.module.module.builder.phi(self.qir_int_type)
@@ -650,7 +650,10 @@ class PQirGenerator:
                     found_second_block = False
 
                     for i in range(-2, -len(ssa_list) - 1, -1):
-                        if ssa_list[-1][1].name != ssa_list[i][1].name:
+                        if (
+                            ssa_list[-1][1].name != ssa_list[i][1].name
+                            and ssa_list[i][1].name[0:5] != "condb"
+                        ):
                             phi.add_incoming(ssa_list[i][0], ssa_list[i][1])
                             found_second_block = True
                             break
@@ -692,6 +695,7 @@ class PQirGenerator:
 
                 self.list_of_changed_cregs = []
                 self.active_block = condb
+                self.active_block_main = condb
 
                 self.subcircuit_to_module(conditional_circuit)
 
@@ -699,6 +703,7 @@ class PQirGenerator:
                 self.module.module.builder.insert_at_end(contb)
 
                 self.active_block = contb
+                self.active_block_main = contb
 
                 for creg in set(self.list_of_changed_cregs):
                     phi = self.module.module.builder.phi(self.qir_int_type)
@@ -708,7 +713,10 @@ class PQirGenerator:
                     found_second_block = False
 
                     for i in range(-2, -len(ssa_list) - 1, -1):
-                        if ssa_list[-1][1].name != ssa_list[i][1].name:
+                        if (
+                            ssa_list[-1][1].name != ssa_list[i][1].name
+                            and ssa_list[i][1].name[0:5] != "condb"
+                        ):
                             phi.add_incoming(ssa_list[i][0], ssa_list[i][1])
                             found_second_block = True
                             break
@@ -727,16 +735,13 @@ class PQirGenerator:
             if op.width == 1:  # only one conditional bit
                 condition_bit_index = command.args[0].index[0]
 
-                ssabool = self.module.builder.call(
-                    self.get_bit_from_int,
-                    [
-                        self.get_ssa_vars(condition_name),
-                        pyqir.const(self.qir_int_type, condition_bit_index),
-                    ],
+                ssabool = self._get_bit_from_int(
+                    self.get_ssa_vars(condition_name), condition_bit_index
                 )
 
                 self.list_of_changed_cregs = []
                 self.active_block = condb
+                self.active_block_main = condb
 
                 if op.value == 1:
                     self.module.module.builder.condbr(ssabool, condb, contb)
@@ -752,6 +757,7 @@ class PQirGenerator:
                 self.module.module.builder.insert_at_end(contb)
 
                 self.active_block = contb
+                self.active_block_main = contb
 
                 for creg in set(self.list_of_changed_cregs):
                     phi = self.module.module.builder.phi(self.qir_int_type)
@@ -761,7 +767,10 @@ class PQirGenerator:
                     found_second_block = False
 
                     for i in range(-2, -len(ssa_list) - 1, -1):
-                        if ssa_list[-1][1].name != ssa_list[i][1].name:
+                        if (
+                            ssa_list[-1][1].name != ssa_list[i][1].name
+                            and ssa_list[i][1].name[0:5] != "condb"
+                        ):
                             phi.add_incoming(ssa_list[i][0], ssa_list[i][1])
                             found_second_block = True
                             break
@@ -802,6 +811,7 @@ class PQirGenerator:
 
                 self.list_of_changed_cregs = []
                 self.active_block = condb
+                self.active_block_main = condb
 
                 self.command_to_module(op.op, command.args[op.width :])
 
@@ -809,6 +819,7 @@ class PQirGenerator:
                 self.module.module.builder.insert_at_end(contb)
 
                 self.active_block = contb
+                self.active_block_main = contb
 
                 for creg in set(self.list_of_changed_cregs):
                     phi = self.module.module.builder.phi(self.qir_int_type)
@@ -818,7 +829,10 @@ class PQirGenerator:
                     found_second_block = False
 
                     for i in range(-2, -len(ssa_list) - 1, -1):
-                        if ssa_list[-1][1].name != ssa_list[i][1].name:
+                        if (
+                            ssa_list[-1][1].name != ssa_list[i][1].name
+                            and ssa_list[i][1].name[0:5] != "condb"
+                        ):
                             phi.add_incoming(ssa_list[i][0], ssa_list[i][1])
                             found_second_block = True
                             break
@@ -965,15 +979,22 @@ class PQirGenerator:
         )
 
     def conv_measure(self, bits: list[Bit], qubits: list[Qubit]) -> None:
-        ssaint = self.module.builder.call(
-            self.mz_to_int,
+
+        qubit_index = qubits[0].index[0]
+
+        self.module.qis.mz(
+            self.module.module.qubits[qubit_index],
+            self.module.module.results[qubit_index],
+        )
+
+        ssa_measureresult = self.module.builder.call(
+            self.read_bit_from_result,
             [
-                self.module.module.qubits[qubits[0].index[0]],
-                self.get_ssa_vars(bits[0].reg_name),
-                pyqir.const(self.qir_int_type, bits[0].index[0]),
+                self.module.module.results[qubit_index],
             ],
         )
-        self.set_ssa_vars(bits[0].reg_name, ssaint)
+
+        self._set_bit_in_int(bits[0].reg_name, bits[0].index[0], ssa_measureresult)
 
     def conv_classicalexpbox(self, op: ClassicalExpBox, args: list) -> None:
         returntypebool = False
@@ -1061,15 +1082,7 @@ class PQirGenerator:
             # to the 0-th entry
             # of the register, this could be changed to a user given value
 
-            ssa_int = self.module.builder.call(
-                self.set_bit_in_int,
-                [
-                    self.get_ssa_vars(outputs),
-                    pyqir.const(self.qir_int_type, result_index),
-                    output_instruction,
-                ],
-            )
-            self.set_ssa_vars(outputs, ssa_int)
+            self._set_bit_in_int(outputs, result_index, output_instruction)
         else:
             self.set_ssa_vars(outputs, output_instruction)
 
@@ -1079,38 +1092,18 @@ class PQirGenerator:
         for b, v in zip(bits, op.values):
             output_instruction = pyqir.const(self.qir_bool_type, int(v))
 
-            ssa_int = self.module.builder.call(
-                self.set_bit_in_int,
-                [
-                    self.get_ssa_vars(b.reg_name),
-                    pyqir.const(self.qir_int_type, b.index[0]),
-                    output_instruction,
-                ],
-            )
-            self.set_ssa_vars(b.reg_name, ssa_int)
+            self._set_bit_in_int(b.reg_name, b.index[0], output_instruction)
 
     def conv_CopyBitsOp(self, args: list) -> None:
         assert len(args) % 2 == 0
         half_length = len(args) // 2
 
         for i, o in zip(args[:half_length], args[half_length:]):
-            output_instruction = self.module.builder.call(
-                self.get_bit_from_int,
-                [
-                    self.get_ssa_vars(i.reg_name),
-                    pyqir.const(self.qir_int_type, i.index[0]),
-                ],
+            output_instruction = self._get_bit_from_int(
+                self.get_ssa_vars(i.reg_name), i.index[0]
             )
 
-            ssa_int = self.module.builder.call(
-                self.set_bit_in_int,
-                [
-                    self.get_ssa_vars(o.reg_name),
-                    pyqir.const(self.qir_int_type, o.index[0]),
-                    output_instruction,
-                ],
-            )
-            self.set_ssa_vars(o.reg_name, ssa_int)
+            self._set_bit_in_int(o.reg_name, o.index[0], output_instruction)
 
     def conv_BarrierOp(self, qubits: list[Qubit], op: BarrierOp) -> None:
         assert qubits[0].reg_name == "q"

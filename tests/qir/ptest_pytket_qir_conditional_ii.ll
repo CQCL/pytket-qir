@@ -11,50 +11,76 @@ source_filename = "ptest_pytket_qir_conditional_ii"
 
 define void @main() #0 {
 entry:
-  %0 = call i64 @create_int(i64 5)
-  %1 = call i64 @create_int(i64 5)
-  %2 = call i64 @create_int(i64 5)
-  %3 = call i64 @create_int(i64 5)
-  %4 = or i64 %0, %1
   call void @__quantum__qis__h__body(%Qubit* null)
   call void @__quantum__qis__h__body(%Qubit* inttoptr (i64 1 to %Qubit*))
   call void @__quantum__qis__h__body(%Qubit* inttoptr (i64 2 to %Qubit*))
-  %5 = or i64 %4, %1
   call void @__quantum__qis__h__body(%Qubit* null)
-  %6 = call i1 @get_bit_from_int(i64 %0, i64 4)
-  br i1 %6, label %contb0, label %condb0
+  br i1 false, label %contb0, label %condb0
 
 condb0:                                           ; preds = %entry
-  %7 = or i64 %4, %1
   br label %contb0
 
 contb0:                                           ; preds = %condb0, %entry
-  %8 = phi i64 [ %7, %condb0 ], [ %5, %entry ]
-  %9 = call i64 @mz_to_int(%Qubit* inttoptr (i64 2 to %Qubit*), i64 %8, i64 2)
-  %10 = call i64 @mz_to_int(%Qubit* inttoptr (i64 1 to %Qubit*), i64 %9, i64 3)
-  %11 = call i64 @mz_to_int(%Qubit* null, i64 %10, i64 4)
-  call void @__quantum__rt__int_record_output(i64 %0, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @0, i32 0, i32 0))
-  call void @__quantum__rt__int_record_output(i64 %1, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @1, i32 0, i32 0))
-  call void @__quantum__rt__int_record_output(i64 %4, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @2, i32 0, i32 0))
-  call void @__quantum__rt__int_record_output(i64 %11, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @3, i32 0, i32 0))
+  %0 = phi i64 [ 0, %condb0 ], [ 0, %entry ]
+  call void @__quantum__qis__mz__body(%Qubit* inttoptr (i64 2 to %Qubit*), %Result* inttoptr (i64 2 to %Result*))
+  %1 = call i1 @__quantum__qis__read_result__body(%Result* inttoptr (i64 2 to %Result*))
+  br i1 %1, label %sb_1_0, label %sb_0_0
+
+sb_0_0:                                           ; preds = %contb0
+  %2 = and i64 9223372036854775803, %0
+  br label %contb0_0
+
+sb_1_0:                                           ; preds = %contb0
+  %3 = or i64 4, %0
+  br label %contb0_0
+
+contb0_0:                                         ; preds = %sb_0_0, %sb_1_0
+  %4 = phi i64 [ %2, %sb_0_0 ], [ %3, %sb_1_0 ]
+  call void @__quantum__qis__mz__body(%Qubit* inttoptr (i64 1 to %Qubit*), %Result* inttoptr (i64 1 to %Result*))
+  %5 = call i1 @__quantum__qis__read_result__body(%Result* inttoptr (i64 1 to %Result*))
+  br i1 %5, label %sb_1_1, label %sb_0_1
+
+sb_0_1:                                           ; preds = %contb0_0
+  %6 = and i64 9223372036854775799, %4
+  br label %contb0_1
+
+sb_1_1:                                           ; preds = %contb0_0
+  %7 = or i64 8, %4
+  br label %contb0_1
+
+contb0_1:                                         ; preds = %sb_0_1, %sb_1_1
+  %8 = phi i64 [ %6, %sb_0_1 ], [ %7, %sb_1_1 ]
+  call void @__quantum__qis__mz__body(%Qubit* null, %Result* null)
+  %9 = call i1 @__quantum__qis__read_result__body(%Result* null)
+  br i1 %9, label %sb_1_2, label %sb_0_2
+
+sb_0_2:                                           ; preds = %contb0_1
+  %10 = and i64 9223372036854775791, %8
+  br label %contb0_2
+
+sb_1_2:                                           ; preds = %contb0_1
+  %11 = or i64 16, %8
+  br label %contb0_2
+
+contb0_2:                                         ; preds = %sb_0_2, %sb_1_2
+  %12 = phi i64 [ %10, %sb_0_2 ], [ %11, %sb_1_2 ]
+  call void @__quantum__rt__int_record_output(i64 0, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @0, i32 0, i32 0))
+  call void @__quantum__rt__int_record_output(i64 0, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @1, i32 0, i32 0))
+  call void @__quantum__rt__int_record_output(i64 0, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @2, i32 0, i32 0))
+  call void @__quantum__rt__int_record_output(i64 %12, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @3, i32 0, i32 0))
   ret void
 }
 
-declare i1 @get_bit_from_int(i64, i64)
-
-declare i64 @set_bit_in_int(i64, i64, i1)
-
 declare i1 @__quantum__qis__read_result__body(%Result*)
-
-declare i64 @create_int(i64)
-
-declare i64 @mz_to_int(%Qubit*, i64, i64)
 
 declare void @__quantum__rt__int_record_output(i64, i8*)
 
 declare void @__quantum__qis__h__body(%Qubit*)
 
+declare void @__quantum__qis__mz__body(%Qubit*, %Result* writeonly) #1
+
 attributes #0 = { "entry_point" "output_labeling_schema" "qir_profiles"="custom" "required_num_qubits"="3" "required_num_results"="3" }
+attributes #1 = { "irreversible" }
 
 !llvm.module.flags = !{!0, !1, !2, !3}
 

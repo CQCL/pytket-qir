@@ -15,7 +15,7 @@
 from utilities import check_qir_result  # type: ignore
 
 from pytket import wasm
-from pytket.circuit import Circuit
+from pytket.circuit import Bit, Circuit, Qubit
 from pytket.qir.conversion.api import QIRFormat, pytket_to_qir
 
 
@@ -75,6 +75,28 @@ def test_pytket_qir_wasm_ii_64() -> None:
     )
 
     check_qir_result(result, "ptest_pytket_qir_wasm_ii_64")
+
+
+def test_pytket_qir_wasm_iii_64() -> None:
+    w = wasm.WasmFileHandler("testfile.wasm", int_size=64)
+    c = Circuit(6, 6)
+    c.Measure(Qubit(0), Bit(0))
+    c.Measure(Qubit(1), Bit(1))
+    c.Measure(Qubit(2), Bit(2))
+    c0 = c.add_c_register("c0", 3)
+    c1 = c.add_c_register("c1", 4)
+    c.add_wasm_to_reg("add_something", w, [c0], [c1])
+    c.add_wasm_to_reg("add_something", w, [c1], [c1])
+    result = pytket_to_qir(
+        c,
+        name="test_pytket_qir_wasm_iii_64",
+        qir_format=QIRFormat.STRING,
+        wfh=w,
+        int_type=64,
+        profile=True,
+    )
+
+    check_qir_result(result, "ptest_pytket_qir_wasm_iii_64")
 
 
 if __name__ == "__main__":

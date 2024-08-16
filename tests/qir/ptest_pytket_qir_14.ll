@@ -14,203 +14,688 @@ source_filename = "ptest_pytket_qir_14"
 
 define void @main() #0 {
 entry:
-  %0 = call i64 @create_int(i64 8)
-  %1 = call i64 @create_int(i64 10)
-  %2 = call i64 @create_int(i64 10)
-  %3 = call i64 @create_int(i64 9)
-  %4 = call i64 @create_int(i64 64)
-  %5 = call i64 @create_int(i64 64)
-  %6 = call i64 @create_int(i64 64)
-  %7 = call i64 @set_bit_in_int(i64 %0, i64 0, i1 true)
-  %8 = call i64 @set_bit_in_int(i64 %1, i64 0, i1 true)
-  %9 = call i64 @set_bit_in_int(i64 %8, i64 1, i1 true)
-  %10 = call i64 @set_bit_in_int(i64 %9, i64 2, i1 false)
-  %11 = call i64 @set_bit_in_int(i64 %10, i64 3, i1 false)
-  %12 = call i64 @set_bit_in_int(i64 %11, i64 4, i1 false)
-  %13 = call i64 @set_bit_in_int(i64 %12, i64 5, i1 false)
-  %14 = call i64 @set_bit_in_int(i64 %13, i64 6, i1 false)
-  %15 = call i64 @set_bit_in_int(i64 %14, i64 7, i1 false)
-  %16 = call i64 @set_bit_in_int(i64 %15, i64 8, i1 false)
-  %17 = call i64 @set_bit_in_int(i64 %16, i64 9, i1 false)
-  %18 = call i64 @set_bit_in_int(i64 %7, i64 0, i1 false)
-  %19 = call i64 @set_bit_in_int(i64 %18, i64 1, i1 true)
-  %20 = call i64 @set_bit_in_int(i64 %19, i64 2, i1 false)
-  %21 = call i64 @set_bit_in_int(i64 %20, i64 3, i1 false)
-  %22 = call i64 @set_bit_in_int(i64 %21, i64 4, i1 false)
-  %23 = call i64 @set_bit_in_int(i64 %22, i64 5, i1 false)
-  %24 = call i64 @set_bit_in_int(i64 %23, i64 6, i1 false)
-  %25 = call i64 @set_bit_in_int(i64 %24, i64 7, i1 false)
-  %26 = call i64 @set_bit_in_int(i64 %25, i64 0, i1 true)
-  %27 = call i64 @set_bit_in_int(i64 %26, i64 1, i1 true)
-  %28 = call i64 @set_bit_in_int(i64 %27, i64 2, i1 true)
-  %29 = call i64 @set_bit_in_int(i64 %28, i64 3, i1 false)
-  %30 = call i64 @set_bit_in_int(i64 %29, i64 4, i1 true)
-  %31 = call i64 @set_bit_in_int(i64 %30, i64 5, i1 false)
-  %32 = call i64 @set_bit_in_int(i64 %31, i64 6, i1 false)
-  %33 = call i64 @set_bit_in_int(i64 %32, i64 7, i1 false)
-  %34 = call i1 @get_bit_from_int(i64 %33, i64 0)
-  %35 = call i64 @set_bit_in_int(i64 %17, i64 0, i1 %34)
-  %36 = call i1 @get_bit_from_int(i64 %33, i64 1)
-  %37 = call i64 @set_bit_in_int(i64 %35, i64 1, i1 %36)
-  %38 = call i1 @get_bit_from_int(i64 %33, i64 2)
-  %39 = call i64 @set_bit_in_int(i64 %37, i64 2, i1 %38)
-  %40 = call i1 @get_bit_from_int(i64 %33, i64 3)
-  %41 = call i64 @set_bit_in_int(i64 %39, i64 3, i1 %40)
-  %42 = call i1 @get_bit_from_int(i64 %33, i64 4)
-  %43 = call i64 @set_bit_in_int(i64 %41, i64 4, i1 %42)
-  %44 = call i1 @get_bit_from_int(i64 %33, i64 5)
-  %45 = call i64 @set_bit_in_int(i64 %43, i64 5, i1 %44)
-  %46 = call i1 @get_bit_from_int(i64 %33, i64 6)
-  %47 = call i64 @set_bit_in_int(i64 %45, i64 6, i1 %46)
-  %48 = call i1 @get_bit_from_int(i64 %33, i64 7)
-  %49 = call i64 @set_bit_in_int(i64 %47, i64 7, i1 %48)
-  %50 = add i64 %33, %49
-  %51 = sub i64 %33, %49
-  %52 = shl i64 %33, 1
-  %53 = lshr i64 %52, 1
-  %54 = icmp eq i64 1, %52
-  %55 = call i64 @set_bit_in_int(i64 %3, i64 4, i1 %54)
-  %56 = icmp sgt i64 2, %52
-  %57 = icmp sgt i64 %52, -1
-  %58 = and i1 %56, %57
-  %59 = call i64 @set_bit_in_int(i64 %55, i64 5, i1 %58)
-  %60 = icmp eq i64 0, %52
-  %61 = call i64 @set_bit_in_int(i64 %59, i64 6, i1 %60)
-  %62 = icmp sgt i64 1, %52
-  %63 = icmp sgt i64 %52, -1
-  %64 = and i1 %62, %63
-  %65 = call i64 @set_bit_in_int(i64 %61, i64 7, i1 %64)
-  %66 = icmp sgt i64 0, %52
-  %67 = icmp sgt i64 %52, 1
-  %68 = and i1 %66, %67
-  %69 = call i64 @set_bit_in_int(i64 %65, i64 8, i1 %68)
-  %70 = call i1 @get_bit_from_int(i64 %52, i64 0)
-  br i1 %70, label %condb0, label %contb0
+  br i1 true, label %sb_1_0, label %sb_0_0
 
-condb0:                                           ; preds = %entry
+sb_0_0:                                           ; preds = %entry
+  br label %entry_0
+
+sb_1_0:                                           ; preds = %entry
+  br label %entry_0
+
+entry_0:                                          ; preds = %sb_0_0, %sb_1_0
+  %0 = phi i64 [ 0, %sb_0_0 ], [ 1, %sb_1_0 ]
+  br i1 true, label %sb_1_1, label %sb_0_1
+
+sb_0_1:                                           ; preds = %entry_0
+  br label %entry_1
+
+sb_1_1:                                           ; preds = %entry_0
+  br label %entry_1
+
+entry_1:                                          ; preds = %sb_0_1, %sb_1_1
+  %1 = phi i64 [ 0, %sb_0_1 ], [ 1, %sb_1_1 ]
+  br i1 true, label %sb_1_2, label %sb_0_2
+
+sb_0_2:                                           ; preds = %entry_1
+  %2 = and i64 9223372036854775805, %1
+  br label %entry_2
+
+sb_1_2:                                           ; preds = %entry_1
+  %3 = or i64 2, %1
+  br label %entry_2
+
+entry_2:                                          ; preds = %sb_0_2, %sb_1_2
+  %4 = phi i64 [ %2, %sb_0_2 ], [ %3, %sb_1_2 ]
+  br i1 false, label %sb_1_3, label %sb_0_3
+
+sb_0_3:                                           ; preds = %entry_2
+  %5 = and i64 9223372036854775803, %4
+  br label %entry_3
+
+sb_1_3:                                           ; preds = %entry_2
+  %6 = or i64 4, %4
+  br label %entry_3
+
+entry_3:                                          ; preds = %sb_0_3, %sb_1_3
+  %7 = phi i64 [ %5, %sb_0_3 ], [ %6, %sb_1_3 ]
+  br i1 false, label %sb_1_4, label %sb_0_4
+
+sb_0_4:                                           ; preds = %entry_3
+  %8 = and i64 9223372036854775799, %7
+  br label %entry_4
+
+sb_1_4:                                           ; preds = %entry_3
+  %9 = or i64 8, %7
+  br label %entry_4
+
+entry_4:                                          ; preds = %sb_0_4, %sb_1_4
+  %10 = phi i64 [ %8, %sb_0_4 ], [ %9, %sb_1_4 ]
+  br i1 false, label %sb_1_5, label %sb_0_5
+
+sb_0_5:                                           ; preds = %entry_4
+  %11 = and i64 9223372036854775791, %10
+  br label %entry_5
+
+sb_1_5:                                           ; preds = %entry_4
+  %12 = or i64 16, %10
+  br label %entry_5
+
+entry_5:                                          ; preds = %sb_0_5, %sb_1_5
+  %13 = phi i64 [ %11, %sb_0_5 ], [ %12, %sb_1_5 ]
+  br i1 false, label %sb_1_6, label %sb_0_6
+
+sb_0_6:                                           ; preds = %entry_5
+  %14 = and i64 9223372036854775775, %13
+  br label %entry_6
+
+sb_1_6:                                           ; preds = %entry_5
+  %15 = or i64 32, %13
+  br label %entry_6
+
+entry_6:                                          ; preds = %sb_0_6, %sb_1_6
+  %16 = phi i64 [ %14, %sb_0_6 ], [ %15, %sb_1_6 ]
+  br i1 false, label %sb_1_7, label %sb_0_7
+
+sb_0_7:                                           ; preds = %entry_6
+  %17 = and i64 9223372036854775743, %16
+  br label %entry_7
+
+sb_1_7:                                           ; preds = %entry_6
+  %18 = or i64 64, %16
+  br label %entry_7
+
+entry_7:                                          ; preds = %sb_0_7, %sb_1_7
+  %19 = phi i64 [ %17, %sb_0_7 ], [ %18, %sb_1_7 ]
+  br i1 false, label %sb_1_8, label %sb_0_8
+
+sb_0_8:                                           ; preds = %entry_7
+  %20 = and i64 9223372036854775679, %19
+  br label %entry_8
+
+sb_1_8:                                           ; preds = %entry_7
+  %21 = or i64 128, %19
+  br label %entry_8
+
+entry_8:                                          ; preds = %sb_0_8, %sb_1_8
+  %22 = phi i64 [ %20, %sb_0_8 ], [ %21, %sb_1_8 ]
+  br i1 false, label %sb_1_9, label %sb_0_9
+
+sb_0_9:                                           ; preds = %entry_8
+  %23 = and i64 9223372036854775551, %22
+  br label %entry_9
+
+sb_1_9:                                           ; preds = %entry_8
+  %24 = or i64 256, %22
+  br label %entry_9
+
+entry_9:                                          ; preds = %sb_0_9, %sb_1_9
+  %25 = phi i64 [ %23, %sb_0_9 ], [ %24, %sb_1_9 ]
+  br i1 false, label %sb_1_10, label %sb_0_10
+
+sb_0_10:                                          ; preds = %entry_9
+  %26 = and i64 9223372036854775295, %25
+  br label %entry_10
+
+sb_1_10:                                          ; preds = %entry_9
+  %27 = or i64 512, %25
+  br label %entry_10
+
+entry_10:                                         ; preds = %sb_0_10, %sb_1_10
+  %28 = phi i64 [ %26, %sb_0_10 ], [ %27, %sb_1_10 ]
+  br i1 false, label %sb_1_11, label %sb_0_11
+
+sb_0_11:                                          ; preds = %entry_10
+  %29 = and i64 9223372036854775806, %0
+  br label %entry_11
+
+sb_1_11:                                          ; preds = %entry_10
+  %30 = or i64 1, %0
+  br label %entry_11
+
+entry_11:                                         ; preds = %sb_0_11, %sb_1_11
+  %31 = phi i64 [ %29, %sb_0_11 ], [ %30, %sb_1_11 ]
+  br i1 true, label %sb_1_12, label %sb_0_12
+
+sb_0_12:                                          ; preds = %entry_11
+  %32 = and i64 9223372036854775805, %31
+  br label %entry_12
+
+sb_1_12:                                          ; preds = %entry_11
+  %33 = or i64 2, %31
+  br label %entry_12
+
+entry_12:                                         ; preds = %sb_0_12, %sb_1_12
+  %34 = phi i64 [ %32, %sb_0_12 ], [ %33, %sb_1_12 ]
+  br i1 false, label %sb_1_13, label %sb_0_13
+
+sb_0_13:                                          ; preds = %entry_12
+  %35 = and i64 9223372036854775803, %34
+  br label %entry_13
+
+sb_1_13:                                          ; preds = %entry_12
+  %36 = or i64 4, %34
+  br label %entry_13
+
+entry_13:                                         ; preds = %sb_0_13, %sb_1_13
+  %37 = phi i64 [ %35, %sb_0_13 ], [ %36, %sb_1_13 ]
+  br i1 false, label %sb_1_14, label %sb_0_14
+
+sb_0_14:                                          ; preds = %entry_13
+  %38 = and i64 9223372036854775799, %37
+  br label %entry_14
+
+sb_1_14:                                          ; preds = %entry_13
+  %39 = or i64 8, %37
+  br label %entry_14
+
+entry_14:                                         ; preds = %sb_0_14, %sb_1_14
+  %40 = phi i64 [ %38, %sb_0_14 ], [ %39, %sb_1_14 ]
+  br i1 false, label %sb_1_15, label %sb_0_15
+
+sb_0_15:                                          ; preds = %entry_14
+  %41 = and i64 9223372036854775791, %40
+  br label %entry_15
+
+sb_1_15:                                          ; preds = %entry_14
+  %42 = or i64 16, %40
+  br label %entry_15
+
+entry_15:                                         ; preds = %sb_0_15, %sb_1_15
+  %43 = phi i64 [ %41, %sb_0_15 ], [ %42, %sb_1_15 ]
+  br i1 false, label %sb_1_16, label %sb_0_16
+
+sb_0_16:                                          ; preds = %entry_15
+  %44 = and i64 9223372036854775775, %43
+  br label %entry_16
+
+sb_1_16:                                          ; preds = %entry_15
+  %45 = or i64 32, %43
+  br label %entry_16
+
+entry_16:                                         ; preds = %sb_0_16, %sb_1_16
+  %46 = phi i64 [ %44, %sb_0_16 ], [ %45, %sb_1_16 ]
+  br i1 false, label %sb_1_17, label %sb_0_17
+
+sb_0_17:                                          ; preds = %entry_16
+  %47 = and i64 9223372036854775743, %46
+  br label %entry_17
+
+sb_1_17:                                          ; preds = %entry_16
+  %48 = or i64 64, %46
+  br label %entry_17
+
+entry_17:                                         ; preds = %sb_0_17, %sb_1_17
+  %49 = phi i64 [ %47, %sb_0_17 ], [ %48, %sb_1_17 ]
+  br i1 false, label %sb_1_18, label %sb_0_18
+
+sb_0_18:                                          ; preds = %entry_17
+  %50 = and i64 9223372036854775679, %49
+  br label %entry_18
+
+sb_1_18:                                          ; preds = %entry_17
+  %51 = or i64 128, %49
+  br label %entry_18
+
+entry_18:                                         ; preds = %sb_0_18, %sb_1_18
+  %52 = phi i64 [ %50, %sb_0_18 ], [ %51, %sb_1_18 ]
+  br i1 true, label %sb_1_19, label %sb_0_19
+
+sb_0_19:                                          ; preds = %entry_18
+  %53 = and i64 9223372036854775806, %52
+  br label %entry_19
+
+sb_1_19:                                          ; preds = %entry_18
+  %54 = or i64 1, %52
+  br label %entry_19
+
+entry_19:                                         ; preds = %sb_0_19, %sb_1_19
+  %55 = phi i64 [ %53, %sb_0_19 ], [ %54, %sb_1_19 ]
+  br i1 true, label %sb_1_20, label %sb_0_20
+
+sb_0_20:                                          ; preds = %entry_19
+  %56 = and i64 9223372036854775805, %55
+  br label %entry_20
+
+sb_1_20:                                          ; preds = %entry_19
+  %57 = or i64 2, %55
+  br label %entry_20
+
+entry_20:                                         ; preds = %sb_0_20, %sb_1_20
+  %58 = phi i64 [ %56, %sb_0_20 ], [ %57, %sb_1_20 ]
+  br i1 true, label %sb_1_21, label %sb_0_21
+
+sb_0_21:                                          ; preds = %entry_20
+  %59 = and i64 9223372036854775803, %58
+  br label %entry_21
+
+sb_1_21:                                          ; preds = %entry_20
+  %60 = or i64 4, %58
+  br label %entry_21
+
+entry_21:                                         ; preds = %sb_0_21, %sb_1_21
+  %61 = phi i64 [ %59, %sb_0_21 ], [ %60, %sb_1_21 ]
+  br i1 false, label %sb_1_22, label %sb_0_22
+
+sb_0_22:                                          ; preds = %entry_21
+  %62 = and i64 9223372036854775799, %61
+  br label %entry_22
+
+sb_1_22:                                          ; preds = %entry_21
+  %63 = or i64 8, %61
+  br label %entry_22
+
+entry_22:                                         ; preds = %sb_0_22, %sb_1_22
+  %64 = phi i64 [ %62, %sb_0_22 ], [ %63, %sb_1_22 ]
+  br i1 true, label %sb_1_23, label %sb_0_23
+
+sb_0_23:                                          ; preds = %entry_22
+  %65 = and i64 9223372036854775791, %64
+  br label %entry_23
+
+sb_1_23:                                          ; preds = %entry_22
+  %66 = or i64 16, %64
+  br label %entry_23
+
+entry_23:                                         ; preds = %sb_0_23, %sb_1_23
+  %67 = phi i64 [ %65, %sb_0_23 ], [ %66, %sb_1_23 ]
+  br i1 false, label %sb_1_24, label %sb_0_24
+
+sb_0_24:                                          ; preds = %entry_23
+  %68 = and i64 9223372036854775775, %67
+  br label %entry_24
+
+sb_1_24:                                          ; preds = %entry_23
+  %69 = or i64 32, %67
+  br label %entry_24
+
+entry_24:                                         ; preds = %sb_0_24, %sb_1_24
+  %70 = phi i64 [ %68, %sb_0_24 ], [ %69, %sb_1_24 ]
+  br i1 false, label %sb_1_25, label %sb_0_25
+
+sb_0_25:                                          ; preds = %entry_24
+  %71 = and i64 9223372036854775743, %70
+  br label %entry_25
+
+sb_1_25:                                          ; preds = %entry_24
+  %72 = or i64 64, %70
+  br label %entry_25
+
+entry_25:                                         ; preds = %sb_0_25, %sb_1_25
+  %73 = phi i64 [ %71, %sb_0_25 ], [ %72, %sb_1_25 ]
+  br i1 false, label %sb_1_26, label %sb_0_26
+
+sb_0_26:                                          ; preds = %entry_25
+  %74 = and i64 9223372036854775679, %73
+  br label %entry_26
+
+sb_1_26:                                          ; preds = %entry_25
+  %75 = or i64 128, %73
+  br label %entry_26
+
+entry_26:                                         ; preds = %sb_0_26, %sb_1_26
+  %76 = phi i64 [ %74, %sb_0_26 ], [ %75, %sb_1_26 ]
+  %77 = and i64 1, %76
+  %78 = icmp eq i64 1, %77
+  br i1 %78, label %sb_1_27, label %sb_0_27
+
+sb_0_27:                                          ; preds = %entry_26
+  %79 = and i64 9223372036854775806, %28
+  br label %entry_27
+
+sb_1_27:                                          ; preds = %entry_26
+  %80 = or i64 1, %28
+  br label %entry_27
+
+entry_27:                                         ; preds = %sb_0_27, %sb_1_27
+  %81 = phi i64 [ %79, %sb_0_27 ], [ %80, %sb_1_27 ]
+  %82 = and i64 2, %76
+  %83 = icmp eq i64 2, %82
+  br i1 %83, label %sb_1_28, label %sb_0_28
+
+sb_0_28:                                          ; preds = %entry_27
+  %84 = and i64 9223372036854775805, %81
+  br label %entry_28
+
+sb_1_28:                                          ; preds = %entry_27
+  %85 = or i64 2, %81
+  br label %entry_28
+
+entry_28:                                         ; preds = %sb_0_28, %sb_1_28
+  %86 = phi i64 [ %84, %sb_0_28 ], [ %85, %sb_1_28 ]
+  %87 = and i64 4, %76
+  %88 = icmp eq i64 4, %87
+  br i1 %88, label %sb_1_29, label %sb_0_29
+
+sb_0_29:                                          ; preds = %entry_28
+  %89 = and i64 9223372036854775803, %86
+  br label %entry_29
+
+sb_1_29:                                          ; preds = %entry_28
+  %90 = or i64 4, %86
+  br label %entry_29
+
+entry_29:                                         ; preds = %sb_0_29, %sb_1_29
+  %91 = phi i64 [ %89, %sb_0_29 ], [ %90, %sb_1_29 ]
+  %92 = and i64 8, %76
+  %93 = icmp eq i64 8, %92
+  br i1 %93, label %sb_1_30, label %sb_0_30
+
+sb_0_30:                                          ; preds = %entry_29
+  %94 = and i64 9223372036854775799, %91
+  br label %entry_30
+
+sb_1_30:                                          ; preds = %entry_29
+  %95 = or i64 8, %91
+  br label %entry_30
+
+entry_30:                                         ; preds = %sb_0_30, %sb_1_30
+  %96 = phi i64 [ %94, %sb_0_30 ], [ %95, %sb_1_30 ]
+  %97 = and i64 16, %76
+  %98 = icmp eq i64 16, %97
+  br i1 %98, label %sb_1_31, label %sb_0_31
+
+sb_0_31:                                          ; preds = %entry_30
+  %99 = and i64 9223372036854775791, %96
+  br label %entry_31
+
+sb_1_31:                                          ; preds = %entry_30
+  %100 = or i64 16, %96
+  br label %entry_31
+
+entry_31:                                         ; preds = %sb_0_31, %sb_1_31
+  %101 = phi i64 [ %99, %sb_0_31 ], [ %100, %sb_1_31 ]
+  %102 = and i64 32, %76
+  %103 = icmp eq i64 32, %102
+  br i1 %103, label %sb_1_32, label %sb_0_32
+
+sb_0_32:                                          ; preds = %entry_31
+  %104 = and i64 9223372036854775775, %101
+  br label %entry_32
+
+sb_1_32:                                          ; preds = %entry_31
+  %105 = or i64 32, %101
+  br label %entry_32
+
+entry_32:                                         ; preds = %sb_0_32, %sb_1_32
+  %106 = phi i64 [ %104, %sb_0_32 ], [ %105, %sb_1_32 ]
+  %107 = and i64 64, %76
+  %108 = icmp eq i64 64, %107
+  br i1 %108, label %sb_1_33, label %sb_0_33
+
+sb_0_33:                                          ; preds = %entry_32
+  %109 = and i64 9223372036854775743, %106
+  br label %entry_33
+
+sb_1_33:                                          ; preds = %entry_32
+  %110 = or i64 64, %106
+  br label %entry_33
+
+entry_33:                                         ; preds = %sb_0_33, %sb_1_33
+  %111 = phi i64 [ %109, %sb_0_33 ], [ %110, %sb_1_33 ]
+  %112 = and i64 128, %76
+  %113 = icmp eq i64 128, %112
+  br i1 %113, label %sb_1_34, label %sb_0_34
+
+sb_0_34:                                          ; preds = %entry_33
+  %114 = and i64 9223372036854775679, %111
+  br label %entry_34
+
+sb_1_34:                                          ; preds = %entry_33
+  %115 = or i64 128, %111
+  br label %entry_34
+
+entry_34:                                         ; preds = %sb_0_34, %sb_1_34
+  %116 = phi i64 [ %114, %sb_0_34 ], [ %115, %sb_1_34 ]
+  %117 = add i64 %76, %116
+  %118 = sub i64 %76, %116
+  %119 = shl i64 %76, 1
+  %120 = lshr i64 %119, 1
+  %121 = icmp eq i64 1, %119
+  br i1 %121, label %sb_1_35, label %sb_0_35
+
+sb_0_35:                                          ; preds = %entry_34
+  br label %entry_35
+
+sb_1_35:                                          ; preds = %entry_34
+  br label %entry_35
+
+entry_35:                                         ; preds = %sb_0_35, %sb_1_35
+  %122 = phi i64 [ 0, %sb_0_35 ], [ 16, %sb_1_35 ]
+  %123 = icmp sgt i64 2, %119
+  %124 = icmp sgt i64 %119, -1
+  %125 = and i1 %123, %124
+  br i1 %125, label %sb_1_36, label %sb_0_36
+
+sb_0_36:                                          ; preds = %entry_35
+  %126 = and i64 9223372036854775775, %122
+  br label %entry_36
+
+sb_1_36:                                          ; preds = %entry_35
+  %127 = or i64 32, %122
+  br label %entry_36
+
+entry_36:                                         ; preds = %sb_0_36, %sb_1_36
+  %128 = phi i64 [ %126, %sb_0_36 ], [ %127, %sb_1_36 ]
+  %129 = icmp eq i64 0, %119
+  br i1 %129, label %sb_1_37, label %sb_0_37
+
+sb_0_37:                                          ; preds = %entry_36
+  %130 = and i64 9223372036854775743, %128
+  br label %entry_37
+
+sb_1_37:                                          ; preds = %entry_36
+  %131 = or i64 64, %128
+  br label %entry_37
+
+entry_37:                                         ; preds = %sb_0_37, %sb_1_37
+  %132 = phi i64 [ %130, %sb_0_37 ], [ %131, %sb_1_37 ]
+  %133 = icmp sgt i64 1, %119
+  %134 = icmp sgt i64 %119, -1
+  %135 = and i1 %133, %134
+  br i1 %135, label %sb_1_38, label %sb_0_38
+
+sb_0_38:                                          ; preds = %entry_37
+  %136 = and i64 9223372036854775679, %132
+  br label %entry_38
+
+sb_1_38:                                          ; preds = %entry_37
+  %137 = or i64 128, %132
+  br label %entry_38
+
+entry_38:                                         ; preds = %sb_0_38, %sb_1_38
+  %138 = phi i64 [ %136, %sb_0_38 ], [ %137, %sb_1_38 ]
+  %139 = icmp sgt i64 0, %119
+  %140 = icmp sgt i64 %119, 1
+  %141 = and i1 %139, %140
+  br i1 %141, label %sb_1_39, label %sb_0_39
+
+sb_0_39:                                          ; preds = %entry_38
+  %142 = and i64 9223372036854775551, %138
+  br label %entry_39
+
+sb_1_39:                                          ; preds = %entry_38
+  %143 = or i64 256, %138
+  br label %entry_39
+
+entry_39:                                         ; preds = %sb_0_39, %sb_1_39
+  %144 = phi i64 [ %142, %sb_0_39 ], [ %143, %sb_1_39 ]
+  %145 = and i64 1, %119
+  %146 = icmp eq i64 1, %145
+  br i1 %146, label %condb0, label %contb0
+
+condb0:                                           ; preds = %entry_39
   br label %contb0
 
-contb0:                                           ; preds = %condb0, %entry
-  %71 = call i1 @get_bit_from_int(i64 %52, i64 0)
-  %72 = call i1 @get_bit_from_int(i64 %53, i64 0)
-  %73 = xor i1 %71, %72
-  %74 = call i64 @set_bit_in_int(i64 %69, i64 1, i1 %73)
-  %75 = xor i64 %52, %53
-  %76 = and i64 %52, %53
-  %77 = or i64 %52, %53
-  %78 = icmp eq i64 1, %75
-  %79 = call i64 @set_bit_in_int(i64 %74, i64 0, i1 %78)
-  %80 = icmp eq i64 1, %76
-  %81 = call i64 @set_bit_in_int(i64 %79, i64 2, i1 %80)
-  %82 = icmp eq i64 1, %77
-  %83 = call i64 @set_bit_in_int(i64 %81, i64 3, i1 %82)
-  %84 = call i1 @get_bit_from_int(i64 %83, i64 0)
-  br i1 %84, label %condb1, label %contb1
+contb0:                                           ; preds = %condb0, %entry_39
+  %147 = and i64 1, %119
+  %148 = icmp eq i64 1, %147
+  %149 = and i64 1, %120
+  %150 = icmp eq i64 1, %149
+  %151 = xor i1 %148, %150
+  br i1 %151, label %sb_1_40, label %sb_0_40
 
-condb1:                                           ; preds = %contb0
+sb_0_40:                                          ; preds = %contb0
+  %152 = and i64 9223372036854775805, %144
+  br label %contb0_40
+
+sb_1_40:                                          ; preds = %contb0
+  %153 = or i64 2, %144
+  br label %contb0_40
+
+contb0_40:                                        ; preds = %sb_0_40, %sb_1_40
+  %154 = phi i64 [ %152, %sb_0_40 ], [ %153, %sb_1_40 ]
+  %155 = xor i64 %119, %120
+  %156 = and i64 %119, %120
+  %157 = or i64 %119, %120
+  %158 = icmp eq i64 1, %155
+  br i1 %158, label %sb_1_41, label %sb_0_41
+
+sb_0_41:                                          ; preds = %contb0_40
+  %159 = and i64 9223372036854775806, %154
+  br label %contb0_41
+
+sb_1_41:                                          ; preds = %contb0_40
+  %160 = or i64 1, %154
+  br label %contb0_41
+
+contb0_41:                                        ; preds = %sb_0_41, %sb_1_41
+  %161 = phi i64 [ %159, %sb_0_41 ], [ %160, %sb_1_41 ]
+  %162 = icmp eq i64 1, %156
+  br i1 %162, label %sb_1_42, label %sb_0_42
+
+sb_0_42:                                          ; preds = %contb0_41
+  %163 = and i64 9223372036854775803, %161
+  br label %contb0_42
+
+sb_1_42:                                          ; preds = %contb0_41
+  %164 = or i64 4, %161
+  br label %contb0_42
+
+contb0_42:                                        ; preds = %sb_0_42, %sb_1_42
+  %165 = phi i64 [ %163, %sb_0_42 ], [ %164, %sb_1_42 ]
+  %166 = icmp eq i64 1, %157
+  br i1 %166, label %sb_1_43, label %sb_0_43
+
+sb_0_43:                                          ; preds = %contb0_42
+  %167 = and i64 9223372036854775799, %165
+  br label %contb0_43
+
+sb_1_43:                                          ; preds = %contb0_42
+  %168 = or i64 8, %165
+  br label %contb0_43
+
+contb0_43:                                        ; preds = %sb_0_43, %sb_1_43
+  %169 = phi i64 [ %167, %sb_0_43 ], [ %168, %sb_1_43 ]
+  %170 = and i64 1, %169
+  %171 = icmp eq i64 1, %170
+  br i1 %171, label %condb1, label %contb1
+
+condb1:                                           ; preds = %contb0_43
   call void @__quantum__qis__x__body(%Qubit* null)
   br label %contb1
 
-contb1:                                           ; preds = %condb1, %contb0
-  %85 = call i1 @get_bit_from_int(i64 %83, i64 1)
-  br i1 %85, label %condb2, label %contb2
+contb1:                                           ; preds = %condb1, %contb0_43
+  %172 = and i64 2, %169
+  %173 = icmp eq i64 2, %172
+  br i1 %173, label %condb2, label %contb2
 
 condb2:                                           ; preds = %contb1
   call void @__quantum__qis__x__body(%Qubit* null)
   br label %contb2
 
 contb2:                                           ; preds = %condb2, %contb1
-  %86 = call i1 @get_bit_from_int(i64 %83, i64 2)
-  br i1 %86, label %condb3, label %contb3
+  %174 = and i64 4, %169
+  %175 = icmp eq i64 4, %174
+  br i1 %175, label %condb3, label %contb3
 
 condb3:                                           ; preds = %contb2
   call void @__quantum__qis__x__body(%Qubit* null)
   br label %contb3
 
 contb3:                                           ; preds = %condb3, %contb2
-  %87 = call i1 @get_bit_from_int(i64 %83, i64 3)
-  br i1 %87, label %condb4, label %contb4
+  %176 = and i64 8, %169
+  %177 = icmp eq i64 8, %176
+  br i1 %177, label %condb4, label %contb4
 
 condb4:                                           ; preds = %contb3
   call void @__quantum__qis__x__body(%Qubit* null)
   br label %contb4
 
 contb4:                                           ; preds = %condb4, %contb3
-  %88 = call i1 @get_bit_from_int(i64 %52, i64 0)
-  br i1 %88, label %condb5, label %contb5
+  %178 = and i64 1, %119
+  %179 = icmp eq i64 1, %178
+  br i1 %179, label %condb5, label %contb5
 
 condb5:                                           ; preds = %contb4
   call void @__quantum__qis__x__body(%Qubit* null)
   br label %contb5
 
 contb5:                                           ; preds = %condb5, %contb4
-  %89 = call i1 @get_bit_from_int(i64 %83, i64 4)
-  br i1 %89, label %contb6, label %condb6
+  %180 = and i64 16, %169
+  %181 = icmp eq i64 16, %180
+  br i1 %181, label %contb6, label %condb6
 
 condb6:                                           ; preds = %contb5
   call void @__quantum__qis__x__body(%Qubit* null)
   br label %contb6
 
 contb6:                                           ; preds = %condb6, %contb5
-  %90 = call i1 @get_bit_from_int(i64 %52, i64 0)
-  br i1 %90, label %contb7, label %condb7
+  %182 = and i64 1, %119
+  %183 = icmp eq i64 1, %182
+  br i1 %183, label %contb7, label %condb7
 
 condb7:                                           ; preds = %contb6
   call void @__quantum__qis__x__body(%Qubit* null)
   br label %contb7
 
 contb7:                                           ; preds = %condb7, %contb6
-  %91 = call i1 @get_bit_from_int(i64 %83, i64 5)
-  br i1 %91, label %condb8, label %contb8
+  %184 = and i64 32, %169
+  %185 = icmp eq i64 32, %184
+  br i1 %185, label %condb8, label %contb8
 
 condb8:                                           ; preds = %contb7
   call void @__quantum__qis__x__body(%Qubit* null)
   br label %contb8
 
 contb8:                                           ; preds = %condb8, %contb7
-  %92 = call i1 @get_bit_from_int(i64 %83, i64 6)
-  br i1 %92, label %condb9, label %contb9
+  %186 = and i64 64, %169
+  %187 = icmp eq i64 64, %186
+  br i1 %187, label %condb9, label %contb9
 
 condb9:                                           ; preds = %contb8
   call void @__quantum__qis__x__body(%Qubit* null)
   br label %contb9
 
 contb9:                                           ; preds = %condb9, %contb8
-  %93 = call i1 @get_bit_from_int(i64 %83, i64 7)
-  br i1 %93, label %condb10, label %contb10
+  %188 = and i64 128, %169
+  %189 = icmp eq i64 128, %188
+  br i1 %189, label %condb10, label %contb10
 
 condb10:                                          ; preds = %contb9
   call void @__quantum__qis__x__body(%Qubit* null)
   br label %contb10
 
 contb10:                                          ; preds = %condb10, %contb9
-  %94 = call i1 @get_bit_from_int(i64 %83, i64 8)
-  br i1 %94, label %condb11, label %contb11
+  %190 = and i64 256, %169
+  %191 = icmp eq i64 256, %190
+  br i1 %191, label %condb11, label %contb11
 
 condb11:                                          ; preds = %contb10
   call void @__quantum__qis__x__body(%Qubit* null)
   br label %contb11
 
 contb11:                                          ; preds = %condb11, %contb10
-  call void @__quantum__rt__int_record_output(i64 %52, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @0, i32 0, i32 0))
-  call void @__quantum__rt__int_record_output(i64 %53, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @1, i32 0, i32 0))
-  call void @__quantum__rt__int_record_output(i64 %51, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @2, i32 0, i32 0))
-  call void @__quantum__rt__int_record_output(i64 %83, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @3, i32 0, i32 0))
-  call void @__quantum__rt__int_record_output(i64 %75, i8* getelementptr inbounds ([20 x i8], [20 x i8]* @4, i32 0, i32 0))
-  call void @__quantum__rt__int_record_output(i64 %76, i8* getelementptr inbounds ([20 x i8], [20 x i8]* @5, i32 0, i32 0))
-  call void @__quantum__rt__int_record_output(i64 %77, i8* getelementptr inbounds ([20 x i8], [20 x i8]* @6, i32 0, i32 0))
+  call void @__quantum__rt__int_record_output(i64 %119, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @0, i32 0, i32 0))
+  call void @__quantum__rt__int_record_output(i64 %120, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @1, i32 0, i32 0))
+  call void @__quantum__rt__int_record_output(i64 %118, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @2, i32 0, i32 0))
+  call void @__quantum__rt__int_record_output(i64 %169, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @3, i32 0, i32 0))
+  call void @__quantum__rt__int_record_output(i64 %155, i8* getelementptr inbounds ([20 x i8], [20 x i8]* @4, i32 0, i32 0))
+  call void @__quantum__rt__int_record_output(i64 %156, i8* getelementptr inbounds ([20 x i8], [20 x i8]* @5, i32 0, i32 0))
+  call void @__quantum__rt__int_record_output(i64 %157, i8* getelementptr inbounds ([20 x i8], [20 x i8]* @6, i32 0, i32 0))
   ret void
 }
 
-declare i1 @get_bit_from_int(i64, i64)
-
-declare i64 @set_bit_in_int(i64, i64, i1)
-
 declare i1 @__quantum__qis__read_result__body(%Result*)
-
-declare i64 @create_int(i64)
-
-declare i64 @mz_to_int(%Qubit*, i64, i64)
 
 declare void @__quantum__rt__int_record_output(i64, i8*)
 

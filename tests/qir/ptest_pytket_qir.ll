@@ -10,15 +10,7 @@ entry:
   ret void
 }
 
-declare i1 @get_bit_from_int(i64, i64)
-
-declare i64 @set_bit_in_int(i64, i64, i1)
-
 declare i1 @__quantum__qis__read_result__body(%Result*)
-
-declare i64 @create_int(i64)
-
-declare i64 @mz_to_int(%Qubit*, i64, i64)
 
 declare void @__quantum__rt__int_record_output(i64, i8*)
 

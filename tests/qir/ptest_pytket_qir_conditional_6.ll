@@ -8,30 +8,20 @@ source_filename = "ptest_pytket_qir_conditional_6"
 
 define void @main() #0 {
 entry:
-  %0 = call i64 @create_int(i64 3)
   call void @__quantum__qis__h__body(%Qubit* null)
   call void @__quantum__qis__h__body(%Qubit* inttoptr (i64 1 to %Qubit*))
-  %1 = icmp eq i64 3, %0
-  br i1 %1, label %condb0, label %contb0
+  br i1 false, label %condb0, label %contb0
 
 condb0:                                           ; preds = %entry
   call void @__quantum__qis__phasedx__body(double 0x3FD41B2F769CF0E0, double 0x3FE41B2F769CF0E0, %Qubit* null)
   br label %contb0
 
 contb0:                                           ; preds = %condb0, %entry
-  call void @__quantum__rt__int_record_output(i64 %0, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @0, i32 0, i32 0))
+  call void @__quantum__rt__int_record_output(i64 0, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @0, i32 0, i32 0))
   ret void
 }
 
-declare i1 @get_bit_from_int(i64, i64)
-
-declare i64 @set_bit_in_int(i64, i64, i1)
-
 declare i1 @__quantum__qis__read_result__body(%Result*)
-
-declare i64 @create_int(i64)
-
-declare i64 @mz_to_int(%Qubit*, i64, i64)
 
 declare void @__quantum__rt__int_record_output(i64, i8*)
 

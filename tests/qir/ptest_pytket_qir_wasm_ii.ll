@@ -2,7 +2,6 @@
 source_filename = "test_pytket_qir_wasm_ii"
 
 %Result = type opaque
-%Qubit = type opaque
 
 @0 = internal constant [2 x i8] c"c\00"
 @1 = internal constant [3 x i8] c"c0\00"
@@ -11,31 +10,19 @@ source_filename = "test_pytket_qir_wasm_ii"
 
 define void @main() #0 {
 entry:
-  %0 = call i32 @create_int(i32 6)
-  %1 = call i32 @create_int(i32 3)
-  %2 = call i32 @create_int(i32 4)
-  %3 = call i32 @create_int(i32 5)
-  %4 = call i32 @multi(i32 %1, i32 %2)
-  %5 = call i32 @add_one(i32 %4)
-  call void @no_return(i32 %5)
+  %0 = call i32 @multi(i32 0, i32 0)
+  %1 = call i32 @add_one(i32 %0)
+  call void @no_return(i32 %1)
   call void @init()
-  %6 = call i32 @no_parameters()
-  call void @__quantum__rt__int_record_output(i32 %0, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @0, i32 0, i32 0))
-  call void @__quantum__rt__int_record_output(i32 %1, i8* getelementptr inbounds ([3 x i8], [3 x i8]* @1, i32 0, i32 0))
-  call void @__quantum__rt__int_record_output(i32 %2, i8* getelementptr inbounds ([3 x i8], [3 x i8]* @2, i32 0, i32 0))
-  call void @__quantum__rt__int_record_output(i32 %6, i8* getelementptr inbounds ([3 x i8], [3 x i8]* @3, i32 0, i32 0))
+  %2 = call i32 @no_parameters()
+  call void @__quantum__rt__int_record_output(i32 0, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @0, i32 0, i32 0))
+  call void @__quantum__rt__int_record_output(i32 0, i8* getelementptr inbounds ([3 x i8], [3 x i8]* @1, i32 0, i32 0))
+  call void @__quantum__rt__int_record_output(i32 0, i8* getelementptr inbounds ([3 x i8], [3 x i8]* @2, i32 0, i32 0))
+  call void @__quantum__rt__int_record_output(i32 %2, i8* getelementptr inbounds ([3 x i8], [3 x i8]* @3, i32 0, i32 0))
   ret void
 }
 
-declare i1 @get_bit_from_int(i32, i32)
-
-declare i32 @set_bit_in_int(i32, i32, i1)
-
 declare i1 @__quantum__qis__read_result__body(%Result*)
-
-declare i32 @create_int(i32)
-
-declare i32 @mz_to_int(%Qubit*, i32, i32)
 
 declare void @__quantum__rt__int_record_output(i32, i8*)
 

@@ -260,6 +260,34 @@ def test_pytket_qir_conditional_10() -> None:
     check_qir_result(result, "ptest_pytket_qir_conditional_10")
 
 
+def test_pytket_qir_conditional_10b() -> None:
+    box_circ = Circuit(4)
+    box_circ.X(0)
+    box_circ.Y(1)
+    box_circ.Z(2)
+    box_circ.H(3)
+    box_c = box_circ.add_c_register("c", 5)
+
+    box_circ.H(0)
+    box_circ.add_classicalexpbox_register(box_c | box_c, box_c)  # type: ignore
+    box_circ.add_classicalexpbox_register(box_c | box_c, box_c)  # type: ignore
+    box_circ.add_c_setbits([False, True] + [False] * 3, list(box_c))
+
+    cbox = CircBox(box_circ)
+    d = Circuit(4, 5)
+    a = d.add_c_register("a", 4)
+    d.add_circbox(cbox, [0, 2, 1, 3, 0, 1, 2, 3, 4], condition=a[0])
+
+    result = pytket_to_qir(
+        d,
+        name="ptest_pytket_qir_conditional_10b",
+        qir_format=QIRFormat.STRING,
+        profile=True,
+    )
+
+    check_qir_result(result, "ptest_pytket_qir_conditional_10b")
+
+
 def test_pytket_qir_conditional_11() -> None:
     # test conditional with to big scratch register
 
