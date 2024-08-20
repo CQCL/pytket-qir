@@ -1,8 +1,8 @@
 Changelog
 ~~~~~~~~~
 
-0.13.0
-------
+0.13.0rc0 (August 2024)
+-----------------------
 
 * Add option to generate profile compatible QIR
 
