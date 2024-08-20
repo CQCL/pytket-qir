@@ -251,22 +251,21 @@ class PQirGenerator:
             self._reg2ssa_var(creg)
             self.list_of_changed_cregs.append(creg)
 
-    def _get_bit_from_int(self, ssa_int: Value, index: int) -> Value:
-        index_ssa = pyqir.const(self.qir_int_type, 2**index)
+    def _get_bit_from_creg(self, creg: str, index: int) -> Value:
+        ssa_index = pyqir.const(self.qir_int_type, 2**index)
 
         result = self.module.module.builder.icmp(
             pyqir.IntPredicate.EQ,
-            index_ssa,
-            self.module.module.builder.and_(index_ssa, ssa_int),
+            ssa_index,
+            self.module.module.builder.and_(ssa_index, self.get_ssa_vars(creg)),
         )
 
         return result
 
-    def _set_bit_in_int(self, creg: str, index: int, ssa_bit: Value) -> None:
-
+    def _set_bit_in_creg(self, creg: str, index: int, ssa_bit: Value) -> None:
         ssa_int = self.get_ssa_vars(creg)
 
-        index_ssa = pyqir.const(self.qir_int_type, 2**index)
+        ssa_index = pyqir.const(self.qir_int_type, 2**index)
 
         # it would be better to do an invert here, but that is not (yet) available
         ssa_int_all_1 = pyqir.const(self.qir_int_type, (2 ** (self.int_size - 1) - 1))
@@ -291,14 +290,14 @@ class PQirGenerator:
 
         # if bit 1
         self.module.module.builder.insert_at_end(sb_1)
-        result_1 = self.module.module.builder.or_(index_ssa, ssa_int)
+        result_1 = self.module.module.builder.or_(ssa_index, ssa_int)
         self.module.module.builder.br(continue_block)
 
         # if bit 0
         self.module.module.builder.insert_at_end(sb_0)
         result_0 = self.module.module.builder.and_(
             self.module.module.builder.xor(
-                index_ssa,
+                ssa_index,
                 ssa_int_all_1,
             ),
             ssa_int,
@@ -525,9 +524,7 @@ class PQirGenerator:
         self, bit: Union[Bit, BitAnd, BitOr, BitXor], module: tketqirModule
     ) -> Value:
         if type(bit) is Bit:
-            result = self._get_bit_from_int(
-                self.get_ssa_vars(bit.reg_name), bit.index[0]
-            )
+            result = self._get_bit_from_creg(bit.reg_name, bit.index[0])
 
             return result
         elif type(bit) is int:
@@ -567,7 +564,7 @@ class PQirGenerator:
             condition_bit_index = args[-1].index[0]
             result_registername = args[-1].reg_name
 
-            self._set_bit_in_int(result_registername, condition_bit_index, result)
+            self._set_bit_in_creg(result_registername, condition_bit_index, result)
 
         else:
             lower_qir = pyqir.const(self.qir_int_type, op.lower)
@@ -592,7 +589,7 @@ class PQirGenerator:
             condition_bit_index = args[-1].index[0]
             registername = args[-1].reg_name
 
-            self._set_bit_in_int(registername, condition_bit_index, result)
+            self._set_bit_in_creg(registername, condition_bit_index, result)
 
     def conv_conditional(self, command: Command, op: Conditional) -> None:
         condition_name = command.args[0].reg_name
@@ -618,21 +615,19 @@ class PQirGenerator:
 
                 condition_bit_index = command.args[0].index[0]
 
-                ssabool = self._get_bit_from_int(
-                    self.get_ssa_vars(condition_name), condition_bit_index
-                )
+                ssa_bool = self._get_bit_from_creg(condition_name, condition_bit_index)
 
                 self.list_of_changed_cregs = []
                 self.active_block = condb
                 self.active_block_main = condb
 
                 if op.value == 1:
-                    self.module.module.builder.condbr(ssabool, condb, contb)
+                    self.module.module.builder.condbr(ssa_bool, condb, contb)
                     self.module.module.builder.insert_at_end(condb)
                     self.subcircuit_to_module(conditional_circuit)
 
                 if op.value == 0:
-                    self.module.module.builder.condbr(ssabool, contb, condb)
+                    self.module.module.builder.condbr(ssa_bool, contb, condb)
                     self.module.module.builder.insert_at_end(condb)
                     self.subcircuit_to_module(conditional_circuit)
 
@@ -683,13 +678,13 @@ class PQirGenerator:
                         "conditional can only work with one entire register"
                     )
 
-                ssabool = self.module.module.builder.icmp(
+                ssa_bool = self.module.module.builder.icmp(
                     pyqir.IntPredicate.EQ,
                     pyqir.const(self.qir_int_type, op.value),
                     self.get_ssa_vars(condition_name),
                 )
 
-                self.module.module.builder.condbr(ssabool, condb, contb)
+                self.module.module.builder.condbr(ssa_bool, condb, contb)
 
                 self.module.module.builder.insert_at_end(condb)
 
@@ -735,21 +730,19 @@ class PQirGenerator:
             if op.width == 1:  # only one conditional bit
                 condition_bit_index = command.args[0].index[0]
 
-                ssabool = self._get_bit_from_int(
-                    self.get_ssa_vars(condition_name), condition_bit_index
-                )
+                ssa_bool = self._get_bit_from_creg(condition_name, condition_bit_index)
 
                 self.list_of_changed_cregs = []
                 self.active_block = condb
                 self.active_block_main = condb
 
                 if op.value == 1:
-                    self.module.module.builder.condbr(ssabool, condb, contb)
+                    self.module.module.builder.condbr(ssa_bool, condb, contb)
                     self.module.module.builder.insert_at_end(condb)
                     self.command_to_module(op.op, command.args[op.width :])
 
                 if op.value == 0:
-                    self.module.module.builder.condbr(ssabool, contb, condb)
+                    self.module.module.builder.condbr(ssa_bool, contb, condb)
                     self.module.module.builder.insert_at_end(condb)
                     self.command_to_module(op.op, command.args[op.width :])
 
@@ -800,13 +793,13 @@ class PQirGenerator:
                         "conditional can only work with one entire register"
                     )
 
-                ssabool = self.module.module.builder.icmp(
+                ssa_bool = self.module.module.builder.icmp(
                     pyqir.IntPredicate.EQ,
                     pyqir.const(self.qir_int_type, op.value),
                     self.get_ssa_vars(condition_name),
                 )
 
-                self.module.module.builder.condbr(ssabool, condb, contb)
+                self.module.module.builder.condbr(ssa_bool, condb, contb)
                 self.module.module.builder.insert_at_end(condb)
 
                 self.list_of_changed_cregs = []
@@ -848,11 +841,11 @@ class PQirGenerator:
     def conv_WASMOp(self, op: WASMOp, args: Union[Bit, Qubit]) -> None:
         paramreg, resultreg = self._get_c_regs_from_com(op, args)
 
-        paramssa = [self.get_ssa_vars(p) for p in paramreg]
+        ssa_param = [self.get_ssa_vars(p) for p in paramreg]
 
         result = self.module.builder.call(
             self.wasm[op.func_name],
-            [*paramssa],
+            [*ssa_param],
         )
 
         if len(resultreg) == 1:
@@ -994,7 +987,7 @@ class PQirGenerator:
             ],
         )
 
-        self._set_bit_in_int(bits[0].reg_name, bits[0].index[0], ssa_measureresult)
+        self._set_bit_in_creg(bits[0].reg_name, bits[0].index[0], ssa_measureresult)
 
     def conv_classicalexpbox(self, op: ClassicalExpBox, args: list) -> None:
         returntypebool = False
@@ -1082,7 +1075,7 @@ class PQirGenerator:
             # to the 0-th entry
             # of the register, this could be changed to a user given value
 
-            self._set_bit_in_int(outputs, result_index, output_instruction)
+            self._set_bit_in_creg(outputs, result_index, output_instruction)
         else:
             self.set_ssa_vars(outputs, output_instruction)
 
@@ -1092,18 +1085,16 @@ class PQirGenerator:
         for b, v in zip(bits, op.values):
             output_instruction = pyqir.const(self.qir_bool_type, int(v))
 
-            self._set_bit_in_int(b.reg_name, b.index[0], output_instruction)
+            self._set_bit_in_creg(b.reg_name, b.index[0], output_instruction)
 
     def conv_CopyBitsOp(self, args: list) -> None:
         assert len(args) % 2 == 0
         half_length = len(args) // 2
 
         for i, o in zip(args[:half_length], args[half_length:]):
-            output_instruction = self._get_bit_from_int(
-                self.get_ssa_vars(i.reg_name), i.index[0]
-            )
+            output_instruction = self._get_bit_from_creg(i.reg_name, i.index[0])
 
-            self._set_bit_in_int(o.reg_name, o.index[0], output_instruction)
+            self._set_bit_in_creg(o.reg_name, o.index[0], output_instruction)
 
     def conv_BarrierOp(self, qubits: list[Qubit], op: BarrierOp) -> None:
         assert qubits[0].reg_name == "q"
