@@ -29,6 +29,7 @@ from pytket.passes import (
 
 from .conversion import QirGenerator
 from .module import tketqirModule
+from .pconversion import PQirGenerator
 
 
 class QIRFormat(Enum):
@@ -47,6 +48,7 @@ def pytket_to_qir(
     wfh: Optional[wasm.WasmFileHandler] = None,
     int_type: int = 64,
     cut_pytket_register: bool = False,
+    profile: bool = False,
 ) -> Union[str, bytes, None]:
     """converts given pytket circuit to qir
 
@@ -58,6 +60,11 @@ def pytket_to_qir(
     :param int_type: size of each integer, allowed value 32 and 64
     :param cut_pytket_register: breaks up the internal scratch bit registers
       into smaller registers, default value false
+    :param profile: generates QIR corresponding to the adaptive profile
+        You can find more details about the adaptive profile under:
+        https://github.com/qir-alliance/qir-spec/pull/35
+        and soon at:
+        https://github.com/qir-alliance/qir-spec/tree/main/specification/under_development/profiles/Adaptive_Profile.md
     """
 
     if cut_pytket_register:
@@ -71,12 +78,26 @@ def pytket_to_qir(
         num_qubits=circ.n_qubits,
         num_results=circ.n_qubits,
     )
+    if not profile:
+        qir_generator = QirGenerator(
+            circuit=circ,
+            module=m,
+            wasm_int_type=int_type,
+            qir_int_type=int_type,
+            wfh=wfh,
+        )
 
-    qir_generator = QirGenerator(
-        circuit=circ, module=m, wasm_int_type=int_type, qir_int_type=int_type, wfh=wfh
-    )
+        populated_module = qir_generator.circuit_to_module(qir_generator.circuit, True)
+    else:
+        qir_generator = PQirGenerator(  # type: ignore
+            circuit=circ,
+            module=m,
+            wasm_int_type=int_type,
+            qir_int_type=int_type,
+            wfh=wfh,
+        )
 
-    populated_module = qir_generator.circuit_to_module(qir_generator.circuit, True)
+        populated_module = qir_generator.circuit_to_module(qir_generator.circuit, True)
 
     if wfh is not None:
         wasm_sar_dict: dict[str, str] = qir_generator.get_wasm_sar()
