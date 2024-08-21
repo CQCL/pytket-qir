@@ -129,6 +129,7 @@ class PQirGenerator:
         self.active_block = None
 
         self.cregs = _retrieve_registers(self.circuit.bits, BitRegister)
+        self.creg_size: dict[str, int] = {}
         self.target_gateset = self.module.gateset.base_gateset
 
         self.block_count = 0
@@ -250,6 +251,7 @@ class PQirGenerator:
         for creg in self.circuit.c_registers:
             self._reg2ssa_var(creg)
             self.list_of_changed_cregs.append(creg)
+            self.creg_size[creg.name] = creg.size
 
     def _get_bit_from_creg(self, creg: str, index: int) -> Value:
         ssa_index = pyqir.const(self.qir_int_type, 2**index)
@@ -311,7 +313,7 @@ class PQirGenerator:
         phi.add_incoming(result_0, sb_0)
         phi.add_incoming(result_1, sb_1)
 
-        self.set_ssa_vars(creg, phi)
+        self.set_ssa_vars(creg, phi, False)
 
     def get_ssa_vars(self, reg_name: str) -> Value:
         if reg_name not in self.ssa_vars:
@@ -323,10 +325,18 @@ class PQirGenerator:
             raise ValueError(f"{reg_name} is not a valid register")
         return self.ssa_vars[reg_name]
 
-    def set_ssa_vars(self, reg_name: str, i64value: Value) -> None:
+    def set_ssa_vars(self, reg_name: str, ssa_i64: Value, trunc=True) -> None:
         if reg_name not in self.ssa_vars:
             raise ValueError(f"{reg_name} is not a valid register")
-        self.ssa_vars[reg_name].append((i64value, self.active_block))  # type: ignore
+        if trunc and self.creg_size[reg_name] != self.int_size:
+            type_register = pyqir.IntType(self.module.context, self.creg_size[reg_name])
+            ssa_i_trunc = self.module.module.builder.trunc(ssa_i64, type_register)
+            ssa_i64_zext = self.module.module.builder.zext(
+                ssa_i_trunc, self.qir_int_type
+            )
+            self.ssa_vars[reg_name].append((ssa_i64_zext, self.active_block))  # type: ignore
+        else:
+            self.ssa_vars[reg_name].append((ssa_i64, self.active_block))  # type: ignore
         self.list_of_changed_cregs.append(reg_name)
 
     def _add_barrier_op(
@@ -658,7 +668,7 @@ class PQirGenerator:
                             "Second block missing after subcircuit_to_module conversion"
                         )
 
-                    self.set_ssa_vars(creg, phi)
+                    self.set_ssa_vars(creg, phi, False)
 
             else:
                 for i in range(op.width):
@@ -722,7 +732,7 @@ class PQirGenerator:
                                  subcircuit_to_module conversion"
                         )
 
-                    self.set_ssa_vars(creg, phi)
+                    self.set_ssa_vars(creg, phi, False)
 
         else:
             condition_name = command.args[0].reg_name
@@ -773,7 +783,7 @@ class PQirGenerator:
                             "Second block missing after command_to_module conversion"
                         )
 
-                    self.set_ssa_vars(creg, phi)
+                    self.set_ssa_vars(creg, phi, False)
 
             else:
                 for i in range(op.width):
@@ -836,7 +846,7 @@ class PQirGenerator:
                                   command_to_module conversion"
                         )
 
-                    self.set_ssa_vars(creg, phi)
+                    self.set_ssa_vars(creg, phi, False)
 
     def conv_WASMOp(self, op: WASMOp, args: Union[Bit, Qubit]) -> None:
         paramreg, resultreg = self._get_c_regs_from_com(op, args)
