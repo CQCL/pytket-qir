@@ -325,7 +325,7 @@ class PQirGenerator:
             raise ValueError(f"{reg_name} is not a valid register")
         return self.ssa_vars[reg_name]
 
-    def set_ssa_vars(self, reg_name: str, ssa_i64: Value, trunc=True) -> None:
+    def set_ssa_vars(self, reg_name: str, ssa_i64: Value, trunc: bool=True) -> None:
         if reg_name not in self.ssa_vars:
             raise ValueError(f"{reg_name} is not a valid register")
         if trunc and self.creg_size[reg_name] != self.int_size:
