@@ -10,10 +10,14 @@ source_filename = "test_pytket_qir_wasm_ii_64"
 define void @main() #0 {
 entry:
   %0 = call i64 @add_something(i64 0)
-  %1 = call i64 @add_something(i64 %0)
+  %1 = trunc i64 %0 to i4
+  %2 = zext i4 %1 to i64
+  %3 = call i64 @add_something(i64 %2)
+  %4 = trunc i64 %3 to i4
+  %5 = zext i4 %4 to i64
   call void @__quantum__rt__int_record_output(i64 0, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @0, i32 0, i32 0))
   call void @__quantum__rt__int_record_output(i64 0, i8* getelementptr inbounds ([3 x i8], [3 x i8]* @1, i32 0, i32 0))
-  call void @__quantum__rt__int_record_output(i64 %1, i8* getelementptr inbounds ([3 x i8], [3 x i8]* @2, i32 0, i32 0))
+  call void @__quantum__rt__int_record_output(i64 %5, i8* getelementptr inbounds ([3 x i8], [3 x i8]* @2, i32 0, i32 0))
   ret void
 }
 
