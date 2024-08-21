@@ -1,9 +1,10 @@
 Changelog
 ~~~~~~~~~
 
-0.13.0rc0 (August 2024)
+0.13.0rc1 (August 2024)
 -----------------------
 
+* Updated pyqir version requirement to 0.10.4.
 * Add option to generate profile compatible QIR
 
 0.12.0 (July 2024)
