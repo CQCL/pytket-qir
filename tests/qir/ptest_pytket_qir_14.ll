@@ -447,11 +447,19 @@ sb_1_34:                                          ; preds = %entry_33
 entry_34:                                         ; preds = %sb_0_34, %sb_1_34
   %116 = phi i64 [ %114, %sb_0_34 ], [ %115, %sb_1_34 ]
   %117 = add i64 %76, %116
-  %118 = sub i64 %76, %116
-  %119 = shl i64 %76, 1
-  %120 = lshr i64 %119, 1
-  %121 = icmp eq i64 1, %119
-  br i1 %121, label %sb_1_35, label %sb_0_35
+  %118 = trunc i64 %117 to i10
+  %119 = zext i10 %118 to i64
+  %120 = sub i64 %76, %116
+  %121 = trunc i64 %120 to i10
+  %122 = zext i10 %121 to i64
+  %123 = shl i64 %76, 1
+  %124 = trunc i64 %123 to i8
+  %125 = zext i8 %124 to i64
+  %126 = lshr i64 %125, 1
+  %127 = trunc i64 %126 to i10
+  %128 = zext i10 %127 to i64
+  %129 = icmp eq i64 1, %125
+  br i1 %129, label %sb_1_35, label %sb_0_35
 
 sb_0_35:                                          ; preds = %entry_34
   br label %entry_35
@@ -460,238 +468,238 @@ sb_1_35:                                          ; preds = %entry_34
   br label %entry_35
 
 entry_35:                                         ; preds = %sb_0_35, %sb_1_35
-  %122 = phi i64 [ 0, %sb_0_35 ], [ 16, %sb_1_35 ]
-  %123 = icmp sgt i64 2, %119
-  %124 = icmp sgt i64 %119, -1
-  %125 = and i1 %123, %124
-  br i1 %125, label %sb_1_36, label %sb_0_36
+  %130 = phi i64 [ 0, %sb_0_35 ], [ 16, %sb_1_35 ]
+  %131 = icmp sgt i64 2, %125
+  %132 = icmp sgt i64 %125, -1
+  %133 = and i1 %131, %132
+  br i1 %133, label %sb_1_36, label %sb_0_36
 
 sb_0_36:                                          ; preds = %entry_35
-  %126 = and i64 9223372036854775775, %122
+  %134 = and i64 9223372036854775775, %130
   br label %entry_36
 
 sb_1_36:                                          ; preds = %entry_35
-  %127 = or i64 32, %122
+  %135 = or i64 32, %130
   br label %entry_36
 
 entry_36:                                         ; preds = %sb_0_36, %sb_1_36
-  %128 = phi i64 [ %126, %sb_0_36 ], [ %127, %sb_1_36 ]
-  %129 = icmp eq i64 0, %119
-  br i1 %129, label %sb_1_37, label %sb_0_37
+  %136 = phi i64 [ %134, %sb_0_36 ], [ %135, %sb_1_36 ]
+  %137 = icmp eq i64 0, %125
+  br i1 %137, label %sb_1_37, label %sb_0_37
 
 sb_0_37:                                          ; preds = %entry_36
-  %130 = and i64 9223372036854775743, %128
+  %138 = and i64 9223372036854775743, %136
   br label %entry_37
 
 sb_1_37:                                          ; preds = %entry_36
-  %131 = or i64 64, %128
+  %139 = or i64 64, %136
   br label %entry_37
 
 entry_37:                                         ; preds = %sb_0_37, %sb_1_37
-  %132 = phi i64 [ %130, %sb_0_37 ], [ %131, %sb_1_37 ]
-  %133 = icmp sgt i64 1, %119
-  %134 = icmp sgt i64 %119, -1
-  %135 = and i1 %133, %134
-  br i1 %135, label %sb_1_38, label %sb_0_38
+  %140 = phi i64 [ %138, %sb_0_37 ], [ %139, %sb_1_37 ]
+  %141 = icmp sgt i64 1, %125
+  %142 = icmp sgt i64 %125, -1
+  %143 = and i1 %141, %142
+  br i1 %143, label %sb_1_38, label %sb_0_38
 
 sb_0_38:                                          ; preds = %entry_37
-  %136 = and i64 9223372036854775679, %132
+  %144 = and i64 9223372036854775679, %140
   br label %entry_38
 
 sb_1_38:                                          ; preds = %entry_37
-  %137 = or i64 128, %132
+  %145 = or i64 128, %140
   br label %entry_38
 
 entry_38:                                         ; preds = %sb_0_38, %sb_1_38
-  %138 = phi i64 [ %136, %sb_0_38 ], [ %137, %sb_1_38 ]
-  %139 = icmp sgt i64 0, %119
-  %140 = icmp sgt i64 %119, 1
-  %141 = and i1 %139, %140
-  br i1 %141, label %sb_1_39, label %sb_0_39
+  %146 = phi i64 [ %144, %sb_0_38 ], [ %145, %sb_1_38 ]
+  %147 = icmp sgt i64 0, %125
+  %148 = icmp sgt i64 %125, 1
+  %149 = and i1 %147, %148
+  br i1 %149, label %sb_1_39, label %sb_0_39
 
 sb_0_39:                                          ; preds = %entry_38
-  %142 = and i64 9223372036854775551, %138
+  %150 = and i64 9223372036854775551, %146
   br label %entry_39
 
 sb_1_39:                                          ; preds = %entry_38
-  %143 = or i64 256, %138
+  %151 = or i64 256, %146
   br label %entry_39
 
 entry_39:                                         ; preds = %sb_0_39, %sb_1_39
-  %144 = phi i64 [ %142, %sb_0_39 ], [ %143, %sb_1_39 ]
-  %145 = and i64 1, %119
-  %146 = icmp eq i64 1, %145
-  br i1 %146, label %condb0, label %contb0
+  %152 = phi i64 [ %150, %sb_0_39 ], [ %151, %sb_1_39 ]
+  %153 = and i64 1, %125
+  %154 = icmp eq i64 1, %153
+  br i1 %154, label %condb0, label %contb0
 
 condb0:                                           ; preds = %entry_39
   br label %contb0
 
 contb0:                                           ; preds = %condb0, %entry_39
-  %147 = and i64 1, %119
-  %148 = icmp eq i64 1, %147
-  %149 = and i64 1, %120
-  %150 = icmp eq i64 1, %149
-  %151 = xor i1 %148, %150
-  br i1 %151, label %sb_1_40, label %sb_0_40
+  %155 = and i64 1, %125
+  %156 = icmp eq i64 1, %155
+  %157 = and i64 1, %128
+  %158 = icmp eq i64 1, %157
+  %159 = xor i1 %156, %158
+  br i1 %159, label %sb_1_40, label %sb_0_40
 
 sb_0_40:                                          ; preds = %contb0
-  %152 = and i64 9223372036854775805, %144
+  %160 = and i64 9223372036854775805, %152
   br label %contb0_40
 
 sb_1_40:                                          ; preds = %contb0
-  %153 = or i64 2, %144
+  %161 = or i64 2, %152
   br label %contb0_40
 
 contb0_40:                                        ; preds = %sb_0_40, %sb_1_40
-  %154 = phi i64 [ %152, %sb_0_40 ], [ %153, %sb_1_40 ]
-  %155 = xor i64 %119, %120
-  %156 = and i64 %119, %120
-  %157 = or i64 %119, %120
-  %158 = icmp eq i64 1, %155
-  br i1 %158, label %sb_1_41, label %sb_0_41
+  %162 = phi i64 [ %160, %sb_0_40 ], [ %161, %sb_1_40 ]
+  %163 = xor i64 %125, %128
+  %164 = and i64 %125, %128
+  %165 = or i64 %125, %128
+  %166 = icmp eq i64 1, %163
+  br i1 %166, label %sb_1_41, label %sb_0_41
 
 sb_0_41:                                          ; preds = %contb0_40
-  %159 = and i64 9223372036854775806, %154
+  %167 = and i64 9223372036854775806, %162
   br label %contb0_41
 
 sb_1_41:                                          ; preds = %contb0_40
-  %160 = or i64 1, %154
+  %168 = or i64 1, %162
   br label %contb0_41
 
 contb0_41:                                        ; preds = %sb_0_41, %sb_1_41
-  %161 = phi i64 [ %159, %sb_0_41 ], [ %160, %sb_1_41 ]
-  %162 = icmp eq i64 1, %156
-  br i1 %162, label %sb_1_42, label %sb_0_42
+  %169 = phi i64 [ %167, %sb_0_41 ], [ %168, %sb_1_41 ]
+  %170 = icmp eq i64 1, %164
+  br i1 %170, label %sb_1_42, label %sb_0_42
 
 sb_0_42:                                          ; preds = %contb0_41
-  %163 = and i64 9223372036854775803, %161
+  %171 = and i64 9223372036854775803, %169
   br label %contb0_42
 
 sb_1_42:                                          ; preds = %contb0_41
-  %164 = or i64 4, %161
+  %172 = or i64 4, %169
   br label %contb0_42
 
 contb0_42:                                        ; preds = %sb_0_42, %sb_1_42
-  %165 = phi i64 [ %163, %sb_0_42 ], [ %164, %sb_1_42 ]
-  %166 = icmp eq i64 1, %157
-  br i1 %166, label %sb_1_43, label %sb_0_43
+  %173 = phi i64 [ %171, %sb_0_42 ], [ %172, %sb_1_42 ]
+  %174 = icmp eq i64 1, %165
+  br i1 %174, label %sb_1_43, label %sb_0_43
 
 sb_0_43:                                          ; preds = %contb0_42
-  %167 = and i64 9223372036854775799, %165
+  %175 = and i64 9223372036854775799, %173
   br label %contb0_43
 
 sb_1_43:                                          ; preds = %contb0_42
-  %168 = or i64 8, %165
+  %176 = or i64 8, %173
   br label %contb0_43
 
 contb0_43:                                        ; preds = %sb_0_43, %sb_1_43
-  %169 = phi i64 [ %167, %sb_0_43 ], [ %168, %sb_1_43 ]
-  %170 = and i64 1, %169
-  %171 = icmp eq i64 1, %170
-  br i1 %171, label %condb1, label %contb1
+  %177 = phi i64 [ %175, %sb_0_43 ], [ %176, %sb_1_43 ]
+  %178 = and i64 1, %177
+  %179 = icmp eq i64 1, %178
+  br i1 %179, label %condb1, label %contb1
 
 condb1:                                           ; preds = %contb0_43
   call void @__quantum__qis__x__body(%Qubit* null)
   br label %contb1
 
 contb1:                                           ; preds = %condb1, %contb0_43
-  %172 = and i64 2, %169
-  %173 = icmp eq i64 2, %172
-  br i1 %173, label %condb2, label %contb2
+  %180 = and i64 2, %177
+  %181 = icmp eq i64 2, %180
+  br i1 %181, label %condb2, label %contb2
 
 condb2:                                           ; preds = %contb1
   call void @__quantum__qis__x__body(%Qubit* null)
   br label %contb2
 
 contb2:                                           ; preds = %condb2, %contb1
-  %174 = and i64 4, %169
-  %175 = icmp eq i64 4, %174
-  br i1 %175, label %condb3, label %contb3
+  %182 = and i64 4, %177
+  %183 = icmp eq i64 4, %182
+  br i1 %183, label %condb3, label %contb3
 
 condb3:                                           ; preds = %contb2
   call void @__quantum__qis__x__body(%Qubit* null)
   br label %contb3
 
 contb3:                                           ; preds = %condb3, %contb2
-  %176 = and i64 8, %169
-  %177 = icmp eq i64 8, %176
-  br i1 %177, label %condb4, label %contb4
+  %184 = and i64 8, %177
+  %185 = icmp eq i64 8, %184
+  br i1 %185, label %condb4, label %contb4
 
 condb4:                                           ; preds = %contb3
   call void @__quantum__qis__x__body(%Qubit* null)
   br label %contb4
 
 contb4:                                           ; preds = %condb4, %contb3
-  %178 = and i64 1, %119
-  %179 = icmp eq i64 1, %178
-  br i1 %179, label %condb5, label %contb5
+  %186 = and i64 1, %125
+  %187 = icmp eq i64 1, %186
+  br i1 %187, label %condb5, label %contb5
 
 condb5:                                           ; preds = %contb4
   call void @__quantum__qis__x__body(%Qubit* null)
   br label %contb5
 
 contb5:                                           ; preds = %condb5, %contb4
-  %180 = and i64 16, %169
-  %181 = icmp eq i64 16, %180
-  br i1 %181, label %contb6, label %condb6
+  %188 = and i64 16, %177
+  %189 = icmp eq i64 16, %188
+  br i1 %189, label %contb6, label %condb6
 
 condb6:                                           ; preds = %contb5
   call void @__quantum__qis__x__body(%Qubit* null)
   br label %contb6
 
 contb6:                                           ; preds = %condb6, %contb5
-  %182 = and i64 1, %119
-  %183 = icmp eq i64 1, %182
-  br i1 %183, label %contb7, label %condb7
+  %190 = and i64 1, %125
+  %191 = icmp eq i64 1, %190
+  br i1 %191, label %contb7, label %condb7
 
 condb7:                                           ; preds = %contb6
   call void @__quantum__qis__x__body(%Qubit* null)
   br label %contb7
 
 contb7:                                           ; preds = %condb7, %contb6
-  %184 = and i64 32, %169
-  %185 = icmp eq i64 32, %184
-  br i1 %185, label %condb8, label %contb8
+  %192 = and i64 32, %177
+  %193 = icmp eq i64 32, %192
+  br i1 %193, label %condb8, label %contb8
 
 condb8:                                           ; preds = %contb7
   call void @__quantum__qis__x__body(%Qubit* null)
   br label %contb8
 
 contb8:                                           ; preds = %condb8, %contb7
-  %186 = and i64 64, %169
-  %187 = icmp eq i64 64, %186
-  br i1 %187, label %condb9, label %contb9
+  %194 = and i64 64, %177
+  %195 = icmp eq i64 64, %194
+  br i1 %195, label %condb9, label %contb9
 
 condb9:                                           ; preds = %contb8
   call void @__quantum__qis__x__body(%Qubit* null)
   br label %contb9
 
 contb9:                                           ; preds = %condb9, %contb8
-  %188 = and i64 128, %169
-  %189 = icmp eq i64 128, %188
-  br i1 %189, label %condb10, label %contb10
+  %196 = and i64 128, %177
+  %197 = icmp eq i64 128, %196
+  br i1 %197, label %condb10, label %contb10
 
 condb10:                                          ; preds = %contb9
   call void @__quantum__qis__x__body(%Qubit* null)
   br label %contb10
 
 contb10:                                          ; preds = %condb10, %contb9
-  %190 = and i64 256, %169
-  %191 = icmp eq i64 256, %190
-  br i1 %191, label %condb11, label %contb11
+  %198 = and i64 256, %177
+  %199 = icmp eq i64 256, %198
+  br i1 %199, label %condb11, label %contb11
 
 condb11:                                          ; preds = %contb10
   call void @__quantum__qis__x__body(%Qubit* null)
   br label %contb11
 
 contb11:                                          ; preds = %condb11, %contb10
-  call void @__quantum__rt__int_record_output(i64 %119, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @0, i32 0, i32 0))
-  call void @__quantum__rt__int_record_output(i64 %120, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @1, i32 0, i32 0))
-  call void @__quantum__rt__int_record_output(i64 %118, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @2, i32 0, i32 0))
-  call void @__quantum__rt__int_record_output(i64 %169, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @3, i32 0, i32 0))
-  call void @__quantum__rt__int_record_output(i64 %155, i8* getelementptr inbounds ([20 x i8], [20 x i8]* @4, i32 0, i32 0))
-  call void @__quantum__rt__int_record_output(i64 %156, i8* getelementptr inbounds ([20 x i8], [20 x i8]* @5, i32 0, i32 0))
-  call void @__quantum__rt__int_record_output(i64 %157, i8* getelementptr inbounds ([20 x i8], [20 x i8]* @6, i32 0, i32 0))
+  call void @__quantum__rt__int_record_output(i64 %125, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @0, i32 0, i32 0))
+  call void @__quantum__rt__int_record_output(i64 %128, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @1, i32 0, i32 0))
+  call void @__quantum__rt__int_record_output(i64 %122, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @2, i32 0, i32 0))
+  call void @__quantum__rt__int_record_output(i64 %177, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @3, i32 0, i32 0))
+  call void @__quantum__rt__int_record_output(i64 %163, i8* getelementptr inbounds ([20 x i8], [20 x i8]* @4, i32 0, i32 0))
+  call void @__quantum__rt__int_record_output(i64 %164, i8* getelementptr inbounds ([20 x i8], [20 x i8]* @5, i32 0, i32 0))
+  call void @__quantum__rt__int_record_output(i64 %165, i8* getelementptr inbounds ([20 x i8], [20 x i8]* @6, i32 0, i32 0))
   ret void
 }
 

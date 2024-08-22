@@ -11,14 +11,20 @@ source_filename = "test_pytket_qir_wasm_ii"
 define void @main() #0 {
 entry:
   %0 = call i32 @multi(i32 0, i32 0)
-  %1 = call i32 @add_one(i32 %0)
-  call void @no_return(i32 %1)
+  %1 = trunc i32 %0 to i5
+  %2 = zext i5 %1 to i32
+  %3 = call i32 @add_one(i32 %2)
+  %4 = trunc i32 %3 to i5
+  %5 = zext i5 %4 to i32
+  call void @no_return(i32 %5)
   call void @init()
-  %2 = call i32 @no_parameters()
+  %6 = call i32 @no_parameters()
+  %7 = trunc i32 %6 to i5
+  %8 = zext i5 %7 to i32
   call void @__quantum__rt__int_record_output(i32 0, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @0, i32 0, i32 0))
   call void @__quantum__rt__int_record_output(i32 0, i8* getelementptr inbounds ([3 x i8], [3 x i8]* @1, i32 0, i32 0))
   call void @__quantum__rt__int_record_output(i32 0, i8* getelementptr inbounds ([3 x i8], [3 x i8]* @2, i32 0, i32 0))
-  call void @__quantum__rt__int_record_output(i32 %2, i8* getelementptr inbounds ([3 x i8], [3 x i8]* @3, i32 0, i32 0))
+  call void @__quantum__rt__int_record_output(i32 %8, i8* getelementptr inbounds ([3 x i8], [3 x i8]* @3, i32 0, i32 0))
   ret void
 }
 
