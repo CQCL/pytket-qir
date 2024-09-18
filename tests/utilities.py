@@ -70,7 +70,7 @@ def run_qir_gen_and_check(
 
     if writefile:
         with open(f"qir/{filename}-{profile}.ll", "w") as f:
-            f.write(gen_qir_ll)
+            f.write(gen_qir_ll)  # type: ignore
         assert not "testcase is writing file"
 
     with open(f"qir/{filename}-{profile}.ll") as f:
