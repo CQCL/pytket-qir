@@ -447,7 +447,7 @@ def test_pytket_qir_18(profile: bool) -> None:
 
     with pytest.raises(ValueError):
         pytket_to_qir(
-            c, name="ptest_pytket_qir_18", qir_format=QIRFormat.STRING, profile=True
+            c, name="ptest_pytket_qir_18", qir_format=QIRFormat.STRING, profile=profile
         )
 
     # gives:
@@ -485,22 +485,22 @@ def test_pytket_qir_19(profile: bool) -> None:
 
 
 if __name__ == "__main__":
-    test_pytket_qir()
-    test_pytket_qir_2()
-    test_pytket_qir_3()
-    test_pytket_qir_4()
-    test_pytket_qir_5()
-    test_pytket_qir_6()
-    test_pytket_qir_7()
-    test_pytket_qir_8()
-    test_pytket_qir_9()
-    test_pytket_qir_10()
-    test_pytket_qir_11()
-    test_pytket_qir_12()
-    test_pytket_qir_13()
-    test_pytket_qir_14()
-    test_pytket_qir_15()
-    test_pytket_qir_16()
-    test_pytket_qir_17()
-    test_pytket_qir_18()
-    test_pytket_qir_19()
+    test_pytket_qir(True)
+    test_pytket_qir_2(True)
+    test_pytket_qir_3(True)
+    test_pytket_qir_4(True)
+    test_pytket_qir_5(True)
+    test_pytket_qir_6(True)
+    test_pytket_qir_7(True)
+    test_pytket_qir_8(True)
+    test_pytket_qir_9(True)
+    test_pytket_qir_10(True)
+    test_pytket_qir_11(True)
+    test_pytket_qir_12(True)
+    test_pytket_qir_13(True)
+    test_pytket_qir_14(True)
+    test_pytket_qir_15(True)
+    test_pytket_qir_16(True)
+    test_pytket_qir_17(True)
+    test_pytket_qir_18(True)
+    test_pytket_qir_19(True)
