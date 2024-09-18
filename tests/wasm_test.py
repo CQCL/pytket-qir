@@ -130,4 +130,4 @@ def test_pytket_qir_wasm_4(profile: bool) -> None:
 
 
 if __name__ == "__main__":
-    test_pytket_qir_wasm()
+    test_pytket_qir_wasm(True)
