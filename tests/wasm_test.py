@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import pytest
 from utilities import check_qir_result  # type: ignore
 
 from pytket import wasm
@@ -19,23 +20,38 @@ from pytket.circuit import Bit, Circuit, Qubit
 from pytket.qir.conversion.api import QIRFormat, pytket_to_qir
 
 
-def test_pytket_qir_wasm() -> None:
+@pytest.mark.parametrize(
+    "profile",
+    [
+        True,
+        False,
+    ],
+)
+def test_pytket_qir_wasm(profile: bool) -> None:
     w = wasm.WasmFileHandler("testfile.wasm")
     circ = Circuit(1)
     circ.H(0)
 
     result = pytket_to_qir(
         circ,
-        name="test_pytket_qir_wasm",
+        name=f"test_pytket_qir_wasm-{profile}",
         qir_format=QIRFormat.STRING,
         wfh=w,
         int_type=32,
+        profile=profile,
     )
 
-    check_qir_result(result, "test_pytket_qir_wasm")
+    check_qir_result(result, f"test_pytket_qir_wasm-{profile}")
 
 
-def test_pytket_qir_wasm_ii() -> None:
+@pytest.mark.parametrize(
+    "profile",
+    [
+        True,
+        False,
+    ],
+)
+def test_pytket_qir_wasm_2(profile: bool) -> None:
     w = wasm.WasmFileHandler("testfile.wasm")
     c = Circuit(6, 6)
     c0 = c.add_c_register("c0", 3)
@@ -48,16 +64,24 @@ def test_pytket_qir_wasm_ii() -> None:
     c.add_wasm_to_reg("no_parameters", w, [], [c2])
     result = pytket_to_qir(
         c,
-        name="test_pytket_qir_wasm_ii",
+        name=f"test_pytket_qir_wasm_2-{profile}",
         qir_format=QIRFormat.STRING,
         wfh=w,
         int_type=32,
+        profile=profile,
     )
 
-    check_qir_result(result, "test_pytket_qir_wasm_ii")
+    check_qir_result(result, f"test_pytket_qir_wasm_2-{profile}")
 
 
-def test_pytket_qir_wasm_ii_64() -> None:
+@pytest.mark.parametrize(
+    "profile",
+    [
+        True,
+        False,
+    ],
+)
+def test_pytket_qir_wasm_3(profile: bool) -> None:
     w = wasm.WasmFileHandler("testfile.wasm", int_size=64)
     c = Circuit(6, 6)
     c0 = c.add_c_register("c0", 3)
@@ -66,32 +90,43 @@ def test_pytket_qir_wasm_ii_64() -> None:
     c.add_wasm_to_reg("add_something", w, [c1], [c1])
     result = pytket_to_qir(
         c,
-        name="test_pytket_qir_wasm_ii_64",
+        name=f"test_pytket_qir_wasm_3-{profile}",
         qir_format=QIRFormat.STRING,
         wfh=w,
         int_type=64,
+        profile=profile,
     )
 
-    check_qir_result(result, "test_pytket_qir_wasm_ii_64")
+    check_qir_result(result, f"test_pytket_qir_wasm_3-{profile}")
 
 
-def test_pytket_qir_wasm_iii_64() -> None:
+@pytest.mark.parametrize(
+    "profile",
+    [
+        True,
+        False,
+    ],
+)
+def test_pytket_qir_wasm_4(profile: bool) -> None:
     w = wasm.WasmFileHandler("testfile.wasm", int_size=64)
     c = Circuit(6, 6)
     c.Measure(Qubit(0), Bit(0))
+    c.Measure(Qubit(1), Bit(1))
+    c.Measure(Qubit(2), Bit(2))
     c0 = c.add_c_register("c0", 3)
     c1 = c.add_c_register("c1", 4)
     c.add_wasm_to_reg("add_something", w, [c0], [c1])
     c.add_wasm_to_reg("add_something", w, [c1], [c1])
     result = pytket_to_qir(
         c,
-        name="test_pytket_qir_wasm_iii_64",
+        name=f"test_pytket_qir_wasm_4-{profile}",
         qir_format=QIRFormat.STRING,
         wfh=w,
         int_type=64,
+        profile=profile,
     )
 
-    check_qir_result(result, "test_pytket_qir_wasm_iii_64")
+    check_qir_result(result, f"test_pytket_qir_wasm_4-{profile}")
 
 
 if __name__ == "__main__":
