@@ -247,6 +247,7 @@ class PQirGenerator:
         self.module.module.builder.insert_at_end(entry)
         self.active_block = entry
         self.active_block_main = entry
+        self.active_block_list = [entry]
 
         for creg in self.circuit.c_registers:
             self._reg2ssa_var(creg)
@@ -264,12 +265,13 @@ class PQirGenerator:
 
         return result
 
-    def _set_bit_in_creg(self, creg: str, index: int, ssa_bit: Value) -> None:
+    def _set_bit_in_creg_blocks(self, creg: str, index: int, ssa_bit: Value) -> None:
         ssa_int = self.get_ssa_vars(creg)
 
         ssa_index = pyqir.const(self.qir_int_type, 2**index)
 
-        # it would be better to do an invert here, but that is not (yet) available
+        # it would be better to do an invert here, but that is not
+        # (yet) available in pyqir
         ssa_int_all_1 = pyqir.const(self.qir_int_type, (2 ** (self.int_size - 1) - 1))
 
         entry_point = self.module.module.entry_point
@@ -286,6 +288,8 @@ class PQirGenerator:
             f"{self.active_block_main.name}_{self.block_count_sb}",
             entry_point,
         )
+        if self.active_block_main.name[0:5] != "condb":
+            self.active_block_list.append(continue_block)
 
         self.block_count_sb = self.block_count_sb + 1
         self.module.module.builder.condbr(ssa_bit, sb_1, sb_0)
@@ -315,6 +319,39 @@ class PQirGenerator:
 
         self.set_ssa_vars(creg, phi, False)
 
+    def _set_bit_in_creg_zext(self, creg: str, index: int, ssa_bit: Value) -> None:
+        ssa_int = self.get_ssa_vars(creg)
+        ssa_bit_i64 = self.module.module.builder.zext(ssa_bit, self.qir_int_type)
+        ssa_index = pyqir.const(self.qir_int_type, 2**index)
+        # it would be better to do an invert here, but that is not
+        # (yet) available in pyqir
+        ssa_int_all_1 = pyqir.const(self.qir_int_type, (2 ** (self.int_size - 1) - 1))
+
+        # if ssa_bit is 1, ((BIT) MUL (2^INDEX) ) OR INT
+        ssa_result_1 = self.module.module.builder.or_(
+            self.module.module.builder.mul(ssa_bit_i64, ssa_index), ssa_int
+        )
+
+        # if ssa_bit is 0, ((2**63-1) XOR ((1-BIT) MUL (2^INDEX))) and INT
+        ssa_result_0 = self.module.module.builder.and_(
+            self.module.module.builder.or_(
+                ssa_int_all_1,
+                self.module.module.builder.mul(
+                    self.module.module.builder.sub(
+                        pyqir.const(self.qir_int_type, 1), ssa_bit_i64
+                    ),
+                    ssa_index,
+                ),
+            ),
+            ssa_result_1,
+        )
+
+        # set ssa
+        self.set_ssa_vars(creg, ssa_result_0, False)
+
+    def _set_bit_in_creg(self, creg: str, index: int, ssa_bit: Value) -> None:
+        self._set_bit_in_creg_zext(creg, index, ssa_bit)
+
     def get_ssa_vars(self, reg_name: str) -> Value:
         if reg_name not in self.ssa_vars:
             raise ValueError(f"{reg_name} is not a valid register")
@@ -325,7 +362,9 @@ class PQirGenerator:
             raise ValueError(f"{reg_name} is not a valid register")
         return self.ssa_vars[reg_name]
 
-    def set_ssa_vars(self, reg_name: str, ssa_i64: Value, trunc: bool = True) -> None:
+    def set_ssa_vars(self, reg_name: str, ssa_i64: Value, trunc: bool = False) -> None:
+        # todo set default value for trunc to true, when enough
+        # classical registers are available
         if reg_name not in self.ssa_vars:
             raise ValueError(f"{reg_name} is not a valid register")
         if trunc and self.creg_size[reg_name] != self.int_size:
@@ -613,6 +652,8 @@ class PQirGenerator:
             self.module.module.context, f"contb{self.block_count}", entry_point
         )
         self.block_count = self.block_count + 1
+        self.active_block_list.append(condb)
+        self.active_block_list.append(contb)
 
         if op.op.type == OpType.CircBox:
             conditional_circuit = self._decompose_conditional_circ_box(
@@ -659,7 +700,7 @@ class PQirGenerator:
                             ssa_list[-1][1].name != ssa_list[i][1].name
                             and ssa_list[i][1].name[0:5] != "condb"
                         ):
-                            phi.add_incoming(ssa_list[i][0], ssa_list[i][1])
+                            phi.add_incoming(ssa_list[i][0], self.active_block_list[-3])
                             found_second_block = True
                             break
 
@@ -722,14 +763,13 @@ class PQirGenerator:
                             ssa_list[-1][1].name != ssa_list[i][1].name
                             and ssa_list[i][1].name[0:5] != "condb"
                         ):
-                            phi.add_incoming(ssa_list[i][0], ssa_list[i][1])
+                            phi.add_incoming(ssa_list[i][0], self.active_block_list[-3])
                             found_second_block = True
                             break
 
                     if not found_second_block:
                         raise RuntimeError(
-                            "Second block missing after generic \
-                                 subcircuit_to_module conversion"
+                            "Second block missing after subcircuit_to_module conversion"
                         )
 
                     self.set_ssa_vars(creg, phi, False)
@@ -774,13 +814,13 @@ class PQirGenerator:
                             ssa_list[-1][1].name != ssa_list[i][1].name
                             and ssa_list[i][1].name[0:5] != "condb"
                         ):
-                            phi.add_incoming(ssa_list[i][0], ssa_list[i][1])
+                            phi.add_incoming(ssa_list[i][0], self.active_block_list[-3])
                             found_second_block = True
                             break
 
                     if not found_second_block:
                         raise RuntimeError(
-                            "Second block missing after command_to_module conversion"
+                            "Second block missing after subcircuit_to_module conversion"
                         )
 
                     self.set_ssa_vars(creg, phi, False)
@@ -836,14 +876,13 @@ class PQirGenerator:
                             ssa_list[-1][1].name != ssa_list[i][1].name
                             and ssa_list[i][1].name[0:5] != "condb"
                         ):
-                            phi.add_incoming(ssa_list[i][0], ssa_list[i][1])
+                            phi.add_incoming(ssa_list[i][0], self.active_block_list[-3])
                             found_second_block = True
                             break
 
                     if not found_second_block:
                         raise RuntimeError(
-                            "Second block missing after generic \
-                                  command_to_module conversion"
+                            "Second block missing after subcircuit_to_module conversion"
                         )
 
                     self.set_ssa_vars(creg, phi, False)
