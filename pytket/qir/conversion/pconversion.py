@@ -249,6 +249,18 @@ class PQirGenerator:
         self.active_block_main = entry
         self.active_block_list = [entry]
 
+        # set the prefix for the names of the conditional blocks
+        self.conditional_bp = "condb"
+        # set the prefix for the names of the continue blocks
+        self.continue_bp = "contb"
+
+        assert self.conditional_bp != self.continue_bp
+        assert self.conditional_bp != "entry"
+        assert self.continue_bp != "entry"
+        # the code is assuming that the prefixes have length 5
+        assert len(self.conditional_bp) == 5
+        assert len(self.continue_bp) == 5
+
         for creg in self.circuit.c_registers:
             self._reg2ssa_var(creg)
             self.list_of_changed_cregs.append(creg)
@@ -288,7 +300,7 @@ class PQirGenerator:
             f"{self.active_block_main.name}_{self.block_count_sb}",
             entry_point,
         )
-        if self.active_block_main.name[0:5] != "condb":
+        if self.active_block_main.name[0:5] != self.conditional_bp:
             self.active_block_list.append(continue_block)
 
         self.block_count_sb = self.block_count_sb + 1
@@ -593,6 +605,40 @@ class PQirGenerator:
         else:
             raise ValueError(f"unsupported bitwise operation {type(bit)}")
 
+    def _add_phi(self) -> None:
+        """
+        add phi nodes for the previously changed registers.
+        phi requires ssa variables from both predecessor blocks,
+        this are not necaserryly the blocks where the variables
+        have been set. The second loop searches for the second variable
+        and adds that with the other predecessor
+        """
+
+        for creg in set(self.list_of_changed_cregs):
+            phi = self.module.module.builder.phi(self.qir_int_type)
+            ssa_list = self.get_ssa_list(creg)
+            # the first predecessor if the direct previous (last) entry in the ssa list
+            phi.add_incoming(ssa_list[-1][0], ssa_list[-1][1])
+
+            found_second_block = False
+
+            # search for the other ssa variable
+            for i in range(-2, -len(ssa_list) - 1, -1):
+                if (
+                    ssa_list[-1][1].name != ssa_list[i][1].name
+                    and ssa_list[i][1].name[0:5] != self.conditional_bp
+                ):
+                    assert self.active_block_list[-3].name[0:5] != self.conditional_bp
+                    # self.active_block_list[-3] is the second predecessor
+                    phi.add_incoming(ssa_list[i][0], self.active_block_list[-3])
+                    found_second_block = True
+                    break
+
+            if not found_second_block:
+                raise RuntimeError("Second block missing phi generation")
+
+            self.set_ssa_vars(creg, phi, False)
+
     def get_wasm_sar(self) -> dict[str, str]:
         return self.wasm_sar_dict
 
@@ -646,10 +692,14 @@ class PQirGenerator:
         entry_point = self.module.module.entry_point
 
         condb = pyqir.BasicBlock(
-            self.module.module.context, f"condb{self.block_count}", entry_point
+            self.module.module.context,
+            f"{self.conditional_bp}{self.block_count}",
+            entry_point,
         )
         contb = pyqir.BasicBlock(
-            self.module.module.context, f"contb{self.block_count}", entry_point
+            self.module.module.context,
+            f"{self.continue_bp}{self.block_count}",
+            entry_point,
         )
         self.block_count = self.block_count + 1
         self.active_block_list.append(condb)
@@ -688,28 +738,7 @@ class PQirGenerator:
                 self.active_block = contb
                 self.active_block_main = contb
 
-                for creg in set(self.list_of_changed_cregs):
-                    phi = self.module.module.builder.phi(self.qir_int_type)
-                    ssa_list = self.get_ssa_list(creg)
-                    phi.add_incoming(ssa_list[-1][0], ssa_list[-1][1])
-
-                    found_second_block = False
-
-                    for i in range(-2, -len(ssa_list) - 1, -1):
-                        if (
-                            ssa_list[-1][1].name != ssa_list[i][1].name
-                            and ssa_list[i][1].name[0:5] != "condb"
-                        ):
-                            phi.add_incoming(ssa_list[i][0], self.active_block_list[-3])
-                            found_second_block = True
-                            break
-
-                    if not found_second_block:
-                        raise RuntimeError(
-                            "Second block missing after subcircuit_to_module conversion"
-                        )
-
-                    self.set_ssa_vars(creg, phi, False)
+                self._add_phi()
 
             else:
                 for i in range(op.width):
@@ -751,28 +780,7 @@ class PQirGenerator:
                 self.active_block = contb
                 self.active_block_main = contb
 
-                for creg in set(self.list_of_changed_cregs):
-                    phi = self.module.module.builder.phi(self.qir_int_type)
-                    ssa_list = self.get_ssa_list(creg)
-                    phi.add_incoming(ssa_list[-1][0], ssa_list[-1][1])
-
-                    found_second_block = False
-
-                    for i in range(-2, -len(ssa_list) - 1, -1):
-                        if (
-                            ssa_list[-1][1].name != ssa_list[i][1].name
-                            and ssa_list[i][1].name[0:5] != "condb"
-                        ):
-                            phi.add_incoming(ssa_list[i][0], self.active_block_list[-3])
-                            found_second_block = True
-                            break
-
-                    if not found_second_block:
-                        raise RuntimeError(
-                            "Second block missing after subcircuit_to_module conversion"
-                        )
-
-                    self.set_ssa_vars(creg, phi, False)
+                self._add_phi()
 
         else:
             condition_name = command.args[0].reg_name
@@ -802,28 +810,7 @@ class PQirGenerator:
                 self.active_block = contb
                 self.active_block_main = contb
 
-                for creg in set(self.list_of_changed_cregs):
-                    phi = self.module.module.builder.phi(self.qir_int_type)
-                    ssa_list = self.get_ssa_list(creg)
-                    phi.add_incoming(ssa_list[-1][0], ssa_list[-1][1])
-
-                    found_second_block = False
-
-                    for i in range(-2, -len(ssa_list) - 1, -1):
-                        if (
-                            ssa_list[-1][1].name != ssa_list[i][1].name
-                            and ssa_list[i][1].name[0:5] != "condb"
-                        ):
-                            phi.add_incoming(ssa_list[i][0], self.active_block_list[-3])
-                            found_second_block = True
-                            break
-
-                    if not found_second_block:
-                        raise RuntimeError(
-                            "Second block missing after subcircuit_to_module conversion"
-                        )
-
-                    self.set_ssa_vars(creg, phi, False)
+                self._add_phi()
 
             else:
                 for i in range(op.width):
@@ -864,28 +851,7 @@ class PQirGenerator:
                 self.active_block = contb
                 self.active_block_main = contb
 
-                for creg in set(self.list_of_changed_cregs):
-                    phi = self.module.module.builder.phi(self.qir_int_type)
-                    ssa_list = self.get_ssa_list(creg)
-                    phi.add_incoming(ssa_list[-1][0], ssa_list[-1][1])
-
-                    found_second_block = False
-
-                    for i in range(-2, -len(ssa_list) - 1, -1):
-                        if (
-                            ssa_list[-1][1].name != ssa_list[i][1].name
-                            and ssa_list[i][1].name[0:5] != "condb"
-                        ):
-                            phi.add_incoming(ssa_list[i][0], self.active_block_list[-3])
-                            found_second_block = True
-                            break
-
-                    if not found_second_block:
-                        raise RuntimeError(
-                            "Second block missing after subcircuit_to_module conversion"
-                        )
-
-                    self.set_ssa_vars(creg, phi, False)
+                self._add_phi()
 
     def conv_WASMOp(self, op: WASMOp, args: Union[Bit, Qubit]) -> None:
         paramreg, resultreg = self._get_c_regs_from_com(op, args)
