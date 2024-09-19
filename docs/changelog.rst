@@ -6,7 +6,7 @@ Changelog
 
 * Updated pyqir version requirement to 0.10.4.
 * Add option to generate profile compatible QIR
-* Updated pytket version requirement to 1.33.
+* Updated pytket version requirement to 1.32.
 
 0.12.0 (July 2024)
 ------------------
