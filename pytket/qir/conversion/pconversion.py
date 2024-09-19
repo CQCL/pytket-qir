@@ -635,7 +635,7 @@ class PQirGenerator:
                     break
 
             if not found_second_block:
-                raise RuntimeError("Second block missing phi generation")
+                raise RuntimeError("Second block missing in phi generation")
 
             self.set_ssa_vars(creg, phi, False)
 
