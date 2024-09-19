@@ -12,24 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from utilities import check_qir_result  # type: ignore
+from utilities import run_qir_gen_and_check  # type: ignore
 
 from pytket.circuit import Circuit
-from pytket.qir.conversion.api import QIRFormat, pytket_to_qir
 
 
 def test_pytket_qir_quantum() -> None:
     circ = Circuit(1)
     circ.H(0)
 
-    result = pytket_to_qir(
-        circ, name="test_pytket_qir_quantum", qir_format=QIRFormat.STRING
-    )
-
-    check_qir_result(result, "test_pytket_qir_quantum")
+    run_qir_gen_and_check(circ, "test_pytket_qir_quantum")
 
 
-def test_pytket_qir_quantum_ii() -> None:
+def test_pytket_qir_quantum_2() -> None:
     circ = Circuit(4, 4)
     circ.H(0)
     circ.X(0)
@@ -41,24 +36,16 @@ def test_pytket_qir_quantum_ii() -> None:
     circ.H(1)
     circ.Measure(1, 1)
 
-    result = pytket_to_qir(
-        circ, name="test_pytket_qir_quantum", qir_format=QIRFormat.STRING
-    )
-
-    check_qir_result(result, "test_pytket_qir_quantum_ii")
+    run_qir_gen_and_check(circ, "test_pytket_qir_quantum_2")
 
 
-def test_pytket_qir_quantum_iii() -> None:
+def test_pytket_qir_quantum_3() -> None:
     circ = Circuit(2).H(0).CX(0, 1).measure_all()
 
-    result = pytket_to_qir(
-        circ, name="test_pytket_qir_quantum", qir_format=QIRFormat.STRING
-    )
-
-    check_qir_result(result, "test_pytket_qir_quantum_iii")
+    run_qir_gen_and_check(circ, "test_pytket_qir_quantum_3")
 
 
-def test_pytket_qir_quantum_iv() -> None:
+def test_pytket_qir_quantum_4() -> None:
     circ = Circuit(4, 4)
     circ.H(0)
     circ.X(0)
@@ -74,14 +61,10 @@ def test_pytket_qir_quantum_iv() -> None:
     circ.H(1)
     circ.Measure(1, 1)
 
-    result = pytket_to_qir(
-        circ, name="test_pytket_qir_quantum_iv", qir_format=QIRFormat.STRING
-    )
-
-    check_qir_result(result, "test_pytket_qir_quantum_iv")
+    run_qir_gen_and_check(circ, "test_pytket_qir_quantum_4")
 
 
-def test_pytket_qir_quantum_v() -> None:
+def test_pytket_qir_quantum_5() -> None:
     circ = Circuit(4, 4)
     circ.H(0)
     circ.X(0)
@@ -99,16 +82,12 @@ def test_pytket_qir_quantum_v() -> None:
     circ.H(1)
     circ.Measure(1, 1)
 
-    result = pytket_to_qir(
-        circ, name="test_pytket_qir_quantum_v", qir_format=QIRFormat.STRING
-    )
-
-    check_qir_result(result, "test_pytket_qir_quantum_v")
+    run_qir_gen_and_check(circ, "test_pytket_qir_quantum_5")
 
 
 if __name__ == "__main__":
     test_pytket_qir_quantum()
-    test_pytket_qir_quantum_ii()
-    test_pytket_qir_quantum_iii()
-    test_pytket_qir_quantum_iv()
-    test_pytket_qir_quantum_v()
+    test_pytket_qir_quantum_2()
+    test_pytket_qir_quantum_3()
+    test_pytket_qir_quantum_4()
+    test_pytket_qir_quantum_5()

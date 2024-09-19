@@ -12,12 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from utilities import check_qir_result  # type: ignore
+from utilities import run_qir_gen_and_check  # type: ignore
 
 from pytket.circuit import (
     Circuit,
 )
-from pytket.qir.conversion.api import QIRFormat, pytket_to_qir
 
 
 def test_pytket_qir_barrier() -> None:
@@ -32,14 +31,10 @@ def test_pytket_qir_barrier() -> None:
     circ.add_barrier([0, 1, 3, 4])
     circ.H(4)
 
-    result = pytket_to_qir(
-        circ, name="test_pytket_qir_barrier", qir_format=QIRFormat.STRING
-    )
-
-    check_qir_result(result, "test_pytket_qir_barrier")
+    run_qir_gen_and_check(circ, "test_pytket_qir_barrier")
 
 
-def test_pytket_qir_barrier_ii() -> None:
+def test_pytket_qir_barrier_2() -> None:
     # test barrier handling
 
     circ = Circuit(5)
@@ -53,13 +48,9 @@ def test_pytket_qir_barrier_ii() -> None:
     circ.add_barrier([1], data="sleep(5.1)")
     circ.add_barrier([0], data="sleep(10000)")
 
-    result = pytket_to_qir(
-        circ, name="test_pytket_qir_barrier_ii", qir_format=QIRFormat.STRING
-    )
-
-    check_qir_result(result, "test_pytket_qir_barrier_ii")
+    run_qir_gen_and_check(circ, "test_pytket_qir_barrier_2")
 
 
 if __name__ == "__main__":
     test_pytket_qir_barrier()
-    test_pytket_qir_barrier_ii()
+    test_pytket_qir_barrier_2()

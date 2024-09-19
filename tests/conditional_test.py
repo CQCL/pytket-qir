@@ -13,7 +13,9 @@
 # limitations under the License.
 
 import pytest
-from utilities import check_qir_result  # type: ignore
+from utilities import (  # type: ignore
+    run_qir_gen_and_check,
+)
 
 from pytket.circuit import (
     Bit,
@@ -28,7 +30,14 @@ from pytket.circuit.logic_exp import BitWiseOp, create_bit_logic_exp
 from pytket.qir.conversion.api import QIRFormat, pytket_to_qir
 
 
-def test_pytket_qir_conditional() -> None:
+@pytest.mark.parametrize(
+    "profile",
+    [
+        True,
+        False,
+    ],
+)
+def test_pytket_qir_conditional(profile: bool) -> None:
     # test conditional handling
 
     circ = Circuit(3)
@@ -47,14 +56,17 @@ def test_pytket_qir_conditional() -> None:
     circ.H(2)
     circ.Measure(Qubit(2), d[2])
 
-    result = pytket_to_qir(
-        circ, name="test_pytket_qir_conditional", qir_format=QIRFormat.STRING
-    )
-
-    check_qir_result(result, "test_pytket_qir_conditional")
+    run_qir_gen_and_check(circ, "test_pytket_qir_conditional", profile=profile)
 
 
-def test_pytket_qir_conditional_ii() -> None:
+@pytest.mark.parametrize(
+    "profile",
+    [
+        True,
+        False,
+    ],
+)
+def test_pytket_qir_conditional_2(profile: bool) -> None:
     # test conditional handling with else case
 
     circ = Circuit(3)
@@ -75,14 +87,17 @@ def test_pytket_qir_conditional_ii() -> None:
     circ.H(2)
     circ.Measure(Qubit(2), d[2])
 
-    result = pytket_to_qir(
-        circ, name="test_pytket_qir_conditional_ii", qir_format=QIRFormat.STRING
-    )
-
-    check_qir_result(result, "test_pytket_qir_conditional_ii")
+    run_qir_gen_and_check(circ, "test_pytket_qir_conditional_2", profile=profile)
 
 
-def test_pytket_qir_conditional_iii() -> None:
+@pytest.mark.parametrize(
+    "profile",
+    [
+        True,
+        False,
+    ],
+)
+def test_pytket_qir_conditional_3(profile: bool) -> None:
     # test complicated conditions and recursive classical op
 
     circ = Circuit(1)
@@ -101,42 +116,51 @@ def test_pytket_qir_conditional_iii() -> None:
     circ.add_classicalexpbox_register(a + b - d, c)  # type: ignore
     circ.add_classicalexpbox_register(a * b * d * c, e)  # type: ignore
 
-    result = pytket_to_qir(
-        circ, name="test_pytket_qir_conditional_iii", qir_format=QIRFormat.STRING
-    )
-
-    check_qir_result(result, "test_pytket_qir_conditional_iii")
+    run_qir_gen_and_check(circ, "test_pytket_qir_conditional_3", profile=profile)
 
 
-def test_pytket_qir_conditional_iv() -> None:
+@pytest.mark.parametrize(
+    "profile",
+    [
+        True,
+        False,
+    ],
+)
+def test_pytket_qir_conditional_4(profile: bool) -> None:
     # test complicated conditions and recursive classical op
 
     circ = Circuit(2, 2).H(0).H(1).measure_all()
 
     circ.add_gate(OpType.H, [0], condition_bits=[0, 1], condition_value=3)
 
-    result = pytket_to_qir(
-        circ, name="test_pytket_qir_conditional_iv", qir_format=QIRFormat.STRING
-    )
-
-    check_qir_result(result, "test_pytket_qir_conditional_iv")
+    run_qir_gen_and_check(circ, "test_pytket_qir_conditional_4", profile=profile)
 
 
-def test_pytket_qir_conditional_v() -> None:
+@pytest.mark.parametrize(
+    "profile",
+    [
+        True,
+        False,
+    ],
+)
+def test_pytket_qir_conditional_5(profile: bool) -> None:
     # test complicated conditions and recursive classical op
 
     circ = Circuit(2, 3).H(0).H(1).measure_all()
 
     circ.add_gate(OpType.H, [0], condition_bits=[0, 1, 2], condition_value=3)
 
-    result = pytket_to_qir(
-        circ, name="test_pytket_qir_conditional_v", qir_format=QIRFormat.STRING
-    )
-
-    check_qir_result(result, "test_pytket_qir_conditional_v")
+    run_qir_gen_and_check(circ, "test_pytket_qir_conditional_5", profile=profile)
 
 
-def test_pytket_qir_conditional_6() -> None:
+@pytest.mark.parametrize(
+    "profile",
+    [
+        True,
+        False,
+    ],
+)
+def test_pytket_qir_conditional_6(profile: bool) -> None:
     # test conditional for manual added gates
 
     circ = Circuit(2, 3).H(0).H(1)
@@ -145,14 +169,17 @@ def test_pytket_qir_conditional_6() -> None:
         OpType.PhasedX, [0.1, 0.2], [0], condition_bits=[0, 1, 2], condition_value=3
     )
 
-    result = pytket_to_qir(
-        circ, name="test_pytket_qir_conditional_6", qir_format=QIRFormat.STRING
-    )
-
-    check_qir_result(result, "test_pytket_qir_conditional_6")
+    run_qir_gen_and_check(circ, "test_pytket_qir_conditional_6", profile=profile)
 
 
-def test_pytket_qir_conditional_7() -> None:
+@pytest.mark.parametrize(
+    "profile",
+    [
+        True,
+        False,
+    ],
+)
+def test_pytket_qir_conditional_7(profile: bool) -> None:
     circ = Circuit(7, name="testcirc")
 
     syn = circ.add_c_register("syn", 4)
@@ -164,14 +191,17 @@ def test_pytket_qir_conditional_7() -> None:
     circ.X(0, condition=reg_eq(syn, 4))
     circ.X(0, condition=reg_eq(syn, 4))
 
-    result = pytket_to_qir(
-        circ, name="test_pytket_qir_conditional_7", qir_format=QIRFormat.STRING
-    )
-
-    check_qir_result(result, "test_pytket_qir_conditional_7")
+    run_qir_gen_and_check(circ, "test_pytket_qir_conditional_7", profile=profile)
 
 
-def test_pytket_qir_conditional_8() -> None:
+@pytest.mark.parametrize(
+    "profile",
+    [
+        True,
+        False,
+    ],
+)
+def test_pytket_qir_conditional_8(profile: bool) -> None:
     c = Circuit(4)
     c.H(0)
     c.H(1)
@@ -182,14 +212,17 @@ def test_pytket_qir_conditional_8() -> None:
     a = d.add_c_register("a", 4)
     d.add_circbox(cbox, [0, 2, 1, 3], condition=a[0])
 
-    result = pytket_to_qir(
-        d, name="test_pytket_qir_conditional_8", qir_format=QIRFormat.STRING
-    )
-
-    check_qir_result(result, "test_pytket_qir_conditional_8")
+    run_qir_gen_and_check(c, "test_pytket_qir_conditional_8", profile=profile)
 
 
-def test_pytket_qir_conditional_9() -> None:
+@pytest.mark.parametrize(
+    "profile",
+    [
+        True,
+        False,
+    ],
+)
+def test_pytket_qir_conditional_9(profile: bool) -> None:
     c = Circuit(4)
     c.X(0)
     c.Y(1)
@@ -200,14 +233,17 @@ def test_pytket_qir_conditional_9() -> None:
     a = d.add_c_register("a", 4)
     d.add_circbox(cbox, [0, 2, 1, 3], condition=a[0])
 
-    result = pytket_to_qir(
-        d, name="test_pytket_qir_conditional_9", qir_format=QIRFormat.STRING
-    )
-
-    check_qir_result(result, "test_pytket_qir_conditional_9")
+    run_qir_gen_and_check(c, "test_pytket_qir_conditional_9", profile=profile)
 
 
-def test_pytket_qir_conditional_10() -> None:
+@pytest.mark.parametrize(
+    "profile",
+    [
+        True,
+        False,
+    ],
+)
+def test_pytket_qir_conditional_10(profile: bool) -> None:
     box_circ = Circuit(4)
     box_circ.X(0)
     box_circ.Y(1)
@@ -223,14 +259,45 @@ def test_pytket_qir_conditional_10() -> None:
     a = d.add_c_register("a", 4)
     d.add_circbox(cbox, [0, 2, 1, 3, 0, 1, 2, 3, 4], condition=a[0])
 
-    result = pytket_to_qir(
-        d, name="test_pytket_qir_conditional_10", qir_format=QIRFormat.STRING
-    )
-
-    check_qir_result(result, "test_pytket_qir_conditional_10")
+    run_qir_gen_and_check(d, "test_pytket_qir_conditional_10", profile=profile)
 
 
-def test_pytket_qir_conditional_11() -> None:
+@pytest.mark.parametrize(
+    "profile",
+    [
+        True,
+        False,
+    ],
+)
+def test_pytket_qir_conditional_11(profile: bool) -> None:
+    box_circ = Circuit(4)
+    box_circ.X(0)
+    box_circ.Y(1)
+    box_circ.Z(2)
+    box_circ.H(3)
+    box_c = box_circ.add_c_register("c", 5)
+
+    box_circ.H(0)
+    box_circ.add_classicalexpbox_register(box_c | box_c, box_c)  # type: ignore
+    box_circ.add_classicalexpbox_register(box_c | box_c, box_c)  # type: ignore
+    box_circ.add_c_setbits([False, True] + [False] * 3, list(box_c))
+
+    cbox = CircBox(box_circ)
+    d = Circuit(4, 5)
+    a = d.add_c_register("a", 4)
+    d.add_circbox(cbox, [0, 2, 1, 3, 0, 1, 2, 3, 4], condition=a[0])
+
+    run_qir_gen_and_check(d, "test_pytket_qir_conditional_11", profile=profile)
+
+
+@pytest.mark.parametrize(
+    "profile",
+    [
+        True,
+        False,
+    ],
+)
+def test_pytket_qir_conditional_12(profile: bool) -> None:
     # test conditional with to big scratch register
 
     circ = Circuit(7, name="testcirc")
@@ -248,22 +315,22 @@ def test_pytket_qir_conditional_11() -> None:
     with pytest.raises(Exception):
         pytket_to_qir(
             circ,
-            name="test_pytket_qir_conditional_11",
+            name="ptest_pytket_qir_conditional_12",
             qir_format=QIRFormat.STRING,
             cut_pytket_register=False,
         )
 
-    result = pytket_to_qir(
-        circ,
-        name="test_pytket_qir_conditional_11",
-        qir_format=QIRFormat.STRING,
-        cut_pytket_register=True,
-    )
-
-    check_qir_result(result, "test_pytket_qir_conditional_11")
+    run_qir_gen_and_check(circ, "test_pytket_qir_conditional_12", profile=profile)
 
 
-def test_pytket_qir_conditional_12() -> None:
+@pytest.mark.parametrize(
+    "profile",
+    [
+        True,
+        False,
+    ],
+)
+def test_pytket_qir_conditional_13(profile: bool) -> None:
     # test conditional with no register
 
     circ = Circuit(7, name="testcirc")
@@ -273,19 +340,110 @@ def test_pytket_qir_conditional_12() -> None:
     exp2 = create_bit_logic_exp(BitWiseOp.ZERO, [])
     circ.H(0, condition=exp2)
 
-    result = pytket_to_qir(
-        circ,
-        name="test_pytket_qir_conditional_12",
-        qir_format=QIRFormat.STRING,
-    )
+    run_qir_gen_and_check(circ, "test_pytket_qir_conditional_13", profile=profile)
 
-    check_qir_result(result, "test_pytket_qir_conditional_12")
+
+@pytest.mark.parametrize(
+    "profile",
+    [
+        True,
+        False,
+    ],
+)
+def test_pytket_qir_conditional_14(profile: bool) -> None:
+    box_circ = Circuit(4)
+    box_circ.X(0)
+    box_c = box_circ.add_c_register("c", 5)
+
+    box_circ.add_classicalexpbox_register(box_c | box_c, box_c)  # type: ignore
+    box_circ.add_classicalexpbox_register(box_c | box_c, box_c)  # type: ignore
+    box_circ.add_c_setbits([False, True] + [False] * 3, list(box_c))
+
+    cbox = CircBox(box_circ)
+    d = Circuit(4, 5)
+    a = d.add_c_register("a", 4)
+    d.add_circbox(cbox, [0, 2, 1, 3, 0, 1, 2, 3, 4], condition=a[0])
+
+    run_qir_gen_and_check(d, "test_pytket_qir_conditional_14-block", profile=profile)
+
+
+@pytest.mark.parametrize(
+    "profile",
+    [
+        True,
+        False,
+    ],
+)
+def test_pytket_qir_conditional_15(profile: bool) -> None:
+    # test setbits op
+    c = Circuit(1, name="ptest_classical")
+    a = c.add_c_register("a", 10)
+    b = c.add_c_register("b", 11)
+    d = c.add_c_register("d", 20)
+
+    c.Measure(Qubit(0), a[0])
+
+    c.add_c_setbits([True, True] + [False] * 9, list(b))
+
+    c.add_classicalexpbox_register(a + b, d)  # type: ignore
+
+    run_qir_gen_and_check(c, "test_pytket_qir_conditional_15-block", profile=profile)
+
+
+@pytest.mark.parametrize(
+    "profile",
+    [
+        True,
+        False,
+    ],
+)
+def test_pytket_qir_conditional_16(profile: bool) -> None:
+    # test setbits op
+    c = Circuit(1, name="ptest_classical")
+    a = c.add_c_register("a", 10)
+    b = c.add_c_register("b", 11)
+    d = c.add_c_register("d", 20)
+
+    c.Measure(Qubit(0), a[0])
+
+    c.add_c_setbits([True, True] + [False] * 9, list(b), condition=a[0])
+
+    c.add_c_setbits([True, True] + [False] * 9, list(b), condition=a[0])
+
+    c.add_classicalexpbox_register(a + b, d, condition=a[0])  # type: ignore
+
+    run_qir_gen_and_check(c, "test_pytket_qir_conditional_16-block", profile=profile)
+
+
+@pytest.mark.parametrize(
+    "profile",
+    [
+        True,
+        False,
+    ],
+)
+def test_pytket_qir_conditional_17(profile: bool) -> None:
+    # test setbits op
+    c = Circuit(1, name="ptest_classical")
+    a = c.add_c_register("a", 1)
+    b = c.add_c_register("b", 10)
+    d = c.add_c_register("d", 20)
+
+    c.Measure(Qubit(0), a[0])
+    for i in range(10):
+        c.Measure(Qubit(0), b[i], condition=a[0])
+
+    for i in range(20):
+        c.Measure(Qubit(0), d[i], condition=a[0])
+
+    c.add_c_setbits([True, True] + [False] * 8, list(b), condition=a[0])
+
+    c.add_c_setbits([True, True] + [False] * 8, list(b), condition=a[0])
+
+    c.add_classicalexpbox_register(a + b, d, condition=a[0])  # type: ignore
+
+    run_qir_gen_and_check(c, "test_pytket_qir_conditional_17-block", profile=profile)
 
 
 if __name__ == "__main__":
-    test_pytket_qir_conditional()
-    test_pytket_qir_conditional_ii()
-    test_pytket_qir_conditional_iii()
-    test_pytket_qir_conditional_iv()
-    test_pytket_qir_conditional_6()
-    test_pytket_qir_conditional_7()
+    test_pytket_qir_conditional(True)

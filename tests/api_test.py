@@ -15,7 +15,7 @@
 
 import pyqir
 import pytest
-from utilities import check_qir_result  # type: ignore
+from utilities import run_qir_gen_and_check  # type: ignore
 
 from pytket.circuit import Bit, Circuit
 from pytket.passes import FlattenRelabelRegistersPass
@@ -39,9 +39,7 @@ def test_pytket_qir() -> None:
     circ = Circuit(3)
     circ.H(0)
 
-    result = pytket_to_qir(circ, name="test_pytket_qir", qir_format=QIRFormat.STRING)
-
-    check_qir_result(result, "test_pytket_qir")
+    run_qir_gen_and_check(circ, "test_pytket_qir")
 
 
 def test_pytket_api_qreg() -> None:
@@ -139,7 +137,7 @@ def test_pytket_qir_module() -> None:
 
     result_2 = pytket_to_qir(circ, name="test_pytket_qir")
 
-    check_qir_result(result, "test_pytket_qir_module")
+    run_qir_gen_and_check(circ, "test_pytket_qir_module")
 
     bitcode = pyqir.Module.from_ir(pyqir.Context(), result).bitcode  # type: ignore
 
