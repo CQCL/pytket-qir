@@ -609,7 +609,7 @@ class PQirGenerator:
         """
         add phi nodes for the previously changed registers.
         phi requires ssa variables from both predecessor blocks,
-        this are not necaserryly the blocks where the variables
+        these are not necessarily the blocks where the variables
         have been set. The second loop searches for the second variable
         and adds that with the other predecessor
         """
