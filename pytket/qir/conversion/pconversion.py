@@ -610,7 +610,7 @@ class PQirGenerator:
         elif type(bit) in _TK_CLOPS_TO_PYQIR_2_BITS:
             assert len(bit.args) == 2
 
-            ssa_left = self._get_ssa_from_cl_bit_op(bit.args[0], module)
+            ssa_left = self._get_ssa_from_cl_bit_op(bit.args[0], module)  # type: ignore
             ssa_right = self._get_ssa_from_cl_bit_op(bit.args[1], module)
 
             # add function to module
