@@ -17,7 +17,7 @@ entry:
   %3 = or i64 %2, 0
   %4 = sub i64 1, %1
   %5 = mul i64 %4, 1
-  %6 = or i64 9223372036854775807, %5
+  %6 = xor i64 9223372036854775807, %5
   %7 = and i64 %6, %3
   call void @__quantum__qis__mz__body(%Qubit* inttoptr (i64 1 to %Qubit*), %Result* inttoptr (i64 1 to %Result*))
   %8 = call i1 @__quantum__qis__read_result__body(%Result* inttoptr (i64 1 to %Result*))
@@ -26,7 +26,7 @@ entry:
   %11 = or i64 %10, %7
   %12 = sub i64 1, %9
   %13 = mul i64 %12, 2
-  %14 = or i64 9223372036854775807, %13
+  %14 = xor i64 9223372036854775807, %13
   %15 = and i64 %14, %11
   %16 = icmp eq i64 3, %15
   br i1 %16, label %condb0, label %contb0

@@ -21,7 +21,7 @@ entry:
   %3 = or i64 %2, 0
   %4 = sub i64 1, %1
   %5 = mul i64 %4, 2
-  %6 = or i64 9223372036854775807, %5
+  %6 = xor i64 9223372036854775807, %5
   %7 = and i64 %6, %3
   call void @__quantum__qis__z__body(%Qubit* null)
   call void @__quantum__qis__rx__body(double 0x3FF921FB54442D18, %Qubit* null)

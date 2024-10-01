@@ -29,7 +29,7 @@ contb0:                                           ; preds = %condb0, %entry
   %4 = or i64 %3, %0
   %5 = sub i64 1, %2
   %6 = mul i64 %5, 4
-  %7 = or i64 9223372036854775807, %6
+  %7 = xor i64 9223372036854775807, %6
   %8 = and i64 %7, %4
   call void @__quantum__qis__mz__body(%Qubit* inttoptr (i64 1 to %Qubit*), %Result* inttoptr (i64 1 to %Result*))
   %9 = call i1 @__quantum__qis__read_result__body(%Result* inttoptr (i64 1 to %Result*))
@@ -38,7 +38,7 @@ contb0:                                           ; preds = %condb0, %entry
   %12 = or i64 %11, %8
   %13 = sub i64 1, %10
   %14 = mul i64 %13, 8
-  %15 = or i64 9223372036854775807, %14
+  %15 = xor i64 9223372036854775807, %14
   %16 = and i64 %15, %12
   call void @__quantum__qis__mz__body(%Qubit* null, %Result* null)
   %17 = call i1 @__quantum__qis__read_result__body(%Result* null)
@@ -47,7 +47,7 @@ contb0:                                           ; preds = %condb0, %entry
   %20 = or i64 %19, %16
   %21 = sub i64 1, %18
   %22 = mul i64 %21, 16
-  %23 = or i64 9223372036854775807, %22
+  %23 = xor i64 9223372036854775807, %22
   %24 = and i64 %23, %20
   call void @__quantum__rt__int_record_output(i64 0, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @0, i32 0, i32 0))
   call void @__quantum__rt__int_record_output(i64 0, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @1, i32 0, i32 0))

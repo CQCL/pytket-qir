@@ -346,7 +346,7 @@ class PQirGenerator:
 
         # if ssa_bit is 0, ((2**63-1) XOR ((1-BIT) MUL (2^INDEX))) and INT
         ssa_result_0 = self.module.module.builder.and_(
-            self.module.module.builder.or_(
+            self.module.module.builder.xor(
                 ssa_int_all_1,
                 self.module.module.builder.mul(
                     self.module.module.builder.sub(
