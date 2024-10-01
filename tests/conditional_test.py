@@ -26,7 +26,7 @@ from pytket.circuit import (
     if_not_bit,
     reg_eq,
 )
-from pytket.circuit.logic_exp import BitWiseOp, create_bit_logic_exp
+from pytket.circuit.logic_exp import BitNot, BitWiseOp, create_bit_logic_exp
 from pytket.qir.conversion.api import QIRFormat, pytket_to_qir
 
 
@@ -443,6 +443,53 @@ def test_pytket_qir_conditional_17(profile: bool) -> None:
     c.add_classicalexpbox_register(a + b, d, condition=a[0])  # type: ignore
 
     run_qir_gen_and_check(c, "test_pytket_qir_conditional_17-block", profile=profile)
+
+
+@pytest.mark.parametrize(
+    "profile",
+    [
+        True,
+        False,
+    ],
+)
+def test_pytket_qir_conditional_18(profile: bool) -> None:
+    c = Circuit(1, 1, name="ptest_classical")
+    c.H(0, condition=BitNot(c.bits[0]))
+    run_qir_gen_and_check(c, "test_pytket_qir_conditional_18", profile=profile)
+
+
+@pytest.mark.parametrize(
+    "profile",
+    [
+        True,
+        False,
+    ],
+)
+def test_pytket_qir_conditional_19(profile: bool) -> None:
+    c = Circuit(1, 2, name="ptest_classical")
+
+    c.H(0)
+    c.Measure(Qubit(0), Bit(0))
+    c.add_classicalexpbox_bit(BitNot(c.bits[0]), [c.bits[1]])
+
+    run_qir_gen_and_check(c, "test_pytket_qir_conditional_19", profile=profile)
+
+
+@pytest.mark.parametrize(
+    "profile",
+    [
+        True,
+        False,
+    ],
+)
+def test_pytket_qir_conditional_20(profile: bool) -> None:
+    # test setbits op
+    c = Circuit(1, name="ptest_classical")
+    a = c.add_c_register("a", 32)
+
+    c.add_c_setbits([False] * 22 + [True, True] + [False] * 8, list(a))
+
+    run_qir_gen_and_check(c, "test_pytket_qir_conditional_20", profile=profile)
 
 
 if __name__ == "__main__":
