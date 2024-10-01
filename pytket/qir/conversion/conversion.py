@@ -43,6 +43,7 @@ from pytket.circuit.logic_exp import (
     BitAnd,
     BitEq,
     BitNeq,
+    BitNot,
     BitOne,
     BitOr,
     BitWiseOp,
@@ -92,15 +93,20 @@ _TK_CLOPS_TO_PYQIR_REG_BOOL: dict = {
     RegLeq: lambda b: partial(b.icmp, IntPredicate.ULE),
 }
 
-_TK_CLOPS_TO_PYQIR_BIT: dict = {
+_TK_CLOPS_TO_PYQIR_2_BITS: dict = {
     BitAnd: lambda b: b.and_,
     BitOr: lambda b: b.or_,
     BitXor: lambda b: b.xor,
     BitNeq: lambda b: partial(b.icmp, IntPredicate.NE),
     BitEq: lambda b: partial(b.icmp, IntPredicate.EQ),
+    BitNot: lambda b: b.and_,
 }
 
-_TK_CLOPS_TO_PYQIR_BIT_NO_PARAM: dict = {
+_TK_CLOPS_TO_PYQIR_BIT: dict = {
+    BitNot: lambda b: b.sub,
+}
+
+_TK_CLOPS_TO_PYQIR_2_BITS_NO_PARAM: dict = {
     BitOne: 1,
     BitZero: 0,
 }
@@ -542,13 +548,25 @@ class QirGenerator:
         elif type(bit) is int:
             return pyqir.const(self.qir_bool_type, bit)
         elif type(bit) in _TK_CLOPS_TO_PYQIR_BIT:
-            assert len(bit.args) == 2
+            assert len(bit.args) == 1
 
-            ssa_left = self._get_ssa_from_cl_bit_op(bit.args[0], module)
-            ssa_right = self._get_ssa_from_cl_bit_op(bit.args[1], module)
+            ssa_left = pyqir.const(self.qir_bool_type, 1)
+            ssa_right = self._get_ssa_from_cl_bit_op(bit.args[0], module)
 
             # add function to module
             output_instruction = _TK_CLOPS_TO_PYQIR_BIT[type(bit)](module.builder)(
+                ssa_left, ssa_right
+            )
+
+            return output_instruction  # type: ignore
+        elif type(bit) in _TK_CLOPS_TO_PYQIR_2_BITS:
+            assert len(bit.args) == 2
+
+            ssa_left = self._get_ssa_from_cl_bit_op(bit.args[0], module)  # type: ignore
+            ssa_right = self._get_ssa_from_cl_bit_op(bit.args[1], module)
+
+            # add function to module
+            output_instruction = _TK_CLOPS_TO_PYQIR_2_BITS[type(bit)](module.builder)(
                 ssa_left, ssa_right
             )
 
@@ -928,16 +946,31 @@ class QirGenerator:
                 self.module.builder
             )(ssa_left, ssa_right)
 
-        elif type(op.get_exp()) in _TK_CLOPS_TO_PYQIR_BIT_NO_PARAM:
+        elif type(op.get_exp()) in _TK_CLOPS_TO_PYQIR_2_BITS_NO_PARAM:
             # classical ops without parameters
             output_instruction = pyqir.const(
                 self.qir_bool_type,
-                _TK_CLOPS_TO_PYQIR_BIT_NO_PARAM[type(op.get_exp())],
+                _TK_CLOPS_TO_PYQIR_2_BITS_NO_PARAM[type(op.get_exp())],
             )
             returntypebool = True
             result_index = args[-1].index[0]
 
         elif type(op.get_exp()) in _TK_CLOPS_TO_PYQIR_BIT:
+            # classical ops acting on bits returning bit
+            ssa_left = pyqir.const(self.qir_bool_type, 1)
+            ssa_right = cast(  # type: ignore
+                Value,
+                self._get_ssa_from_cl_bit_op(op.get_exp().args[0], self.module),
+            )
+
+            # add function to module
+            returntypebool = True
+            result_index = args[-1].index[0]
+            output_instruction = _TK_CLOPS_TO_PYQIR_BIT[type(op.get_exp())](
+                self.module.builder
+            )(ssa_left, ssa_right)
+
+        elif type(op.get_exp()) in _TK_CLOPS_TO_PYQIR_2_BITS:
             # classical ops acting on bits returning bit
             ssa_left = cast(  # type: ignore
                 Value,
@@ -951,7 +984,7 @@ class QirGenerator:
             # add function to module
             returntypebool = True
             result_index = args[-1].index[0]
-            output_instruction = _TK_CLOPS_TO_PYQIR_BIT[type(op.get_exp())](
+            output_instruction = _TK_CLOPS_TO_PYQIR_2_BITS[type(op.get_exp())](
                 self.module.builder
             )(ssa_left, ssa_right)
 

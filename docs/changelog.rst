@@ -1,12 +1,13 @@
 Changelog
 ~~~~~~~~~
 
-0.13.0rc3 (August 2024)
+0.13.0rc4 (August 2024)
 -----------------------
 
 * Updated pyqir version requirement to 0.10.4.
 * Add option to generate profile compatible QIR
 * Updated pytket version requirement to 1.32.
+* Add support for BitNot operation
 
 0.12.0 (July 2024)
 ------------------
