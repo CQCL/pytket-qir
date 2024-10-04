@@ -25,10 +25,13 @@ jobs:
     - name: Update pip
       run: pip install --upgrade pip
     - name: Install formatters and linters
-      run: pip install black pylint ruff
+      run: pip install black pylint ruff ruff
     - name: Check files are formatted with black
       run: |
         black --check .
+    - name: Run ruff
+      run: |
+        ruff check .
     - name: Run ruff
       run: |
         ruff check .
