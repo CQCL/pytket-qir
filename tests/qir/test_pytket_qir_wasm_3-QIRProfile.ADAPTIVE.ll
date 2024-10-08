@@ -1,5 +1,5 @@
-; ModuleID = 'test_pytket_qir_wasm_3-True'
-source_filename = "test_pytket_qir_wasm_3-True"
+; ModuleID = 'test_pytket_qir_wasm_3-QIRProfile.ADAPTIVE'
+source_filename = "test_pytket_qir_wasm_3-QIRProfile.ADAPTIVE"
 
 %Result = type opaque
 

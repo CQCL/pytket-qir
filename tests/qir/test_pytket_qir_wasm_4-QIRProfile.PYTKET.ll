@@ -1,5 +1,5 @@
-; ModuleID = 'test_pytket_qir_wasm_4-False'
-source_filename = "test_pytket_qir_wasm_4-False"
+; ModuleID = 'test_pytket_qir_wasm_4-QIRProfile.PYTKET'
+source_filename = "test_pytket_qir_wasm_4-QIRProfile.PYTKET"
 
 %Qubit = type opaque
 %Result = type opaque
