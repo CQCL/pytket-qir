@@ -17,17 +17,18 @@ from utilities import check_qir_result  # type: ignore
 
 from pytket import wasm
 from pytket.circuit import Bit, Circuit, Qubit
-from pytket.qir.conversion.api import QIRFormat, pytket_to_qir
+from pytket.qir.conversion.api import QIRFormat, QIRProfile, pytket_to_qir
 
 
 @pytest.mark.parametrize(
     "profile",
     [
-        True,
-        False,
+        QIRProfile.ADAPTIVE,
+        QIRProfile.PYTKET,
+        QIRProfile.ADAPTIVE_CREGSIZE,
     ],
 )
-def test_pytket_qir_wasm(profile: bool) -> None:
+def test_pytket_qir_wasm(profile: QIRProfile) -> None:
     w = wasm.WasmFileHandler("testfile.wasm")
     circ = Circuit(1)
     circ.H(0)
@@ -47,11 +48,12 @@ def test_pytket_qir_wasm(profile: bool) -> None:
 @pytest.mark.parametrize(
     "profile",
     [
-        True,
-        False,
+        QIRProfile.ADAPTIVE,
+        QIRProfile.PYTKET,
+        QIRProfile.ADAPTIVE_CREGSIZE,
     ],
 )
-def test_pytket_qir_wasm_2(profile: bool) -> None:
+def test_pytket_qir_wasm_2(profile: QIRProfile) -> None:
     w = wasm.WasmFileHandler("testfile.wasm")
     c = Circuit(6, 6)
     c0 = c.add_c_register("c0", 3)
@@ -77,11 +79,12 @@ def test_pytket_qir_wasm_2(profile: bool) -> None:
 @pytest.mark.parametrize(
     "profile",
     [
-        True,
-        False,
+        QIRProfile.ADAPTIVE,
+        QIRProfile.PYTKET,
+        QIRProfile.ADAPTIVE_CREGSIZE,
     ],
 )
-def test_pytket_qir_wasm_3(profile: bool) -> None:
+def test_pytket_qir_wasm_3(profile: QIRProfile) -> None:
     w = wasm.WasmFileHandler("testfile.wasm", int_size=64)
     c = Circuit(6, 6)
     c0 = c.add_c_register("c0", 3)
@@ -103,11 +106,12 @@ def test_pytket_qir_wasm_3(profile: bool) -> None:
 @pytest.mark.parametrize(
     "profile",
     [
-        True,
-        False,
+        QIRProfile.ADAPTIVE,
+        QIRProfile.PYTKET,
+        QIRProfile.ADAPTIVE_CREGSIZE,
     ],
 )
-def test_pytket_qir_wasm_4(profile: bool) -> None:
+def test_pytket_qir_wasm_4(profile: QIRProfile) -> None:
     w = wasm.WasmFileHandler("testfile.wasm", int_size=64)
     c = Circuit(6, 6)
     c.Measure(Qubit(0), Bit(0))
@@ -130,4 +134,7 @@ def test_pytket_qir_wasm_4(profile: bool) -> None:
 
 
 if __name__ == "__main__":
-    test_pytket_qir_wasm(True)
+    test_pytket_qir_wasm(QIRProfile.PYTKET)
+    test_pytket_qir_wasm_2(QIRProfile.PYTKET)
+    test_pytket_qir_wasm_3(QIRProfile.PYTKET)
+    test_pytket_qir_wasm_4(QIRProfile.PYTKET)
