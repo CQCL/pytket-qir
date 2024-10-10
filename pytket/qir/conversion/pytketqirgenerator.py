@@ -12,11 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-This module contains all functionality to generate QIR files
-from pytket circuits.
-"""
-
 from typing import Optional, cast
 
 import pyqir
@@ -32,12 +27,17 @@ from pytket.circuit import (
 
 from .module import tketqirModule
 from .qirgenerator import (
-    AbsQirGenerator,
+    AbstractQirGenerator,
 )
 
 
-class PytketQirGenerator(AbsQirGenerator):
-    """Generate QIR from a pytket circuit."""
+class PytketQirGenerator(AbstractQirGenerator):
+    """Generates QIR from a pytket circuit in line with the pytket profile.
+    This profiles uses the functions `get_creg_bit`, `set_creg_bit`,
+    `set_creg_to_int`, `create_creg`, `get_int_from_creg` and
+    `mz_to_creg_bit` for the handling of the classical registers.
+    The other aspects of the QIR file are identical to the adaptive profile.
+    """
 
     def __init__(
         self,

@@ -12,11 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-This module contains all functionality to generate QIR files
-from pytket circuits.
-"""
-
 import abc
 import math
 from collections.abc import Sequence
@@ -112,8 +107,9 @@ _TK_CLOPS_TO_PYQIR_2_BITS_NO_PARAM: dict = {
 }
 
 
-class AbsQirGenerator:
-    """Generate QIR from a pytket circuit."""
+class AbstractQirGenerator:
+    """Abstract Class for the QIR generation from a pytket circuit.
+    Implementing the not profile specific functionality"""
 
     def __init__(
         self,

@@ -12,11 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-This module contains all functionality to generate QIR files
-from pytket circuits.
-"""
-
 from typing import Optional, cast
 
 import pyqir
@@ -32,11 +27,11 @@ from pytket.circuit import (
 
 from .module import tketqirModule
 from .qirgenerator import (
-    AbsQirGenerator,
+    AbstractQirGenerator,
 )
 
 
-class AProfileQirGenerator(AbsQirGenerator):
+class AdaptiveProfileQirGenerator(AbstractQirGenerator):
     """Generate QIR from a pytket circuit."""
 
     def __init__(

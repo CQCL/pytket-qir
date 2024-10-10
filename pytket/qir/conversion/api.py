@@ -28,7 +28,7 @@ from pytket.passes import (
 )
 
 from .module import tketqirModule
-from .profileqirgenerator import AProfileQirGenerator
+from .profileqirgenerator import AdaptiveProfileQirGenerator
 from .pytketqirgenerator import PytketQirGenerator
 
 
@@ -75,7 +75,7 @@ def pytket_to_qir(
         Use QIRProfile.ADAPTIVE for the adaptive profile, see:
         https://github.com/qir-alliance/qir-spec/tree/main/specification/under_development/profiles/Adaptive_Profile.md
         Use QIRProfile.ADAPTIVE_CREGSIZE for the adaptive profile with additional
-        truncation operation to assure that intergers matching the classical
+        truncation operation to assure that integers matching the classical
         registers have no unexpected set bits, see:
         https://github.com/qir-alliance/qir-spec/tree/main/specification/under_development/profiles/Adaptive_Profile.md
         Use QIRProfile.PYTKET for QIR with additonal function for classical registers.
@@ -110,7 +110,7 @@ def pytket_to_qir(
             wfh=wfh,
         )
     elif profile == QIRProfile.ADAPTIVE or profile == QIRProfile.ADAPTIVE_CREGSIZE:
-        qir_generator = AProfileQirGenerator(  # type: ignore
+        qir_generator = AdaptiveProfileQirGenerator(  # type: ignore
             circuit=circ,
             module=m,
             wasm_int_type=int_type,
