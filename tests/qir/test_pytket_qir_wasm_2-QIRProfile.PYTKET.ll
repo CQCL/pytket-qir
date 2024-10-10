@@ -27,7 +27,6 @@ entry:
   call void @init()
   %10 = call i32 @no_parameters()
   call void @set_creg_to_int(i1* %3, i32 %10)
-  call void @__quantum__rt__tuple_start_record_output()
   %11 = call i32 @get_int_from_creg(i1* %0)
   call void @__quantum__rt__int_record_output(i32 %11, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @0, i32 0, i32 0))
   %12 = call i32 @get_int_from_creg(i1* %1)
@@ -36,29 +35,12 @@ entry:
   call void @__quantum__rt__int_record_output(i32 %13, i8* getelementptr inbounds ([3 x i8], [3 x i8]* @2, i32 0, i32 0))
   %14 = call i32 @get_int_from_creg(i1* %3)
   call void @__quantum__rt__int_record_output(i32 %14, i8* getelementptr inbounds ([3 x i8], [3 x i8]* @3, i32 0, i32 0))
-  call void @__quantum__rt__tuple_end_record_output()
   ret void
 }
 
-declare i1 @get_creg_bit(i1*, i32)
-
-declare void @set_creg_bit(i1*, i32, i1)
-
-declare void @set_creg_to_int(i1*, i32)
-
 declare i1 @__quantum__qis__read_result__body(%Result*)
 
-declare i1* @create_creg(i32)
-
-declare i32 @get_int_from_creg(i1*)
-
-declare void @mz_to_creg_bit(%Qubit*, i1*, i32)
-
 declare void @__quantum__rt__int_record_output(i32, i8*)
-
-declare void @__quantum__rt__tuple_start_record_output()
-
-declare void @__quantum__rt__tuple_end_record_output()
 
 declare void @init() #1
 
@@ -75,6 +57,18 @@ declare void @no_return(i32) #1
 declare i32 @no_parameters() #1
 
 declare i32 @new_function() #1
+
+declare i1 @get_creg_bit(i1*, i32)
+
+declare void @set_creg_bit(i1*, i32, i1)
+
+declare void @set_creg_to_int(i1*, i32)
+
+declare i1* @create_creg(i32)
+
+declare i32 @get_int_from_creg(i1*)
+
+declare void @mz_to_creg_bit(%Qubit*, i1*, i32)
 
 attributes #0 = { "entry_point" "output_labeling_schema" "qir_profiles"="custom" "required_num_qubits"="6" "required_num_results"="6" }
 

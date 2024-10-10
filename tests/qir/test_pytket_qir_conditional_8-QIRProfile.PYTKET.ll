@@ -10,10 +10,12 @@ entry:
   call void @__quantum__qis__h__body(%Qubit* inttoptr (i64 1 to %Qubit*))
   call void @__quantum__qis__h__body(%Qubit* inttoptr (i64 2 to %Qubit*))
   call void @__quantum__qis__h__body(%Qubit* inttoptr (i64 3 to %Qubit*))
-  call void @__quantum__rt__tuple_start_record_output()
-  call void @__quantum__rt__tuple_end_record_output()
   ret void
 }
+
+declare i1 @__quantum__qis__read_result__body(%Result*)
+
+declare void @__quantum__rt__int_record_output(i64, i8*)
 
 declare i1 @get_creg_bit(i1*, i64)
 
@@ -21,19 +23,11 @@ declare void @set_creg_bit(i1*, i64, i1)
 
 declare void @set_creg_to_int(i1*, i64)
 
-declare i1 @__quantum__qis__read_result__body(%Result*)
-
 declare i1* @create_creg(i64)
 
 declare i64 @get_int_from_creg(i1*)
 
 declare void @mz_to_creg_bit(%Qubit*, i1*, i64)
-
-declare void @__quantum__rt__int_record_output(i64, i8*)
-
-declare void @__quantum__rt__tuple_start_record_output()
-
-declare void @__quantum__rt__tuple_end_record_output()
 
 declare void @__quantum__qis__h__body(%Qubit*)
 

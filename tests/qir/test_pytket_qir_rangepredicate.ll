@@ -86,14 +86,16 @@ condb5:                                           ; preds = %contb4
   br label %contb5
 
 contb5:                                           ; preds = %condb5, %contb4
-  call void @__quantum__rt__tuple_start_record_output()
   %29 = call i64 @get_int_from_creg(i1* %0)
   call void @__quantum__rt__int_record_output(i64 %29, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @0, i32 0, i32 0))
   %30 = call i64 @get_int_from_creg(i1* %1)
   call void @__quantum__rt__int_record_output(i64 %30, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @1, i32 0, i32 0))
-  call void @__quantum__rt__tuple_end_record_output()
   ret void
 }
+
+declare i1 @__quantum__qis__read_result__body(%Result*)
+
+declare void @__quantum__rt__int_record_output(i64, i8*)
 
 declare i1 @get_creg_bit(i1*, i64)
 
@@ -101,19 +103,11 @@ declare void @set_creg_bit(i1*, i64, i1)
 
 declare void @set_creg_to_int(i1*, i64)
 
-declare i1 @__quantum__qis__read_result__body(%Result*)
-
 declare i1* @create_creg(i64)
 
 declare i64 @get_int_from_creg(i1*)
 
 declare void @mz_to_creg_bit(%Qubit*, i1*, i64)
-
-declare void @__quantum__rt__int_record_output(i64, i8*)
-
-declare void @__quantum__rt__tuple_start_record_output()
-
-declare void @__quantum__rt__tuple_end_record_output()
 
 declare void @__quantum__qis__h__body(%Qubit*)
 
