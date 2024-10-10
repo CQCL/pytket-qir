@@ -25,6 +25,7 @@ from pytket.qir.conversion.api import QIRFormat, QIRProfile, pytket_to_qir
     [
         QIRProfile.ADAPTIVE,
         QIRProfile.PYTKET,
+        QIRProfile.ADAPTIVE_CREGSIZE,
     ],
 )
 def test_pytket_qir_wasm(profile: QIRProfile) -> None:
@@ -49,6 +50,7 @@ def test_pytket_qir_wasm(profile: QIRProfile) -> None:
     [
         QIRProfile.ADAPTIVE,
         QIRProfile.PYTKET,
+        QIRProfile.ADAPTIVE_CREGSIZE,
     ],
 )
 def test_pytket_qir_wasm_2(profile: QIRProfile) -> None:
@@ -79,6 +81,7 @@ def test_pytket_qir_wasm_2(profile: QIRProfile) -> None:
     [
         QIRProfile.ADAPTIVE,
         QIRProfile.PYTKET,
+        QIRProfile.ADAPTIVE_CREGSIZE,
     ],
 )
 def test_pytket_qir_wasm_3(profile: QIRProfile) -> None:
@@ -105,6 +108,7 @@ def test_pytket_qir_wasm_3(profile: QIRProfile) -> None:
     [
         QIRProfile.ADAPTIVE,
         QIRProfile.PYTKET,
+        QIRProfile.ADAPTIVE_CREGSIZE,
     ],
 )
 def test_pytket_qir_wasm_4(profile: QIRProfile) -> None:
