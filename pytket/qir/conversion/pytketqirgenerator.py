@@ -121,8 +121,6 @@ class PytketQirGenerator(AbsQirGenerator):
             ),
         )
 
-        self.reg_const = {}
-
         for creg in self.circuit.c_registers:
             reg_name = creg[0].reg_name
             self.reg_const[reg_name] = self.module.module.add_byte_string(

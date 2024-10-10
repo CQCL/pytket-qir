@@ -134,4 +134,7 @@ def test_pytket_qir_wasm_4(profile: QIRProfile) -> None:
 
 
 if __name__ == "__main__":
-    test_pytket_qir_wasm(True)
+    test_pytket_qir_wasm(QIRProfile.PYTKET)
+    test_pytket_qir_wasm_2(QIRProfile.PYTKET)
+    test_pytket_qir_wasm_3(QIRProfile.PYTKET)
+    test_pytket_qir_wasm_4(QIRProfile.PYTKET)

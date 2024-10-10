@@ -132,7 +132,6 @@ class AbsQirGenerator:
         self.qir_bool_type = pyqir.IntType(self.module.context, 1)
         self.qubit_type = pyqir.qubit_type(self.module.context)
         self.result_type = pyqir.result_type(self.module.context)
-        self.active_block = None
 
         self.cregs = _retrieve_registers(self.circuit.bits, BitRegister)
         self.creg_size: dict[str, int] = {}
@@ -158,6 +157,8 @@ class AbsQirGenerator:
         self.target_gateset.add(OpType.ZZPhase)
         self.target_gateset.add(OpType.ZZMax)
         self.target_gateset.add(OpType.TK2)
+
+        self.reg_const: dict[str, Value] = {}
 
         self.getset_predicate = predicates.GateSetPredicate(
             set(self.target_gateset)
@@ -374,11 +375,6 @@ class AbsQirGenerator:
             return [self.module.module.results[bit.index[0]] for bit in args[:-1]]
         return []
 
-    @abc.abstractmethod
-    def _reg2ssa_var(self, bit_reg: BitRegister) -> Value:
-        """Convert a BitRegister to an SSA variable using pyqir types."""
-        pass
-
     def _get_c_regs_from_com(
         self, op: Op, args: Union[Bit, Qubit]
     ) -> tuple[list[str], list[str]]:
@@ -404,7 +400,6 @@ class AbsQirGenerator:
     def _get_ssa_from_cl_reg_op(
         self, reg: Union[BitRegister, RegAnd, RegOr, RegXor, int], module: tketqirModule
     ) -> Value:
-        # todo melf
         if type(reg) in _TK_CLOPS_TO_PYQIR_REG:
             assert len(reg.args) == 2  # type: ignore
 

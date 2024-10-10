@@ -513,4 +513,4 @@ def test_pytket_qir_conditional_20(profile: QIRProfile) -> None:
 
 
 if __name__ == "__main__":
-    test_pytket_qir_conditional(True)
+    test_pytket_qir_conditional(QIRProfile.PYTKET)

@@ -59,8 +59,6 @@ class AProfileQirGenerator(AbsQirGenerator):
         )  # Keep track of set ssa variables.
         self.list_of_changed_cregs: list[str] = []
 
-        self.reg_const = {}
-
         for creg in self.circuit.c_registers:
             reg_name = creg[0].reg_name
             self.reg_const[reg_name] = self.module.module.add_byte_string(
@@ -212,9 +210,9 @@ class AProfileQirGenerator(AbsQirGenerator):
             ssa_i64_zext = self.module.module.builder.zext(
                 ssa_i_trunc, self.qir_int_type
             )
-            self.ssa_vars[reg_name].append((ssa_i64_zext, self.active_block))  # type: ignore
+            self.ssa_vars[reg_name].append((ssa_i64_zext, self.active_block))
         else:
-            self.ssa_vars[reg_name].append((ssa_i64, self.active_block))  # type: ignore
+            self.ssa_vars[reg_name].append((ssa_i64, self.active_block))
         self.list_of_changed_cregs.append(reg_name)
 
     def _reg2ssa_var(self, bit_reg: BitRegister) -> Value:
@@ -226,7 +224,7 @@ class AProfileQirGenerator(AbsQirGenerator):
                     f"Classical register should only have the size of {self.int_size}"
                 )
             ssa_var = pyqir.const(self.qir_int_type, 0)
-            self.ssa_vars[reg_name] = [(ssa_var, self.active_block)]  # type: ignore
+            self.ssa_vars[reg_name] = [(ssa_var, self.active_block)]
             return ssa_var
         else:
             return cast(Value, self.ssa_vars[reg_name])
