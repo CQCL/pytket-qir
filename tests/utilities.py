@@ -14,7 +14,7 @@
 
 
 from pytket.circuit import Circuit
-from pytket.qir.conversion.api import QIRFormat, pytket_to_qir
+from pytket.qir.conversion.api import QIRFormat, QIRProfile, pytket_to_qir
 
 
 def check_qir_result(given_qir: str, filename: str, writefile: bool = False) -> None:
@@ -43,7 +43,10 @@ def check_qir_result(given_qir: str, filename: str, writefile: bool = False) -> 
 
 
 def run_qir_gen_and_check(
-    circ: Circuit, filename: str, writefile: bool = False, profile: bool = True
+    circ: Circuit,
+    filename: str,
+    writefile: bool = False,
+    profile: QIRProfile = QIRProfile.ADAPTIVE,
 ) -> None:
     """this function can be used to compare the generated qir from a circuit to the qir
     in a file can be used to write the file as well, if the file is written

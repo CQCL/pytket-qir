@@ -25,17 +25,17 @@ from pytket.circuit.logic_exp import (
     reg_neq,
 )
 from pytket.passes import FlattenRelabelRegistersPass
-from pytket.qir.conversion.api import QIRFormat, pytket_to_qir
+from pytket.qir.conversion.api import QIRFormat, QIRProfile, pytket_to_qir
 
 
 @pytest.mark.parametrize(
     "profile",
     [
-        True,
-        False,
+        QIRProfile.ADAPTIVE,
+        QIRProfile.PYTKET,
     ],
 )
-def test_pytket_qir(profile: bool) -> None:
+def test_pytket_qir(profile: QIRProfile) -> None:
     circ = Circuit(3)
     circ.H(0)
 
@@ -45,11 +45,11 @@ def test_pytket_qir(profile: bool) -> None:
 @pytest.mark.parametrize(
     "profile",
     [
-        True,
-        False,
+        QIRProfile.ADAPTIVE,
+        QIRProfile.PYTKET,
     ],
 )
-def test_pytket_qir_2(profile: bool) -> None:
+def test_pytket_qir_2(profile: QIRProfile) -> None:
     circ = Circuit(3)
     circ.H(0)
 
@@ -59,11 +59,11 @@ def test_pytket_qir_2(profile: bool) -> None:
 @pytest.mark.parametrize(
     "profile",
     [
-        True,
-        False,
+        QIRProfile.ADAPTIVE,
+        QIRProfile.PYTKET,
     ],
 )
-def test_pytket_qir_3(profile: bool) -> None:
+def test_pytket_qir_3(profile: QIRProfile) -> None:
     circ = Circuit(3, 3)
     circ.H(0)
     circ.H(1)
@@ -75,11 +75,11 @@ def test_pytket_qir_3(profile: bool) -> None:
 @pytest.mark.parametrize(
     "profile",
     [
-        True,
-        False,
+        QIRProfile.ADAPTIVE,
+        QIRProfile.PYTKET,
     ],
 )
-def test_pytket_qir_4(profile: bool) -> None:
+def test_pytket_qir_4(profile: QIRProfile) -> None:
     # test conditional handling
 
     circ = Circuit(3)
@@ -97,11 +97,11 @@ def test_pytket_qir_4(profile: bool) -> None:
 @pytest.mark.parametrize(
     "profile",
     [
-        True,
-        False,
+        QIRProfile.ADAPTIVE,
+        QIRProfile.PYTKET,
     ],
 )
-def test_pytket_qir_5(profile: bool) -> None:
+def test_pytket_qir_5(profile: QIRProfile) -> None:
     # test conditional handling
 
     circ = Circuit(3)
@@ -127,11 +127,11 @@ def test_pytket_qir_5(profile: bool) -> None:
 @pytest.mark.parametrize(
     "profile",
     [
-        True,
-        False,
+        QIRProfile.ADAPTIVE,
+        QIRProfile.PYTKET,
     ],
 )
-def test_pytket_qir_6(profile: bool) -> None:
+def test_pytket_qir_6(profile: QIRProfile) -> None:
     # test conditional handling
 
     circ = Circuit(3)
@@ -153,11 +153,11 @@ def test_pytket_qir_6(profile: bool) -> None:
 @pytest.mark.parametrize(
     "profile",
     [
-        True,
-        False,
+        QIRProfile.ADAPTIVE,
+        QIRProfile.PYTKET,
     ],
 )
-def test_pytket_qir_7(profile: bool) -> None:
+def test_pytket_qir_7(profile: QIRProfile) -> None:
     # test calssical exp box handling
     circ = Circuit(2)
     a = circ.add_c_register("a", 3)
@@ -186,11 +186,11 @@ def test_pytket_qir_7(profile: bool) -> None:
 @pytest.mark.parametrize(
     "profile",
     [
-        True,
-        False,
+        QIRProfile.ADAPTIVE,
+        QIRProfile.PYTKET,
     ],
 )
-def test_pytket_qir_8(profile: bool) -> None:
+def test_pytket_qir_8(profile: QIRProfile) -> None:
     # test setbits op
     c = Circuit(1, name="test_classical")
     a = c.add_c_register("a", 8)
@@ -207,11 +207,11 @@ def test_pytket_qir_8(profile: bool) -> None:
 @pytest.mark.parametrize(
     "profile",
     [
-        True,
-        False,
+        QIRProfile.ADAPTIVE,
+        QIRProfile.PYTKET,
     ],
 )
-def test_pytket_qir_9(profile: bool) -> None:
+def test_pytket_qir_9(profile: QIRProfile) -> None:
     # test copybits op
     c = Circuit(1, name="test_classical")
     a = c.add_c_register("a", 2)
@@ -225,11 +225,11 @@ def test_pytket_qir_9(profile: bool) -> None:
 @pytest.mark.parametrize(
     "profile",
     [
-        True,
-        False,
+        QIRProfile.ADAPTIVE,
+        QIRProfile.PYTKET,
     ],
 )
-def test_pytket_qir_10(profile: bool) -> None:
+def test_pytket_qir_10(profile: QIRProfile) -> None:
     # test copybits op
     c = Circuit(1, name="test_classical")
     a = c.add_c_register("a", 4)
@@ -243,11 +243,11 @@ def test_pytket_qir_10(profile: bool) -> None:
 @pytest.mark.parametrize(
     "profile",
     [
-        True,
-        False,
+        QIRProfile.ADAPTIVE,
+        QIRProfile.PYTKET,
     ],
 )
-def test_pytket_qir_11(profile: bool) -> None:
+def test_pytket_qir_11(profile: QIRProfile) -> None:
     # test copybits op
     c = Circuit(1, name="test_classical")
     a = c.add_c_register("a", 2)
@@ -261,11 +261,11 @@ def test_pytket_qir_11(profile: bool) -> None:
 @pytest.mark.parametrize(
     "profile",
     [
-        True,
-        False,
+        QIRProfile.ADAPTIVE,
+        QIRProfile.PYTKET,
     ],
 )
-def test_pytket_qir_12(profile: bool) -> None:
+def test_pytket_qir_12(profile: QIRProfile) -> None:
     # test << and >> ops
     c = Circuit(1, name="test_classical")
     a = c.add_c_register("a", 8)
@@ -278,11 +278,11 @@ def test_pytket_qir_12(profile: bool) -> None:
 @pytest.mark.parametrize(
     "profile",
     [
-        True,
-        False,
+        QIRProfile.ADAPTIVE,
+        QIRProfile.PYTKET,
     ],
 )
-def test_pytket_qir_13(profile: bool) -> None:
+def test_pytket_qir_13(profile: QIRProfile) -> None:
     # test << and >> ops
     c = Circuit(1, name="test_classical")
     a = c.add_c_register("a", 8)
@@ -297,11 +297,11 @@ def test_pytket_qir_13(profile: bool) -> None:
 @pytest.mark.parametrize(
     "profile",
     [
-        True,
-        False,
+        QIRProfile.ADAPTIVE,
+        QIRProfile.PYTKET,
     ],
 )
-def test_pytket_qir_14(profile: bool) -> None:
+def test_pytket_qir_14(profile: QIRProfile) -> None:
     # test setbits op
     c = Circuit(1, name="test_classical")
     a = c.add_c_register("a", 8)
@@ -341,11 +341,11 @@ def test_pytket_qir_14(profile: bool) -> None:
 @pytest.mark.parametrize(
     "profile",
     [
-        True,
-        False,
+        QIRProfile.ADAPTIVE,
+        QIRProfile.PYTKET,
     ],
 )
-def test_pytket_qir_15(profile: bool) -> None:
+def test_pytket_qir_15(profile: QIRProfile) -> None:
     # test setbits op
     c = Circuit(1, name="test_classical")
     a = c.add_c_register("a", 32)
@@ -385,11 +385,11 @@ def test_pytket_qir_15(profile: bool) -> None:
 @pytest.mark.parametrize(
     "profile",
     [
-        True,
-        False,
+        QIRProfile.ADAPTIVE,
+        QIRProfile.PYTKET,
     ],
 )
-def test_pytket_qir_16(profile: bool) -> None:
+def test_pytket_qir_16(profile: QIRProfile) -> None:
     # test setbits op
     c = Circuit(1, name="test_classical")
     a = c.add_c_register("a", 10)
@@ -408,11 +408,11 @@ def test_pytket_qir_16(profile: bool) -> None:
 @pytest.mark.parametrize(
     "profile",
     [
-        True,
-        False,
+        QIRProfile.ADAPTIVE,
+        QIRProfile.PYTKET,
     ],
 )
-def test_pytket_qir_17(profile: bool) -> None:
+def test_pytket_qir_17(profile: QIRProfile) -> None:
     # test calssical exp box handling
     # circuit to cover capabilities covered in example notebook
     c = Circuit(0, 1, name="test_classical")
@@ -425,11 +425,11 @@ def test_pytket_qir_17(profile: bool) -> None:
 @pytest.mark.parametrize(
     "profile",
     [
-        True,
-        False,
+        QIRProfile.ADAPTIVE,
+        QIRProfile.PYTKET,
     ],
 )
-def test_pytket_qir_18(profile: bool) -> None:
+def test_pytket_qir_18(profile: QIRProfile) -> None:
     # try circuit with multi-circuit register
     c = Circuit()
     q1 = Qubit("q1", 0)
@@ -459,11 +459,11 @@ def test_pytket_qir_18(profile: bool) -> None:
 @pytest.mark.parametrize(
     "profile",
     [
-        True,
-        False,
+        QIRProfile.ADAPTIVE,
+        QIRProfile.PYTKET,
     ],
 )
-def test_pytket_qir_19(profile: bool) -> None:
+def test_pytket_qir_19(profile: QIRProfile) -> None:
     # try circuit with multi-circuit register
     c = Circuit()
     q1 = Qubit("q1", 0)

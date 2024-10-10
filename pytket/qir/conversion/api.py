@@ -27,9 +27,9 @@ from pytket.passes import (
     scratch_reg_resize_pass,
 )
 
-from .conversion import QirGenerator
 from .module import tketqirModule
-from .pconversion import PQirGenerator
+from .profileqirgenerator import AProfileQirGenerator
+from .pytketqirgenerator import PytketQirGenerator
 
 
 class QIRFormat(Enum):
@@ -41,6 +41,15 @@ class QIRFormat(Enum):
     STRING = 1
 
 
+class QIRProfile(Enum):
+    """Profile for the QIR generation"""
+
+    BASE = 0
+    ADAPTIVE = 1
+    ADAPTIVE_CREGSIZE = 2
+    PYTKET = 3
+
+
 def pytket_to_qir(
     circ: Circuit,
     name: str = "Generated from input pytket circuit",
@@ -48,7 +57,7 @@ def pytket_to_qir(
     wfh: Optional[wasm.WasmFileHandler] = None,
     int_type: int = 64,
     cut_pytket_register: bool = False,
-    profile: bool = False,
+    profile: QIRProfile = QIRProfile.PYTKET,
 ) -> Union[str, bytes, None]:
     """converts given pytket circuit to qir
 
@@ -60,11 +69,17 @@ def pytket_to_qir(
     :param int_type: size of each integer, allowed value 32 and 64
     :param cut_pytket_register: breaks up the internal scratch bit registers
       into smaller registers, default value false
-    :param profile: generates QIR corresponding to the adaptive profile
-        You can find more details about the adaptive profile under:
-        https://github.com/qir-alliance/qir-spec/pull/35
-        and soon at:
+    :param profile: generates QIR corresponding to the selected profile:
+        Use QIRProfile.BASE for the base profile, see:
+        https://github.com/qir-alliance/qir-spec/blob/main/specification/under_development/profiles/Base_Profile.md
+        Use QIRProfile.ADAPTIVE for the adaptive profile, see:
         https://github.com/qir-alliance/qir-spec/tree/main/specification/under_development/profiles/Adaptive_Profile.md
+        Use QIRProfile.ADAPTIVE_CREGSIZE for the adaptive profile with additional
+        truncation operation to assure that intergers matching the classical
+        registers have no unexpected set bits, see:
+        https://github.com/qir-alliance/qir-spec/tree/main/specification/under_development/profiles/Adaptive_Profile.md
+        Use QIRProfile.PYTKET for QIR with additonal function for classical registers.
+
     """
 
     if cut_pytket_register:
@@ -78,26 +93,35 @@ def pytket_to_qir(
         num_qubits=circ.n_qubits,
         num_results=circ.n_qubits,
     )
-    if not profile:
-        qir_generator = QirGenerator(
+
+    if profile == QIRProfile.BASE:
+        raise NotImplementedError("QIRProfile.BASE not implemented")
+
+    trunc = False
+    if profile == QIRProfile.ADAPTIVE_CREGSIZE:
+        trunc = True
+
+    if profile == QIRProfile.PYTKET:
+        qir_generator = PytketQirGenerator(
             circuit=circ,
             module=m,
             wasm_int_type=int_type,
             qir_int_type=int_type,
             wfh=wfh,
         )
-
-        populated_module = qir_generator.circuit_to_module(qir_generator.circuit, True)
+    elif profile == QIRProfile.ADAPTIVE or profile == QIRProfile.ADAPTIVE_CREGSIZE:
+        qir_generator = AProfileQirGenerator(  # type: ignore
+            circuit=circ,
+            module=m,
+            wasm_int_type=int_type,
+            qir_int_type=int_type,
+            wfh=wfh,
+            trunc=trunc,
+        )
     else:
-        qir_generator = PQirGenerator(  # type: ignore
-            circuit=circ,
-            module=m,
-            wasm_int_type=int_type,
-            qir_int_type=int_type,
-            wfh=wfh,
-        )
+        raise NotImplementedError("unexpected profile")
 
-        populated_module = qir_generator.circuit_to_module(qir_generator.circuit, True)
+    populated_module = qir_generator.circuit_to_module(qir_generator.circuit, True)
 
     if wfh is not None:
         wasm_sar_dict: dict[str, str] = qir_generator.get_wasm_sar()

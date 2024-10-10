@@ -17,6 +17,7 @@ This module contains all functionality to generate QIR files
 from pytket circuits.
 """
 
+import abc
 import math
 from collections.abc import Sequence
 from functools import partial
@@ -99,7 +100,6 @@ _TK_CLOPS_TO_PYQIR_2_BITS: dict = {
     BitXor: lambda b: b.xor,
     BitNeq: lambda b: partial(b.icmp, IntPredicate.NE),
     BitEq: lambda b: partial(b.icmp, IntPredicate.EQ),
-    BitNot: lambda b: b.and_,
 }
 
 _TK_CLOPS_TO_PYQIR_BIT: dict = {
@@ -112,7 +112,7 @@ _TK_CLOPS_TO_PYQIR_2_BITS_NO_PARAM: dict = {
 }
 
 
-class QirGenerator:
+class AbsQirGenerator:
     """Generate QIR from a pytket circuit."""
 
     def __init__(
@@ -126,21 +126,32 @@ class QirGenerator:
         self.circuit = circuit
         self.module = module
         self.wasm_int_type = pyqir.IntType(self.module.context, wasm_int_type)
+        self.int_size = qir_int_type
         self.qir_int_type = pyqir.IntType(self.module.context, qir_int_type)
         self.qir_i1p_type = pyqir.PointerType(pyqir.IntType(self.module.context, 1))
         self.qir_bool_type = pyqir.IntType(self.module.context, 1)
         self.qubit_type = pyqir.qubit_type(self.module.context)
         self.result_type = pyqir.result_type(self.module.context)
+        self.active_block = None
 
         self.cregs = _retrieve_registers(self.circuit.bits, BitRegister)
+        self.creg_size: dict[str, int] = {}
         self.target_gateset = self.module.gateset.base_gateset
 
         self.block_count = 0
+        self.block_count_sb = 0
 
         self.wasm_sar_dict: dict[str, str] = {}
         self.wasm_sar_dict["!llvm.module.flags"] = (
             'attributes #1 = { "wasm" }\n\n!llvm.module.flags'
         )
+        self.wasm_sar_dict[
+            'attributes #1 = { "irreversible" }\n\nattributes #1 = { "wasm" }'
+        ] = 'attributes #1 = { "wasm" }\nattributes #2 = { "irreversible" }'
+        self.wasm_sar_dict[
+            "declare void @__quantum__qis__mz__body(%Qubit*, %Result* writeonly) #1"
+        ] = "declare void @__quantum__qis__mz__body(%Qubit*, %Result* writeonly) #2"
+
         self.int_type_str = f"i{qir_int_type}"
 
         self.target_gateset.add(OpType.PhasedX)
@@ -152,43 +163,6 @@ class QirGenerator:
             set(self.target_gateset)
         )  # noqa: E501
 
-        self.set_cregs: dict[str, list] = {}  # Keep track of set registers.
-        self.ssa_vars: dict[str, Value] = {}  # Keep track of set ssa variables.
-
-        # i1 get_creg_bit(i1* creg, i64 index)
-        self.get_creg_bit = self.module.module.add_external_function(
-            "get_creg_bit",
-            pyqir.FunctionType(
-                pyqir.IntType(self.module.module.context, 1),
-                [self.qir_i1p_type, self.qir_int_type],
-            ),
-        )
-
-        # void set_creg_bit(i1* creg, i64 index, i1 value)
-        self.set_creg_bit = self.module.module.add_external_function(
-            "set_creg_bit",
-            pyqir.FunctionType(
-                pyqir.Type.void(self.module.module.context),
-                [
-                    self.qir_i1p_type,
-                    self.qir_int_type,
-                    pyqir.IntType(self.module.module.context, 1),
-                ],
-            ),
-        )
-
-        # void set_creg_to_int(i1* creg, i64 value)
-        self.set_creg_to_int = self.module.module.add_external_function(
-            "set_creg_to_int",
-            pyqir.FunctionType(
-                pyqir.Type.void(self.module.module.context),
-                [
-                    self.qir_i1p_type,
-                    self.qir_int_type,
-                ],
-            ),
-        )
-
         # __quantum__qis__read_result__body(result)
         self.read_bit_from_result = self.module.module.add_external_function(
             "__quantum__qis__read_result__body",
@@ -198,49 +172,7 @@ class QirGenerator:
             ),
         )
 
-        # i1* create_creg(i64 size)
-        self.create_creg = self.module.module.add_external_function(
-            "create_creg",
-            pyqir.FunctionType(
-                self.qir_i1p_type,
-                [pyqir.IntType(self.module.module.context, qir_int_type)],
-            ),
-        )
-
-        # i64 get_int_from_creg(i1* creg)
-        self.get_int_from_creg = self.module.module.add_external_function(
-            "get_int_from_creg",
-            pyqir.FunctionType(
-                self.qir_int_type,
-                [
-                    self.qir_i1p_type,
-                ],
-            ),
-        )
-
-        # void mz_to_creg_bit(qubit, i1* creg, int creg_index)
-        # measures one qubit to one bit entry in a creg
-        self.mz_to_creg_bit = self.module.module.add_external_function(
-            "mz_to_creg_bit",
-            pyqir.FunctionType(
-                pyqir.Type.void(self.module.module.context),
-                [
-                    pyqir.qubit_type(self.module.module.context),
-                    self.qir_i1p_type,
-                    self.qir_int_type,
-                ],
-            ),
-        )
-
-        self.reg_const = {}
-
-        for creg in self.circuit.c_registers:
-            reg_name = creg[0].reg_name
-            self.reg_const[reg_name] = self.module.module.add_byte_string(
-                str.encode(reg_name)
-            )
-
-            # void __quantum__rt__int_record_output(i64)
+        # void __quantum__rt__int_record_output(i64)
         self.record_output_i64 = self.module.module.add_external_function(
             "__quantum__rt__int_record_output",
             pyqir.FunctionType(
@@ -249,24 +181,6 @@ class QirGenerator:
                     pyqir.IntType(self.module.module.context, qir_int_type),
                     pyqir.PointerType(pyqir.IntType(self.module.module.context, 8)),
                 ],
-            ),
-        )
-
-        # void __quantum__rt__tuple_start_record_output()
-        self.record_output_start = self.module.module.add_external_function(
-            "__quantum__rt__tuple_start_record_output",
-            pyqir.FunctionType(
-                pyqir.Type.void(self.module.module.context),
-                [],
-            ),
-        )
-
-        # void __quantum__rt__tuple_end_record_output()
-        self.record_output_end = self.module.module.add_external_function(
-            "__quantum__rt__tuple_end_record_output",
-            pyqir.FunctionType(
-                pyqir.Type.void(self.module.module.context),
-                [],
             ),
         )
 
@@ -321,16 +235,25 @@ class QirGenerator:
 
         self.additional_quantum_gates: dict[OpType, pyqir.Function] = {}
 
-        entry = self.module.module.entry_block
-        self.module.module.builder.insert_at_end(entry)
+    @abc.abstractmethod
+    def _get_bit_from_creg(self, creg: str, index: int) -> Value:
+        pass
 
-        for creg in self.circuit.c_registers:
-            self._reg2ssa_var(creg, qir_int_type)
+    @abc.abstractmethod
+    def _set_bit_in_creg(self, creg: str, index: int, ssa_bit: Value) -> None:
+        pass
 
+    @abc.abstractmethod
     def get_ssa_vars(self, reg_name: str) -> Value:
-        if reg_name not in self.ssa_vars:
-            raise ValueError(f"{reg_name} is not a valid register")
-        return self.ssa_vars[reg_name]
+        pass
+
+    @abc.abstractmethod
+    def _get_i64_ssa_reg(self, name: str) -> Value:
+        pass
+
+    @abc.abstractmethod
+    def set_ssa_vars(self, reg_name: str, ssa_i64: Value, trunc: bool) -> None:
+        pass
 
     def _add_barrier_op(
         self, module: tketqirModule, index: int, qir_qubits: Sequence
@@ -415,19 +338,6 @@ class QirGenerator:
             ],
         )
 
-    def _rebase_command_to_gateset(self, command: Command) -> Optional[Circuit]:
-        """Rebase to the target gateset if needed."""
-        optype = command.op.type
-        params = command.op.params
-        args = command.args
-        if optype not in self.module.gateset.base_gateset:
-            circuit = Circuit(self.circuit.n_qubits, self.circuit.n_bits)
-            circuit.add_gate(optype, params, args)
-            if not self.getset_predicate.verify(circuit):
-                raise ValueError(f"Gate not supported {optype}, {params}, {args}")
-            return circuit
-        return None
-
     def _decompose_conditional_circ_box(self, op: Op, args: list) -> Optional[Circuit]:
         """Rebase an op to the target gateset if needed."""
         circuit = Circuit(self.circuit.n_qubits)
@@ -449,13 +359,6 @@ class QirGenerator:
             params = op.params
         return (optype, params)
 
-    def _get_i64_ssa_reg(self, name: str) -> Value:
-        ssa_var = self.module.builder.call(
-            self.get_int_from_creg,
-            [self.get_ssa_vars(name)],
-        )
-        return ssa_var
-
     def _to_qis_qubits(self, qubits: list[Qubit]) -> list[Qubit]:
         return [self.module.module.qubits[qubit.index[0]] for qubit in qubits]
 
@@ -471,21 +374,10 @@ class QirGenerator:
             return [self.module.module.results[bit.index[0]] for bit in args[:-1]]
         return []
 
-    def _reg2ssa_var(self, bit_reg: BitRegister, int_size: int) -> Value:
+    @abc.abstractmethod
+    def _reg2ssa_var(self, bit_reg: BitRegister) -> Value:
         """Convert a BitRegister to an SSA variable using pyqir types."""
-        reg_name = bit_reg[0].reg_name
-        if reg_name not in self.ssa_vars:
-            if len(bit_reg) > int_size:
-                raise ValueError(
-                    f"Classical register should only have the size of {int_size}"
-                )
-            ssa_var = self.module.builder.call(
-                self.create_creg, [pyqir.const(self.qir_int_type, len(bit_reg))]
-            )
-            self.ssa_vars[reg_name] = ssa_var
-            return ssa_var
-        else:
-            return cast(Value, self.ssa_vars[reg_name])  # type: ignore
+        pass
 
     def _get_c_regs_from_com(
         self, op: Op, args: Union[Bit, Qubit]
@@ -512,6 +404,7 @@ class QirGenerator:
     def _get_ssa_from_cl_reg_op(
         self, reg: Union[BitRegister, RegAnd, RegOr, RegXor, int], module: tketqirModule
     ) -> Value:
+        # todo melf
         if type(reg) in _TK_CLOPS_TO_PYQIR_REG:
             assert len(reg.args) == 2  # type: ignore
 
@@ -536,13 +429,7 @@ class QirGenerator:
         self, bit: Union[Bit, BitAnd, BitOr, BitXor], module: tketqirModule
     ) -> Value:
         if type(bit) is Bit:
-            result = module.builder.call(
-                self.get_creg_bit,
-                [
-                    self.get_ssa_vars(bit.reg_name),
-                    pyqir.const(self.qir_int_type, bit.index[0]),
-                ],
-            )
+            result = self._get_bit_from_creg(bit.reg_name, bit.index[0])
 
             return result
         elif type(bit) is int:
@@ -594,14 +481,7 @@ class QirGenerator:
             condition_bit_index = args[-1].index[0]
             result_registername = args[-1].reg_name
 
-            self.module.builder.call(
-                self.set_creg_bit,
-                [
-                    self.get_ssa_vars(result_registername),
-                    pyqir.const(self.qir_int_type, condition_bit_index),
-                    result,
-                ],
-            )
+            self._set_bit_in_creg(result_registername, condition_bit_index, result)
 
         else:
             lower_qir = pyqir.const(self.qir_int_type, op.lower)
@@ -626,167 +506,24 @@ class QirGenerator:
             condition_bit_index = args[-1].index[0]
             registername = args[-1].reg_name
 
-            self.module.builder.call(
-                self.set_creg_bit,
-                [
-                    self.get_ssa_vars(registername),
-                    pyqir.const(self.qir_int_type, condition_bit_index),
-                    result,
-                ],
-            )
+            self._set_bit_in_creg(registername, condition_bit_index, result)
 
+    @abc.abstractmethod
     def conv_conditional(self, command: Command, op: Conditional) -> None:
-        condition_name = command.args[0].reg_name
-
-        entry_point = self.module.module.entry_point
-
-        condb = pyqir.BasicBlock(
-            self.module.module.context, f"condb{self.block_count}", entry_point
-        )
-        contb = pyqir.BasicBlock(
-            self.module.module.context, f"contb{self.block_count}", entry_point
-        )
-        self.block_count = self.block_count + 1
-
-        if op.op.type == OpType.CircBox:
-            conditional_circuit = self._decompose_conditional_circ_box(
-                op.op, command.args[op.width :]
-            )
-
-            condition_name = command.args[0].reg_name
-
-            if op.width == 1:  # only one conditional bit
-
-                condition_bit_index = command.args[0].index[0]
-
-                ssabool = self.module.builder.call(
-                    self.get_creg_bit,
-                    [
-                        self.get_ssa_vars(condition_name),
-                        pyqir.const(self.qir_int_type, condition_bit_index),
-                    ],
-                )
-
-                if op.value == 1:
-                    self.module.module.builder.condbr(ssabool, condb, contb)
-                    self.module.module.builder.insert_at_end(condb)
-                    self.subcircuit_to_module(conditional_circuit)
-
-                if op.value == 0:
-                    self.module.module.builder.condbr(ssabool, contb, condb)
-                    self.module.module.builder.insert_at_end(condb)
-                    self.subcircuit_to_module(conditional_circuit)
-
-                self.module.module.builder.br(contb)
-                self.module.module.builder.insert_at_end(contb)
-
-            else:
-                for i in range(op.width):
-                    if command.args[i].reg_name != condition_name:
-                        raise ValueError(
-                            "conditional can only work with one entire register"
-                        )
-
-                for i in range(op.width - 1):
-                    if command.args[i].index[0] >= command.args[i + 1].index[0]:
-                        raise ValueError(
-                            "conditional can only work with one entire register"
-                        )
-
-                if self.circuit.get_c_register(condition_name).size != op.width:
-                    raise ValueError(
-                        "conditional can only work with one entire register"
-                    )
-
-                ssabool = self.module.module.builder.icmp(
-                    pyqir.IntPredicate.EQ,
-                    pyqir.const(self.qir_int_type, op.value),
-                    self._get_i64_ssa_reg(condition_name),
-                )
-
-                self.module.module.builder.condbr(ssabool, condb, contb)
-
-                self.module.module.builder.insert_at_end(condb)
-
-                self.subcircuit_to_module(conditional_circuit)
-
-                self.module.module.builder.br(contb)
-                self.module.module.builder.insert_at_end(contb)
-
-        else:
-            condition_name = command.args[0].reg_name
-
-            if op.width == 1:  # only one conditional bit
-                condition_bit_index = command.args[0].index[0]
-
-                ssabool = self.module.builder.call(
-                    self.get_creg_bit,
-                    [
-                        self.get_ssa_vars(condition_name),
-                        pyqir.const(self.qir_int_type, condition_bit_index),
-                    ],
-                )
-
-                if op.value == 1:
-                    self.module.module.builder.condbr(ssabool, condb, contb)
-                    self.module.module.builder.insert_at_end(condb)
-                    self.command_to_module(op.op, command.args[op.width :])
-
-                if op.value == 0:
-                    self.module.module.builder.condbr(ssabool, contb, condb)
-                    self.module.module.builder.insert_at_end(condb)
-                    self.command_to_module(op.op, command.args[op.width :])
-
-                self.module.module.builder.br(contb)
-                self.module.module.builder.insert_at_end(contb)
-
-            else:
-                for i in range(op.width):
-                    if command.args[i].reg_name != condition_name:
-                        raise ValueError(
-                            "conditional can only work with one entire register"
-                        )
-
-                for i in range(op.width - 1):
-                    if command.args[i].index[0] >= command.args[i + 1].index[0]:
-                        raise ValueError(
-                            "conditional can only work with one entire register"
-                        )
-
-                if self.circuit.get_c_register(condition_name).size != op.width:
-                    raise ValueError(
-                        "conditional can only work with one entire register"
-                    )
-
-                ssabool = self.module.module.builder.icmp(
-                    pyqir.IntPredicate.EQ,
-                    pyqir.const(self.qir_int_type, op.value),
-                    self._get_i64_ssa_reg(condition_name),
-                )
-
-                self.module.module.builder.condbr(ssabool, condb, contb)
-                self.module.module.builder.insert_at_end(condb)
-
-                self.command_to_module(op.op, command.args[op.width :])
-
-                self.module.module.builder.br(contb)
-                self.module.module.builder.insert_at_end(contb)
+        pass
 
     def conv_WASMOp(self, op: WASMOp, args: Union[Bit, Qubit]) -> None:
         paramreg, resultreg = self._get_c_regs_from_com(op, args)
 
-        paramssa = [self._get_i64_ssa_reg(p) for p in paramreg]
+        ssa_param = [self._get_i64_ssa_reg(p) for p in paramreg]
 
         result = self.module.builder.call(
             self.wasm[op.func_name],
-            [*paramssa],
+            [*ssa_param],
         )
 
         if len(resultreg) == 1:
-            self.module.builder.call(
-                self.set_creg_to_int,
-                [self.get_ssa_vars(resultreg[0]), result],
-            )
+            self.set_ssa_vars(resultreg[0], result, True)
 
     def conv_ZZPhase(self, qubits: list[Qubit], op: Op) -> None:
         if OpType.ZZPhase not in self.additional_quantum_gates:
@@ -908,15 +645,9 @@ class QirGenerator:
             ],
         )
 
+    @abc.abstractmethod
     def conv_measure(self, bits: list[Bit], qubits: list[Qubit]) -> None:
-        self.module.builder.call(
-            self.mz_to_creg_bit,
-            [
-                self.module.module.qubits[qubits[0].index[0]],
-                self.get_ssa_vars(bits[0].reg_name),
-                pyqir.const(self.qir_int_type, bits[0].index[0]),
-            ],
-        )
+        pass
 
     def conv_classicalexpbox(self, op: ClassicalExpBox, args: list) -> None:
         returntypebool = False
@@ -1019,19 +750,9 @@ class QirGenerator:
             # to the 0-th entry
             # of the register, this could be changed to a user given value
 
-            self.module.builder.call(
-                self.set_creg_bit,
-                [
-                    self.get_ssa_vars(outputs),
-                    pyqir.const(self.qir_int_type, result_index),
-                    output_instruction,
-                ],
-            )
+            self._set_bit_in_creg(outputs, result_index, output_instruction)
         else:
-            self.module.builder.call(
-                self.set_creg_to_int,
-                [self.get_ssa_vars(outputs), output_instruction],
-            )
+            self.set_ssa_vars(outputs, output_instruction, True)
 
     def conv_SetBitsOp(self, bits: list[Bit], op: SetBitsOp) -> None:
         assert len(op.values) == len(bits)
@@ -1039,36 +760,16 @@ class QirGenerator:
         for b, v in zip(bits, op.values):
             output_instruction = pyqir.const(self.qir_bool_type, int(v))
 
-            self.module.builder.call(
-                self.set_creg_bit,
-                [
-                    self.get_ssa_vars(b.reg_name),
-                    pyqir.const(self.qir_int_type, b.index[0]),
-                    output_instruction,
-                ],
-            )
+            self._set_bit_in_creg(b.reg_name, b.index[0], output_instruction)
 
     def conv_CopyBitsOp(self, args: list) -> None:
         assert len(args) % 2 == 0
         half_length = len(args) // 2
 
         for i, o in zip(args[:half_length], args[half_length:]):
-            output_instruction = self.module.builder.call(
-                self.get_creg_bit,
-                [
-                    self.get_ssa_vars(i.reg_name),
-                    pyqir.const(self.qir_int_type, i.index[0]),
-                ],
-            )
+            output_instruction = self._get_bit_from_creg(i.reg_name, i.index[0])
 
-            self.module.builder.call(
-                self.set_creg_bit,
-                [
-                    self.get_ssa_vars(o.reg_name),
-                    pyqir.const(self.qir_int_type, o.index[0]),
-                    output_instruction,
-                ],
-            )
+            self._set_bit_in_creg(o.reg_name, o.index[0], output_instruction)
 
     def conv_BarrierOp(self, qubits: list[Qubit], op: BarrierOp) -> None:
         assert qubits[0].reg_name == "q"
@@ -1181,10 +882,6 @@ class QirGenerator:
                 self.command_to_module(op, command.args)
 
         if record_output:
-            self.module.builder.call(
-                self.record_output_start,
-                [],
-            )
 
             for creg in self.circuit.c_registers:
                 reg_name = creg[0].reg_name
@@ -1195,11 +892,6 @@ class QirGenerator:
                         self.reg_const[reg_name],
                     ],
                 )
-
-            self.module.builder.call(
-                self.record_output_end,
-                [],
-            )
 
         return self.module
 
