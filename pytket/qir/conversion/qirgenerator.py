@@ -109,7 +109,7 @@ _TK_CLOPS_TO_PYQIR_2_BITS_NO_PARAM: dict = {
 
 class AbstractQirGenerator:
     """Abstract Class for the QIR generation from a pytket circuit.
-    Implementing the not profile specific functionality"""
+    Implementing the functionality that is not specific to any profile"""
 
     def __init__(
         self,
