@@ -75,7 +75,7 @@ class BaseProfileQirGenerator(AbstractQirGenerator):
         )
 
     def _get_bit_from_creg(self, creg: str, index: int) -> Value:
-        raise ValueError("Classical REG Ops Not available in base profile")
+        raise ValueError("Classical register operations not available in base profile")
 
     def _set_bit_in_creg(self, creg: str, index: int, ssa_bit: Value) -> None:
         raise ValueError("Classical REG Ops Not available in base profile")
@@ -96,7 +96,7 @@ class BaseProfileQirGenerator(AbstractQirGenerator):
         raise ValueError("Classical REG Ops Not available in base profile")
 
     def conv_conditional(self, command: Command, op: Conditional) -> None:
-        raise ValueError("Conditional NOT available in base profile")
+        raise ValueError("Conditional not available in base profile")
 
     def conv_measure(self, bits: list[Bit], qubits: list[Qubit]) -> None:
         assert len(bits) == 1
