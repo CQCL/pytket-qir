@@ -204,6 +204,7 @@ def test_pytket_qir_conditional_7(profile: QIRProfile) -> None:
 @pytest.mark.parametrize(
     "profile",
     [
+        QIRProfile.BASE,
         QIRProfile.ADAPTIVE,
         QIRProfile.PYTKET,
         QIRProfile.ADAPTIVE_CREGSIZE,
@@ -226,6 +227,7 @@ def test_pytket_qir_conditional_8(profile: QIRProfile) -> None:
 @pytest.mark.parametrize(
     "profile",
     [
+        QIRProfile.BASE,
         QIRProfile.ADAPTIVE,
         QIRProfile.PYTKET,
         QIRProfile.ADAPTIVE_CREGSIZE,
