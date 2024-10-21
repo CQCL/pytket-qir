@@ -99,6 +99,8 @@ class BaseProfileQirGenerator(AbstractQirGenerator):
         raise ValueError("Conditional NOT available in base profile")
 
     def conv_measure(self, bits: list[Bit], qubits: list[Qubit]) -> None:
+        assert len(bits) == 1
+        assert len(qubits) == 1
 
         qubit_index = qubits[0].index[0]
 

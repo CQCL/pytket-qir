@@ -325,6 +325,10 @@ class PytketQirGenerator(AbstractQirGenerator):
                 self.module.module.builder.insert_at_end(contb)
 
     def conv_measure(self, bits: list[Bit], qubits: list[Qubit]) -> None:
+
+        assert len(bits) == 1
+        assert len(qubits) == 1
+
         self.module.builder.call(
             self.mz_to_creg_bit,
             [
