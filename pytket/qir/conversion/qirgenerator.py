@@ -858,6 +858,10 @@ class AbstractQirGenerator:
 
         return self.module
 
+    @abc.abstractmethod
+    def record_output(self) -> None:
+        """function to record the output"""
+
     def circuit_to_module(
         self, circuit: Circuit, record_output: bool = False
     ) -> tketqirModule:
@@ -874,15 +878,7 @@ class AbstractQirGenerator:
 
         if record_output:
 
-            for creg in self.circuit.c_registers:
-                reg_name = creg[0].reg_name
-                self.module.builder.call(
-                    self.record_output_i64,
-                    [
-                        self._get_i64_ssa_reg(reg_name),
-                        self.reg_const[reg_name],
-                    ],
-                )
+            self.record_output()
 
         return self.module
 

@@ -333,3 +333,15 @@ class PytketQirGenerator(AbstractQirGenerator):
                 pyqir.const(self.qir_int_type, bits[0].index[0]),
             ],
         )
+
+    def record_output(self) -> None:
+
+        for creg in self.circuit.c_registers:
+            reg_name = creg[0].reg_name
+            self.module.builder.call(
+                self.record_output_i64,
+                [
+                    self._get_i64_ssa_reg(reg_name),
+                    self.reg_const[reg_name],
+                ],
+            )

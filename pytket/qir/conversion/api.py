@@ -17,7 +17,7 @@ public api for qir conversion from pytket
 """
 
 from enum import Enum
-from typing import Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 
 import pyqir
 
@@ -27,9 +27,13 @@ from pytket.passes import (
     scratch_reg_resize_pass,
 )
 
+from .baseprofileqirgenerator import BaseProfileQirGenerator
 from .module import tketqirModule
 from .profileqirgenerator import AdaptiveProfileQirGenerator
 from .pytketqirgenerator import PytketQirGenerator
+
+if TYPE_CHECKING:
+    from .qirgenerator import AbstractQirGenerator
 
 
 class QIRFormat(Enum):
@@ -94,14 +98,19 @@ def pytket_to_qir(
         num_results=circ.n_qubits,
     )
 
-    if profile == QIRProfile.BASE:
-        raise NotImplementedError("QIRProfile.BASE not implemented")
-
     trunc = False
     if profile == QIRProfile.ADAPTIVE_CREGSIZE:
         trunc = True
 
-    if profile == QIRProfile.PYTKET:
+    if profile == QIRProfile.BASE:
+        qir_generator: AbstractQirGenerator = BaseProfileQirGenerator(
+            circuit=circ,
+            module=m,
+            wasm_int_type=int_type,
+            qir_int_type=int_type,
+            wfh=wfh,
+        )
+    elif profile == QIRProfile.PYTKET:
         qir_generator = PytketQirGenerator(
             circuit=circ,
             module=m,
@@ -110,7 +119,7 @@ def pytket_to_qir(
             wfh=wfh,
         )
     elif profile == QIRProfile.ADAPTIVE or profile == QIRProfile.ADAPTIVE_CREGSIZE:
-        qir_generator = AdaptiveProfileQirGenerator(  # type: ignore
+        qir_generator = AdaptiveProfileQirGenerator(
             circuit=circ,
             module=m,
             wasm_int_type=int_type,

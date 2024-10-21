@@ -442,3 +442,15 @@ class AdaptiveProfileQirGenerator(AbstractQirGenerator):
         )
 
         self._set_bit_in_creg(bits[0].reg_name, bits[0].index[0], ssa_measureresult)
+
+    def record_output(self) -> None:
+
+        for creg in self.circuit.c_registers:
+            reg_name = creg[0].reg_name
+            self.module.builder.call(
+                self.record_output_i64,
+                [
+                    self._get_i64_ssa_reg(reg_name),
+                    self.reg_const[reg_name],
+                ],
+            )
