@@ -17,13 +17,17 @@ from typing import Optional, cast
 import pyqir
 from pyqir import Value
 
-from pytket import Bit, Circuit, Qubit, wasm  # type: ignore
 from pytket.circuit import (
+    Bit,
     BitRegister,
+    CircBox,
+    Circuit,
     Command,
     Conditional,
     OpType,
+    Qubit,
 )
+from pytket.wasm import WasmFileHandler
 
 from .module import tketqirModule
 from .qirgenerator import (
@@ -45,7 +49,7 @@ class PytketQirGenerator(AbstractQirGenerator):
         module: tketqirModule,
         wasm_int_type: int,
         qir_int_type: int,
-        wfh: Optional[wasm.WasmFileHandler] = None,
+        wfh: Optional[WasmFileHandler] = None,
     ) -> None:
 
         super().__init__(circuit, module, wasm_int_type, qir_int_type, wfh)
@@ -202,7 +206,7 @@ class PytketQirGenerator(AbstractQirGenerator):
 
         if op.op.type == OpType.CircBox:
             conditional_circuit = self._decompose_conditional_circ_box(
-                op.op, command.args[op.width :]
+                cast(CircBox, op.op), command.args[op.width :]
             )
 
             condition_name = command.args[0].reg_name
@@ -325,6 +329,10 @@ class PytketQirGenerator(AbstractQirGenerator):
                 self.module.module.builder.insert_at_end(contb)
 
     def conv_measure(self, bits: list[Bit], qubits: list[Qubit]) -> None:
+
+        assert len(bits) == 1
+        assert len(qubits) == 1
+
         self.module.builder.call(
             self.mz_to_creg_bit,
             [
@@ -333,3 +341,15 @@ class PytketQirGenerator(AbstractQirGenerator):
                 pyqir.const(self.qir_int_type, bits[0].index[0]),
             ],
         )
+
+    def record_output(self) -> None:
+
+        for creg in self.circuit.c_registers:
+            reg_name = creg[0].reg_name
+            self.module.builder.call(
+                self.record_output_i64,
+                [
+                    self._get_i64_ssa_reg(reg_name),
+                    self.reg_const[reg_name],
+                ],
+            )

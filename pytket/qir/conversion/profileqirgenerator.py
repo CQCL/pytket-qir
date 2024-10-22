@@ -17,13 +17,17 @@ from typing import Optional, cast
 import pyqir
 from pyqir import BasicBlock, Value
 
-from pytket import Bit, Circuit, Qubit, wasm  # type: ignore
 from pytket.circuit import (
+    Bit,
     BitRegister,
+    CircBox,
+    Circuit,
     Command,
     Conditional,
     OpType,
+    Qubit,
 )
+from pytket.wasm import WasmFileHandler
 
 from .module import tketqirModule
 from .qirgenerator import (
@@ -41,7 +45,7 @@ class AdaptiveProfileQirGenerator(AbstractQirGenerator):
         wasm_int_type: int,
         qir_int_type: int,
         trunc: bool,
-        wfh: Optional[wasm.WasmFileHandler] = None,
+        wfh: Optional[WasmFileHandler] = None,
     ) -> None:
 
         self.trunc = trunc
@@ -80,7 +84,7 @@ class AdaptiveProfileQirGenerator(AbstractQirGenerator):
 
         for creg in self.circuit.c_registers:
             self._reg2ssa_var(creg)
-            self.list_of_changed_cregs.append(creg)
+            self.list_of_changed_cregs.append(creg.name)
             self.creg_size[creg.name] = creg.size
 
     def _get_bit_from_creg(self, creg: str, index: int) -> Value:
@@ -279,7 +283,7 @@ class AdaptiveProfileQirGenerator(AbstractQirGenerator):
 
         if op.op.type == OpType.CircBox:
             conditional_circuit = self._decompose_conditional_circ_box(
-                op.op, command.args[op.width :]
+                cast(CircBox, op.op), command.args[op.width :]
             )
 
             condition_name = command.args[0].reg_name
@@ -427,6 +431,9 @@ class AdaptiveProfileQirGenerator(AbstractQirGenerator):
 
     def conv_measure(self, bits: list[Bit], qubits: list[Qubit]) -> None:
 
+        assert len(bits) == 1
+        assert len(qubits) == 1
+
         qubit_index = qubits[0].index[0]
 
         self.module.qis.mz(
@@ -442,3 +449,15 @@ class AdaptiveProfileQirGenerator(AbstractQirGenerator):
         )
 
         self._set_bit_in_creg(bits[0].reg_name, bits[0].index[0], ssa_measureresult)
+
+    def record_output(self) -> None:
+
+        for creg in self.circuit.c_registers:
+            reg_name = creg[0].reg_name
+            self.module.builder.call(
+                self.record_output_i64,
+                [
+                    self._get_i64_ssa_reg(reg_name),
+                    self.reg_const[reg_name],
+                ],
+            )

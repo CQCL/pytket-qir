@@ -31,6 +31,7 @@ from pytket.qir.conversion.api import QIRFormat, QIRProfile, pytket_to_qir
 @pytest.mark.parametrize(
     "profile",
     [
+        QIRProfile.BASE,
         QIRProfile.ADAPTIVE,
         QIRProfile.PYTKET,
         QIRProfile.ADAPTIVE_CREGSIZE,
@@ -46,6 +47,7 @@ def test_pytket_qir(profile: QIRProfile) -> None:
 @pytest.mark.parametrize(
     "profile",
     [
+        QIRProfile.BASE,
         QIRProfile.ADAPTIVE,
         QIRProfile.PYTKET,
         QIRProfile.ADAPTIVE_CREGSIZE,
@@ -61,6 +63,7 @@ def test_pytket_qir_2(profile: QIRProfile) -> None:
 @pytest.mark.parametrize(
     "profile",
     [
+        QIRProfile.BASE,
         QIRProfile.ADAPTIVE,
         QIRProfile.PYTKET,
         QIRProfile.ADAPTIVE_CREGSIZE,
@@ -442,6 +445,7 @@ def test_pytket_qir_17(profile: QIRProfile) -> None:
 @pytest.mark.parametrize(
     "profile",
     [
+        QIRProfile.BASE,
         QIRProfile.ADAPTIVE,
         QIRProfile.PYTKET,
         QIRProfile.ADAPTIVE_CREGSIZE,
@@ -477,6 +481,7 @@ def test_pytket_qir_18(profile: QIRProfile) -> None:
 @pytest.mark.parametrize(
     "profile",
     [
+        QIRProfile.BASE,
         QIRProfile.ADAPTIVE,
         QIRProfile.PYTKET,
         QIRProfile.ADAPTIVE_CREGSIZE,
@@ -503,6 +508,24 @@ def test_pytket_qir_19(profile: QIRProfile) -> None:
     run_qir_gen_and_check(c, "test_pytket_qir_19", profile=profile)
 
 
+@pytest.mark.parametrize(
+    "profile",
+    [
+        QIRProfile.BASE,
+        QIRProfile.ADAPTIVE,
+        QIRProfile.PYTKET,
+        QIRProfile.ADAPTIVE_CREGSIZE,
+    ],
+)
+def test_pytket_qir_20(profile: QIRProfile) -> None:
+    circ = Circuit(10, 10)
+    for i in range(10):
+        circ.H(i)
+    circ.measure_all()
+
+    run_qir_gen_and_check(circ, "test_pytket_qir_20", profile=profile)
+
+
 if __name__ == "__main__":
     test_pytket_qir(QIRProfile.PYTKET)
     test_pytket_qir_2(QIRProfile.PYTKET)
@@ -523,3 +546,4 @@ if __name__ == "__main__":
     test_pytket_qir_17(QIRProfile.PYTKET)
     test_pytket_qir_18(QIRProfile.PYTKET)
     test_pytket_qir_19(QIRProfile.PYTKET)
+    test_pytket_qir_20(QIRProfile.PYTKET)
