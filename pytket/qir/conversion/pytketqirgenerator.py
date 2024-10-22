@@ -17,13 +17,17 @@ from typing import Optional, cast
 import pyqir
 from pyqir import Value
 
-from pytket import Bit, Circuit, Qubit, wasm  # type: ignore
 from pytket.circuit import (
+    Bit,
     BitRegister,
+    CircBox,
+    Circuit,
     Command,
     Conditional,
     OpType,
+    Qubit,
 )
+from pytket.wasm import WasmFileHandler
 
 from .module import tketqirModule
 from .qirgenerator import (
@@ -45,7 +49,7 @@ class PytketQirGenerator(AbstractQirGenerator):
         module: tketqirModule,
         wasm_int_type: int,
         qir_int_type: int,
-        wfh: Optional[wasm.WasmFileHandler] = None,
+        wfh: Optional[WasmFileHandler] = None,
     ) -> None:
 
         super().__init__(circuit, module, wasm_int_type, qir_int_type, wfh)
@@ -202,7 +206,7 @@ class PytketQirGenerator(AbstractQirGenerator):
 
         if op.op.type == OpType.CircBox:
             conditional_circuit = self._decompose_conditional_circ_box(
-                op.op, command.args[op.width :]
+                cast(CircBox, op.op), command.args[op.width :]
             )
 
             condition_name = command.args[0].reg_name

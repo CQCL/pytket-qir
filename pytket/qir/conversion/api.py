@@ -21,11 +21,11 @@ from typing import TYPE_CHECKING, Optional, Union
 
 import pyqir
 
-from pytket import wasm
 from pytket.circuit import Circuit
 from pytket.passes import (
     scratch_reg_resize_pass,
 )
+from pytket.wasm import WasmFileHandler
 
 from .baseprofileqirgenerator import BaseProfileQirGenerator
 from .module import tketqirModule
@@ -58,7 +58,7 @@ def pytket_to_qir(
     circ: Circuit,
     name: str = "Generated from input pytket circuit",
     qir_format: QIRFormat = QIRFormat.BINARY,
-    wfh: Optional[wasm.WasmFileHandler] = None,
+    wfh: Optional[WasmFileHandler] = None,
     int_type: int = 64,
     cut_pytket_register: bool = False,
     profile: QIRProfile = QIRProfile.PYTKET,

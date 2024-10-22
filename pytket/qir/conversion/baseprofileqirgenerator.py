@@ -17,12 +17,15 @@ from typing import Optional
 import pyqir
 from pyqir import Value
 
-from pytket import Bit, Circuit, Qubit, wasm  # type: ignore
 from pytket.circuit import (
+    Bit,
     BitRegister,
+    Circuit,
     Command,
     Conditional,
+    Qubit,
 )
+from pytket.wasm import WasmFileHandler
 
 from .module import tketqirModule
 from .qirgenerator import (
@@ -39,7 +42,7 @@ class BaseProfileQirGenerator(AbstractQirGenerator):
         module: tketqirModule,
         wasm_int_type: int,
         qir_int_type: int,
-        wfh: Optional[wasm.WasmFileHandler] = None,
+        wfh: Optional[WasmFileHandler] = None,
     ) -> None:
 
         super().__init__(circuit, module, wasm_int_type, qir_int_type, wfh)
