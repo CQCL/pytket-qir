@@ -3,6 +3,11 @@
 Changelog
 ~~~~~~~~~
 
+0.15.0 (October 2024)
+---------------------
+
+* Add option to generate base profile compatible QIR
+
 0.14.0 (October 2024)
 ---------------------
 

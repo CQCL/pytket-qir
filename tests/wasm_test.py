@@ -23,6 +23,7 @@ from pytket.qir.conversion.api import QIRFormat, QIRProfile, pytket_to_qir
 @pytest.mark.parametrize(
     "profile",
     [
+        QIRProfile.BASE,
         QIRProfile.ADAPTIVE,
         QIRProfile.PYTKET,
         QIRProfile.ADAPTIVE_CREGSIZE,
