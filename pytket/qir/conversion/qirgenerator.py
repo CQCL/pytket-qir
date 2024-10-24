@@ -29,6 +29,11 @@ from pytket.circuit import (
     CircBox,
     Circuit,
     ClassicalExpBox,
+    ClBitVar,
+    ClExpr,
+    ClExprOp,
+    ClOp,
+    ClRegVar,
     Command,
     Conditional,
     CopyBitsOp,
@@ -39,6 +44,7 @@ from pytket.circuit import (
     SetBitsOp,
     UnitID,
     WASMOp,
+    WiredClExpr,
 )
 from pytket.circuit.logic_exp import (
     BitAnd,
@@ -112,6 +118,60 @@ _TK_CLOPS_TO_PYQIR_2_BITS_NO_PARAM: dict = {
     BitOne: 1,
     BitZero: 0,
 }
+
+_TK_CLEXPR_OP_TO_PYQIR: dict = {
+    ClOp.BitAnd: lambda b: b.and_,
+    ClOp.BitOr: lambda b: b.or_,
+    ClOp.BitXor: lambda b: b.xor,
+    ClOp.BitEq: lambda b: partial(b.icmp, IntPredicate.EQ),
+    ClOp.BitNeq: lambda b: partial(b.icmp, IntPredicate.NE),
+    # ClOp.BitNot
+    # ClOp.BitZero
+    # ClOp.BitOne
+    ClOp.RegAnd: lambda b: b.and_,
+    ClOp.RegOr: lambda b: b.or_,
+    ClOp.RegXor: lambda b: b.xor,
+    ClOp.RegEq: lambda b: partial(b.icmp, IntPredicate.EQ),
+    ClOp.RegNeq: lambda b: partial(b.icmp, IntPredicate.NE),
+    # ClOp.RegNot
+    # ClOp.RegZero
+    # ClOp.RegOne
+    ClOp.RegLt: lambda b: partial(b.icmp, IntPredicate.ULT),
+    ClOp.RegGt: lambda b: partial(b.icmp, IntPredicate.UGT),
+    ClOp.RegLeq: lambda b: partial(b.icmp, IntPredicate.ULE),
+    ClOp.RegGeq: lambda b: partial(b.icmp, IntPredicate.UGE),
+    ClOp.RegAdd: lambda b: b.add,
+    ClOp.RegSub: lambda b: b.sub,
+    ClOp.RegMul: lambda b: b.mul,
+    # ClOp.RegDiv
+    # ClOp.RegPow
+    ClOp.RegLsh: lambda b: b.shl,
+    ClOp.RegRsh: lambda b: b.lshr,
+    # ClOp.RegNeg
+}
+
+_TK_CLEXPR_OP_WITH_REG_ARGS = set(
+    [
+        ClOp.RegAnd,
+        ClOp.RegOr,
+        ClOp.RegXor,
+        ClOp.RegEq,
+        ClOp.RegNeq,
+        ClOp.RegNot,
+        ClOp.RegLt,
+        ClOp.RegGt,
+        ClOp.RegLeq,
+        ClOp.RegGeq,
+        ClOp.RegAdd,
+        ClOp.RegSub,
+        ClOp.RegMul,
+        ClOp.RegDiv,
+        ClOp.RegPow,
+        ClOp.RegLsh,
+        ClOp.RegRsh,
+        ClOp.RegNeg,
+    ]
+)
 
 
 class AbstractQirGenerator:
@@ -731,6 +791,153 @@ class AbstractQirGenerator:
         else:
             self.set_ssa_vars(outputs, output_instruction, True)
 
+    def _get_ssa_from_clexpr_arg(
+        self,
+        arg: int | ClBitVar | ClRegVar | ClExpr,
+        bit_posn: dict[int, int],
+        reg_posn: dict[int, list[int]],
+        cmd_args: list[Bit],
+        expect_register: bool,
+    ) -> tuple[bool, Value]:
+        if isinstance(arg, int):
+            if expect_register:
+                return False, pyqir.const(self.qir_int_type, arg)
+            elif arg not in (0, 1):
+                raise ValueError(f"Invalid bit value {arg}")
+            else:
+                return True, pyqir.const(self.qir_bool_type, arg)
+        elif isinstance(arg, ClBitVar):
+            cmd_arg: Bit = cmd_args[bit_posn[arg.index]]
+            return True, self._get_bit_from_creg(cmd_arg.reg_name, cmd_arg.index[0])
+        elif isinstance(arg, ClRegVar):
+            return False, self._get_i64_ssa_reg(
+                cmd_args[reg_posn[arg.index][0]].reg_name
+            )
+        else:
+            assert isinstance(arg, ClExpr)
+            expr_op: ClOp = arg.op
+            ssa_args = [
+                self._get_ssa_from_clexpr_arg(
+                    expr_arg,
+                    bit_posn,
+                    reg_posn,
+                    cmd_args,
+                    expr_op in _TK_CLEXPR_OP_WITH_REG_ARGS,
+                )[1]
+                for expr_arg in arg.args
+            ]
+            match expr_op:
+                case ClOp.BitAnd | ClOp.BitOr | ClOp.BitXor | ClOp.BitEq | ClOp.BitNeq:
+                    return True, _TK_CLEXPR_OP_TO_PYQIR[expr_op](self.module.builder)(
+                        *ssa_args
+                    )
+                case ClOp.BitNot:
+                    # Implemented as x --> 1 - x
+                    assert len(ssa_args) == 1
+                    return True, self.module.builder.sub(
+                        pyqir.const(self.qir_bool_type, 1), ssa_args[0]
+                    )
+                case ClOp.BitZero:
+                    assert len(ssa_args) == 0
+                    return True, pyqir.const(self.qir_bool_type, 0)
+                case ClOp.BitOne:
+                    assert len(ssa_args) == 0
+                    return True, pyqir.const(self.qir_bool_type, 1)
+                case (
+                    ClOp.RegAnd
+                    | ClOp.RegOr
+                    | ClOp.RegXor
+                    | ClOp.RegEq
+                    | ClOp.RegNeq
+                    | ClOp.RegLt
+                    | ClOp.RegGt
+                    | ClOp.RegLeq
+                    | ClOp.RegGeq
+                    | ClOp.RegAdd
+                    | ClOp.RegSub
+                    | ClOp.RegMul
+                    | ClOp.RegLsh
+                    | ClOp.RegRsh
+                ):
+                    assert len(ssa_args) == 2
+                    return False, _TK_CLEXPR_OP_TO_PYQIR[expr_op](self.module.builder)(
+                        *ssa_args
+                    )
+                case ClOp.RegNot:
+                    # Implemented as x --> 2^self.int_size - 1 - x
+                    assert len(ssa_args) == 1
+                    return False, self.module.builder.sub(
+                        pyqir.const(self.qir_int_type, (1 << self.int_size) - 1),
+                        ssa_args[0],
+                    )
+                case ClOp.RegZero:
+                    assert len(ssa_args) == 0
+                    return False, pyqir.const(self.qir_int_type, 0)
+                case ClOp.RegOne:
+                    # Sets all bits in the register to 1
+                    assert len(ssa_args) == 0
+                    return False, pyqir.const(
+                        self.qir_int_type, (1 << self.int_size) - 1
+                    )
+                case ClOp.RegNeg:
+                    # Implemented as x --> 0 - x
+                    assert len(ssa_args) == 1
+                    return False, self.module.builder.sub(
+                        pyqir.const(self.qir_int_type, 0), ssa_args[0]
+                    )
+                case ClOp.RegDiv | ClOp.RegPow:
+                    raise ValueError(f"Classical operation {expr_op} not supported")
+                case _:
+                    raise ValueError("Invalid classical operation")
+
+    def conv_clexprop(self, op: ClExprOp, args: list[Bit]) -> None:
+        wexpr: WiredClExpr = op.expr
+        expr: ClExpr = wexpr.expr
+        bit_posn: dict[int, int] = wexpr.bit_posn
+        reg_posn: dict[int, list[int]] = wexpr.reg_posn
+        output_posn: list[int] = wexpr.output_posn
+
+        # We require that all register variables correspond to actual complete
+        # registers.
+        input_regs: dict[int, BitRegister] = {}
+        all_cregs = set(self.cregs.values())
+        for i, posns in reg_posn.items():
+            reg_args = [args[j] for j in posns]
+            for creg in all_cregs:
+                if creg.to_list() == reg_args:
+                    input_regs[i] = creg
+                    break
+            else:
+                raise ValueError(
+                    f"ClExprOp ({wexpr}) contains a register variable (r{i}) "
+                    "that is not wired to any BitRegister in the circuit."
+                )
+
+        returntypebool, output_instruction = self._get_ssa_from_clexpr_arg(
+            expr, bit_posn, reg_posn, args, expr.op in _TK_CLEXPR_OP_WITH_REG_ARGS
+        )
+
+        if returntypebool:
+            assert len(output_posn) == 1
+            output_arg: Bit = args[output_posn[0]]
+            self._set_bit_in_creg(
+                output_arg.reg_name, output_arg.index[0], output_instruction
+            )
+        else:
+            assert len(output_posn) > 0
+            output_args: list[Bit] = [args[i] for i in output_posn]
+            output_reg_name: Optional[str] = None
+            for creg in all_cregs:
+                if creg.to_list() == output_args:
+                    output_reg_name = creg.name
+                    break
+            else:
+                raise ValueError(
+                    f"ClExprOp ({wexpr}) has outputs that do not "
+                    "correspond to any BitRegister in the circuit."
+                )
+            self.set_ssa_vars(output_reg_name, output_instruction, True)
+
     def conv_SetBitsOp(self, bits: list[Bit], op: SetBitsOp) -> None:
         assert len(op.values) == len(bits)
 
@@ -824,6 +1031,9 @@ class AbstractQirGenerator:
 
         elif isinstance(op, ClassicalExpBox):
             self.conv_classicalexpbox(op, args)
+
+        elif isinstance(op, ClExprOp):
+            self.conv_clexprop(op, args)
 
         elif isinstance(op, SetBitsOp):
             self.conv_SetBitsOp(bits, op)
