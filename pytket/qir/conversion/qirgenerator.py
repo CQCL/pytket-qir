@@ -247,6 +247,9 @@ class AbstractQirGenerator:
     def _set_bit_in_creg(self, creg: str, index: int, ssa_bit: Value) -> None:
         pass
 
+    def _set_bit(self, bit: Bit, ssa_bit: Value) -> None:
+        self._set_bit_in_creg(bit.reg_name, bit.index[0], ssa_bit)
+
     @abc.abstractmethod
     def get_ssa_vars(self, reg_name: str) -> Value:
         pass
@@ -468,10 +471,7 @@ class AbstractQirGenerator:
                 self._get_i64_ssa_reg(registername),
             )
 
-            condition_bit_index = args[-1].index[0]
-            result_registername = args[-1].reg_name
-
-            self._set_bit_in_creg(result_registername, condition_bit_index, result)
+            self._set_bit(args[-1], result)
 
         else:
             lower_qir = pyqir.const(self.qir_int_type, op.lower)
@@ -493,10 +493,7 @@ class AbstractQirGenerator:
 
             result = self.module.module.builder.and_(lower_cond, upper_cond)
 
-            condition_bit_index = args[-1].index[0]
-            registername = args[-1].reg_name
-
-            self._set_bit_in_creg(registername, condition_bit_index, result)
+            self._set_bit(args[-1], result)
 
     @abc.abstractmethod
     def conv_conditional(self, command: Command, op: Conditional) -> None:
@@ -742,7 +739,7 @@ class AbstractQirGenerator:
         for b, v in zip(bits, op.values):
             output_instruction = pyqir.const(self.qir_bool_type, int(v))
 
-            self._set_bit_in_creg(b.reg_name, b.index[0], output_instruction)
+            self._set_bit(b, output_instruction)
 
     def conv_CopyBitsOp(self, args: list) -> None:
         assert len(args) % 2 == 0
@@ -751,7 +748,7 @@ class AbstractQirGenerator:
         for i, o in zip(args[:half_length], args[half_length:]):
             output_instruction = self._get_bit_from_creg(i.reg_name, i.index[0])
 
-            self._set_bit_in_creg(o.reg_name, o.index[0], output_instruction)
+            self._set_bit(o, output_instruction)
 
     def conv_BarrierOp(self, qubits: list[Qubit], op: BarrierOp) -> None:
         assert qubits[0].reg_name == "q"
