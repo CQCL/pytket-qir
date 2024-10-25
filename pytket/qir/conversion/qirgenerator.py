@@ -259,9 +259,7 @@ class AbstractQirGenerator:
     def set_ssa_vars(self, reg_name: str, ssa_i64: Value, trunc: bool) -> None:
         pass
 
-    def _add_barrier_op(
-        self, module: tketqirModule, index: int, qir_qubits: Sequence
-    ) -> None:
+    def _add_barrier_op(self, index: int, qir_qubits: Sequence) -> None:
         # __quantum__qis__barrier1__body()
         if self.barrier[index] is None:
             self.barrier[index] = self.module.module.add_external_function(
@@ -272,14 +270,12 @@ class AbstractQirGenerator:
                 ),
             )
 
-        module.builder.call(
+        self.module.builder.call(
             self.barrier[index],  # type: ignore
             [*qir_qubits],
         )
 
-    def _add_group_op(
-        self, module: tketqirModule, index: int, qir_qubits: Sequence
-    ) -> None:
+    def _add_group_op(self, index: int, qir_qubits: Sequence) -> None:
         # __quantum__qis__group1__body()
         if self.group[index] is None:
             self.group[index] = self.module.module.add_external_function(
@@ -290,14 +286,12 @@ class AbstractQirGenerator:
                 ),
             )
 
-        module.builder.call(
+        self.module.builder.call(
             self.group[index],  # type: ignore
             [*qir_qubits],
         )
 
-    def _add_order_op(
-        self, module: tketqirModule, index: int, qir_qubits: Sequence
-    ) -> None:
+    def _add_order_op(self, index: int, qir_qubits: Sequence) -> None:
         # __quantum__qis__order1__body()
         if self.order[index] is None:
             self.order[index] = self.module.module.add_external_function(
@@ -308,14 +302,12 @@ class AbstractQirGenerator:
                 ),
             )
 
-        module.builder.call(
+        self.module.builder.call(
             self.order[index],  # type: ignore
             [*qir_qubits],
         )
 
-    def _add_sleep_op(
-        self, module: tketqirModule, index: int, qir_qubits: Sequence, duration: float
-    ) -> None:
+    def _add_sleep_op(self, index: int, qir_qubits: Sequence, duration: float) -> None:
         # __quantum__qis__sleep__body()
 
         if index > 1:
@@ -334,7 +326,7 @@ class AbstractQirGenerator:
                 ),
             )
 
-        module.builder.call(
+        self.module.builder.call(
             self.sleep[index],  # type: ignore
             [
                 *qir_qubits,
@@ -403,18 +395,16 @@ class AbstractQirGenerator:
         return inputs, outputs
 
     def _get_ssa_from_cl_reg_op(
-        self, reg: Union[BitRegister, RegAnd, RegOr, RegXor, int], module: tketqirModule
+        self, reg: Union[BitRegister, RegAnd, RegOr, RegXor, int]
     ) -> Value:
         if type(reg) in _TK_CLOPS_TO_PYQIR_REG:
             assert len(reg.args) == 2  # type: ignore
 
-            ssa_left = self._get_ssa_from_cl_reg_op(reg.args[0], module)  # type: ignore
-            ssa_right = self._get_ssa_from_cl_reg_op(
-                reg.args[1], module  # type: ignore
-            )
+            ssa_left = self._get_ssa_from_cl_reg_op(reg.args[0])  # type: ignore
+            ssa_right = self._get_ssa_from_cl_reg_op(reg.args[1])  # type: ignore
 
             # add function to module
-            output_instruction = _TK_CLOPS_TO_PYQIR_REG[type(reg)](module.builder)(
+            output_instruction = _TK_CLOPS_TO_PYQIR_REG[type(reg)](self.module.builder)(
                 ssa_left, ssa_right
             )
             return output_instruction  # type: ignore
@@ -426,9 +416,7 @@ class AbstractQirGenerator:
             raise ValueError(f"unsupported classical register operation: {type(reg)}")
 
     def _get_ssa_from_cl_bit_op(
-        self,
-        bit: Union[LogicExp, Bit, BitAnd, BitOr, BitXor, int],
-        module: tketqirModule,
+        self, bit: Union[LogicExp, Bit, BitAnd, BitOr, BitXor, int]
     ) -> Value:
         if type(bit) is Bit:
             result = self._get_bit_from_creg(bit.reg_name, bit.index[0])
@@ -440,10 +428,10 @@ class AbstractQirGenerator:
             assert len(bit.args) == 1  # type: ignore
 
             ssa_left = pyqir.const(self.qir_bool_type, 1)
-            ssa_right = self._get_ssa_from_cl_bit_op(bit.args[0], module)  # type: ignore
+            ssa_right = self._get_ssa_from_cl_bit_op(bit.args[0])  # type: ignore
 
             # add function to module
-            output_instruction = _TK_CLOPS_TO_PYQIR_BIT[type(bit)](module.builder)(
+            output_instruction = _TK_CLOPS_TO_PYQIR_BIT[type(bit)](self.module.builder)(
                 ssa_left, ssa_right
             )
 
@@ -451,13 +439,13 @@ class AbstractQirGenerator:
         elif type(bit) in _TK_CLOPS_TO_PYQIR_2_BITS:
             assert len(bit.args) == 2  # type: ignore
 
-            ssa_left = self._get_ssa_from_cl_bit_op(bit.args[0], module)  # type: ignore
-            ssa_right = self._get_ssa_from_cl_bit_op(bit.args[1], module)  # type: ignore
+            ssa_left = self._get_ssa_from_cl_bit_op(bit.args[0])  # type: ignore
+            ssa_right = self._get_ssa_from_cl_bit_op(bit.args[1])  # type: ignore
 
             # add function to module
-            output_instruction = _TK_CLOPS_TO_PYQIR_2_BITS[type(bit)](module.builder)(
-                ssa_left, ssa_right
-            )
+            output_instruction = _TK_CLOPS_TO_PYQIR_2_BITS[type(bit)](
+                self.module.builder
+            )(ssa_left, ssa_right)
 
             return output_instruction  # type: ignore
         else:
@@ -663,15 +651,11 @@ class AbstractQirGenerator:
             # classical ops acting on registers returning register
             ssa_left = cast(  # type: ignore
                 Value,
-                self._get_ssa_from_cl_reg_op(
-                    op.get_exp().args[0], self.module  # type: ignore
-                ),
+                self._get_ssa_from_cl_reg_op(op.get_exp().args[0]),  # type: ignore
             )
             ssa_right = cast(  # type: ignore
                 Value,
-                self._get_ssa_from_cl_reg_op(
-                    op.get_exp().args[1], self.module  # type: ignore
-                ),
+                self._get_ssa_from_cl_reg_op(op.get_exp().args[1]),  # type: ignore
             )
 
             # add function to module
@@ -693,7 +677,7 @@ class AbstractQirGenerator:
             ssa_left = pyqir.const(self.qir_bool_type, 1)
             ssa_right = cast(  # type: ignore
                 Value,
-                self._get_ssa_from_cl_bit_op(op.get_exp().args[0], self.module),  # type: ignore
+                self._get_ssa_from_cl_bit_op(op.get_exp().args[0]),  # type: ignore
             )
 
             # add function to module
@@ -707,11 +691,11 @@ class AbstractQirGenerator:
             # classical ops acting on bits returning bit
             ssa_left = cast(  # type: ignore
                 Value,
-                self._get_ssa_from_cl_bit_op(op.get_exp().args[0], self.module),  # type: ignore
+                self._get_ssa_from_cl_bit_op(op.get_exp().args[0]),  # type: ignore
             )
             ssa_right = cast(  # type: ignore
                 Value,
-                self._get_ssa_from_cl_bit_op(op.get_exp().args[1], self.module),  # type: ignore
+                self._get_ssa_from_cl_bit_op(op.get_exp().args[1]),  # type: ignore
             )
 
             # add function to module
@@ -725,15 +709,11 @@ class AbstractQirGenerator:
             # classical ops acting on registers returning bit
             ssa_left = cast(  # type: ignore
                 Value,
-                self._get_ssa_from_cl_reg_op(
-                    op.get_exp().args[0], self.module  # type: ignore
-                ),
+                self._get_ssa_from_cl_reg_op(op.get_exp().args[0]),  # type: ignore
             )
             ssa_right = cast(  # type: ignore
                 Value,
-                self._get_ssa_from_cl_reg_op(
-                    op.get_exp().args[1], self.module  # type: ignore
-                ),
+                self._get_ssa_from_cl_reg_op(op.get_exp().args[1]),  # type: ignore
             )
 
             # add function to module
@@ -779,18 +759,13 @@ class AbstractQirGenerator:
         qir_qubits = self._to_qis_qubits(qubits)
 
         if op.data == "":
-            self._add_barrier_op(self.module, len(qubits), qir_qubits)
+            self._add_barrier_op(len(qubits), qir_qubits)
         elif op.data[0:5] == "order":
-            self._add_order_op(self.module, len(qubits), qir_qubits)
+            self._add_order_op(len(qubits), qir_qubits)
         elif op.data[0:5] == "group":
-            self._add_group_op(self.module, len(qubits), qir_qubits)
+            self._add_group_op(len(qubits), qir_qubits)
         elif op.data[0:5] == "sleep":
-            self._add_sleep_op(
-                self.module,
-                len(qubits),
-                qir_qubits,
-                float(op.data[6:-1]),
-            )
+            self._add_sleep_op(len(qubits), qir_qubits, float(op.data[6:-1]))
         else:
             raise ValueError("op is not supported yet")
 
