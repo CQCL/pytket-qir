@@ -134,6 +134,72 @@ def test_pytket_qir_wasm_4(profile: QIRProfile) -> None:
     check_qir_result(result, f"test_pytket_qir_wasm_4-{profile}")
 
 
+@pytest.mark.parametrize(
+    "profile",
+    [
+        QIRProfile.ADAPTIVE,
+        QIRProfile.PYTKET,
+        QIRProfile.ADAPTIVE_CREGSIZE,
+    ],
+)
+def test_pytket_qir_wasm_5(profile: QIRProfile) -> None:
+    w = wasm.WasmFileHandler("testfile.wasm", int_size=32, check_file=False)
+    c = Circuit(6, 6)
+    c.Measure(Qubit(0), Bit(0))
+    c.Measure(Qubit(1), Bit(1))
+    c.Measure(Qubit(2), Bit(2))
+    c0 = c.add_c_register("c0", 64)
+    c1 = c.add_c_register("c1", 32)
+    c.add_c_setbits([True] + [False] * 63, list(c0))
+    c.add_wasm_to_reg("add_one", w, [c0], [c1])
+
+    w.check()
+
+    result = pytket_to_qir(
+        c,
+        name=f"test_pytket_qir_wasm_5-{profile}",
+        qir_format=QIRFormat.STRING,
+        wfh=w,
+        int_type=64,
+        profile=profile,
+    )
+
+    check_qir_result(result, f"test_pytket_qir_wasm_5-{profile}")
+
+
+@pytest.mark.parametrize(
+    "profile",
+    [
+        QIRProfile.ADAPTIVE,
+        QIRProfile.PYTKET,
+        QIRProfile.ADAPTIVE_CREGSIZE,
+    ],
+)
+def test_pytket_qir_wasm_6(profile: QIRProfile) -> None:
+    w = wasm.WasmFileHandler("testfile.wasm", int_size=32, check_file=False)
+    c = Circuit(6, 6)
+    c.Measure(Qubit(0), Bit(0))
+    c.Measure(Qubit(1), Bit(1))
+    c.Measure(Qubit(2), Bit(2))
+    c0 = c.add_c_register("c0", 64)
+    c1 = c.add_c_register("c1", 32)
+    c.add_c_setbits([False] * 30 + [True, True, True, True] + [False] * 30, list(c0))
+    c.add_wasm_to_reg("add_one", w, [c0], [c1])
+
+    w.check()
+
+    result = pytket_to_qir(
+        c,
+        name=f"test_pytket_qir_wasm_6-{profile}",
+        qir_format=QIRFormat.STRING,
+        wfh=w,
+        int_type=64,
+        profile=profile,
+    )
+
+    check_qir_result(result, f"test_pytket_qir_wasm_6-{profile}")
+
+
 if __name__ == "__main__":
     test_pytket_qir_wasm(QIRProfile.PYTKET)
     test_pytket_qir_wasm_2(QIRProfile.PYTKET)
