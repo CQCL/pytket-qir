@@ -457,9 +457,7 @@ class AbstractQirGenerator:
     def get_wasm_sar(self) -> dict[str, str]:
         return self.wasm_sar_dict
 
-    def conv_RangePredicateOp(
-        self, op: RangePredicateOp, args: list[Union[Bit, Qubit]]
-    ) -> None:
+    def conv_RangePredicateOp(self, op: RangePredicateOp, args: list[Bit]) -> None:
         # special case handling for REG_EQ
 
         if op.lower == op.upper:
