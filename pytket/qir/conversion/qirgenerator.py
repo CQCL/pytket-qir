@@ -259,9 +259,7 @@ class AbstractQirGenerator:
     def set_ssa_vars(self, reg_name: str, ssa_i64: Value, trunc: bool) -> None:
         pass
 
-    def _add_barrier_op(
-        self, module: tketqirModule, index: int, qir_qubits: Sequence
-    ) -> None:
+    def _add_barrier_op(self, index: int, qir_qubits: Sequence) -> None:
         # __quantum__qis__barrier1__body()
         if self.barrier[index] is None:
             self.barrier[index] = self.module.module.add_external_function(
@@ -272,14 +270,12 @@ class AbstractQirGenerator:
                 ),
             )
 
-        module.builder.call(
+        self.module.builder.call(
             self.barrier[index],  # type: ignore
             [*qir_qubits],
         )
 
-    def _add_group_op(
-        self, module: tketqirModule, index: int, qir_qubits: Sequence
-    ) -> None:
+    def _add_group_op(self, index: int, qir_qubits: Sequence) -> None:
         # __quantum__qis__group1__body()
         if self.group[index] is None:
             self.group[index] = self.module.module.add_external_function(
@@ -290,14 +286,12 @@ class AbstractQirGenerator:
                 ),
             )
 
-        module.builder.call(
+        self.module.builder.call(
             self.group[index],  # type: ignore
             [*qir_qubits],
         )
 
-    def _add_order_op(
-        self, module: tketqirModule, index: int, qir_qubits: Sequence
-    ) -> None:
+    def _add_order_op(self, index: int, qir_qubits: Sequence) -> None:
         # __quantum__qis__order1__body()
         if self.order[index] is None:
             self.order[index] = self.module.module.add_external_function(
@@ -308,14 +302,12 @@ class AbstractQirGenerator:
                 ),
             )
 
-        module.builder.call(
+        self.module.builder.call(
             self.order[index],  # type: ignore
             [*qir_qubits],
         )
 
-    def _add_sleep_op(
-        self, module: tketqirModule, index: int, qir_qubits: Sequence, duration: float
-    ) -> None:
+    def _add_sleep_op(self, index: int, qir_qubits: Sequence, duration: float) -> None:
         # __quantum__qis__sleep__body()
 
         if index > 1:
@@ -334,7 +326,7 @@ class AbstractQirGenerator:
                 ),
             )
 
-        module.builder.call(
+        self.module.builder.call(
             self.sleep[index],  # type: ignore
             [
                 *qir_qubits,
@@ -767,18 +759,13 @@ class AbstractQirGenerator:
         qir_qubits = self._to_qis_qubits(qubits)
 
         if op.data == "":
-            self._add_barrier_op(self.module, len(qubits), qir_qubits)
+            self._add_barrier_op(len(qubits), qir_qubits)
         elif op.data[0:5] == "order":
-            self._add_order_op(self.module, len(qubits), qir_qubits)
+            self._add_order_op(len(qubits), qir_qubits)
         elif op.data[0:5] == "group":
-            self._add_group_op(self.module, len(qubits), qir_qubits)
+            self._add_group_op(len(qubits), qir_qubits)
         elif op.data[0:5] == "sleep":
-            self._add_sleep_op(
-                self.module,
-                len(qubits),
-                qir_qubits,
-                float(op.data[6:-1]),
-            )
+            self._add_sleep_op(len(qubits), qir_qubits, float(op.data[6:-1]))
         else:
             raise ValueError("op is not supported yet")
 
