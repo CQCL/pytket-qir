@@ -18,7 +18,7 @@ from pytket.qasm import circuit_from_qasm_str
 
 
 def test_pytket_qir_qasm() -> None:
-    with open("qec.qasm") as my_file:
+    with open("qasm/qec.qasm") as my_file:
         circ = circuit_from_qasm_str(my_file.read())
 
     run_qir_gen_and_check(circ, "test_pytket_qir_qasm")
