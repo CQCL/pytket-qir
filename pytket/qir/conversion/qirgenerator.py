@@ -263,6 +263,7 @@ class AbstractQirGenerator:
 
         # void functionname()
         if wfh is not None:
+            wfh.check()
             self.wasm: dict[str, pyqir.Function] = {}
             for fn in wfh._functions:
                 wasm_func_interface = "declare "
