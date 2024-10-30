@@ -3,12 +3,12 @@
 Changelog
 ~~~~~~~~~
 
-Unreleased
-----------
+0.16.0 (October 2024)
+---------------------
 
 * Updated pytket version requirement to 1.34.
 * Add support for pytket circuits containing `ClExprOp`.
-
+* Always check wasm files
 
 0.15.0 (October 2024)
 ---------------------
