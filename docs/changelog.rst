@@ -3,6 +3,13 @@
 Changelog
 ~~~~~~~~~
 
+Unreleased
+----------
+
+* Updated pytket version requirement to 1.34.
+* Add support for pytket circuits containing `ClExprOp`.
+
+
 0.15.0 (October 2024)
 ---------------------
 
