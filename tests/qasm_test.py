@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import pytest
 from utilities import run_qir_gen_and_check  # type: ignore
 
 from pytket.qasm import circuit_from_qasm_str
@@ -25,25 +26,39 @@ def test_pytket_qir_qasm() -> None:
     run_qir_gen_and_check(circ, "test_pytket_qir_qasm")
 
 
-def test_pytket_qir_qasm_classical_0() -> None:
+@pytest.mark.parametrize(
+    "profile",
+    [
+        QIRProfile.ADAPTIVE,
+        QIRProfile.PYTKET,
+    ],
+)
+def test_pytket_qir_qasm_classical_0(profile: QIRProfile) -> None:
     with open("qasm/test0.qasm") as my_file:
         circ = circuit_from_qasm_str(my_file.read(), use_clexpr=True)
 
     run_qir_gen_and_check(
         circ,
         "test_pytket_qir_qasm_classical_0",
-        profile=QIRProfile.PYTKET,
+        profile=profile,
     )
 
 
-def test_pytket_qir_qasm_classical_1() -> None:
+@pytest.mark.parametrize(
+    "profile",
+    [
+        QIRProfile.ADAPTIVE,
+        QIRProfile.PYTKET,
+    ],
+)
+def test_pytket_qir_qasm_classical_1(profile: QIRProfile) -> None:
     with open("qasm/test1.qasm") as my_file:
         circ = circuit_from_qasm_str(my_file.read(), use_clexpr=True)
 
     run_qir_gen_and_check(
         circ,
         "test_pytket_qir_qasm_classical_1",
-        profile=QIRProfile.PYTKET,
+        profile=profile,
     )
 
 
