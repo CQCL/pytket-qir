@@ -75,7 +75,6 @@ from pytket.circuit.logic_exp import (
 from pytket.qasm.qasm import _retrieve_registers
 from pytket.transform import Transform
 from pytket.unit_id import UnitType
-from pytket.wasm import WasmFileHandler
 
 from .gatesets import (
     FuncSpec,
@@ -184,7 +183,6 @@ class AbstractQirGenerator:
         module: tketqirModule,
         wasm_int_type: int,
         qir_int_type: int,
-        wfh: Optional[WasmFileHandler] = None,
     ) -> None:
         self.circuit = circuit
         self.module = module
@@ -203,6 +201,7 @@ class AbstractQirGenerator:
         self.block_count = 0
         self.block_count_sb = 0
 
+        self.has_wasm = False
         self.wasm_sar_dict: dict[str, str] = {}
         self.wasm_sar_dict["!llvm.module.flags"] = (
             'attributes #1 = { "wasm" }\n\n!llvm.module.flags'
@@ -261,42 +260,7 @@ class AbstractQirGenerator:
             self.circuit.n_qubits + 1
         )
 
-        # void functionname()
-        if wfh is not None:
-            wfh.check()
-            self.wasm: dict[str, pyqir.Function] = {}
-            for fn in wfh._functions:
-                wasm_func_interface = "declare "
-                parametertype = [self.qir_int_type] * wfh._functions[fn][0]
-                if wfh._functions[fn][1] == 0:
-                    returntype = pyqir.Type.void(self.module.module.context)
-                    wasm_func_interface += "void "
-                elif wfh._functions[fn][1] == 1:
-                    returntype = self.qir_int_type
-                    wasm_func_interface += f"{self.int_type_str} "
-                else:
-                    raise ValueError(
-                        "wasm function which return more than"
-                        + " one value are not supported yet"
-                    )
-
-                self.wasm[fn] = self.module.module.add_external_function(
-                    f"{fn}",
-                    pyqir.FunctionType(
-                        returntype,
-                        parametertype,
-                    ),
-                )
-
-                wasm_func_interface += f"@{fn}("
-                if wfh._functions[fn][0] > 0:
-                    param_str = f"{self.int_type_str}, " * (wfh._functions[fn][0] - 1)
-                    wasm_func_interface += param_str
-                    wasm_func_interface += f"{self.int_type_str})"
-                else:
-                    wasm_func_interface += ")"
-
-                self.wasm_sar_dict[wasm_func_interface] = f"{wasm_func_interface} #1"
+        self.wasm: dict[str, pyqir.Function] = {}
 
         self.additional_quantum_gates: dict[OpType, pyqir.Function] = {}
 
@@ -559,9 +523,45 @@ class AbstractQirGenerator:
         pass
 
     def conv_WASMOp(self, op: WASMOp, args: list[Union[Bit, Qubit]]) -> None:
+        self.has_wasm = True
+
         paramreg, resultreg = self._get_c_regs_from_com(op, args)
 
         ssa_param = [self._get_i64_ssa_reg(p) for p in paramreg]
+
+        if op.func_name not in self.wasm:
+            wasm_func_interface = "declare "
+            parametertype = [self.qir_int_type] * len(paramreg)
+            if len(resultreg) == 0:
+                returntype = pyqir.Type.void(self.module.module.context)
+                wasm_func_interface += "void "
+            elif len(resultreg) == 1:
+                returntype = self.qir_int_type
+                wasm_func_interface += f"{self.int_type_str} "
+            else:
+                raise ValueError(
+                    "wasm function which return more than"
+                    + " one value are not supported yet"
+                    + f"please don't use {op.func_name}"
+                )
+
+            self.wasm[op.func_name] = self.module.module.add_external_function(
+                f"{op.func_name}",
+                pyqir.FunctionType(
+                    returntype,
+                    parametertype,
+                ),
+            )
+
+            wasm_func_interface += f"@{op.func_name}("
+            if len(paramreg) > 0:
+                param_str = f"{self.int_type_str}, " * (len(paramreg) - 1)
+                wasm_func_interface += param_str
+                wasm_func_interface += f"{self.int_type_str})"
+            else:
+                wasm_func_interface += ")"
+
+            self.wasm_sar_dict[wasm_func_interface] = f"{wasm_func_interface} #1"
 
         result = self.module.builder.call(
             self.wasm[op.func_name],
