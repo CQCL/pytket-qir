@@ -3,6 +3,11 @@
 Changelog
 ~~~~~~~~~
 
+0.17.0 (October 2024)
+---------------------
+
+* Update qir generation for wasm functions to work without wasm file handler
+
 0.16.0 (October 2024)
 ---------------------
 
