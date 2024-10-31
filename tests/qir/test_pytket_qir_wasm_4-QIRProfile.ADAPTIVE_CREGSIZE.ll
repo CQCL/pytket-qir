@@ -53,8 +53,6 @@ declare i1 @__quantum__qis__read_result__body(%Result*)
 
 declare void @__quantum__rt__int_record_output(i64, i8*)
 
-declare void @init() #1
-
 declare i64 @add_something(i64) #1
 
 declare void @__quantum__qis__mz__body(%Qubit*, %Result* writeonly) #2
