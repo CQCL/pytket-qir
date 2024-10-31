@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Optional, cast
+from typing import cast
 
 import pyqir
 from pyqir import BasicBlock, Value
@@ -27,7 +27,6 @@ from pytket.circuit import (
     OpType,
     Qubit,
 )
-from pytket.wasm import WasmFileHandler
 
 from .module import tketqirModule
 from .qirgenerator import (
@@ -45,12 +44,11 @@ class AdaptiveProfileQirGenerator(AbstractQirGenerator):
         wasm_int_type: int,
         qir_int_type: int,
         trunc: bool,
-        wfh: Optional[WasmFileHandler] = None,
     ) -> None:
 
         self.trunc = trunc
 
-        super().__init__(circuit, module, wasm_int_type, qir_int_type, wfh)
+        super().__init__(circuit, module, wasm_int_type, qir_int_type)
 
         self.set_cregs: dict[str, list] = {}  # Keep track of set registers.
         self.ssa_vars: dict[str, list[tuple[Value, BasicBlock]]] = (

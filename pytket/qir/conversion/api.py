@@ -17,7 +17,7 @@ public api for qir conversion from pytket
 """
 
 from enum import Enum
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, Union
 
 import pyqir
 
@@ -25,7 +25,6 @@ from pytket.circuit import Circuit
 from pytket.passes import (
     scratch_reg_resize_pass,
 )
-from pytket.wasm import WasmFileHandler
 
 from .baseprofileqirgenerator import BaseProfileQirGenerator
 from .module import tketqirModule
@@ -58,7 +57,6 @@ def pytket_to_qir(
     circ: Circuit,
     name: str = "Generated from input pytket circuit",
     qir_format: QIRFormat = QIRFormat.BINARY,
-    wfh: Optional[WasmFileHandler] = None,
     int_type: int = 64,
     cut_pytket_register: bool = False,
     profile: QIRProfile = QIRProfile.PYTKET,
@@ -108,7 +106,6 @@ def pytket_to_qir(
             module=m,
             wasm_int_type=int_type,
             qir_int_type=int_type,
-            wfh=wfh,
         )
     elif profile == QIRProfile.PYTKET:
         qir_generator = PytketQirGenerator(
@@ -116,7 +113,6 @@ def pytket_to_qir(
             module=m,
             wasm_int_type=int_type,
             qir_int_type=int_type,
-            wfh=wfh,
         )
     elif profile == QIRProfile.ADAPTIVE or profile == QIRProfile.ADAPTIVE_CREGSIZE:
         qir_generator = AdaptiveProfileQirGenerator(
@@ -124,7 +120,6 @@ def pytket_to_qir(
             module=m,
             wasm_int_type=int_type,
             qir_int_type=int_type,
-            wfh=wfh,
             trunc=trunc,
         )
     else:
@@ -132,7 +127,7 @@ def pytket_to_qir(
 
     populated_module = qir_generator.circuit_to_module(qir_generator.circuit, True)
 
-    if wfh is not None:
+    if qir_generator.has_wasm:
         wasm_sar_dict: dict[str, str] = qir_generator.get_wasm_sar()
 
         initial_result = str(populated_module.module.ir())

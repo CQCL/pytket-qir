@@ -96,22 +96,6 @@ declare i1 @__quantum__qis__read_result__body(%Result*)
 
 declare void @__quantum__rt__int_record_output(i64, i8*)
 
-declare void @init() #1
-
-declare i64 @add_one(i64) #1
-
-declare i64 @multi(i64, i64) #1
-
-declare i64 @add_two(i64) #1
-
-declare i64 @add_eleven(i64) #1
-
-declare void @no_return(i64) #1
-
-declare i64 @no_parameters() #1
-
-declare i64 @new_function() #1
-
 declare i1 @get_creg_bit(i1*, i64)
 
 declare void @set_creg_bit(i1*, i64, i1)
@@ -123,6 +107,8 @@ declare i1* @create_creg(i64)
 declare i64 @get_int_from_creg(i1*)
 
 declare void @mz_to_creg_bit(%Qubit*, i1*, i64)
+
+declare i64 @add_one(i64) #1
 
 attributes #0 = { "entry_point" "output_labeling_schema" "qir_profiles"="custom" "required_num_qubits"="6" "required_num_results"="6" }
 

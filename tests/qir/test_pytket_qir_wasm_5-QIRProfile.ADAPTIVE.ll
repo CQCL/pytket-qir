@@ -48,23 +48,9 @@ declare i1 @__quantum__qis__read_result__body(%Result*)
 
 declare void @__quantum__rt__int_record_output(i64, i8*)
 
-declare void @init() #1
+declare void @__quantum__qis__mz__body(%Qubit*, %Result* writeonly) #2
 
 declare i64 @add_one(i64) #1
-
-declare i64 @multi(i64, i64) #1
-
-declare i64 @add_two(i64) #1
-
-declare i64 @add_eleven(i64) #1
-
-declare void @no_return(i64) #1
-
-declare i64 @no_parameters() #1
-
-declare i64 @new_function() #1
-
-declare void @__quantum__qis__mz__body(%Qubit*, %Result* writeonly) #2
 
 attributes #0 = { "entry_point" "output_labeling_schema" "qir_profiles"="custom" "required_num_qubits"="6" "required_num_results"="6" }
 attributes #1 = { "wasm" }

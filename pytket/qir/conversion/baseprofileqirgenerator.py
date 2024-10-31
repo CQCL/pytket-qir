@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Optional
 
 import pyqir
 from pyqir import Value
@@ -25,7 +24,6 @@ from pytket.circuit import (
     Conditional,
     Qubit,
 )
-from pytket.wasm import WasmFileHandler
 
 from .module import tketqirModule
 from .qirgenerator import (
@@ -42,10 +40,9 @@ class BaseProfileQirGenerator(AbstractQirGenerator):
         module: tketqirModule,
         wasm_int_type: int,
         qir_int_type: int,
-        wfh: Optional[WasmFileHandler] = None,
     ) -> None:
 
-        super().__init__(circuit, module, wasm_int_type, qir_int_type, wfh)
+        super().__init__(circuit, module, wasm_int_type, qir_int_type)
 
         self.measure_results: list[list] = []
 

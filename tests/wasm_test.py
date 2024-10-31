@@ -30,7 +30,6 @@ from pytket.qir.conversion.api import QIRFormat, QIRProfile, pytket_to_qir
     ],
 )
 def test_pytket_qir_wasm(profile: QIRProfile) -> None:
-    w = wasm.WasmFileHandler("testfile.wasm")
     circ = Circuit(1)
     circ.H(0)
 
@@ -38,7 +37,6 @@ def test_pytket_qir_wasm(profile: QIRProfile) -> None:
         circ,
         name=f"test_pytket_qir_wasm-{profile}",
         qir_format=QIRFormat.STRING,
-        wfh=w,
         int_type=32,
         profile=profile,
     )
@@ -69,7 +67,6 @@ def test_pytket_qir_wasm_2(profile: QIRProfile) -> None:
         c,
         name=f"test_pytket_qir_wasm_2-{profile}",
         qir_format=QIRFormat.STRING,
-        wfh=w,
         int_type=32,
         profile=profile,
     )
@@ -96,7 +93,6 @@ def test_pytket_qir_wasm_3(profile: QIRProfile) -> None:
         c,
         name=f"test_pytket_qir_wasm_3-{profile}",
         qir_format=QIRFormat.STRING,
-        wfh=w,
         int_type=64,
         profile=profile,
     )
@@ -126,7 +122,6 @@ def test_pytket_qir_wasm_4(profile: QIRProfile) -> None:
         c,
         name=f"test_pytket_qir_wasm_4-{profile}",
         qir_format=QIRFormat.STRING,
-        wfh=w,
         int_type=64,
         profile=profile,
     )
@@ -153,13 +148,10 @@ def test_pytket_qir_wasm_5(profile: QIRProfile) -> None:
     c.add_c_setbits([True] + [False] * 63, list(c0))
     c.add_wasm_to_reg("add_one", w, [c0], [c1])
 
-    w.check()
-
     result = pytket_to_qir(
         c,
         name=f"test_pytket_qir_wasm_5-{profile}",
         qir_format=QIRFormat.STRING,
-        wfh=w,
         int_type=64,
         profile=profile,
     )
@@ -186,13 +178,10 @@ def test_pytket_qir_wasm_6(profile: QIRProfile) -> None:
     c.add_c_setbits([False] * 30 + [True, True, True, True] + [False] * 30, list(c0))
     c.add_wasm_to_reg("add_one", w, [c0], [c1])
 
-    w.check()
-
     result = pytket_to_qir(
         c,
         name=f"test_pytket_qir_wasm_6-{profile}",
         qir_format=QIRFormat.STRING,
-        wfh=w,
         int_type=64,
         profile=profile,
     )
@@ -205,3 +194,5 @@ if __name__ == "__main__":
     test_pytket_qir_wasm_2(QIRProfile.PYTKET)
     test_pytket_qir_wasm_3(QIRProfile.PYTKET)
     test_pytket_qir_wasm_4(QIRProfile.PYTKET)
+    test_pytket_qir_wasm_5(QIRProfile.PYTKET)
+    test_pytket_qir_wasm_6(QIRProfile.PYTKET)
