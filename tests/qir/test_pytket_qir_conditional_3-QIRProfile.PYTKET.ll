@@ -19,7 +19,6 @@ entry:
   %3 = call i1* @create_creg(i64 15)
   %4 = call i1* @create_creg(i64 15)
   %5 = call i1* @create_creg(i64 1)
-  call void @__quantum__qis__h__body(%Qubit* null)
   %6 = call i1 @get_creg_bit(i1* %2, i64 4)
   %7 = call i1 @get_creg_bit(i1* %2, i64 5)
   %8 = call i1 @get_creg_bit(i1* %2, i64 6)
@@ -30,6 +29,7 @@ entry:
   %13 = and i1 %11, %12
   %14 = or i1 %10, %13
   call void @set_creg_bit(i1* %5, i64 0, i1 %14)
+  call void @__quantum__qis__h__body(%Qubit* null)
   %15 = call i64 @get_int_from_creg(i1* %0)
   %16 = call i64 @get_int_from_creg(i1* %1)
   %17 = add i64 %15, %16
