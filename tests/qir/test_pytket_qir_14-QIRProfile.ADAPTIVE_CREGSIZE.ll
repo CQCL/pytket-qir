@@ -17,17 +17,18 @@ entry:
   br i1 false, label %condb0, label %contb0
 
 condb0:                                           ; preds = %entry
+  call void @__quantum__qis__x__body(%Qubit* null)
   br label %contb0
 
 contb0:                                           ; preds = %condb0, %entry
-  br i1 false, label %condb1, label %contb1
+  br i1 true, label %condb1, label %contb1
 
 condb1:                                           ; preds = %contb0
   call void @__quantum__qis__x__body(%Qubit* null)
   br label %contb1
 
 contb1:                                           ; preds = %condb1, %contb0
-  br i1 true, label %condb2, label %contb2
+  br i1 false, label %condb2, label %contb2
 
 condb2:                                           ; preds = %contb1
   call void @__quantum__qis__x__body(%Qubit* null)
@@ -37,7 +38,6 @@ contb2:                                           ; preds = %condb2, %contb1
   br i1 false, label %condb3, label %contb3
 
 condb3:                                           ; preds = %contb2
-  call void @__quantum__qis__x__body(%Qubit* null)
   br label %contb3
 
 contb3:                                           ; preds = %condb3, %contb2

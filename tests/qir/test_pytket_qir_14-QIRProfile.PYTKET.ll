@@ -18,9 +18,9 @@ entry:
   %1 = call i1* @create_creg(i64 10)
   %2 = call i1* @create_creg(i64 10)
   %3 = call i1* @create_creg(i64 9)
-  %4 = call i1* @create_creg(i64 64)
-  %5 = call i1* @create_creg(i64 64)
-  %6 = call i1* @create_creg(i64 64)
+  %4 = call i1* @create_creg(i64 8)
+  %5 = call i1* @create_creg(i64 8)
+  %6 = call i1* @create_creg(i64 8)
   call void @set_creg_bit(i1* %0, i64 0, i1 true)
   call void @set_creg_bit(i1* %1, i64 0, i1 true)
   call void @set_creg_bit(i1* %1, i64 1, i1 true)
@@ -79,82 +79,82 @@ entry:
   %24 = lshr i64 %23, 1
   call void @set_creg_to_int(i1* %1, i64 %24)
   %25 = call i64 @get_int_from_creg(i1* %0)
-  %26 = icmp eq i64 1, %25
-  call void @set_creg_bit(i1* %3, i64 4, i1 %26)
-  %27 = call i64 @get_int_from_creg(i1* %0)
-  %28 = icmp sgt i64 2, %27
-  %29 = call i64 @get_int_from_creg(i1* %0)
-  %30 = icmp sgt i64 %29, -1
-  %31 = and i1 %28, %30
-  call void @set_creg_bit(i1* %3, i64 5, i1 %31)
-  %32 = call i64 @get_int_from_creg(i1* %0)
-  %33 = icmp eq i64 0, %32
-  call void @set_creg_bit(i1* %3, i64 6, i1 %33)
-  %34 = call i64 @get_int_from_creg(i1* %0)
-  %35 = icmp sgt i64 1, %34
-  %36 = call i64 @get_int_from_creg(i1* %0)
-  %37 = icmp sgt i64 %36, -1
-  %38 = and i1 %35, %37
-  call void @set_creg_bit(i1* %3, i64 7, i1 %38)
-  %39 = call i64 @get_int_from_creg(i1* %0)
-  %40 = icmp sgt i64 0, %39
-  %41 = call i64 @get_int_from_creg(i1* %0)
-  %42 = icmp sgt i64 %41, 1
-  %43 = and i1 %40, %42
-  call void @set_creg_bit(i1* %3, i64 8, i1 %43)
-  %44 = call i1 @get_creg_bit(i1* %0, i64 0)
-  br i1 %44, label %condb0, label %contb0
+  %26 = call i64 @get_int_from_creg(i1* %1)
+  %27 = xor i64 %25, %26
+  call void @set_creg_to_int(i1* %4, i64 %27)
+  %28 = call i1 @get_creg_bit(i1* %0, i64 0)
+  %29 = call i1 @get_creg_bit(i1* %1, i64 0)
+  %30 = xor i1 %28, %29
+  call void @set_creg_bit(i1* %3, i64 1, i1 %30)
+  %31 = call i64 @get_int_from_creg(i1* %4)
+  %32 = icmp eq i64 1, %31
+  call void @set_creg_bit(i1* %3, i64 0, i1 %32)
+  %33 = call i64 @get_int_from_creg(i1* %0)
+  %34 = call i64 @get_int_from_creg(i1* %1)
+  %35 = and i64 %33, %34
+  call void @set_creg_to_int(i1* %5, i64 %35)
+  %36 = call i1 @get_creg_bit(i1* %3, i64 0)
+  br i1 %36, label %condb0, label %contb0
 
 condb0:                                           ; preds = %entry
+  call void @__quantum__qis__x__body(%Qubit* null)
   br label %contb0
 
 contb0:                                           ; preds = %condb0, %entry
-  %45 = call i1 @get_creg_bit(i1* %0, i64 0)
-  %46 = call i1 @get_creg_bit(i1* %1, i64 0)
-  %47 = xor i1 %45, %46
-  call void @set_creg_bit(i1* %3, i64 1, i1 %47)
-  %48 = call i64 @get_int_from_creg(i1* %0)
-  %49 = call i64 @get_int_from_creg(i1* %1)
-  %50 = xor i64 %48, %49
-  call void @set_creg_to_int(i1* %4, i64 %50)
-  %51 = call i64 @get_int_from_creg(i1* %0)
-  %52 = call i64 @get_int_from_creg(i1* %1)
-  %53 = and i64 %51, %52
-  call void @set_creg_to_int(i1* %5, i64 %53)
-  %54 = call i64 @get_int_from_creg(i1* %0)
-  %55 = call i64 @get_int_from_creg(i1* %1)
-  %56 = or i64 %54, %55
-  call void @set_creg_to_int(i1* %6, i64 %56)
-  %57 = call i64 @get_int_from_creg(i1* %4)
-  %58 = icmp eq i64 1, %57
-  call void @set_creg_bit(i1* %3, i64 0, i1 %58)
-  %59 = call i64 @get_int_from_creg(i1* %5)
-  %60 = icmp eq i64 1, %59
-  call void @set_creg_bit(i1* %3, i64 2, i1 %60)
-  %61 = call i64 @get_int_from_creg(i1* %6)
-  %62 = icmp eq i64 1, %61
-  call void @set_creg_bit(i1* %3, i64 3, i1 %62)
-  %63 = call i1 @get_creg_bit(i1* %3, i64 0)
-  br i1 %63, label %condb1, label %contb1
+  %37 = call i64 @get_int_from_creg(i1* %0)
+  %38 = call i64 @get_int_from_creg(i1* %1)
+  %39 = or i64 %37, %38
+  call void @set_creg_to_int(i1* %6, i64 %39)
+  %40 = call i1 @get_creg_bit(i1* %3, i64 1)
+  br i1 %40, label %condb1, label %contb1
 
 condb1:                                           ; preds = %contb0
   call void @__quantum__qis__x__body(%Qubit* null)
   br label %contb1
 
 contb1:                                           ; preds = %condb1, %contb0
-  %64 = call i1 @get_creg_bit(i1* %3, i64 1)
-  br i1 %64, label %condb2, label %contb2
+  %41 = call i64 @get_int_from_creg(i1* %5)
+  %42 = icmp eq i64 1, %41
+  call void @set_creg_bit(i1* %3, i64 2, i1 %42)
+  %43 = call i1 @get_creg_bit(i1* %3, i64 2)
+  br i1 %43, label %condb2, label %contb2
 
 condb2:                                           ; preds = %contb1
   call void @__quantum__qis__x__body(%Qubit* null)
   br label %contb2
 
 contb2:                                           ; preds = %condb2, %contb1
-  %65 = call i1 @get_creg_bit(i1* %3, i64 2)
+  %44 = call i64 @get_int_from_creg(i1* %6)
+  %45 = icmp eq i64 1, %44
+  call void @set_creg_bit(i1* %3, i64 3, i1 %45)
+  %46 = call i64 @get_int_from_creg(i1* %0)
+  %47 = icmp eq i64 1, %46
+  call void @set_creg_bit(i1* %3, i64 4, i1 %47)
+  %48 = call i64 @get_int_from_creg(i1* %0)
+  %49 = icmp sgt i64 2, %48
+  %50 = call i64 @get_int_from_creg(i1* %0)
+  %51 = icmp sgt i64 %50, -1
+  %52 = and i1 %49, %51
+  call void @set_creg_bit(i1* %3, i64 5, i1 %52)
+  %53 = call i64 @get_int_from_creg(i1* %0)
+  %54 = icmp eq i64 0, %53
+  call void @set_creg_bit(i1* %3, i64 6, i1 %54)
+  %55 = call i64 @get_int_from_creg(i1* %0)
+  %56 = icmp sgt i64 1, %55
+  %57 = call i64 @get_int_from_creg(i1* %0)
+  %58 = icmp sgt i64 %57, -1
+  %59 = and i1 %56, %58
+  call void @set_creg_bit(i1* %3, i64 7, i1 %59)
+  %60 = call i64 @get_int_from_creg(i1* %0)
+  %61 = icmp sgt i64 0, %60
+  %62 = call i64 @get_int_from_creg(i1* %0)
+  %63 = icmp sgt i64 %62, 1
+  %64 = and i1 %61, %63
+  call void @set_creg_bit(i1* %3, i64 8, i1 %64)
+  %65 = call i1 @get_creg_bit(i1* %0, i64 0)
   br i1 %65, label %condb3, label %contb3
 
 condb3:                                           ; preds = %contb2
-  call void @__quantum__qis__x__body(%Qubit* null)
   br label %contb3
 
 contb3:                                           ; preds = %condb3, %contb2
