@@ -56,8 +56,6 @@ class AzureBaseProfileQirGenerator(BaseProfileQirGenerator):
         assert len(bits) == 1
         assert len(qubits) == 1
 
-        pass
-
     def record_output(self) -> None:
 
         # this will measure all qubits at the end of the circuit
