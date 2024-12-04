@@ -112,7 +112,7 @@ def pytket_to_qir(
             qir_int_type=int_type,
         )
     elif profile == QIRProfile.AZUREBASE:
-        qir_generator: AbstractQirGenerator = AzureBaseProfileQirGenerator(
+        qir_generator = AzureBaseProfileQirGenerator(
             circuit=circ,
             module=m,
             wasm_int_type=int_type,
