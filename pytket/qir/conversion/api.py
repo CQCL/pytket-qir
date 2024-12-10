@@ -26,6 +26,8 @@ from pytket.passes import (
     scratch_reg_resize_pass,
 )
 
+from .azurebaseprofileqirgenerator import AzureBaseProfileQirGenerator
+from .azureprofileqirgenerator import AzureAdaptiveProfileQirGenerator
 from .baseprofileqirgenerator import BaseProfileQirGenerator
 from .module import tketqirModule
 from .profileqirgenerator import AdaptiveProfileQirGenerator
@@ -48,9 +50,11 @@ class QIRProfile(Enum):
     """Profile for the QIR generation"""
 
     BASE = 0
-    ADAPTIVE = 1
-    ADAPTIVE_CREGSIZE = 2
-    PYTKET = 3
+    AZUREBASE = 1
+    ADAPTIVE = 2
+    AZUREADAPTIVE = 3
+    ADAPTIVE_CREGSIZE = 4
+    PYTKET = 5
 
 
 def pytket_to_qir(
@@ -107,6 +111,13 @@ def pytket_to_qir(
             wasm_int_type=int_type,
             qir_int_type=int_type,
         )
+    elif profile == QIRProfile.AZUREBASE:
+        qir_generator = AzureBaseProfileQirGenerator(
+            circuit=circ,
+            module=m,
+            wasm_int_type=int_type,
+            qir_int_type=int_type,
+        )
     elif profile == QIRProfile.PYTKET:
         qir_generator = PytketQirGenerator(
             circuit=circ,
@@ -116,6 +127,14 @@ def pytket_to_qir(
         )
     elif profile == QIRProfile.ADAPTIVE or profile == QIRProfile.ADAPTIVE_CREGSIZE:
         qir_generator = AdaptiveProfileQirGenerator(
+            circuit=circ,
+            module=m,
+            wasm_int_type=int_type,
+            qir_int_type=int_type,
+            trunc=trunc,
+        )
+    elif profile == QIRProfile.AZUREADAPTIVE:
+        qir_generator = AzureAdaptiveProfileQirGenerator(
             circuit=circ,
             module=m,
             wasm_int_type=int_type,
