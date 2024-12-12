@@ -101,18 +101,6 @@ class AzureAdaptiveProfileQirGenerator(AdaptiveProfileQirGenerator):
             ],
         )
 
-        """for creg in self.circuit.c_registers:
-            reg_name = creg[0].reg_name
-            self.module.builder.call(
-                self.record_output_i64,
-                [
-                    self._get_i64_ssa_reg(reg_name),
-                    pyqir.Constant.null(
-                        pyqir.PointerType(pyqir.IntType(self.module.module.context, 8))
-                    ),
-                ],
-            )"""
-
         for creg in self.circuit.c_registers:
             reg_name = creg[0].reg_name
             self.module.builder.call(
