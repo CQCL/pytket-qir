@@ -159,8 +159,10 @@ def pytket_to_qir(
 
         result = initial_result
 
+        bitcode = pyqir.Module.from_ir(pyqir.Context(), result).bitcode
+
         if qir_format == QIRFormat.BINARY:
-            return pyqir.Module.from_ir(pyqir.Context(), result).bitcode
+            return bitcode
         elif qir_format == QIRFormat.STRING:
             return result
         else:
@@ -176,8 +178,10 @@ def pytket_to_qir(
 
         result = initial_result
 
+        bitcode = pyqir.Module.from_ir(pyqir.Context(), result).bitcode
+
         if qir_format == QIRFormat.BINARY:
-            return pyqir.Module.from_ir(pyqir.Context(), result).bitcode
+            return bitcode
         elif qir_format == QIRFormat.STRING:
             return result
         else:
