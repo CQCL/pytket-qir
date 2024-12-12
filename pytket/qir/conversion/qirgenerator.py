@@ -203,6 +203,7 @@ class AbstractQirGenerator:
 
         self.has_wasm = False
         self.wasm_sar_dict: dict[str, str] = {}
+        self.azure_sar_dict: dict[str, str] = {}
         self.wasm_sar_dict["!llvm.module.flags"] = (
             'attributes #1 = { "wasm" }\n\n!llvm.module.flags'
         )
@@ -481,6 +482,9 @@ class AbstractQirGenerator:
 
     def get_wasm_sar(self) -> dict[str, str]:
         return self.wasm_sar_dict
+
+    def get_azure_sar(self) -> dict[str, str]:
+        return self.azure_sar_dict
 
     def conv_RangePredicateOp(self, op: RangePredicateOp, args: list[Bit]) -> None:
         # special case handling for REG_EQ

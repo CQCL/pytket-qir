@@ -26,6 +26,8 @@ from pytket.passes import (
     scratch_reg_resize_pass,
 )
 
+from .azurebaseprofileqirgenerator import AzureBaseProfileQirGenerator
+from .azureprofileqirgenerator import AzureAdaptiveProfileQirGenerator
 from .baseprofileqirgenerator import BaseProfileQirGenerator
 from .module import tketqirModule
 from .profileqirgenerator import AdaptiveProfileQirGenerator
@@ -48,9 +50,11 @@ class QIRProfile(Enum):
     """Profile for the QIR generation"""
 
     BASE = 0
-    ADAPTIVE = 1
-    ADAPTIVE_CREGSIZE = 2
-    PYTKET = 3
+    AZUREBASE = 1
+    ADAPTIVE = 2
+    AZUREADAPTIVE = 3
+    ADAPTIVE_CREGSIZE = 4
+    PYTKET = 5
 
 
 def pytket_to_qir(
@@ -107,6 +111,13 @@ def pytket_to_qir(
             wasm_int_type=int_type,
             qir_int_type=int_type,
         )
+    elif profile == QIRProfile.AZUREBASE:
+        qir_generator = AzureBaseProfileQirGenerator(
+            circuit=circ,
+            module=m,
+            wasm_int_type=int_type,
+            qir_int_type=int_type,
+        )
     elif profile == QIRProfile.PYTKET:
         qir_generator = PytketQirGenerator(
             circuit=circ,
@@ -122,12 +133,42 @@ def pytket_to_qir(
             qir_int_type=int_type,
             trunc=trunc,
         )
+    elif profile == QIRProfile.AZUREADAPTIVE:
+        qir_generator = AzureAdaptiveProfileQirGenerator(
+            circuit=circ,
+            module=m,
+            wasm_int_type=int_type,
+            qir_int_type=int_type,
+            trunc=trunc,
+        )
     else:
         raise NotImplementedError("unexpected profile")
 
     populated_module = qir_generator.circuit_to_module(qir_generator.circuit, True)
 
-    if qir_generator.has_wasm:
+    if profile == QIRProfile.AZUREADAPTIVE:
+
+        assert not qir_generator.has_wasm
+
+        sar_azure_dict: dict[str, str] = qir_generator.get_azure_sar()
+
+        initial_result = str(populated_module.module.ir())
+
+        for az in sar_azure_dict:
+            initial_result = initial_result.replace(az, sar_azure_dict[az])
+
+        result = initial_result
+
+        bitcode = pyqir.Module.from_ir(pyqir.Context(), result).bitcode
+
+        if qir_format == QIRFormat.BINARY:
+            return bitcode
+        elif qir_format == QIRFormat.STRING:
+            return result
+        else:
+            assert not "unsupported return type"  # type: ignore
+
+    elif qir_generator.has_wasm:
         wasm_sar_dict: dict[str, str] = qir_generator.get_wasm_sar()
 
         initial_result = str(populated_module.module.ir())
