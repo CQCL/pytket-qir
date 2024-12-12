@@ -3,11 +3,12 @@
 Changelog
 ~~~~~~~~~
 
-0.18.0rc0 (November 2024)
+0.19.0 (December 2024)
 ----------------------
 
 * Updated pytket version requirement to 1.35.
 * Updated pyqir version requirement to 0.10.6.
+* Add option to generate QIR for azure target
 
 0.17.0 (October 2024)
 ---------------------
