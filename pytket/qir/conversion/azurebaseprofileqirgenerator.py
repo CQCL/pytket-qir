@@ -59,7 +59,7 @@ class AzureBaseProfileQirGenerator(BaseProfileQirGenerator):
     def record_output(self) -> None:
 
         # this will measure all qubits at the end of the circuit
-        # the result of the measurement will be added to an array and recorded togeather
+        # the result of the measurement will be added to an array and recorded together
 
         for i in range(len(self.circuit.qubits)):
             self.module.qis.mz(
