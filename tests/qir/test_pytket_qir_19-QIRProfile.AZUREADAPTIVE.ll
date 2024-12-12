@@ -1,15 +1,16 @@
-; ModuleID = 'test_pytket_qir_conditional_5'
-source_filename = "test_pytket_qir_conditional_5"
+; ModuleID = 'test_pytket_qir_19'
+source_filename = "test_pytket_qir_19"
 
 %Qubit = type opaque
 %Result = type opaque
 
-@0 = internal constant [2 x i8] c"c\00"
+@0 = internal constant [3 x i8] c"c1\00"
+@1 = internal constant [3 x i8] c"c2\00"
 
 define void @main() #0 {
 entry:
   call void @__quantum__qis__h__body(%Qubit* null)
-  call void @__quantum__qis__h__body(%Qubit* inttoptr (i64 1 to %Qubit*))
+  call void @__quantum__qis__cnot__body(%Qubit* null, %Qubit* inttoptr (i64 1 to %Qubit*))
   call void @__quantum__qis__mz__body(%Qubit* null, %Result* null)
   %0 = call i1 @__quantum__qis__read_result__body(%Result* null)
   %1 = zext i1 %0 to i64
@@ -22,22 +23,15 @@ entry:
   call void @__quantum__qis__mz__body(%Qubit* inttoptr (i64 1 to %Qubit*), %Result* inttoptr (i64 1 to %Result*))
   %8 = call i1 @__quantum__qis__read_result__body(%Result* inttoptr (i64 1 to %Result*))
   %9 = zext i1 %8 to i64
-  %10 = mul i64 %9, 2
-  %11 = or i64 %10, %7
+  %10 = mul i64 %9, 1
+  %11 = or i64 %10, 0
   %12 = sub i64 1, %9
-  %13 = mul i64 %12, 2
+  %13 = mul i64 %12, 1
   %14 = xor i64 9223372036854775807, %13
   %15 = and i64 %14, %11
-  %16 = icmp eq i64 3, %15
-  br i1 %16, label %condb0, label %contb0
-
-condb0:                                           ; preds = %entry
-  call void @__quantum__qis__h__body(%Qubit* null)
-  br label %contb0
-
-contb0:                                           ; preds = %condb0, %entry
-  call void @__quantum__rt__array_record_output(i64 1, i8* null)
-  call void @__quantum__rt__int_record_output(i64 %15, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @0, i32 0, i32 0))
+  call void @__quantum__rt__array_record_output(i64 2, i8* null)
+  call void @__quantum__rt__int_record_output(i64 %7, i8* getelementptr inbounds ([3 x i8], [3 x i8]* @0, i32 0, i32 0))
+  call void @__quantum__rt__int_record_output(i64 %15, i8* getelementptr inbounds ([3 x i8], [3 x i8]* @1, i32 0, i32 0))
   ret void
 }
 
@@ -48,6 +42,8 @@ declare void @__quantum__rt__int_record_output(i64, i8*)
 declare void @__quantum__rt__array_record_output(i64, i8*)
 
 declare void @__quantum__qis__h__body(%Qubit*)
+
+declare void @__quantum__qis__cnot__body(%Qubit*, %Qubit*)
 
 declare void @__quantum__qis__mz__body(%Qubit*, %Result* writeonly) #1
 

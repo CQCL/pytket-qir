@@ -23,7 +23,7 @@ condb1:                                           ; preds = %contb0
 
 contb1:                                           ; preds = %condb1, %contb0
   call void @__quantum__rt__array_record_output(i64 1, i8* null)
-  call void @__quantum__rt__int_record_output(i64 1, i8* null)
+  call void @__quantum__rt__int_record_output(i64 1, i8* getelementptr inbounds ([15 x i8], [15 x i8]* @0, i32 0, i32 0))
   ret void
 }
 

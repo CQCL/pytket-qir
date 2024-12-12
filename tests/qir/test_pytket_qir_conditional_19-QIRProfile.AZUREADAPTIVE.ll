@@ -29,7 +29,7 @@ entry:
   %16 = xor i64 9223372036854775807, %15
   %17 = and i64 %16, %13
   call void @__quantum__rt__array_record_output(i64 1, i8* null)
-  call void @__quantum__rt__int_record_output(i64 %17, i8* null)
+  call void @__quantum__rt__int_record_output(i64 %17, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @0, i32 0, i32 0))
   ret void
 }
 

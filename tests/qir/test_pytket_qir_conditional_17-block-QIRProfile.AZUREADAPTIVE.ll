@@ -628,9 +628,9 @@ condb32:                                          ; preds = %contb31
 contb32:                                          ; preds = %condb32, %contb31
   %387 = phi i64 [ %386, %condb32 ], [ %383, %contb31 ]
   call void @__quantum__rt__array_record_output(i64 3, i8* null)
-  call void @__quantum__rt__int_record_output(i64 %7, i8* null)
-  call void @__quantum__rt__int_record_output(i64 %174, i8* null)
-  call void @__quantum__rt__int_record_output(i64 %387, i8* null)
+  call void @__quantum__rt__int_record_output(i64 %7, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @0, i32 0, i32 0))
+  call void @__quantum__rt__int_record_output(i64 %174, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @1, i32 0, i32 0))
+  call void @__quantum__rt__int_record_output(i64 %387, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @2, i32 0, i32 0))
   ret void
 }
 

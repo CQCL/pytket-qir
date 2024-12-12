@@ -473,9 +473,9 @@ condb65:                                          ; preds = %contb64
 
 contb65:                                          ; preds = %condb65, %contb64
   call void @__quantum__rt__array_record_output(i64 3, i8* null)
-  call void @__quantum__rt__int_record_output(i64 0, i8* null)
-  call void @__quantum__rt__int_record_output(i64 0, i8* null)
-  call void @__quantum__rt__int_record_output(i64 0, i8* null)
+  call void @__quantum__rt__int_record_output(i64 0, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @0, i32 0, i32 0))
+  call void @__quantum__rt__int_record_output(i64 0, i8* getelementptr inbounds ([17 x i8], [17 x i8]* @1, i32 0, i32 0))
+  call void @__quantum__rt__int_record_output(i64 0, i8* getelementptr inbounds ([17 x i8], [17 x i8]* @2, i32 0, i32 0))
   ret void
 }
 

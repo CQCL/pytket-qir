@@ -1,5 +1,5 @@
-; ModuleID = 'test_pytket_qir_conditional_15-block'
-source_filename = "test_pytket_qir_conditional_15-block"
+; ModuleID = 'test_pytket_qir_16'
+source_filename = "test_pytket_qir_16"
 
 %Qubit = type opaque
 %Result = type opaque
