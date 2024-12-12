@@ -30,6 +30,7 @@ def test_pytket_qir_qasm() -> None:
     "profile",
     [
         QIRProfile.ADAPTIVE,
+        QIRProfile.AZUREADAPTIVE,
         QIRProfile.PYTKET,
     ],
 )
@@ -48,6 +49,7 @@ def test_pytket_qir_qasm_classical_0(profile: QIRProfile) -> None:
     "profile",
     [
         QIRProfile.ADAPTIVE,
+        QIRProfile.AZUREADAPTIVE,
         QIRProfile.PYTKET,
     ],
 )

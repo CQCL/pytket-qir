@@ -34,6 +34,7 @@ from pytket.qir.conversion.api import QIRFormat, QIRProfile, pytket_to_qir
     "profile",
     [
         QIRProfile.ADAPTIVE,
+        QIRProfile.AZUREADAPTIVE,
         QIRProfile.PYTKET,
         QIRProfile.ADAPTIVE_CREGSIZE,
     ],
@@ -64,6 +65,7 @@ def test_pytket_qir_conditional(profile: QIRProfile) -> None:
     "profile",
     [
         QIRProfile.ADAPTIVE,
+        QIRProfile.AZUREADAPTIVE,
         QIRProfile.PYTKET,
         QIRProfile.ADAPTIVE_CREGSIZE,
     ],
@@ -96,6 +98,7 @@ def test_pytket_qir_conditional_2(profile: QIRProfile) -> None:
     "profile",
     [
         QIRProfile.ADAPTIVE,
+        QIRProfile.AZUREADAPTIVE,
         QIRProfile.PYTKET,
         QIRProfile.ADAPTIVE_CREGSIZE,
     ],
@@ -126,6 +129,7 @@ def test_pytket_qir_conditional_3(profile: QIRProfile) -> None:
     "profile",
     [
         QIRProfile.ADAPTIVE,
+        QIRProfile.AZUREADAPTIVE,
         QIRProfile.PYTKET,
         QIRProfile.ADAPTIVE_CREGSIZE,
     ],
@@ -144,6 +148,7 @@ def test_pytket_qir_conditional_4(profile: QIRProfile) -> None:
     "profile",
     [
         QIRProfile.ADAPTIVE,
+        QIRProfile.AZUREADAPTIVE,
         QIRProfile.PYTKET,
         QIRProfile.ADAPTIVE_CREGSIZE,
     ],
@@ -162,6 +167,7 @@ def test_pytket_qir_conditional_5(profile: QIRProfile) -> None:
     "profile",
     [
         QIRProfile.ADAPTIVE,
+        QIRProfile.AZUREADAPTIVE,
         QIRProfile.PYTKET,
         QIRProfile.ADAPTIVE_CREGSIZE,
     ],
@@ -182,6 +188,7 @@ def test_pytket_qir_conditional_6(profile: QIRProfile) -> None:
     "profile",
     [
         QIRProfile.ADAPTIVE,
+        QIRProfile.AZUREADAPTIVE,
         QIRProfile.PYTKET,
         QIRProfile.ADAPTIVE_CREGSIZE,
     ],
@@ -206,6 +213,7 @@ def test_pytket_qir_conditional_7(profile: QIRProfile) -> None:
     [
         QIRProfile.BASE,
         QIRProfile.ADAPTIVE,
+        QIRProfile.AZUREADAPTIVE,
         QIRProfile.PYTKET,
         QIRProfile.ADAPTIVE_CREGSIZE,
     ],
@@ -229,6 +237,7 @@ def test_pytket_qir_conditional_8(profile: QIRProfile) -> None:
     [
         QIRProfile.BASE,
         QIRProfile.ADAPTIVE,
+        QIRProfile.AZUREADAPTIVE,
         QIRProfile.PYTKET,
         QIRProfile.ADAPTIVE_CREGSIZE,
     ],
@@ -251,6 +260,7 @@ def test_pytket_qir_conditional_9(profile: QIRProfile) -> None:
     "profile",
     [
         QIRProfile.ADAPTIVE,
+        QIRProfile.AZUREADAPTIVE,
         QIRProfile.PYTKET,
         QIRProfile.ADAPTIVE_CREGSIZE,
     ],
@@ -278,6 +288,7 @@ def test_pytket_qir_conditional_10(profile: QIRProfile) -> None:
     "profile",
     [
         QIRProfile.ADAPTIVE,
+        QIRProfile.AZUREADAPTIVE,
         QIRProfile.PYTKET,
         QIRProfile.ADAPTIVE_CREGSIZE,
     ],
@@ -307,6 +318,7 @@ def test_pytket_qir_conditional_11(profile: QIRProfile) -> None:
     "profile",
     [
         QIRProfile.ADAPTIVE,
+        QIRProfile.AZUREADAPTIVE,
         QIRProfile.PYTKET,
         QIRProfile.ADAPTIVE_CREGSIZE,
     ],
@@ -341,6 +353,7 @@ def test_pytket_qir_conditional_12(profile: QIRProfile) -> None:
     "profile",
     [
         QIRProfile.ADAPTIVE,
+        QIRProfile.AZUREADAPTIVE,
         QIRProfile.PYTKET,
         QIRProfile.ADAPTIVE_CREGSIZE,
     ],
@@ -362,6 +375,7 @@ def test_pytket_qir_conditional_13(profile: QIRProfile) -> None:
     "profile",
     [
         QIRProfile.ADAPTIVE,
+        QIRProfile.AZUREADAPTIVE,
         QIRProfile.PYTKET,
         QIRProfile.ADAPTIVE_CREGSIZE,
     ],
@@ -387,6 +401,7 @@ def test_pytket_qir_conditional_14(profile: QIRProfile) -> None:
     "profile",
     [
         QIRProfile.ADAPTIVE,
+        QIRProfile.AZUREADAPTIVE,
         QIRProfile.PYTKET,
         QIRProfile.ADAPTIVE_CREGSIZE,
     ],
@@ -411,6 +426,7 @@ def test_pytket_qir_conditional_15(profile: QIRProfile) -> None:
     "profile",
     [
         QIRProfile.ADAPTIVE,
+        QIRProfile.AZUREADAPTIVE,
         QIRProfile.PYTKET,
         QIRProfile.ADAPTIVE_CREGSIZE,
     ],
@@ -437,6 +453,7 @@ def test_pytket_qir_conditional_16(profile: QIRProfile) -> None:
     "profile",
     [
         QIRProfile.ADAPTIVE,
+        QIRProfile.AZUREADAPTIVE,
         QIRProfile.PYTKET,
         QIRProfile.ADAPTIVE_CREGSIZE,
     ],
@@ -468,6 +485,7 @@ def test_pytket_qir_conditional_17(profile: QIRProfile) -> None:
     "profile",
     [
         QIRProfile.ADAPTIVE,
+        QIRProfile.AZUREADAPTIVE,
         QIRProfile.PYTKET,
         QIRProfile.ADAPTIVE_CREGSIZE,
     ],
@@ -482,6 +500,7 @@ def test_pytket_qir_conditional_18(profile: QIRProfile) -> None:
     "profile",
     [
         QIRProfile.ADAPTIVE,
+        QIRProfile.AZUREADAPTIVE,
         QIRProfile.PYTKET,
         QIRProfile.ADAPTIVE_CREGSIZE,
     ],
@@ -500,6 +519,7 @@ def test_pytket_qir_conditional_19(profile: QIRProfile) -> None:
     "profile",
     [
         QIRProfile.ADAPTIVE,
+        QIRProfile.AZUREADAPTIVE,
         QIRProfile.PYTKET,
         QIRProfile.ADAPTIVE_CREGSIZE,
     ],
