@@ -26,6 +26,7 @@ from pytket.circuit import (
     if_not_bit,
     reg_eq,
 )
+from pytket.circuit.clexpr import wired_clexpr_from_logic_exp
 from pytket.circuit.logic_exp import BitNot, BitWiseOp, create_bit_logic_exp
 from pytket.qir.conversion.api import QIRFormat, QIRProfile, pytket_to_qir
 
@@ -48,9 +49,9 @@ def test_pytket_qir_conditional(profile: QIRProfile) -> None:
     c = circ.add_c_register("c", 5)
     d = circ.add_c_register("d", 5)
     circ.H(0)
-    circ.add_classicalexpbox_register(a | b, c)  # type: ignore
-    circ.add_classicalexpbox_register(c | b, d)  # type: ignore
-    circ.add_classicalexpbox_register(c | b, d, condition=a[4])  # type: ignore
+    circ.add_clexpr(*wired_clexpr_from_logic_exp(a | b, c))  # type: ignore
+    circ.add_clexpr(*wired_clexpr_from_logic_exp(c | b, d))  # type: ignore
+    circ.add_clexpr(*wired_clexpr_from_logic_exp(c | b, d), condition=a[4])  # type: ignore
     circ.H(0)
     circ.Measure(Qubit(0), d[4])
     circ.H(1)
@@ -79,10 +80,10 @@ def test_pytket_qir_conditional_2(profile: QIRProfile) -> None:
     c = circ.add_c_register("c", 5)
     d = circ.add_c_register("d", 5)
     circ.H(0)
-    circ.add_classicalexpbox_register(a | b, c)  # type: ignore
-    circ.add_classicalexpbox_register(c | b, d)  # type: ignore
-    circ.add_classicalexpbox_register(
-        c | b, d, condition=if_not_bit(a[4])  # type: ignore
+    circ.add_clexpr(*wired_clexpr_from_logic_exp(a | b, c))  # type: ignore
+    circ.add_clexpr(*wired_clexpr_from_logic_exp(c | b, d))  # type: ignore
+    circ.add_clexpr(
+        *wired_clexpr_from_logic_exp(c | b, d), condition=if_not_bit(a[4])  # type: ignore
     )
     circ.H(0)
     circ.Measure(Qubit(0), d[4])
@@ -119,8 +120,8 @@ def test_pytket_qir_conditional_3(profile: QIRProfile) -> None:
     big_exp = bits[4] | bits[5] ^ bits[6] | bits[7] & bits[8]
     circ.H(0, condition=big_exp)
 
-    circ.add_classicalexpbox_register(a + b - d, c)  # type: ignore
-    circ.add_classicalexpbox_register(a * b * d * c, e)  # type: ignore
+    circ.add_clexpr(*wired_clexpr_from_logic_exp(a + b - d, c))  # type: ignore
+    circ.add_clexpr(*wired_clexpr_from_logic_exp(a * b * d * c, e))  # type: ignore
 
     run_qir_gen_and_check(circ, "test_pytket_qir_conditional_3", profile=profile)
 
@@ -274,7 +275,7 @@ def test_pytket_qir_conditional_10(profile: QIRProfile) -> None:
     box_c = box_circ.add_c_register("c", 5)
 
     box_circ.H(0)
-    box_circ.add_classicalexpbox_register(box_c | box_c, box_c)  # type: ignore
+    box_circ.add_clexpr(*wired_clexpr_from_logic_exp(box_c | box_c, box_c))  # type: ignore
 
     cbox = CircBox(box_circ)
     d = Circuit(4, 5)
@@ -302,8 +303,8 @@ def test_pytket_qir_conditional_11(profile: QIRProfile) -> None:
     box_c = box_circ.add_c_register("c", 5)
 
     box_circ.H(0)
-    box_circ.add_classicalexpbox_register(box_c | box_c, box_c)  # type: ignore
-    box_circ.add_classicalexpbox_register(box_c | box_c, box_c)  # type: ignore
+    box_circ.add_clexpr(*wired_clexpr_from_logic_exp(box_c | box_c, box_c))  # type: ignore
+    box_circ.add_clexpr(*wired_clexpr_from_logic_exp(box_c | box_c, box_c))  # type: ignore
     box_circ.add_c_setbits([False, True] + [False] * 3, list(box_c))
 
     cbox = CircBox(box_circ)
@@ -385,8 +386,8 @@ def test_pytket_qir_conditional_14(profile: QIRProfile) -> None:
     box_circ.X(0)
     box_c = box_circ.add_c_register("c", 5)
 
-    box_circ.add_classicalexpbox_register(box_c | box_c, box_c)  # type: ignore
-    box_circ.add_classicalexpbox_register(box_c | box_c, box_c)  # type: ignore
+    box_circ.add_clexpr(*wired_clexpr_from_logic_exp(box_c | box_c, box_c))  # type: ignore
+    box_circ.add_clexpr(*wired_clexpr_from_logic_exp(box_c | box_c, box_c))  # type: ignore
     box_circ.add_c_setbits([False, True] + [False] * 3, list(box_c))
 
     cbox = CircBox(box_circ)
@@ -417,7 +418,7 @@ def test_pytket_qir_conditional_15(profile: QIRProfile) -> None:
 
     c.add_c_setbits([True, True] + [False] * 9, list(b))
 
-    c.add_classicalexpbox_register(a + b, d)  # type: ignore
+    c.add_clexpr(*wired_clexpr_from_logic_exp(a + b, d))  # type: ignore
 
     run_qir_gen_and_check(c, "test_pytket_qir_conditional_15-block", profile=profile)
 
@@ -444,7 +445,7 @@ def test_pytket_qir_conditional_16(profile: QIRProfile) -> None:
 
     c.add_c_setbits([True, True] + [False] * 9, list(b), condition=a[0])
 
-    c.add_classicalexpbox_register(a + b, d, condition=a[0])  # type: ignore
+    c.add_clexpr(*wired_clexpr_from_logic_exp(a + b, d), condition=a[0])  # type: ignore
 
     run_qir_gen_and_check(c, "test_pytket_qir_conditional_16-block", profile=profile)
 
@@ -476,7 +477,7 @@ def test_pytket_qir_conditional_17(profile: QIRProfile) -> None:
 
     c.add_c_setbits([True, True] + [False] * 8, list(b), condition=a[0])
 
-    c.add_classicalexpbox_register(a + b, d, condition=a[0])  # type: ignore
+    c.add_clexpr(*wired_clexpr_from_logic_exp(a + b, d), condition=a[0])  # type: ignore
 
     run_qir_gen_and_check(c, "test_pytket_qir_conditional_17-block", profile=profile)
 
@@ -510,7 +511,7 @@ def test_pytket_qir_conditional_19(profile: QIRProfile) -> None:
 
     c.H(0)
     c.Measure(Qubit(0), Bit(0))
-    c.add_classicalexpbox_bit(BitNot(c.bits[0]), [c.bits[1]])
+    c.add_clexpr(*wired_clexpr_from_logic_exp(BitNot(c.bits[0]), [c.bits[1]]))
 
     run_qir_gen_and_check(c, "test_pytket_qir_conditional_19", profile=profile)
 

@@ -16,7 +16,7 @@ import abc
 import math
 from collections.abc import Sequence
 from functools import partial
-from typing import Optional, Union, cast
+from typing import Optional, Union
 
 import pyqir
 from pyqir import IntPredicate, Value
@@ -28,7 +28,6 @@ from pytket.circuit import (
     BitRegister,
     CircBox,
     Circuit,
-    ClassicalExpBox,
     ClBitVar,
     ClExpr,
     ClExprOp,
@@ -699,103 +698,6 @@ class AbstractQirGenerator:
     def conv_measure(self, bits: list[Bit], qubits: list[Qubit]) -> None:
         pass
 
-    def conv_classicalexpbox(self, op: ClassicalExpBox, args: list) -> None:
-        returntypebool = False
-        result_index = (
-            0  # defines the default value for ops that returns bool, see below
-        )
-
-        outputs = args[-1].reg_name
-
-        if type(op.get_exp()) in _TK_CLOPS_TO_PYQIR_REG:
-            # classical ops acting on registers returning register
-            ssa_left = cast(  # type: ignore
-                Value,
-                self._get_ssa_from_cl_reg_op(op.get_exp().args[0]),  # type: ignore
-            )
-            ssa_right = cast(  # type: ignore
-                Value,
-                self._get_ssa_from_cl_reg_op(op.get_exp().args[1]),  # type: ignore
-            )
-
-            # add function to module
-            output_instruction = _TK_CLOPS_TO_PYQIR_REG[type(op.get_exp())](
-                self.module.builder
-            )(ssa_left, ssa_right)
-
-        elif type(op.get_exp()) in _TK_CLOPS_TO_PYQIR_2_BITS_NO_PARAM:
-            # classical ops without parameters
-            output_instruction = pyqir.const(
-                self.qir_bool_type,
-                _TK_CLOPS_TO_PYQIR_2_BITS_NO_PARAM[type(op.get_exp())],
-            )
-            returntypebool = True
-            result_index = args[-1].index[0]
-
-        elif type(op.get_exp()) in _TK_CLOPS_TO_PYQIR_BIT:
-            # classical ops acting on bits returning bit
-            ssa_left = pyqir.const(self.qir_bool_type, 1)
-            ssa_right = cast(  # type: ignore
-                Value,
-                self._get_ssa_from_cl_bit_op(op.get_exp().args[0]),  # type: ignore
-            )
-
-            # add function to module
-            returntypebool = True
-            result_index = args[-1].index[0]
-            output_instruction = _TK_CLOPS_TO_PYQIR_BIT[type(op.get_exp())](
-                self.module.builder
-            )(ssa_left, ssa_right)
-
-        elif type(op.get_exp()) in _TK_CLOPS_TO_PYQIR_2_BITS:
-            # classical ops acting on bits returning bit
-            ssa_left = cast(  # type: ignore
-                Value,
-                self._get_ssa_from_cl_bit_op(op.get_exp().args[0]),  # type: ignore
-            )
-            ssa_right = cast(  # type: ignore
-                Value,
-                self._get_ssa_from_cl_bit_op(op.get_exp().args[1]),  # type: ignore
-            )
-
-            # add function to module
-            returntypebool = True
-            result_index = args[-1].index[0]
-            output_instruction = _TK_CLOPS_TO_PYQIR_2_BITS[type(op.get_exp())](
-                self.module.builder
-            )(ssa_left, ssa_right)
-
-        elif type(op.get_exp()) in _TK_CLOPS_TO_PYQIR_REG_BOOL:
-            # classical ops acting on registers returning bit
-            ssa_left = cast(  # type: ignore
-                Value,
-                self._get_ssa_from_cl_reg_op(op.get_exp().args[0]),  # type: ignore
-            )
-            ssa_right = cast(  # type: ignore
-                Value,
-                self._get_ssa_from_cl_reg_op(op.get_exp().args[1]),  # type: ignore
-            )
-
-            # add function to module
-            returntypebool = True
-            output_instruction = _TK_CLOPS_TO_PYQIR_REG_BOOL[type(op.get_exp())](
-                self.module.builder
-            )(ssa_left, ssa_right)
-
-        else:
-            raise ValueError(f"unexpected classical op {type(op.get_exp())}")
-
-        if returntypebool:
-            # the return value of the some classical ops is bool in qir,
-            # so the return value can only be written to one entry
-            # of the register this implementation write the value
-            # to the 0-th entry
-            # of the register, this could be changed to a user given value
-
-            self._set_bit_in_creg(outputs, result_index, output_instruction)
-        else:
-            self.set_ssa_vars(outputs, output_instruction, True)
-
     def _get_ssa_from_clexpr_arg(
         self,
         arg: int | ClBitVar | ClRegVar | ClExpr,
@@ -1040,9 +942,6 @@ class AbstractQirGenerator:
         elif op.type == OpType.Phase:
             # ignore phase op
             pass
-
-        elif isinstance(op, ClassicalExpBox):
-            self.conv_classicalexpbox(op, args)
 
         elif isinstance(op, ClExprOp):
             self.conv_clexprop(op, args)
