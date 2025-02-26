@@ -1,8 +1,8 @@
 ; ModuleID = 'test_pytket_qir_21'
 source_filename = "test_pytket_qir_21"
 
-%Result = type opaque
 %Qubit = type opaque
+%Result = type opaque
 
 @0 = internal constant [2 x i8] c"a\00"
 @1 = internal constant [2 x i8] c"b\00"
@@ -13,6 +13,10 @@ entry:
   %0 = call i1* @create_creg(i64 3)
   %1 = call i1* @create_creg(i64 3)
   %2 = call i1* @create_creg(i64 1)
+  call void @__quantum__qis__h__body(%Qubit* null)
+  call void @__quantum__qis__h__body(%Qubit* inttoptr (i64 1 to %Qubit*))
+  call void @mz_to_creg_bit(%Qubit* null, i1* %0, i64 0)
+  call void @mz_to_creg_bit(%Qubit* inttoptr (i64 1 to %Qubit*), i1* %1, i64 0)
   %3 = call i64 @get_int_from_creg(i1* %0)
   %4 = call i64 @get_int_from_creg(i1* %1)
   %5 = icmp eq i64 %3, %4
@@ -61,6 +65,8 @@ declare i1* @create_creg(i64)
 declare i64 @get_int_from_creg(i1*)
 
 declare void @mz_to_creg_bit(%Qubit*, i1*, i64)
+
+declare void @__quantum__qis__h__body(%Qubit*)
 
 attributes #0 = { "entry_point" "output_labeling_schema" "qir_profiles"="custom" "required_num_qubits"="2" "required_num_results"="2" }
 

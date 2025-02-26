@@ -563,6 +563,7 @@ def test_pytket_qir_21(profile: QIRProfile) -> None:
     b = circ.add_c_register("b", 3)
     c = circ.add_c_register("c", 1)
 
+    circ.H(0).H(1).Measure(Qubit(0), a[0]).Measure(Qubit(1), b[0])
     circ.add_clexpr(*wired_clexpr_from_logic_exp(reg_eq(a, b), c))  # type: ignore
     circ.add_clexpr(*wired_clexpr_from_logic_exp(reg_neq(a, b), c))  # type: ignore
     circ.add_clexpr(*wired_clexpr_from_logic_exp(reg_gt(a, b), c))  # type: ignore
