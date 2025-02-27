@@ -852,12 +852,6 @@ class AbstractQirGenerator:
                     ClOp.RegAnd
                     | ClOp.RegOr
                     | ClOp.RegXor
-                    | ClOp.RegEq
-                    | ClOp.RegNeq
-                    | ClOp.RegLt
-                    | ClOp.RegGt
-                    | ClOp.RegLeq
-                    | ClOp.RegGeq
                     | ClOp.RegAdd
                     | ClOp.RegSub
                     | ClOp.RegMul
@@ -866,6 +860,18 @@ class AbstractQirGenerator:
                 ):
                     assert len(ssa_args) == 2
                     return False, _TK_CLEXPR_OP_TO_PYQIR[expr_op](self.module.builder)(
+                        *ssa_args
+                    )
+                case (
+                    ClOp.RegEq
+                    | ClOp.RegNeq
+                    | ClOp.RegLt
+                    | ClOp.RegGt
+                    | ClOp.RegLeq
+                    | ClOp.RegGeq
+                ):
+                    assert len(ssa_args) == 2
+                    return True, _TK_CLEXPR_OP_TO_PYQIR[expr_op](self.module.builder)(
                         *ssa_args
                     )
                 case ClOp.RegNot:

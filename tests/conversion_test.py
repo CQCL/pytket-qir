@@ -16,6 +16,7 @@ import pytest
 from utilities import run_qir_gen_and_check  # type: ignore
 
 from pytket.circuit import Bit, BitRegister, Circuit, Qubit, if_not_bit
+from pytket.circuit.clexpr import wired_clexpr_from_logic_exp
 from pytket.circuit.logic_exp import (
     reg_eq,
     reg_geq,
@@ -546,6 +547,33 @@ def test_pytket_qir_20(profile: QIRProfile) -> None:
     run_qir_gen_and_check(circ, "test_pytket_qir_20", profile=profile)
 
 
+@pytest.mark.parametrize(
+    "profile",
+    [
+        QIRProfile.ADAPTIVE,
+        QIRProfile.AZUREADAPTIVE,
+        QIRProfile.PYTKET,
+        QIRProfile.ADAPTIVE_CREGSIZE,
+    ],
+)
+def test_pytket_qir_21(profile: QIRProfile) -> None:
+    # test classical expression handling with register predicates
+    circ = Circuit(2)
+    a = circ.add_c_register("a", 3)
+    b = circ.add_c_register("b", 3)
+    c = circ.add_c_register("c", 1)
+
+    circ.H(0).H(1).Measure(Qubit(0), a[0]).Measure(Qubit(1), b[0])
+    circ.add_clexpr(*wired_clexpr_from_logic_exp(reg_eq(a, b), c))  # type: ignore
+    circ.add_clexpr(*wired_clexpr_from_logic_exp(reg_neq(a, b), c))  # type: ignore
+    circ.add_clexpr(*wired_clexpr_from_logic_exp(reg_gt(a, b), c))  # type: ignore
+    circ.add_clexpr(*wired_clexpr_from_logic_exp(reg_geq(a, b), c))  # type: ignore
+    circ.add_clexpr(*wired_clexpr_from_logic_exp(reg_lt(a, b), c))  # type: ignore
+    circ.add_clexpr(*wired_clexpr_from_logic_exp(reg_leq(a, b), c))  # type: ignore
+
+    run_qir_gen_and_check(circ, "test_pytket_qir_21", profile=profile)
+
+
 if __name__ == "__main__":
     test_pytket_qir(QIRProfile.PYTKET)
     test_pytket_qir_2(QIRProfile.PYTKET)
@@ -567,3 +595,4 @@ if __name__ == "__main__":
     test_pytket_qir_18(QIRProfile.PYTKET)
     test_pytket_qir_19(QIRProfile.PYTKET)
     test_pytket_qir_20(QIRProfile.PYTKET)
+    test_pytket_qir_21(QIRProfile.PYTKET)

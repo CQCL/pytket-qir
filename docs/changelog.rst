@@ -3,6 +3,11 @@
 Changelog
 ~~~~~~~~~
 
+Unreleased
+----------
+
+* Fix handling of register predicate ops in classical expressions.
+
 0.20.0 (February 2025)
 ----------------------
 
