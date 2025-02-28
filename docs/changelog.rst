@@ -3,8 +3,8 @@
 Changelog
 ~~~~~~~~~
 
-Unreleased
-----------
+0.21.0 (February 2025)
+----------------------
 
 * Fix handling of register predicate ops in classical expressions.
 * Update pytket minimium version requirement to 2.0.0.
