@@ -7,6 +7,7 @@ Unreleased
 ----------
 
 * Fix handling of register predicate ops in classical expressions.
+* Update pytket minimium version requirement to 2.0.0.
 
 0.20.0 (February 2025)
 ----------------------
