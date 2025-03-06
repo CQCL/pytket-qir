@@ -46,7 +46,7 @@ setup(
     include_package_data=True,
     install_requires=[
         "pytket >= 2.0.1",
-        "pyqir == 0.10.7",
+        "pyqir ~= 0.10.7",
     ],
     classifiers=[
         "Environment :: Console",
