@@ -7,6 +7,7 @@ Changelog
 -------------------
 
 * Update pytket minimium version requirement to 2.0.1.
+* Updated pyqir minimium version requirement to 0.10.7.
 
 0.21.0 (February 2025)
 ----------------------
