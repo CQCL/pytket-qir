@@ -87,6 +87,10 @@ def pytket_to_qir(
         https://github.com/qir-alliance/qir-spec/tree/main/specification/under_development/profiles/Adaptive_Profile.md
       - Use ``QIRProfile.PYTKET`` for QIR with additional functions for classical
         registers.
+      - Use ``QIRProfile.AZUREBASE`` for the base profile with metadata for Azure
+        devices and ``array_record`` for output recording.
+      - Use ``QIRProfile.AZUREADAPTIVE`` for the adaptive profile with metadata for
+        Azure devices and bitwise recording of results via ``array_record``.
     """
 
     if cut_pytket_register:
