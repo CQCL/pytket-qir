@@ -76,16 +76,17 @@ def pytket_to_qir(
     :param cut_pytket_register: breaks up the internal scratch bit registers
       into smaller registers, default value false
     :param profile: generates QIR corresponding to the selected profile:
-        Use QIRProfile.BASE for the base profile, see:
-        https://github.com/qir-alliance/qir-spec/blob/main/specification/under_development/profiles/Base_Profile.md
-        Use QIRProfile.ADAPTIVE for the adaptive profile, see:
-        https://github.com/qir-alliance/qir-spec/tree/main/specification/under_development/profiles/Adaptive_Profile.md
-        Use QIRProfile.ADAPTIVE_CREGSIZE for the adaptive profile with additional
-        truncation operation to assure that integers matching the classical
-        registers have no unexpected set bits, see:
-        https://github.com/qir-alliance/qir-spec/tree/main/specification/under_development/profiles/Adaptive_Profile.md
-        Use QIRProfile.PYTKET for QIR with additonal function for classical registers.
 
+      - Use ``QIRProfile.BASE`` for the base profile. See:
+        https://github.com/qir-alliance/qir-spec/blob/main/specification/under_development/profiles/Base_Profile.md
+      - Use ``QIRProfile.ADAPTIVE`` for the adaptive profile. See:
+        https://github.com/qir-alliance/qir-spec/tree/main/specification/under_development/profiles/Adaptive_Profile.md
+      - Use ``QIRProfile.ADAPTIVE_CREGSIZE`` for the adaptive profile with additional
+        truncation operations to assure that integers matching the classical
+        registers have no unexpected set bits. See:
+        https://github.com/qir-alliance/qir-spec/tree/main/specification/under_development/profiles/Adaptive_Profile.md
+      - Use ``QIRProfile.PYTKET`` for QIR with additional functions for classical
+        registers.
     """
 
     if cut_pytket_register:
