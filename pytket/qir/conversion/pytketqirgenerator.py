@@ -175,6 +175,8 @@ class PytketQirGenerator(AbstractQirGenerator):
 
     def _reg2ssa_var(self, bit_reg: BitRegister, int_size: int) -> Value:
         """Convert a BitRegister to an SSA variable using pyqir types."""
+        print("bit_reg", bit_reg)
+        print("len(bit_reg)", len(bit_reg))
         reg_name = bit_reg[0].reg_name
         if reg_name not in self.ssa_vars:
             if len(bit_reg) > int_size:
@@ -191,6 +193,7 @@ class PytketQirGenerator(AbstractQirGenerator):
 
     def conv_conditional(self, command: Command, op: Conditional) -> None:
         condition_name = command.args[0].reg_name
+        print("condition_name", condition_name)
 
         entry_point = self.module.module.entry_point
 
@@ -269,6 +272,9 @@ class PytketQirGenerator(AbstractQirGenerator):
 
         else:
             condition_name = command.args[0].reg_name
+            print("command", command)
+            print("command.args", command.args)
+            print("op", op)
 
             if op.width == 1:  # only one conditional bit
                 condition_bit_index = command.args[0].index[0]
