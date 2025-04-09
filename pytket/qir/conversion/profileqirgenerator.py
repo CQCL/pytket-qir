@@ -20,6 +20,7 @@ from pyqir import BasicBlock, Value
 from pytket.circuit import (
     Bit,
     BitRegister,
+    CircBox,
     Circuit,
     Command,
     Conditional,
@@ -278,9 +279,11 @@ class AdaptiveProfileQirGenerator(AbstractQirGenerator):
         self.active_block_list.append(condb)
         self.active_block_list.append(contb)
 
-        if op.op.type == OpType.CircBox:
+        inner_op = op.op
+        if inner_op.type == OpType.CircBox:
+            assert isinstance(inner_op, CircBox)
             conditional_circuit = self._decompose_conditional_circ_box(
-                cast("CircBox", op.op), command.args[op.width :]
+                inner_op, command.args[op.width :]
             )
 
             condition_name = command.args[0].reg_name
