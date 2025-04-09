@@ -20,7 +20,6 @@ from pyqir import BasicBlock, Value
 from pytket.circuit import (
     Bit,
     BitRegister,
-    CircBox,
     Circuit,
     Command,
     Conditional,
