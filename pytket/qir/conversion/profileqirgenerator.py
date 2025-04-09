@@ -280,7 +280,7 @@ class AdaptiveProfileQirGenerator(AbstractQirGenerator):
 
         if op.op.type == OpType.CircBox:
             conditional_circuit = self._decompose_conditional_circ_box(
-                cast("CircBox", op.op), command.args[op.width :]
+                cast("CircBox", op.op), command.args[op.width :]  # noqa: F821
             )
 
             condition_name = command.args[0].reg_name
