@@ -187,7 +187,7 @@ class PytketQirGenerator(AbstractQirGenerator):
             self.ssa_vars[reg_name] = ssa_var
             return ssa_var
         else:
-            return cast(Value, self.ssa_vars[reg_name])  # type: ignore
+            return cast("Value", self.ssa_vars[reg_name])  # type: ignore
 
     def conv_conditional(self, command: Command, op: Conditional) -> None:
         condition_name = command.args[0].reg_name
@@ -204,7 +204,7 @@ class PytketQirGenerator(AbstractQirGenerator):
 
         if op.op.type == OpType.CircBox:
             conditional_circuit = self._decompose_conditional_circ_box(
-                cast(CircBox, op.op), command.args[op.width :]
+                cast("CircBox", op.op), command.args[op.width :]
             )
 
             condition_name = command.args[0].reg_name

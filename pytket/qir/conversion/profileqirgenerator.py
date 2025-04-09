@@ -224,7 +224,7 @@ class AdaptiveProfileQirGenerator(AbstractQirGenerator):
             self.ssa_vars[reg_name] = [(ssa_var, self.active_block)]
             return ssa_var
         else:
-            return cast(Value, self.ssa_vars[reg_name])
+            return cast("Value", self.ssa_vars[reg_name])
 
     def _add_phi(self) -> None:
         """
@@ -281,7 +281,7 @@ class AdaptiveProfileQirGenerator(AbstractQirGenerator):
 
         if op.op.type == OpType.CircBox:
             conditional_circuit = self._decompose_conditional_circ_box(
-                cast(CircBox, op.op), command.args[op.width :]
+                cast("CircBox", op.op), command.args[op.width :]
             )
 
             condition_name = command.args[0].reg_name
