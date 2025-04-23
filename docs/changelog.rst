@@ -3,6 +3,11 @@
 Changelog
 ~~~~~~~~~
 
+Unreleased
+----------
+
+* Support Python 3.13.
+
 0.22.0 (April 2025)
 -------------------
 

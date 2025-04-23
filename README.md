@@ -17,7 +17,7 @@ Some useful links:
 
 ## Getting started
 
-`pytket-qir` is available for Python 3.10, 3.11 and 3.12, on Linux, MacOS
+`pytket-qir` is available for Python 3.10, 3.11, 3.12 and 3.13, on Linux, MacOS
 and Windows. To install, run:
 
 ```shell
