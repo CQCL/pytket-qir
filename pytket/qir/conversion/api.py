@@ -17,7 +17,7 @@ public api for qir conversion from pytket
 """
 
 from enum import Enum
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
 
 import pyqir
 
@@ -57,14 +57,14 @@ class QIRProfile(Enum):
     PYTKET = 5
 
 
-def pytket_to_qir(
+def pytket_to_qir(  # noqa: PLR0912, PLR0913
     circ: Circuit,
     name: str = "Generated from input pytket circuit",
     qir_format: QIRFormat = QIRFormat.BINARY,
     int_type: int = 64,
     cut_pytket_register: bool = False,
     profile: QIRProfile = QIRProfile.PYTKET,
-) -> Union[str, bytes, None]:
+) -> str | bytes | None:
     """converts given pytket circuit to qir
 
     :param circ: given circuit
@@ -130,7 +130,7 @@ def pytket_to_qir(
             wasm_int_type=int_type,
             qir_int_type=int_type,
         )
-    elif profile == QIRProfile.ADAPTIVE or profile == QIRProfile.ADAPTIVE_CREGSIZE:
+    elif profile in (QIRProfile.ADAPTIVE, QIRProfile.ADAPTIVE_CREGSIZE):
         qir_generator = AdaptiveProfileQirGenerator(
             circuit=circ,
             module=m,
@@ -152,14 +152,13 @@ def pytket_to_qir(
     populated_module = qir_generator.circuit_to_module(qir_generator.circuit, True)
 
     if profile == QIRProfile.AZUREADAPTIVE:
-
         assert not qir_generator.has_wasm
 
         sar_azure_dict: dict[str, str] = qir_generator.get_azure_sar()
 
         initial_result = str(populated_module.module.ir())
 
-        for az in sar_azure_dict:
+        for az in sar_azure_dict.items():
             initial_result = initial_result.replace(az, sar_azure_dict[az])
 
         result = initial_result
@@ -178,7 +177,7 @@ def pytket_to_qir(
 
         initial_result = str(populated_module.module.ir())
 
-        for wf in wasm_sar_dict:
+        for wf in wasm_sar_dict.items():
             initial_result = initial_result.replace(wf, wasm_sar_dict[wf])
 
         result = initial_result
@@ -192,13 +191,12 @@ def pytket_to_qir(
         else:
             assert not "unsupported return type"  # type: ignore
 
+    elif qir_format == QIRFormat.BINARY:
+        return populated_module.module.bitcode()
+    elif qir_format == QIRFormat.STRING:
+        return populated_module.module.ir()
     else:
-        if qir_format == QIRFormat.BINARY:
-            return populated_module.module.bitcode()
-        elif qir_format == QIRFormat.STRING:
-            return populated_module.module.ir()
-        else:
-            assert not "unsupported return type"  # type: ignore
+        assert not "unsupported return type"  # type: ignore
 
 
 def check_circuit(
@@ -220,20 +218,20 @@ def check_circuit(
         raise ValueError(
             """The circuit that should be converted should only have the default
             quantum register. You can convert it using the pytket
-            compiler pass `FlattenRelabelRegistersPass`."""
+            compiler pass `FlattenRelabelRegistersPass`.""",
         )
 
-    if int_type != 32 and int_type != 64:
+    if int_type not in {32, 64}:
         raise ValueError("the integer size must be 32 or 64")
 
     for creg in circuit.c_registers:
         if creg.size > int_type:
             raise ValueError(
                 f"""classical registers must not have more than {int_type} bits, \
-you could try to set cut_pytket_register=True in the conversion"""
+you could try to set cut_pytket_register=True in the conversion""",
             )
 
-    set_circ_register = set([creg.name for creg in circuit.c_registers])
-    for b in set([b.reg_name for b in circuit.bits]):
+    set_circ_register = {creg.name for creg in circuit.c_registers}
+    for b in {b.reg_name for b in circuit.bits}:
         if b not in set_circ_register:
             raise ValueError(f"Used register {b} in not a valid register")
