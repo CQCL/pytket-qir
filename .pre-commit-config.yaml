@@ -20,28 +20,14 @@ repos:
       - id: typos
         args: []
 
-  - repo: https://github.com/psf/black
-    rev: 23.7.0
-    hooks:
-      - id: black
-
-  - repo: https://github.com/charliermarsh/ruff-pre-commit
-    # Ruff version.
-    rev: v0.0.282
-    hooks:
-      - id: ruff
-        args: [--fix, --exit-non-zero-on-fix]
-
-  - repo: local
-    hooks:
-      - id: pylint
-        name: pylint
-        entry: pylint
-        language: system
-        types: [python]
-        args:
-          [
-            "--jobs=0",         # 0 auto-detects CPU count
-            "--py-version=3.10",
-            "-sn",              # Don't display the score
-          ]
+repos:
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  # Ruff version.
+  rev: v0.11.7
+  hooks:
+    # Run the linter.
+    - id: ruff
+      args: [--fix, --exit-non-zero-on-fix]
+    # Run the formatter.
+    - id: ruff-format
+  
