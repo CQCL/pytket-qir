@@ -158,8 +158,8 @@ def pytket_to_qir(  # noqa: PLR0912, PLR0913
 
         initial_result = str(populated_module.module.ir())
 
-        for az in sar_azure_dict.items():
-            initial_result = initial_result.replace(az, sar_azure_dict[az])
+        for az, azv in sar_azure_dict.items():
+            initial_result = initial_result.replace(az, azv)
 
         result = initial_result
 
@@ -177,8 +177,8 @@ def pytket_to_qir(  # noqa: PLR0912, PLR0913
 
         initial_result = str(populated_module.module.ir())
 
-        for wf in wasm_sar_dict.items():
-            initial_result = initial_result.replace(wf, wasm_sar_dict[wf])
+        for wf, wfv in wasm_sar_dict.items():
+            initial_result = initial_result.replace(wf, wfv)
 
         result = initial_result
 
