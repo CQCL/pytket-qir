@@ -212,7 +212,7 @@ class AbstractQirGenerator:
 
         self.int_type_str = f"i{qir_int_type}"
 
-        self.target_gateset.add(      OpType.PhasedX)
+        self.target_gateset.add(OpType.PhasedX)
         self.target_gateset.add(OpType.ZZPhase)
         self.target_gateset.add(OpType.ZZMax)
         self.target_gateset.add(OpType.TK2)
