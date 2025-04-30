@@ -83,7 +83,8 @@ def test_pytket_qir_conditional_2(profile: QIRProfile) -> None:
     circ.add_clexpr(*wired_clexpr_from_logic_exp(a | b, c))  # type: ignore
     circ.add_clexpr(*wired_clexpr_from_logic_exp(c | b, d))  # type: ignore
     circ.add_clexpr(
-        *wired_clexpr_from_logic_exp(c | b, d), condition=if_not_bit(a[4])  # type: ignore
+        *wired_clexpr_from_logic_exp(c | b, d),  # type: ignore
+        condition=if_not_bit(a[4]),
     )
     circ.H(0)
     circ.Measure(Qubit(0), d[4])
@@ -179,7 +180,11 @@ def test_pytket_qir_conditional_6(profile: QIRProfile) -> None:
     circ = Circuit(2, 3).H(0).H(1)
 
     circ.add_gate(
-        OpType.PhasedX, [0.1, 0.2], [0], condition_bits=[0, 1, 2], condition_value=3
+        OpType.PhasedX,
+        [0.1, 0.2],
+        [0],
+        condition_bits=[0, 1, 2],
+        condition_value=3,
     )
 
     run_qir_gen_and_check(circ, "test_pytket_qir_conditional_6", profile=profile)
@@ -339,7 +344,7 @@ def test_pytket_qir_conditional_12(profile: QIRProfile) -> None:
         circ.X(0, condition=reg_eq(syn, 4))
         circ.X(0, condition=reg_eq(syn, 4))
 
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         pytket_to_qir(
             circ,
             name="ptest_pytket_qir_conditional_12",

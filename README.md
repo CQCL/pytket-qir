@@ -79,7 +79,7 @@ tests and is accepted after review, it will be merged in.
 #### Formatting
 
 All code should be formatted using
-[black](https://black.readthedocs.io/en/stable/), with default options. This is
+[ruff](https://docs.astral.sh/ruff/formatter/), with default options. This is
 checked on the CI.
 
 #### Type annotation
@@ -93,9 +93,8 @@ complicated, but it should be sufficient to run the script `./mypy-check`
 
 #### Linting
 
-We use [ruff](https://github.com/astral-sh/ruff) and [pylint](https://pypi.org/project/pylint/)
-on the CI to check compliance with a set of style requirements (listed in `ruff.toml` and `.pylintrc`).
-You should run `pylint` over any changed files before submitting a PR, to catch any issues.
+We use [ruff](https://github.com/astral-sh/ruff) on the CI to check compliance with a set of style requirements (listed in `ruff.toml`).
+You should run `ruff` over any changed files before submitting a PR, to catch any issues.
 
 An easy way to meet all formatting and linting requirements is to issue `pre-commit run --all-files`
 or `make lint` before sending a PR.

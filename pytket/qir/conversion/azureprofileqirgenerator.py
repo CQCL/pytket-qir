@@ -38,7 +38,6 @@ class AzureAdaptiveProfileQirGenerator(AdaptiveProfileQirGenerator):
         qir_int_type: int,
         trunc: bool,
     ) -> None:
-
         super().__init__(circuit, module, wasm_int_type, qir_int_type, trunc)
 
         self.azure_sar_dict["!llvm.module.flags = !{!0, !1, !2, !3}"] = (
@@ -69,7 +68,6 @@ class AzureAdaptiveProfileQirGenerator(AdaptiveProfileQirGenerator):
         )
 
     def conv_measure(self, bits: list[Bit], qubits: list[Qubit]) -> None:
-
         assert len(bits) == 1
         assert len(qubits) == 1
 
@@ -90,13 +88,12 @@ class AzureAdaptiveProfileQirGenerator(AdaptiveProfileQirGenerator):
         self._set_bit_in_creg(bits[0].reg_name, bits[0].index[0], ssa_measureresult)
 
     def record_output(self) -> None:
-
         self.module.builder.call(
             self.record_output_array,
             [
                 pyqir.const(self.qir_int_type, len(self.circuit.c_registers)),
                 pyqir.Constant.null(
-                    pyqir.PointerType(pyqir.IntType(self.module.module.context, 8))
+                    pyqir.PointerType(pyqir.IntType(self.module.module.context, 8)),
                 ),
             ],
         )
