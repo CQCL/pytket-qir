@@ -152,7 +152,6 @@ def pytket_to_qir(
     populated_module = qir_generator.circuit_to_module(qir_generator.circuit, True)
 
     if profile == QIRProfile.AZUREADAPTIVE:
-
         assert not qir_generator.has_wasm
 
         sar_azure_dict: dict[str, str] = qir_generator.get_azure_sar()

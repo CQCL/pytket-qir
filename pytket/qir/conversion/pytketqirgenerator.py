@@ -49,7 +49,6 @@ class PytketQirGenerator(AbstractQirGenerator):
         wasm_int_type: int,
         qir_int_type: int,
     ) -> None:
-
         super().__init__(circuit, module, wasm_int_type, qir_int_type)
 
         self.set_cregs: dict[str, list] = {}  # Keep track of set registers.
@@ -148,7 +147,6 @@ class PytketQirGenerator(AbstractQirGenerator):
         return ssa_var
 
     def set_ssa_vars(self, reg_name: str, ssa_i64: Value, trunc: bool) -> None:
-
         self.module.builder.call(
             self.set_creg_to_int,
             [self.get_ssa_vars(reg_name), ssa_i64],
@@ -210,7 +208,6 @@ class PytketQirGenerator(AbstractQirGenerator):
             condition_name = command.args[0].reg_name
 
             if op.width == 1:  # only one conditional bit
-
                 condition_bit_index = command.args[0].index[0]
 
                 ssabool = self.module.builder.call(
@@ -327,7 +324,6 @@ class PytketQirGenerator(AbstractQirGenerator):
                 self.module.module.builder.insert_at_end(contb)
 
     def conv_measure(self, bits: list[Bit], qubits: list[Qubit]) -> None:
-
         assert len(bits) == 1
         assert len(qubits) == 1
 
@@ -341,7 +337,6 @@ class PytketQirGenerator(AbstractQirGenerator):
         )
 
     def record_output(self) -> None:
-
         for creg in self.circuit.c_registers:
             reg_name = creg[0].reg_name
             self.module.builder.call(

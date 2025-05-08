@@ -45,7 +45,6 @@ class AdaptiveProfileQirGenerator(AbstractQirGenerator):
         qir_int_type: int,
         trunc: bool,
     ) -> None:
-
         self.trunc = trunc
 
         super().__init__(circuit, module, wasm_int_type, qir_int_type)
@@ -289,7 +288,6 @@ class AdaptiveProfileQirGenerator(AbstractQirGenerator):
             condition_name = command.args[0].reg_name
 
             if op.width == 1:  # only one conditional bit
-
                 condition_bit_index = command.args[0].index[0]
 
                 ssa_bool = self._get_bit_from_creg(condition_name, condition_bit_index)
@@ -430,7 +428,6 @@ class AdaptiveProfileQirGenerator(AbstractQirGenerator):
                 self._add_phi()
 
     def conv_measure(self, bits: list[Bit], qubits: list[Qubit]) -> None:
-
         assert len(bits) == 1
         assert len(qubits) == 1
 
@@ -451,7 +448,6 @@ class AdaptiveProfileQirGenerator(AbstractQirGenerator):
         self._set_bit_in_creg(bits[0].reg_name, bits[0].index[0], ssa_measureresult)
 
     def record_output(self) -> None:
-
         for creg in self.circuit.c_registers:
             reg_name = creg[0].reg_name
             self.module.builder.call(

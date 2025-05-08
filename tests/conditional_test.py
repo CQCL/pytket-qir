@@ -83,7 +83,8 @@ def test_pytket_qir_conditional_2(profile: QIRProfile) -> None:
     circ.add_clexpr(*wired_clexpr_from_logic_exp(a | b, c))  # type: ignore
     circ.add_clexpr(*wired_clexpr_from_logic_exp(c | b, d))  # type: ignore
     circ.add_clexpr(
-        *wired_clexpr_from_logic_exp(c | b, d), condition=if_not_bit(a[4])  # type: ignore
+        *wired_clexpr_from_logic_exp(c | b, d),
+        condition=if_not_bit(a[4]),  # type: ignore
     )
     circ.H(0)
     circ.Measure(Qubit(0), d[4])

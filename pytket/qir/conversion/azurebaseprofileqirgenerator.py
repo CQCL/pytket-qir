@@ -37,7 +37,6 @@ class AzureBaseProfileQirGenerator(BaseProfileQirGenerator):
         wasm_int_type: int,
         qir_int_type: int,
     ) -> None:
-
         super().__init__(circuit, module, wasm_int_type, qir_int_type)
 
         # void @__quantum__rt__array_record_output(result)
@@ -57,7 +56,6 @@ class AzureBaseProfileQirGenerator(BaseProfileQirGenerator):
         assert len(qubits) == 1
 
     def record_output(self) -> None:
-
         # this will measure all qubits at the end of the circuit
         # the result of the measurement will be added to an array and recorded together
 

@@ -979,7 +979,6 @@ class AbstractQirGenerator:
                 self.command_to_module(op, command.args)
 
         if record_output:
-
             self.record_output()
 
         return self.module

@@ -41,7 +41,6 @@ class BaseProfileQirGenerator(AbstractQirGenerator):
         wasm_int_type: int,
         qir_int_type: int,
     ) -> None:
-
         super().__init__(circuit, module, wasm_int_type, qir_int_type)
 
         self.measure_results: list[list] = []
@@ -117,7 +116,6 @@ class BaseProfileQirGenerator(AbstractQirGenerator):
         )
 
     def record_output(self) -> None:
-
         for res in self.measure_results:
             self.module.builder.call(
                 self.record_output_res,
