@@ -70,7 +70,7 @@ class AzureBaseProfileQirGenerator(BaseProfileQirGenerator):
             [
                 pyqir.const(self.qir_int_type, len(self.circuit.qubits)),
                 pyqir.Constant.null(
-                    pyqir.PointerType(pyqir.IntType(self.module.module.context, 8))
+                    pyqir.PointerType(pyqir.IntType(self.module.module.context, 8)),
                 ),
             ],
         )
@@ -81,7 +81,7 @@ class AzureBaseProfileQirGenerator(BaseProfileQirGenerator):
                 [
                     self.module.module.results[i],
                     pyqir.Constant.null(
-                        pyqir.PointerType(pyqir.IntType(self.module.module.context, 8))
+                        pyqir.PointerType(pyqir.IntType(self.module.module.context, 8)),
                     ),
                 ],
             )

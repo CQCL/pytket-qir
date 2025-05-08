@@ -488,7 +488,10 @@ def test_pytket_qir_18(profile: QIRProfile) -> None:
 
     with pytest.raises(ValueError):
         pytket_to_qir(
-            c, name="ptest_pytket_qir_18", qir_format=QIRFormat.STRING, profile=profile
+            c,
+            name="ptest_pytket_qir_18",
+            qir_format=QIRFormat.STRING,
+            profile=profile,
         )
 
     # gives:

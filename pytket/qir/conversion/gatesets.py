@@ -13,15 +13,13 @@
 # limitations under the License.
 
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from enum import Enum
 from string import Template
-from typing import Any, Callable, NamedTuple, Union
+from typing import Any, NamedTuple
 
 from pytket import OpType  # type: ignore
-
-# PyQirParameterType = any  # Union[Double, Int, Qubit, Result] # todo
-# PyQirReturnType = any  # Union[Int, Result, Void] # todo
 
 
 class FuncNat(Enum):
@@ -70,7 +68,7 @@ class FuncSpec(Enum):
 @dataclass(frozen=True)
 class QirGate:
     func_nat: FuncNat
-    func_name: Union[FuncName, Enum]
+    func_name: FuncName | Enum
     func_spec: FuncSpec
 
 
@@ -90,52 +88,84 @@ class CustomGateSet(NamedTuple):
 
 _TK_TO_PYQIR = {
     OpType.H: QirGate(
-        func_nat=FuncNat.QIS, func_name=FuncName.H, func_spec=FuncSpec.BODY
+        func_nat=FuncNat.QIS,
+        func_name=FuncName.H,
+        func_spec=FuncSpec.BODY,
     ),
     OpType.X: QirGate(
-        func_nat=FuncNat.QIS, func_name=FuncName.X, func_spec=FuncSpec.BODY
+        func_nat=FuncNat.QIS,
+        func_name=FuncName.X,
+        func_spec=FuncSpec.BODY,
     ),
     OpType.Y: QirGate(
-        func_nat=FuncNat.QIS, func_name=FuncName.Y, func_spec=FuncSpec.BODY
+        func_nat=FuncNat.QIS,
+        func_name=FuncName.Y,
+        func_spec=FuncSpec.BODY,
     ),
     OpType.Z: QirGate(
-        func_nat=FuncNat.QIS, func_name=FuncName.Z, func_spec=FuncSpec.BODY
+        func_nat=FuncNat.QIS,
+        func_name=FuncName.Z,
+        func_spec=FuncSpec.BODY,
     ),
     OpType.S: QirGate(
-        func_nat=FuncNat.QIS, func_name=FuncName.S, func_spec=FuncSpec.BODY
+        func_nat=FuncNat.QIS,
+        func_name=FuncName.S,
+        func_spec=FuncSpec.BODY,
     ),
     OpType.Sdg: QirGate(
-        func_nat=FuncNat.QIS, func_name=FuncName.S, func_spec=FuncSpec.ADJ
+        func_nat=FuncNat.QIS,
+        func_name=FuncName.S,
+        func_spec=FuncSpec.ADJ,
     ),
     OpType.T: QirGate(
-        func_nat=FuncNat.QIS, func_name=FuncName.T, func_spec=FuncSpec.BODY
+        func_nat=FuncNat.QIS,
+        func_name=FuncName.T,
+        func_spec=FuncSpec.BODY,
     ),
     OpType.Tdg: QirGate(
-        func_nat=FuncNat.QIS, func_name=FuncName.T, func_spec=FuncSpec.ADJ
+        func_nat=FuncNat.QIS,
+        func_name=FuncName.T,
+        func_spec=FuncSpec.ADJ,
     ),
     OpType.Reset: QirGate(
-        func_nat=FuncNat.QIS, func_name=FuncName.RESET, func_spec=FuncSpec.BODY
+        func_nat=FuncNat.QIS,
+        func_name=FuncName.RESET,
+        func_spec=FuncSpec.BODY,
     ),
     OpType.CX: QirGate(
-        func_nat=FuncNat.QIS, func_name=FuncName.CX, func_spec=FuncSpec.BODY
+        func_nat=FuncNat.QIS,
+        func_name=FuncName.CX,
+        func_spec=FuncSpec.BODY,
     ),
     OpType.CZ: QirGate(
-        func_nat=FuncNat.QIS, func_name=FuncName.CZ, func_spec=FuncSpec.BODY
+        func_nat=FuncNat.QIS,
+        func_name=FuncName.CZ,
+        func_spec=FuncSpec.BODY,
     ),
     OpType.Measure: QirGate(
-        func_nat=FuncNat.QIS, func_name=FuncName.MEASUREZ, func_spec=FuncSpec.BODY
+        func_nat=FuncNat.QIS,
+        func_name=FuncName.MEASUREZ,
+        func_spec=FuncSpec.BODY,
     ),
     OpType.Rx: QirGate(
-        func_nat=FuncNat.QIS, func_name=FuncName.Rx, func_spec=FuncSpec.BODY
+        func_nat=FuncNat.QIS,
+        func_name=FuncName.Rx,
+        func_spec=FuncSpec.BODY,
     ),
     OpType.Ry: QirGate(
-        func_nat=FuncNat.QIS, func_name=FuncName.Ry, func_spec=FuncSpec.BODY
+        func_nat=FuncNat.QIS,
+        func_name=FuncName.Ry,
+        func_spec=FuncSpec.BODY,
     ),
     OpType.Rz: QirGate(
-        func_nat=FuncNat.QIS, func_name=FuncName.Rz, func_spec=FuncSpec.BODY
+        func_nat=FuncNat.QIS,
+        func_name=FuncName.Rz,
+        func_spec=FuncSpec.BODY,
     ),
     OpType.CopyBits: QirGate(
-        func_nat=FuncNat.QIS, func_name=FuncName.READ_RES, func_spec=FuncSpec.BODY
+        func_nat=FuncNat.QIS,
+        func_name=FuncName.READ_RES,
+        func_spec=FuncSpec.BODY,
     ),
 }
 

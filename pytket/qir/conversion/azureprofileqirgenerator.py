@@ -93,7 +93,7 @@ class AzureAdaptiveProfileQirGenerator(AdaptiveProfileQirGenerator):
             [
                 pyqir.const(self.qir_int_type, len(self.circuit.c_registers)),
                 pyqir.Constant.null(
-                    pyqir.PointerType(pyqir.IntType(self.module.module.context, 8))
+                    pyqir.PointerType(pyqir.IntType(self.module.module.context, 8)),
                 ),
             ],
         )

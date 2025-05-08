@@ -16,7 +16,6 @@ import abc
 import math
 from collections.abc import Sequence
 from functools import partial
-from typing import Optional, Union
 
 import pyqir
 from pyqir import IntPredicate, Value
@@ -148,28 +147,26 @@ _TK_CLEXPR_OP_TO_PYQIR: dict = {
     # ClOp.RegNeg
 }
 
-_TK_CLEXPR_OP_WITH_REG_ARGS = set(
-    [
-        ClOp.RegAnd,
-        ClOp.RegOr,
-        ClOp.RegXor,
-        ClOp.RegEq,
-        ClOp.RegNeq,
-        ClOp.RegNot,
-        ClOp.RegLt,
-        ClOp.RegGt,
-        ClOp.RegLeq,
-        ClOp.RegGeq,
-        ClOp.RegAdd,
-        ClOp.RegSub,
-        ClOp.RegMul,
-        ClOp.RegDiv,
-        ClOp.RegPow,
-        ClOp.RegLsh,
-        ClOp.RegRsh,
-        ClOp.RegNeg,
-    ]
-)
+_TK_CLEXPR_OP_WITH_REG_ARGS = {
+    ClOp.RegAnd,
+    ClOp.RegOr,
+    ClOp.RegXor,
+    ClOp.RegEq,
+    ClOp.RegNeq,
+    ClOp.RegNot,
+    ClOp.RegLt,
+    ClOp.RegGt,
+    ClOp.RegLeq,
+    ClOp.RegGeq,
+    ClOp.RegAdd,
+    ClOp.RegSub,
+    ClOp.RegMul,
+    ClOp.RegDiv,
+    ClOp.RegPow,
+    ClOp.RegLsh,
+    ClOp.RegRsh,
+    ClOp.RegNeg,
+}
 
 
 class AbstractQirGenerator:
@@ -223,8 +220,8 @@ class AbstractQirGenerator:
         self.reg_const: dict[str, Value] = {}
 
         self.getset_predicate = predicates.GateSetPredicate(
-            set(self.target_gateset)
-        )  # noqa: E501
+            set(self.target_gateset),
+        )
 
         # __quantum__qis__read_result__body(result)
         self.read_bit_from_result = self.module.module.add_external_function(
@@ -247,18 +244,10 @@ class AbstractQirGenerator:
             ),
         )
 
-        self.barrier: list[Optional[pyqir.Function]] = [None] * (
-            self.circuit.n_qubits + 1
-        )
-        self.order: list[Optional[pyqir.Function]] = [None] * (
-            self.circuit.n_qubits + 1
-        )
-        self.group: list[Optional[pyqir.Function]] = [None] * (
-            self.circuit.n_qubits + 1
-        )
-        self.sleep: list[Optional[pyqir.Function]] = [None] * (
-            self.circuit.n_qubits + 1
-        )
+        self.barrier: list[pyqir.Function | None] = [None] * (self.circuit.n_qubits + 1)
+        self.order: list[pyqir.Function | None] = [None] * (self.circuit.n_qubits + 1)
+        self.group: list[pyqir.Function | None] = [None] * (self.circuit.n_qubits + 1)
+        self.sleep: list[pyqir.Function | None] = [None] * (self.circuit.n_qubits + 1)
 
         self.wasm: dict[str, pyqir.Function] = {}
 
@@ -344,7 +333,7 @@ class AbstractQirGenerator:
         if self.sleep[index] is None:
             paramlist = [pyqir.qubit_type(self.module.module.context)] * index
             paramlist.append(
-                pyqir.Type.double(self.module.module.context)
+                pyqir.Type.double(self.module.module.context),
             )  # add float parameter
             self.sleep[index] = self.module.module.add_external_function(
                 "__quantum__qis__sleep__body",
@@ -363,11 +352,13 @@ class AbstractQirGenerator:
         )
 
     def _decompose_conditional_circ_box(
-        self, op: CircBox, args: list[UnitID]
+        self,
+        op: CircBox,
+        args: list[UnitID],
     ) -> Circuit:
         """Rebase an op to the target gateset if needed."""
         circuit = Circuit(self.circuit.n_qubits)
-        arg_names = set([b.reg_name for b in args if type(b) is Bit])
+        arg_names = {b.reg_name for b in args if type(b) is Bit}
         for cr_name in arg_names:
             circuit.add_c_register(self.circuit.get_c_register(cr_name))
 
@@ -388,7 +379,7 @@ class AbstractQirGenerator:
     def _to_qis_qubits(self, qubits: list[Qubit]) -> list[Value]:
         return [self.module.module.qubits[qubit.index[0]] for qubit in qubits]
 
-    def _to_qis_results(self, bits: list[Bit]) -> Optional[Value]:
+    def _to_qis_results(self, bits: list[Bit]) -> Value | None:
         if bits:
             return self.module.module.results[bits[0].index[0]]
         return None
@@ -401,7 +392,9 @@ class AbstractQirGenerator:
         return []
 
     def _get_c_regs_from_com(
-        self, op: Op, args: list[Union[Bit, Qubit]]
+        self,
+        op: Op,
+        args: list[Bit | Qubit],
     ) -> tuple[list[str], list[str]]:
         """Get classical registers from command op types."""
         inputs: list[str] = []
@@ -423,17 +416,19 @@ class AbstractQirGenerator:
         return inputs, outputs
 
     def _get_ssa_from_cl_reg_op(
-        self, reg: Union[BitRegister, RegAnd, RegOr, RegXor, int]
+        self,
+        reg: BitRegister | RegAnd | RegOr | RegXor | int,
     ) -> Value:
         if type(reg) in _TK_CLOPS_TO_PYQIR_REG:
-            assert len(reg.args) == 2  # type: ignore
+            assert len(reg.args) == 2  # type: ignore # noqa: PLR2004
 
             ssa_left = self._get_ssa_from_cl_reg_op(reg.args[0])  # type: ignore
             ssa_right = self._get_ssa_from_cl_reg_op(reg.args[1])  # type: ignore
 
             # add function to module
             output_instruction = _TK_CLOPS_TO_PYQIR_REG[type(reg)](self.module.builder)(
-                ssa_left, ssa_right
+                ssa_left,
+                ssa_right,
             )
             return output_instruction  # type: ignore
         elif type(reg) is BitRegister:
@@ -444,7 +439,8 @@ class AbstractQirGenerator:
             raise ValueError(f"unsupported classical register operation: {type(reg)}")
 
     def _get_ssa_from_cl_bit_op(
-        self, bit: Union[LogicExp, Bit, BitAnd, BitOr, BitXor, int]
+        self,
+        bit: LogicExp | Bit | BitAnd | BitOr | BitXor | int,
     ) -> Value:
         if type(bit) is Bit:
             result = self._get_bit_from_creg(bit.reg_name, bit.index[0])
@@ -460,19 +456,20 @@ class AbstractQirGenerator:
 
             # add function to module
             output_instruction = _TK_CLOPS_TO_PYQIR_BIT[type(bit)](self.module.builder)(
-                ssa_left, ssa_right
+                ssa_left,
+                ssa_right,
             )
 
             return output_instruction  # type: ignore
         elif type(bit) in _TK_CLOPS_TO_PYQIR_2_BITS:
-            assert len(bit.args) == 2  # type: ignore
+            assert len(bit.args) == 2  # type: ignore # noqa: PLR2004
 
             ssa_left = self._get_ssa_from_cl_bit_op(bit.args[0])  # type: ignore
             ssa_right = self._get_ssa_from_cl_bit_op(bit.args[1])  # type: ignore
 
             # add function to module
             output_instruction = _TK_CLOPS_TO_PYQIR_2_BITS[type(bit)](
-                self.module.builder
+                self.module.builder,
             )(ssa_left, ssa_right)
 
             return output_instruction  # type: ignore
@@ -525,7 +522,7 @@ class AbstractQirGenerator:
     def conv_conditional(self, command: Command, op: Conditional) -> None:
         pass
 
-    def conv_WASMOp(self, op: WASMOp, args: list[Union[Bit, Qubit]]) -> None:
+    def conv_WASMOp(self, op: WASMOp, args: list[Bit | Qubit]) -> None:
         self.has_wasm = True
 
         paramreg, resultreg = self._get_c_regs_from_com(op, args)
@@ -544,8 +541,8 @@ class AbstractQirGenerator:
             else:
                 raise ValueError(
                     "wasm function which return more than"
-                    + " one value are not supported yet"
-                    + f"please don't use {op.func_name}"
+                    " one value are not supported yet"
+                    f"please don't use {op.func_name}",
                 )
 
             self.wasm[op.func_name] = self.module.module.add_external_function(
@@ -698,7 +695,7 @@ class AbstractQirGenerator:
     def conv_measure(self, bits: list[Bit], qubits: list[Qubit]) -> None:
         pass
 
-    def _get_ssa_from_clexpr_arg(
+    def _get_ssa_from_clexpr_arg(  # noqa: PLR0911, PLR0912
         self,
         arg: int | ClBitVar | ClRegVar | ClExpr,
         bit_posn: dict[int, int],
@@ -718,7 +715,7 @@ class AbstractQirGenerator:
             return True, self._get_bit_from_creg(cmd_arg.reg_name, cmd_arg.index[0])
         elif isinstance(arg, ClRegVar):
             return False, self._get_i64_ssa_reg(
-                cmd_args[reg_posn[arg.index][0]].reg_name
+                cmd_args[reg_posn[arg.index][0]].reg_name,
             )
         else:
             assert isinstance(arg, ClExpr)
@@ -736,13 +733,14 @@ class AbstractQirGenerator:
             match expr_op:
                 case ClOp.BitAnd | ClOp.BitOr | ClOp.BitXor | ClOp.BitEq | ClOp.BitNeq:
                     return True, _TK_CLEXPR_OP_TO_PYQIR[expr_op](self.module.builder)(
-                        *ssa_args
+                        *ssa_args,
                     )
                 case ClOp.BitNot:
                     # Implemented as x --> 1 - x
                     assert len(ssa_args) == 1
                     return True, self.module.builder.sub(
-                        pyqir.const(self.qir_bool_type, 1), ssa_args[0]
+                        pyqir.const(self.qir_bool_type, 1),
+                        ssa_args[0],
                     )
                 case ClOp.BitZero:
                     assert len(ssa_args) == 0
@@ -760,9 +758,9 @@ class AbstractQirGenerator:
                     | ClOp.RegLsh
                     | ClOp.RegRsh
                 ):
-                    assert len(ssa_args) == 2
+                    assert len(ssa_args) == 2  # noqa: PLR2004
                     return False, _TK_CLEXPR_OP_TO_PYQIR[expr_op](self.module.builder)(
-                        *ssa_args
+                        *ssa_args,
                     )
                 case (
                     ClOp.RegEq
@@ -772,9 +770,9 @@ class AbstractQirGenerator:
                     | ClOp.RegLeq
                     | ClOp.RegGeq
                 ):
-                    assert len(ssa_args) == 2
+                    assert len(ssa_args) == 2  # noqa: PLR2004
                     return True, _TK_CLEXPR_OP_TO_PYQIR[expr_op](self.module.builder)(
-                        *ssa_args
+                        *ssa_args,
                     )
                 case ClOp.RegNot:
                     # Implemented as x --> 2^self.int_size - 1 - x
@@ -790,13 +788,15 @@ class AbstractQirGenerator:
                     # Sets all bits in the register to 1
                     assert len(ssa_args) == 0
                     return False, pyqir.const(
-                        self.qir_int_type, (1 << self.int_size) - 1
+                        self.qir_int_type,
+                        (1 << self.int_size) - 1,
                     )
                 case ClOp.RegNeg:
                     # Implemented as x --> 0 - x
                     assert len(ssa_args) == 1
                     return False, self.module.builder.sub(
-                        pyqir.const(self.qir_int_type, 0), ssa_args[0]
+                        pyqir.const(self.qir_int_type, 0),
+                        ssa_args[0],
                     )
                 case ClOp.RegDiv | ClOp.RegPow:
                     # https://github.com/CQCL/pytket-qir/issues/181
@@ -824,23 +824,29 @@ class AbstractQirGenerator:
             else:
                 raise ValueError(
                     f"ClExprOp ({wexpr}) contains a register variable (r{i}) "
-                    "that is not wired to any BitRegister in the circuit."
+                    "that is not wired to any BitRegister in the circuit.",
                 )
 
         returntypebool, output_instruction = self._get_ssa_from_clexpr_arg(
-            expr, bit_posn, reg_posn, args, expr.op in _TK_CLEXPR_OP_WITH_REG_ARGS
+            expr,
+            bit_posn,
+            reg_posn,
+            args,
+            expr.op in _TK_CLEXPR_OP_WITH_REG_ARGS,
         )
 
         if returntypebool:
             assert len(output_posn) == 1
             output_arg: Bit = args[output_posn[0]]
             self._set_bit_in_creg(
-                output_arg.reg_name, output_arg.index[0], output_instruction
+                output_arg.reg_name,
+                output_arg.index[0],
+                output_instruction,
             )
         else:
             assert len(output_posn) > 0
             output_args: list[Bit] = [args[i] for i in output_posn]
-            output_reg_name: Optional[str] = None
+            output_reg_name: str | None = None
             for creg in all_cregs:
                 if creg.to_list() == output_args:
                     output_reg_name = creg.name
@@ -848,14 +854,14 @@ class AbstractQirGenerator:
             else:
                 raise ValueError(
                     f"ClExprOp ({wexpr}) has outputs that do not "
-                    "correspond to any BitRegister in the circuit."
+                    "correspond to any BitRegister in the circuit.",
                 )
             self.set_ssa_vars(output_reg_name, output_instruction, True)
 
     def conv_SetBitsOp(self, bits: list[Bit], op: SetBitsOp) -> None:
         assert len(op.values) == len(bits)
 
-        for b, v in zip(bits, op.values):
+        for b, v in zip(bits, op.values, strict=False):
             output_instruction = pyqir.const(self.qir_bool_type, int(v))
 
             self._set_bit(b, output_instruction)
@@ -864,7 +870,7 @@ class AbstractQirGenerator:
         assert len(args) % 2 == 0
         half_length = len(args) // 2
 
-        for i, o in zip(args[:half_length], args[half_length:]):
+        for i, o in zip(args[:half_length], args[half_length:], strict=False):
             output_instruction = self._get_bit_from_creg(i.reg_name, i.index[0])
 
             self._set_bit(o, output_instruction)
@@ -886,13 +892,17 @@ class AbstractQirGenerator:
             raise ValueError("op is not supported yet")
 
     def conv_other(
-        self, bits: list[Bit], qubits: list[Qubit], op: Op, args: list
+        self,
+        bits: list[Bit],
+        qubits: list[Qubit],
+        op: Op,
+        args: list,
     ) -> None:
         optype, params = self._get_optype_and_params(op)
         pi_params = [p * math.pi for p in params]
         qubits_qis = self._to_qis_qubits(qubits)
         results = self._to_qis_results(bits)
-        bits_qis: Optional[Sequence[Value]] = None
+        bits_qis: Sequence[Value] | None = None
         if type(optype) is BitWiseOp:
             bits_qis = self._to_qis_bits(args)
         gate = self.module.gateset.tk_to_gateset(optype)
@@ -910,7 +920,7 @@ class AbstractQirGenerator:
         else:
             get_gate(*qubits_qis)
 
-    def command_to_module(self, op: Op, args: list) -> tketqirModule:
+    def command_to_module(self, op: Op, args: list) -> tketqirModule:  # noqa: PLR0912
         """Populate a PyQir module from a pytket command."""
         qubits = [q for q in args if q.type == UnitType.qubit]
         bits = [b for b in args if b.type == UnitType.bit]
@@ -965,7 +975,9 @@ class AbstractQirGenerator:
         """function to record the output"""
 
     def circuit_to_module(
-        self, circuit: Circuit, record_output: bool = False
+        self,
+        circuit: Circuit,
+        record_output: bool = False,
     ) -> tketqirModule:
         """Populate a PyQir module from a pytket circuit."""
 

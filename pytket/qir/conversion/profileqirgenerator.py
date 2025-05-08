@@ -50,15 +50,16 @@ class AdaptiveProfileQirGenerator(AbstractQirGenerator):
         super().__init__(circuit, module, wasm_int_type, qir_int_type)
 
         self.set_cregs: dict[str, list] = {}  # Keep track of set registers.
-        self.ssa_vars: dict[str, list[tuple[Value, BasicBlock]]] = (
-            {}
-        )  # Keep track of set ssa variables.
+        self.ssa_vars: dict[
+            str,
+            list[tuple[Value, BasicBlock]],
+        ] = {}  # Keep track of set ssa variables.
         self.list_of_changed_cregs: list[str] = []
 
         for creg in self.circuit.c_registers:
             reg_name = creg[0].reg_name
             self.reg_const[reg_name] = self.module.module.add_byte_string(
-                str.encode(reg_name)
+                str.encode(reg_name),
             )
 
         entry = self.module.module.entry_block
@@ -71,13 +72,14 @@ class AdaptiveProfileQirGenerator(AbstractQirGenerator):
         self.conditional_bp = "condb"
         # set the prefix for the names of the continue blocks
         self.continue_bp = "contb"
+        self.prefix_length = 5
 
         assert self.conditional_bp != self.continue_bp
         assert self.conditional_bp != "entry"
         assert self.continue_bp != "entry"
-        # the code is assuming that the prefixes have length 5
-        assert len(self.conditional_bp) == 5
-        assert len(self.continue_bp) == 5
+        # the code is assuming that the prefixes have the same length
+        assert len(self.conditional_bp) == self.prefix_length
+        assert len(self.continue_bp) == self.prefix_length
 
         for creg in self.circuit.c_registers:
             self._reg2ssa_var(creg)
@@ -107,10 +109,14 @@ class AdaptiveProfileQirGenerator(AbstractQirGenerator):
         entry_point = self.module.module.entry_point
 
         sb_0 = pyqir.BasicBlock(
-            self.module.module.context, f"sb_0_{self.block_count_sb}", entry_point
+            self.module.module.context,
+            f"sb_0_{self.block_count_sb}",
+            entry_point,
         )
         sb_1 = pyqir.BasicBlock(
-            self.module.module.context, f"sb_1_{self.block_count_sb}", entry_point
+            self.module.module.context,
+            f"sb_1_{self.block_count_sb}",
+            entry_point,
         )
 
         continue_block = pyqir.BasicBlock(
@@ -118,7 +124,7 @@ class AdaptiveProfileQirGenerator(AbstractQirGenerator):
             f"{self.active_block_main.name}_{self.block_count_sb}",
             entry_point,
         )
-        if self.active_block_main.name[0:5] != self.conditional_bp:
+        if self.active_block_main.name[0 : self.prefix_length] != self.conditional_bp:
             self.active_block_list.append(continue_block)
 
         self.block_count_sb = self.block_count_sb + 1
@@ -159,7 +165,8 @@ class AdaptiveProfileQirGenerator(AbstractQirGenerator):
 
         # if ssa_bit is 1, ((BIT) MUL (2^INDEX) ) OR INT
         ssa_result_1 = self.module.module.builder.or_(
-            self.module.module.builder.mul(ssa_bit_i64, ssa_index), ssa_int
+            self.module.module.builder.mul(ssa_bit_i64, ssa_index),
+            ssa_int,
         )
 
         # if ssa_bit is 0, ((2**63-1) XOR ((1-BIT) MUL (2^INDEX))) and INT
@@ -168,7 +175,8 @@ class AdaptiveProfileQirGenerator(AbstractQirGenerator):
                 ssa_int_all_1,
                 self.module.module.builder.mul(
                     self.module.module.builder.sub(
-                        pyqir.const(self.qir_int_type, 1), ssa_bit_i64
+                        pyqir.const(self.qir_int_type, 1),
+                        ssa_bit_i64,
                     ),
                     ssa_index,
                 ),
@@ -204,7 +212,8 @@ class AdaptiveProfileQirGenerator(AbstractQirGenerator):
             type_register = pyqir.IntType(self.module.context, self.creg_size[reg_name])
             ssa_i_trunc = self.module.module.builder.trunc(ssa_i64, type_register)
             ssa_i64_zext = self.module.module.builder.zext(
-                ssa_i_trunc, self.qir_int_type
+                ssa_i_trunc,
+                self.qir_int_type,
             )
             self.ssa_vars[reg_name].append((ssa_i64_zext, self.active_block))
         else:
@@ -217,7 +226,7 @@ class AdaptiveProfileQirGenerator(AbstractQirGenerator):
         if reg_name not in self.ssa_vars:
             if len(bit_reg) > self.int_size:
                 raise ValueError(
-                    f"Classical register should only have the size of {self.int_size}"
+                    f"Classical register should only have the size of {self.int_size}",
                 )
             ssa_var = pyqir.const(self.qir_int_type, 0)
             self.ssa_vars[reg_name] = [(ssa_var, self.active_block)]
@@ -246,9 +255,13 @@ class AdaptiveProfileQirGenerator(AbstractQirGenerator):
             for i in range(-2, -len(ssa_list) - 1, -1):
                 if (
                     ssa_list[-1][1].name != ssa_list[i][1].name
-                    and ssa_list[i][1].name[0:5] != self.conditional_bp
+                    and ssa_list[i][1].name[0 : self.prefix_length]
+                    != self.conditional_bp
                 ):
-                    assert self.active_block_list[-3].name[0:5] != self.conditional_bp
+                    assert (
+                        self.active_block_list[-3].name[0 : self.prefix_length]
+                        != self.conditional_bp
+                    )
                     # self.active_block_list[-3] is the second predecessor
                     phi.add_incoming(ssa_list[i][0], self.active_block_list[-3])
                     found_second_block = True
@@ -259,7 +272,7 @@ class AdaptiveProfileQirGenerator(AbstractQirGenerator):
 
             self.set_ssa_vars(creg, phi, False)
 
-    def conv_conditional(self, command: Command, op: Conditional) -> None:
+    def conv_conditional(self, command: Command, op: Conditional) -> None:  # noqa: PLR0915, PLR0912
         condition_name = command.args[0].reg_name
 
         entry_point = self.module.module.entry_point
@@ -282,7 +295,8 @@ class AdaptiveProfileQirGenerator(AbstractQirGenerator):
         if inner_op.type == OpType.CircBox:
             assert isinstance(inner_op, CircBox)
             conditional_circuit = self._decompose_conditional_circ_box(
-                inner_op, command.args[op.width :]
+                inner_op,
+                command.args[op.width :],
             )
 
             condition_name = command.args[0].reg_name
@@ -318,18 +332,18 @@ class AdaptiveProfileQirGenerator(AbstractQirGenerator):
                 for i in range(op.width):
                     if command.args[i].reg_name != condition_name:
                         raise ValueError(
-                            "conditional can only work with one entire register"
+                            "conditional can only work with one entire register",
                         )
 
                 for i in range(op.width - 1):
                     if command.args[i].index[0] >= command.args[i + 1].index[0]:
                         raise ValueError(
-                            "conditional can only work with one entire register"
+                            "conditional can only work with one entire register",
                         )
 
                 if self.circuit.get_c_register(condition_name).size != op.width:
                     raise ValueError(
-                        "conditional can only work with one entire register"
+                        "conditional can only work with one entire register",
                     )
 
                 ssa_bool = self.module.module.builder.icmp(
@@ -390,18 +404,18 @@ class AdaptiveProfileQirGenerator(AbstractQirGenerator):
                 for i in range(op.width):
                     if command.args[i].reg_name != condition_name:
                         raise ValueError(
-                            "conditional can only work with one entire register"
+                            "conditional can only work with one entire register",
                         )
 
                 for i in range(op.width - 1):
                     if command.args[i].index[0] >= command.args[i + 1].index[0]:
                         raise ValueError(
-                            "conditional can only work with one entire register"
+                            "conditional can only work with one entire register",
                         )
 
                 if self.circuit.get_c_register(condition_name).size != op.width:
                     raise ValueError(
-                        "conditional can only work with one entire register"
+                        "conditional can only work with one entire register",
                     )
 
                 ssa_bool = self.module.module.builder.icmp(

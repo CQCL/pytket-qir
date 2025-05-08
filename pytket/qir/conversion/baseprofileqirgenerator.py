@@ -55,7 +55,7 @@ class BaseProfileQirGenerator(AbstractQirGenerator):
             reg_name = creg[0].reg_name
             for i in range(creg.size):
                 self.reg_const_list[reg_name].append(
-                    self.module.module.add_byte_string(str.encode(f"{reg_name}[{i}]"))
+                    self.module.module.add_byte_string(str.encode(f"{reg_name}[{i}]")),
                 )
 
         entry = self.module.module.entry_block
@@ -112,7 +112,7 @@ class BaseProfileQirGenerator(AbstractQirGenerator):
             [
                 self.reg_const_list[bits[0].reg_name][bits[0].index[0]],
                 self.module.module.results[qubit_index],
-            ]
+            ],
         )
 
     def record_output(self) -> None:

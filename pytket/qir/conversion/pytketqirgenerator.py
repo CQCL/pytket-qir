@@ -125,7 +125,7 @@ class PytketQirGenerator(AbstractQirGenerator):
         for creg in self.circuit.c_registers:
             reg_name = creg[0].reg_name
             self.reg_const[reg_name] = self.module.module.add_byte_string(
-                str.encode(reg_name)
+                str.encode(reg_name),
             )
 
         entry = self.module.module.entry_block
@@ -177,32 +177,38 @@ class PytketQirGenerator(AbstractQirGenerator):
         if reg_name not in self.ssa_vars:
             if len(bit_reg) > int_size:
                 raise ValueError(
-                    f"Classical register should only have the size of {int_size}"
+                    f"Classical register should only have the size of {int_size}",
                 )
             ssa_var = self.module.builder.call(
-                self.create_creg, [pyqir.const(self.qir_int_type, len(bit_reg))]
+                self.create_creg,
+                [pyqir.const(self.qir_int_type, len(bit_reg))],
             )
             self.ssa_vars[reg_name] = ssa_var
             return ssa_var
         else:
             return cast("Value", self.ssa_vars[reg_name])  # type: ignore
 
-    def conv_conditional(self, command: Command, op: Conditional) -> None:
+    def conv_conditional(self, command: Command, op: Conditional) -> None:  # noqa: PLR0915, PLR0912
         condition_name = command.args[0].reg_name
 
         entry_point = self.module.module.entry_point
 
         condb = pyqir.BasicBlock(
-            self.module.module.context, f"condb{self.block_count}", entry_point
+            self.module.module.context,
+            f"condb{self.block_count}",
+            entry_point,
         )
         contb = pyqir.BasicBlock(
-            self.module.module.context, f"contb{self.block_count}", entry_point
+            self.module.module.context,
+            f"contb{self.block_count}",
+            entry_point,
         )
         self.block_count = self.block_count + 1
 
         if op.op.type == OpType.CircBox:
             conditional_circuit = self._decompose_conditional_circ_box(
-                cast("CircBox", op.op), command.args[op.width :]
+                cast("CircBox", op.op),
+                command.args[op.width :],
             )
 
             condition_name = command.args[0].reg_name
@@ -235,18 +241,18 @@ class PytketQirGenerator(AbstractQirGenerator):
                 for i in range(op.width):
                     if command.args[i].reg_name != condition_name:
                         raise ValueError(
-                            "conditional can only work with one entire register"
+                            "conditional can only work with one entire register",
                         )
 
                 for i in range(op.width - 1):
                     if command.args[i].index[0] >= command.args[i + 1].index[0]:
                         raise ValueError(
-                            "conditional can only work with one entire register"
+                            "conditional can only work with one entire register",
                         )
 
                 if self.circuit.get_c_register(condition_name).size != op.width:
                     raise ValueError(
-                        "conditional can only work with one entire register"
+                        "conditional can only work with one entire register",
                     )
 
                 ssabool = self.module.module.builder.icmp(
@@ -295,18 +301,18 @@ class PytketQirGenerator(AbstractQirGenerator):
                 for i in range(op.width):
                     if command.args[i].reg_name != condition_name:
                         raise ValueError(
-                            "conditional can only work with one entire register"
+                            "conditional can only work with one entire register",
                         )
 
                 for i in range(op.width - 1):
                     if command.args[i].index[0] >= command.args[i + 1].index[0]:
                         raise ValueError(
-                            "conditional can only work with one entire register"
+                            "conditional can only work with one entire register",
                         )
 
                 if self.circuit.get_c_register(condition_name).size != op.width:
                     raise ValueError(
-                        "conditional can only work with one entire register"
+                        "conditional can only work with one entire register",
                     )
 
                 ssabool = self.module.module.builder.icmp(

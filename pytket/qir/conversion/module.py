@@ -17,8 +17,6 @@ This module defines an extension for the PyQir SimpleModule
 for the needs of generating QIR from Pytket circuits.
 """
 
-from typing import Optional
-
 from pyqir import BasicQisBuilder, SimpleModule
 
 from pytket.wasm import WasmFileHandler
@@ -37,7 +35,7 @@ class tketqirModule:
         name: str,
         num_qubits: int,
         num_results: int,
-        wasm_handler: Optional[WasmFileHandler] = None,
+        wasm_handler: WasmFileHandler | None = None,
     ) -> None:
         self.module = SimpleModule(name, num_qubits, num_results)
 
