@@ -64,5 +64,197 @@ def test_pytket_qir_qasm_classical_1(profile: QIRProfile) -> None:
     )
 
 
+@pytest.mark.parametrize(
+    "profile",
+    [
+        QIRProfile.ADAPTIVE,
+        QIRProfile.AZUREADAPTIVE,
+        QIRProfile.PYTKET,
+    ],
+)
+def test_bitreg_as_bit_1(profile: QIRProfile) -> None:
+    # https://github.com/CQCL/tket/issues/1896
+    qasm = """OPENQASM 2.0;
+include "hqslib1.inc";
+creg a[1];
+creg b[2];
+a = a ^ b[0];
+"""
+    circ = circuit_from_qasm_str(qasm)
+    run_qir_gen_and_check(
+        circ,
+        "test_bitreg_as_bit_1",
+        profile=profile,
+    )
+
+
+@pytest.mark.parametrize(
+    "profile",
+    [
+        QIRProfile.ADAPTIVE,
+        QIRProfile.AZUREADAPTIVE,
+        QIRProfile.PYTKET,
+    ],
+)
+def test_bitreg_as_bit_2(profile: QIRProfile) -> None:
+    # https://github.com/CQCL/tket/issues/1896
+    qasm = """OPENQASM 2.0;
+include "hqslib1.inc";
+creg a[1];
+creg b[2];
+a = a[0] ^ b[0];
+"""
+    circ = circuit_from_qasm_str(qasm)
+    run_qir_gen_and_check(
+        circ,
+        "test_bitreg_as_bit_2",
+        profile=profile,
+    )
+
+
+@pytest.mark.parametrize(
+    "profile",
+    [
+        QIRProfile.ADAPTIVE,
+        QIRProfile.AZUREADAPTIVE,
+        QIRProfile.PYTKET,
+    ],
+)
+def test_bitreg_as_bit_3(profile: QIRProfile) -> None:
+    # https://github.com/CQCL/tket/issues/1896
+    qasm = """OPENQASM 2.0;
+include "hqslib1.inc";
+creg a[1];
+creg b[2];
+a[0] = a[0] ^ b[0];
+"""
+    circ = circuit_from_qasm_str(qasm)
+    run_qir_gen_and_check(
+        circ,
+        "test_bitreg_as_bit_3",
+        profile=profile,
+    )
+
+
+@pytest.mark.parametrize(
+    "profile",
+    [
+        QIRProfile.ADAPTIVE,
+        QIRProfile.AZUREADAPTIVE,
+        QIRProfile.PYTKET,
+    ],
+)
+def test_bitreg_as_bit_4(profile: QIRProfile) -> None:
+    # https://github.com/CQCL/tket/issues/1896
+    qasm = """OPENQASM 2.0;
+include "hqslib1.inc";
+creg a[1];
+creg b[2];
+a[0] = a ^ b[0];
+"""
+    circ = circuit_from_qasm_str(qasm)
+    run_qir_gen_and_check(
+        circ,
+        "test_bitreg_as_bit_4",
+        profile=profile,
+    )
+
+
+@pytest.mark.parametrize(
+    "profile",
+    [
+        QIRProfile.ADAPTIVE,
+        QIRProfile.AZUREADAPTIVE,
+        QIRProfile.PYTKET,
+    ],
+)
+def test_bitreg_as_bit_5(profile: QIRProfile) -> None:
+    # https://github.com/CQCL/tket/issues/1896
+    qasm = """OPENQASM 2.0;
+include "hqslib1.inc";
+creg a[1];
+creg b[2];
+a = a + b[0];
+"""
+    circ = circuit_from_qasm_str(qasm)
+    run_qir_gen_and_check(
+        circ,
+        "test_bitreg_as_bit_5",
+        profile=profile,
+    )
+
+
+@pytest.mark.parametrize(
+    "profile",
+    [
+        QIRProfile.ADAPTIVE,
+        QIRProfile.AZUREADAPTIVE,
+        QIRProfile.PYTKET,
+    ],
+)
+def test_bitreg_as_bit_6(profile: QIRProfile) -> None:
+    # https://github.com/CQCL/tket/issues/1896
+    qasm = """OPENQASM 2.0;
+include "hqslib1.inc";
+creg a[1];
+creg b[2];
+a = a[0] + b[0];
+"""
+    circ = circuit_from_qasm_str(qasm)
+    run_qir_gen_and_check(
+        circ,
+        "test_bitreg_as_bit_6",
+        profile=profile,
+    )
+
+
+@pytest.mark.parametrize(
+    "profile",
+    [
+        QIRProfile.ADAPTIVE,
+        QIRProfile.AZUREADAPTIVE,
+        QIRProfile.PYTKET,
+    ],
+)
+def test_bitreg_as_bit_7(profile: QIRProfile) -> None:
+    # https://github.com/CQCL/tket/issues/1896
+    qasm = """OPENQASM 2.0;
+include "hqslib1.inc";
+creg a[1];
+creg b[2];
+a[0] = a[0] + b[0];
+"""
+    circ = circuit_from_qasm_str(qasm)
+    run_qir_gen_and_check(
+        circ,
+        "test_bitreg_as_bit_7",
+        profile=profile,
+    )
+
+
+@pytest.mark.parametrize(
+    "profile",
+    [
+        QIRProfile.ADAPTIVE,
+        QIRProfile.AZUREADAPTIVE,
+        QIRProfile.PYTKET,
+    ],
+)
+def test_bitreg_as_bit_8(profile: QIRProfile) -> None:
+    # https://github.com/CQCL/tket/issues/1896
+    qasm = """OPENQASM 2.0;
+include "hqslib1.inc";
+creg a[1];
+creg b[2];
+a[0] = a + b[0];
+"""
+    circ = circuit_from_qasm_str(qasm)
+    run_qir_gen_and_check(
+        circ,
+        "test_bitreg_as_bit_8",
+        profile=profile,
+    )
+
+
 if __name__ == "__main__":
     test_pytket_qir_qasm()
