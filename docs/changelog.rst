@@ -3,10 +3,11 @@
 Changelog
 ~~~~~~~~~
 
-Unreleased
-----------
+0.23.0 (May 2025)
+-----------------
 
 * Support Python 3.13.
+* Update pytket minimium version requirement to 2.4.1.
 
 0.22.0 (April 2025)
 -------------------
