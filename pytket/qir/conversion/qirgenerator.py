@@ -430,13 +430,12 @@ class AbstractQirGenerator:
                 ssa_left,
                 ssa_right,
             )
-            return output_instruction  # type: ignore
-        elif type(reg) is BitRegister:
+            return output_instruction  # type: ignore  # noqa: RET504
+        if type(reg) is BitRegister:
             return self._get_i64_ssa_reg(reg.name)
-        elif type(reg) is int:
+        if type(reg) is int:
             return pyqir.const(self.qir_int_type, reg)
-        else:
-            raise ValueError(f"unsupported classical register operation: {type(reg)}")
+        raise ValueError(f"unsupported classical register operation: {type(reg)}")
 
     def _get_ssa_from_cl_bit_op(
         self,
@@ -445,10 +444,10 @@ class AbstractQirGenerator:
         if type(bit) is Bit:
             result = self._get_bit_from_creg(bit.reg_name, bit.index[0])
 
-            return result
-        elif type(bit) is int:
+            return result  # noqa: RET504
+        if type(bit) is int:
             return pyqir.const(self.qir_bool_type, bit)
-        elif type(bit) in _TK_CLOPS_TO_PYQIR_BIT:
+        if type(bit) in _TK_CLOPS_TO_PYQIR_BIT:
             assert len(bit.args) == 1  # type: ignore
 
             ssa_left = pyqir.const(self.qir_bool_type, 1)
@@ -460,8 +459,8 @@ class AbstractQirGenerator:
                 ssa_right,
             )
 
-            return output_instruction  # type: ignore
-        elif type(bit) in _TK_CLOPS_TO_PYQIR_2_BITS:
+            return output_instruction  # type: ignore  # noqa: RET504
+        if type(bit) in _TK_CLOPS_TO_PYQIR_2_BITS:
             assert len(bit.args) == 2  # type: ignore # noqa: PLR2004
 
             ssa_left = self._get_ssa_from_cl_bit_op(bit.args[0])  # type: ignore
@@ -472,9 +471,8 @@ class AbstractQirGenerator:
                 self.module.builder,
             )(ssa_left, ssa_right)
 
-            return output_instruction  # type: ignore
-        else:
-            raise ValueError(f"unsupported bitwise operation {type(bit)}")
+            return output_instruction  # type: ignore  # noqa: RET504
+        raise ValueError(f"unsupported bitwise operation {type(bit)}")
 
     def get_wasm_sar(self) -> dict[str, str]:
         return self.wasm_sar_dict
@@ -706,103 +704,101 @@ class AbstractQirGenerator:
         if isinstance(arg, int):
             if expect_register:
                 return False, pyqir.const(self.qir_int_type, arg)
-            elif arg not in (0, 1):
+            if arg not in (0, 1):
                 raise ValueError(f"Invalid bit value {arg}")
-            else:
-                return True, pyqir.const(self.qir_bool_type, arg)
-        elif isinstance(arg, ClBitVar):
+            return True, pyqir.const(self.qir_bool_type, arg)
+        if isinstance(arg, ClBitVar):
             cmd_arg: Bit = cmd_args[bit_posn[arg.index]]
             return True, self._get_bit_from_creg(cmd_arg.reg_name, cmd_arg.index[0])
-        elif isinstance(arg, ClRegVar):
+        if isinstance(arg, ClRegVar):
             return False, self._get_i64_ssa_reg(
                 cmd_args[reg_posn[arg.index][0]].reg_name,
             )
-        else:
-            assert isinstance(arg, ClExpr)
-            expr_op: ClOp = arg.op
-            ssa_args = [
-                self._get_ssa_from_clexpr_arg(
-                    expr_arg,
-                    bit_posn,
-                    reg_posn,
-                    cmd_args,
-                    expr_op in _TK_CLEXPR_OP_WITH_REG_ARGS,
-                )[1]
-                for expr_arg in arg.args
-            ]
-            match expr_op:
-                case ClOp.BitAnd | ClOp.BitOr | ClOp.BitXor | ClOp.BitEq | ClOp.BitNeq:
-                    return True, _TK_CLEXPR_OP_TO_PYQIR[expr_op](self.module.builder)(
-                        *ssa_args,
-                    )
-                case ClOp.BitNot:
-                    # Implemented as x --> 1 - x
-                    assert len(ssa_args) == 1
-                    return True, self.module.builder.sub(
-                        pyqir.const(self.qir_bool_type, 1),
-                        ssa_args[0],
-                    )
-                case ClOp.BitZero:
-                    assert len(ssa_args) == 0
-                    return True, pyqir.const(self.qir_bool_type, 0)
-                case ClOp.BitOne:
-                    assert len(ssa_args) == 0
-                    return True, pyqir.const(self.qir_bool_type, 1)
-                case (
-                    ClOp.RegAnd
-                    | ClOp.RegOr
-                    | ClOp.RegXor
-                    | ClOp.RegAdd
-                    | ClOp.RegSub
-                    | ClOp.RegMul
-                    | ClOp.RegLsh
-                    | ClOp.RegRsh
-                ):
-                    assert len(ssa_args) == 2  # noqa: PLR2004
-                    return False, _TK_CLEXPR_OP_TO_PYQIR[expr_op](self.module.builder)(
-                        *ssa_args,
-                    )
-                case (
-                    ClOp.RegEq
-                    | ClOp.RegNeq
-                    | ClOp.RegLt
-                    | ClOp.RegGt
-                    | ClOp.RegLeq
-                    | ClOp.RegGeq
-                ):
-                    assert len(ssa_args) == 2  # noqa: PLR2004
-                    return True, _TK_CLEXPR_OP_TO_PYQIR[expr_op](self.module.builder)(
-                        *ssa_args,
-                    )
-                case ClOp.RegNot:
-                    # Implemented as x --> 2^self.int_size - 1 - x
-                    assert len(ssa_args) == 1
-                    return False, self.module.builder.sub(
-                        pyqir.const(self.qir_int_type, (1 << self.int_size) - 1),
-                        ssa_args[0],
-                    )
-                case ClOp.RegZero:
-                    assert len(ssa_args) == 0
-                    return False, pyqir.const(self.qir_int_type, 0)
-                case ClOp.RegOne:
-                    # Sets all bits in the register to 1
-                    assert len(ssa_args) == 0
-                    return False, pyqir.const(
-                        self.qir_int_type,
-                        (1 << self.int_size) - 1,
-                    )
-                case ClOp.RegNeg:
-                    # Implemented as x --> 0 - x
-                    assert len(ssa_args) == 1
-                    return False, self.module.builder.sub(
-                        pyqir.const(self.qir_int_type, 0),
-                        ssa_args[0],
-                    )
-                case ClOp.RegDiv | ClOp.RegPow:
-                    # https://github.com/CQCL/pytket-qir/issues/181
-                    raise ValueError(f"Classical operation {expr_op} not supported")
-                case _:
-                    raise ValueError("Invalid classical operation")
+        assert isinstance(arg, ClExpr)
+        expr_op: ClOp = arg.op
+        ssa_args = [
+            self._get_ssa_from_clexpr_arg(
+                expr_arg,
+                bit_posn,
+                reg_posn,
+                cmd_args,
+                expr_op in _TK_CLEXPR_OP_WITH_REG_ARGS,
+            )[1]
+            for expr_arg in arg.args
+        ]
+        match expr_op:
+            case ClOp.BitAnd | ClOp.BitOr | ClOp.BitXor | ClOp.BitEq | ClOp.BitNeq:
+                return True, _TK_CLEXPR_OP_TO_PYQIR[expr_op](self.module.builder)(
+                    *ssa_args,
+                )
+            case ClOp.BitNot:
+                # Implemented as x --> 1 - x
+                assert len(ssa_args) == 1
+                return True, self.module.builder.sub(
+                    pyqir.const(self.qir_bool_type, 1),
+                    ssa_args[0],
+                )
+            case ClOp.BitZero:
+                assert len(ssa_args) == 0
+                return True, pyqir.const(self.qir_bool_type, 0)
+            case ClOp.BitOne:
+                assert len(ssa_args) == 0
+                return True, pyqir.const(self.qir_bool_type, 1)
+            case (
+                ClOp.RegAnd
+                | ClOp.RegOr
+                | ClOp.RegXor
+                | ClOp.RegAdd
+                | ClOp.RegSub
+                | ClOp.RegMul
+                | ClOp.RegLsh
+                | ClOp.RegRsh
+            ):
+                assert len(ssa_args) == 2  # noqa: PLR2004
+                return False, _TK_CLEXPR_OP_TO_PYQIR[expr_op](self.module.builder)(
+                    *ssa_args,
+                )
+            case (
+                ClOp.RegEq
+                | ClOp.RegNeq
+                | ClOp.RegLt
+                | ClOp.RegGt
+                | ClOp.RegLeq
+                | ClOp.RegGeq
+            ):
+                assert len(ssa_args) == 2  # noqa: PLR2004
+                return True, _TK_CLEXPR_OP_TO_PYQIR[expr_op](self.module.builder)(
+                    *ssa_args,
+                )
+            case ClOp.RegNot:
+                # Implemented as x --> 2^self.int_size - 1 - x
+                assert len(ssa_args) == 1
+                return False, self.module.builder.sub(
+                    pyqir.const(self.qir_int_type, (1 << self.int_size) - 1),
+                    ssa_args[0],
+                )
+            case ClOp.RegZero:
+                assert len(ssa_args) == 0
+                return False, pyqir.const(self.qir_int_type, 0)
+            case ClOp.RegOne:
+                # Sets all bits in the register to 1
+                assert len(ssa_args) == 0
+                return False, pyqir.const(
+                    self.qir_int_type,
+                    (1 << self.int_size) - 1,
+                )
+            case ClOp.RegNeg:
+                # Implemented as x --> 0 - x
+                assert len(ssa_args) == 1
+                return False, self.module.builder.sub(
+                    pyqir.const(self.qir_int_type, 0),
+                    ssa_args[0],
+                )
+            case ClOp.RegDiv | ClOp.RegPow:
+                # https://github.com/CQCL/pytket-qir/issues/181
+                raise ValueError(f"Classical operation {expr_op} not supported")
+            case _:
+                raise ValueError("Invalid classical operation")
 
     def conv_clexprop(self, op: ClExprOp, args: list[Bit]) -> None:
         wexpr: WiredClExpr = op.expr

@@ -95,7 +95,7 @@ class AdaptiveProfileQirGenerator(AbstractQirGenerator):
             self.module.module.builder.and_(ssa_index, self.get_ssa_vars(creg)),
         )
 
-        return result
+        return result  # noqa: RET504
 
     def _set_bit_in_creg_blocks(self, creg: str, index: int, ssa_bit: Value) -> None:
         ssa_int = self.get_ssa_vars(creg)
@@ -231,8 +231,7 @@ class AdaptiveProfileQirGenerator(AbstractQirGenerator):
             ssa_var = pyqir.const(self.qir_int_type, 0)
             self.ssa_vars[reg_name] = [(ssa_var, self.active_block)]
             return ssa_var
-        else:
-            return cast("Value", self.ssa_vars[reg_name])
+        return cast("Value", self.ssa_vars[reg_name])
 
     def _add_phi(self) -> None:
         """
