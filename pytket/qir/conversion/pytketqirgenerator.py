@@ -144,7 +144,7 @@ class PytketQirGenerator(AbstractQirGenerator):
             self.get_int_from_creg,
             [self.get_ssa_vars(name)],
         )
-        return ssa_var
+        return ssa_var  # noqa: RET504
 
     def set_ssa_vars(self, reg_name: str, ssa_i64: Value, trunc: bool) -> None:
         self.module.builder.call(
@@ -185,8 +185,7 @@ class PytketQirGenerator(AbstractQirGenerator):
             )
             self.ssa_vars[reg_name] = ssa_var
             return ssa_var
-        else:
-            return cast("Value", self.ssa_vars[reg_name])  # type: ignore
+        return cast("Value", self.ssa_vars[reg_name])  # type: ignore
 
     def conv_conditional(self, command: Command, op: Conditional) -> None:  # noqa: PLR0915, PLR0912
         condition_name = command.args[0].reg_name

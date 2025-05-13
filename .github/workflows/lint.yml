@@ -1,13 +1,11 @@
 name: Lint python projects
 
 on:
-  pull_request:
-    branches:
-      - main
+  pull_request: {}
+  workflow_dispatch: {}
 
   push:
     branches:
-      - main
       - 'wheel/**'
       - 'runci/**'
 
@@ -29,6 +27,6 @@ jobs:
     - name: Run ruff lint
       run: |
         ruff check .
-    - name: Run ruff
+    - name: Check formatting
       run: |
         ruff format --check .
