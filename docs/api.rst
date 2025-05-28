@@ -3,4 +3,4 @@ API documentation
 
 .. automodule:: pytket.qir
     :special-members:
-    :members: pytket_to_qir, QIRFormat, QIRProfile
+    :members: pytket_to_qir, QIRFormat, QIRProfile, ClassicalRegisterWidthError
