@@ -60,10 +60,15 @@ class QIRProfile(Enum):
 class ClassicalRegisterWidthError(Exception):
     """Error trying to convert a circuit with a classical register exceeding the maximum width"""
 
-    def __init__(self, width: int, max_width: int = 64) -> None:
-        super().__init__(
+    def __init__(
+        self, width: int, max_width: int = 64, hint: str | None = None
+    ) -> None:
+        msg = (
             f"Classical register of width {width} exceeds maximum width ({max_width})."
         )
+        if hint is not None:
+            msg += f" Hint: {hint}."
+        super().__init__(msg)
 
 
 def pytket_to_qir(  # noqa: PLR0912, PLR0913
@@ -233,7 +238,11 @@ def check_circuit(
 
     for creg in circuit.c_registers:
         if creg.size > int_type:
-            raise ClassicalRegisterWidthError(width=creg.size, max_width=int_type)
+            raise ClassicalRegisterWidthError(
+                width=creg.size,
+                max_width=int_type,
+                hint="try setting cut_pytket_register=True` when calling `pytket_to_qir()`",
+            )
 
     set_circ_register = {creg.name for creg in circuit.c_registers}
     for b in {b.reg_name for b in circuit.bits}:
