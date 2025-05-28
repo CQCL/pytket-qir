@@ -14,4 +14,4 @@
 
 """Backends for processing pytket circuits with Quantinuum devices"""
 
-from .api import QIRFormat, QIRProfile, pytket_to_qir
+from .api import ClassicalRegisterWidthError, QIRFormat, QIRProfile, pytket_to_qir

@@ -20,6 +20,7 @@ from utilities import run_qir_gen_and_check  # type: ignore
 from pytket.circuit import Bit, Circuit
 from pytket.passes import FlattenRelabelRegistersPass
 from pytket.qir.conversion.api import (
+    ClassicalRegisterWidthError,
     QIRFormat,
     check_circuit,
     pytket_to_qir,
@@ -67,7 +68,7 @@ def test_pytket_api_creg() -> None:
 
     circ.add_c_register("c2", 100)
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ClassicalRegisterWidthError):
         pytket_to_qir(circ)
 
 

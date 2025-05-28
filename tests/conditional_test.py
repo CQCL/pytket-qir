@@ -28,7 +28,12 @@ from pytket.circuit import (
 )
 from pytket.circuit.clexpr import wired_clexpr_from_logic_exp
 from pytket.circuit.logic_exp import BitNot, BitWiseOp, create_bit_logic_exp
-from pytket.qir.conversion.api import QIRFormat, QIRProfile, pytket_to_qir
+from pytket.qir.conversion.api import (
+    ClassicalRegisterWidthError,
+    QIRFormat,
+    QIRProfile,
+    pytket_to_qir,
+)
 
 
 @pytest.mark.parametrize(
@@ -344,7 +349,7 @@ def test_pytket_qir_conditional_12(profile: QIRProfile) -> None:
         circ.X(0, condition=reg_eq(syn, 4))
         circ.X(0, condition=reg_eq(syn, 4))
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ClassicalRegisterWidthError):
         pytket_to_qir(
             circ,
             name="ptest_pytket_qir_conditional_12",
