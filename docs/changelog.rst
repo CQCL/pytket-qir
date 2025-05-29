@@ -3,6 +3,11 @@
 Changelog
 ~~~~~~~~~
 
+0.24.0 (May 2025)
+-----------------
+
+* Define error class for classical registers being too wide.
+
 0.23.0 (May 2025)
 -----------------
 
