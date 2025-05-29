@@ -3,6 +3,11 @@
 Changelog
 ~~~~~~~~~
 
+0.24.1 (May 2025)
+-----------------
+
+* Store more information in `ClassicalRegisterWidthError`.
+
 0.24.0 (May 2025)
 -----------------
 
