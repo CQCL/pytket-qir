@@ -63,6 +63,9 @@ class ClassicalRegisterWidthError(Exception):
     def __init__(
         self, width: int, max_width: int = 64, hint: str | None = None
     ) -> None:
+        self.width = width
+        self.max_width = max_width
+        self.hint = hint
         msg = (
             f"Classical register of width {width} exceeds maximum width ({max_width})."
         )
