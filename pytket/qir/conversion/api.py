@@ -12,10 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-public api for qir conversion from pytket
-"""
-
 from enum import Enum
 from typing import TYPE_CHECKING
 
