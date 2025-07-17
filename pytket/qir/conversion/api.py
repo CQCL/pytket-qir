@@ -206,8 +206,7 @@ def pytket_to_qir(  # noqa: PLR0911, PLR0912, PLR0913
         return populated_module.module.bitcode()
     elif qir_format == QIRFormat.STRING:
         return populated_module.module.ir()
-    else:
-        assert not "unsupported return type"  # type: ignore.
+    assert not "unsupported return type"  # type: ignore
     return None
 
 
