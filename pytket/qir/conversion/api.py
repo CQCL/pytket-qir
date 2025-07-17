@@ -78,7 +78,7 @@ def pytket_to_qir(  # noqa: PLR0912, PLR0913
     cut_pytket_register: bool = False,
     profile: QIRProfile = QIRProfile.PYTKET,
 ) -> str | bytes | None:
-    """converts given pytket circuit to qir
+    """Converts the given pytket :py:class:`~pytket._tket.circuit.Circuit` to qir
 
     :param circ: given circuit
     :param name: name for the qir module created

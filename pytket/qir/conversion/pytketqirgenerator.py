@@ -36,9 +36,9 @@ from .qirgenerator import (
 
 class PytketQirGenerator(AbstractQirGenerator):
     """Generates QIR from a pytket circuit in line with the pytket profile.
-    This profile uses the functions `get_creg_bit`, `set_creg_bit`,
-    `set_creg_to_int`, `create_creg`, `get_int_from_creg` and
-    `mz_to_creg_bit` for the handling of the classical registers.
+    This profile uses the functions ``get_creg_bit``, ``set_creg_bit``,
+    ``set_creg_to_int``, ``create_creg``, ``get_int_from_creg`` and
+    ``mz_to_creg_bit`` for the handling of the classical registers.
     The other aspects of the QIR file are identical to the adaptive profile.
     """
 
