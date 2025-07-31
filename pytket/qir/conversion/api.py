@@ -12,10 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-public api for qir conversion from pytket
-"""
-
 from enum import Enum
 from typing import TYPE_CHECKING
 
@@ -74,7 +70,7 @@ class ClassicalRegisterWidthError(Exception):
         super().__init__(msg)
 
 
-def pytket_to_qir(  # noqa: PLR0912, PLR0913
+def pytket_to_qir(  # noqa: PLR0911, PLR0912, PLR0913
     circ: Circuit,
     name: str = "Generated from input pytket circuit",
     qir_format: QIRFormat = QIRFormat.BINARY,
@@ -82,7 +78,7 @@ def pytket_to_qir(  # noqa: PLR0912, PLR0913
     cut_pytket_register: bool = False,
     profile: QIRProfile = QIRProfile.PYTKET,
 ) -> str | bytes | None:
-    """converts given pytket circuit to qir
+    """Converts the given pytket :py:class:`~pytket._tket.circuit.Circuit` to qir
 
     :param circ: given circuit
     :param name: name for the qir module created
@@ -186,7 +182,7 @@ def pytket_to_qir(  # noqa: PLR0912, PLR0913
             return bitcode
         if qir_format == QIRFormat.STRING:
             return result
-        assert not "unsupported return type"  # type: ignore  # noqa: RET503
+        assert not "unsupported return type"  # type: ignore
 
     elif qir_generator.has_wasm:
         wasm_sar_dict: dict[str, str] = qir_generator.get_wasm_sar()
@@ -204,14 +200,14 @@ def pytket_to_qir(  # noqa: PLR0912, PLR0913
             return bitcode
         if qir_format == QIRFormat.STRING:
             return result
-        assert not "unsupported return type"  # type: ignore  # noqa: RET503
+        assert not "unsupported return type"  # type: ignore
 
     elif qir_format == QIRFormat.BINARY:
         return populated_module.module.bitcode()
     elif qir_format == QIRFormat.STRING:
         return populated_module.module.ir()
-    else:
-        assert not "unsupported return type"  # type: ignore  # noqa: RET503
+    assert not "unsupported return type"  # type: ignore
+    return None
 
 
 def check_circuit(

@@ -968,7 +968,7 @@ class AbstractQirGenerator:
 
     @abc.abstractmethod
     def record_output(self) -> None:
-        """function to record the output"""
+        """Function to record the output"""
 
     def circuit_to_module(
         self,
