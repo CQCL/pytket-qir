@@ -248,10 +248,17 @@ class AbstractQirGenerator:
         self.order: list[pyqir.Function | None] = [None] * (self.circuit.n_qubits + 1)
         self.group: list[pyqir.Function | None] = [None] * (self.circuit.n_qubits + 1)
         self.sleep: list[pyqir.Function | None] = [None] * (self.circuit.n_qubits + 1)
+        self.rngseed: pyqir.Function | None = None
+        self.rngnum_bound: pyqir.Function | None = None
+        self.rngnum: pyqir.Function | None = None
+        self.rngindex: pyqir.Function | None = None
+        self.jobnum: pyqir.Function | None = None
 
         self.wasm: dict[str, pyqir.Function] = {}
 
         self.additional_quantum_gates: dict[OpType, pyqir.Function] = {}
+
+        self.rng_bound: Value | None = None
 
     @abc.abstractmethod
     def _get_bit_from_creg(self, creg: str, index: int) -> Value:
@@ -348,6 +355,101 @@ class AbstractQirGenerator:
             [
                 *qir_qubits,
                 pyqir.const(pyqir.Type.double(self.module.module.context), duration),
+            ],
+        )
+
+    def _add_rngbound_op(self, qir_creg: Value) -> None:
+        # raise ValueError(f"FOUNd BOUND {qir_creg}")
+        self.rng_bound = qir_creg
+
+    def _add_rngseed_op(self, qir_creg: Value) -> None:
+        # ___random_seed
+        if self.rngseed is None:
+            paramlist = [self.qir_int_type]
+            self.rngseed = self.module.module.add_external_function(
+                "___random_seed",
+                pyqir.FunctionType(
+                    pyqir.Type.void(self.module.module.context),
+                    paramlist,
+                ),
+            )
+
+        self.module.builder.call(
+            self.rngseed,  # type: ignore
+            [
+                qir_creg,
+            ],
+        )
+
+    def _add_rngnum_op(self, qir_creg_name: str) -> None:
+        if self.rng_bound is None:
+            # ___random_int
+            if self.rngnum is None:
+                self.rngnum = self.module.module.add_external_function(
+                    "___random_int",
+                    pyqir.FunctionType(
+                        self.qir_int_type,
+                        [],
+                    ),
+                )
+
+            rng_num = self.module.builder.call(
+                self.rngnum,  # type: ignore
+                [],
+            )
+            self.set_ssa_vars(qir_creg_name, rng_num, False)
+        else:
+            # ___random_int_bounded
+            if self.rngnum_bound is None:
+                self.rngnum_bound = self.module.module.add_external_function(
+                    "___random_int_bounded",
+                    pyqir.FunctionType(
+                        self.qir_int_type,
+                        [self.qir_int_type],
+                    ),
+                )
+
+            rng_num = self.module.builder.call(
+                self.rngnum_bound,  # type: ignore
+                [self.rng_bound],
+            )
+            self.set_ssa_vars(qir_creg_name, rng_num, False)
+
+    def _add_rngindex_op(self, qir_creg: Value) -> None:
+        # ___set_random_index
+        if self.rngindex is None:
+            paramlist = [self.qir_int_type]
+            self.rngindex = self.module.module.add_external_function(
+                "___set_random_index",
+                pyqir.FunctionType(
+                    pyqir.Type.void(self.module.module.context),
+                    paramlist,
+                ),
+            )
+
+        self.module.builder.call(
+            self.rngindex,  # type: ignore
+            [
+                qir_creg,
+            ],
+        )
+
+    def _add_jobnum_op(self, qir_creg: Value) -> None:
+        # ___get_current_shot
+        if self.jobnum is None:
+            paramlist = [self.qir_int_type]
+            self.jobnum = self.module.module.add_external_function(
+                "___get_current_shot",
+                pyqir.FunctionType(
+                    pyqir.Type.void(self.module.module.context),
+                    paramlist,
+                ),
+            )
+
+        self.module.builder.call(
+            self.jobnum,  # type: ignore
+            [
+                qir_creg,
             ],
         )
 
@@ -887,6 +989,30 @@ class AbstractQirGenerator:
         else:
             raise ValueError("op is not supported yet")
 
+    def conv_RNGNumOp(self, bits: list[Bit]) -> None:
+        creg_name = bits[0].reg_name
+        for x in bits:
+            assert creg_name == x.reg_name
+
+        self._add_rngnum_op(creg_name)
+
+    def conv_RNGJobOp(self, optype: OpType, bits: list[Bit]) -> None:
+        creg_name = bits[0].reg_name
+        for x in bits:
+            assert creg_name == x.reg_name
+        creg = self._get_i64_ssa_reg(creg_name)
+
+        if optype == OpType.RNGSeed:
+            self._add_rngseed_op(creg)
+        elif optype == OpType.RNGBound:
+            self._add_rngbound_op(creg)
+        elif optype == OpType.RNGIndex:
+            self._add_rngindex_op(creg)
+        elif optype == OpType.JobShotNum:
+            self._add_jobnum_op(creg)
+        else:
+            raise Value(f"unexpected op type for RNG: {optype}")
+
     def conv_other(
         self,
         bits: list[Bit],
@@ -948,6 +1074,17 @@ class AbstractQirGenerator:
         elif op.type == OpType.Phase:
             # ignore phase op
             pass
+
+        elif op.type == OpType.RNGNum:
+            self.conv_RNGNumOp(bits)
+
+        elif op.type in [
+            OpType.RNGSeed,
+            OpType.RNGBound,
+            OpType.RNGIndex,
+            OpType.JobShotNum,
+        ]:
+            self.conv_RNGJobOp(op.type, bits)
 
         elif isinstance(op, ClExprOp):
             self.conv_clexprop(op, args)
