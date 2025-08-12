@@ -375,7 +375,7 @@ class AbstractQirGenerator:
             )
 
         self.module.builder.call(
-            self.rngseed,  # type: ignore
+            self.rngseed,
             [
                 qir_creg,
             ],
@@ -394,7 +394,7 @@ class AbstractQirGenerator:
                 )
 
             rng_num = self.module.builder.call(
-                self.rngnum,  # type: ignore
+                self.rngnum,
                 [],
             )
             self.set_ssa_vars(qir_creg_name, rng_num, False)
@@ -410,7 +410,7 @@ class AbstractQirGenerator:
                 )
 
             rng_num = self.module.builder.call(
-                self.rngnum_bound,  # type: ignore
+                self.rngnum_bound,
                 [self.rng_bound],
             )
             self.set_ssa_vars(qir_creg_name, rng_num, False)
@@ -428,7 +428,7 @@ class AbstractQirGenerator:
             )
 
         self.module.builder.call(
-            self.rngindex,  # type: ignore
+            self.rngindex,
             [
                 qir_creg,
             ],
@@ -447,7 +447,7 @@ class AbstractQirGenerator:
             )
 
         self.module.builder.call(
-            self.jobnum,  # type: ignore
+            self.jobnum,
             [
                 qir_creg,
             ],
@@ -1011,7 +1011,7 @@ class AbstractQirGenerator:
         elif optype == OpType.JobShotNum:
             self._add_jobnum_op(creg)
         else:
-            raise Value(f"unexpected op type for RNG: {optype}")
+            raise ValueError(f"unexpected op type for RNG: {optype}")
 
     def conv_other(
         self,

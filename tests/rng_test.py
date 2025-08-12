@@ -136,7 +136,7 @@ def test_pytket_qir_rng_6(profile: QIRProfile) -> None:
     ],
 )
 def test_pytket_qir_rng_7(profile: QIRProfile) -> None:
-    # check that get_job_shot_num can;t be converted for the base profile
+    # check that get_job_shot_num can't be converted for the base profile
     circ = Circuit()
     jobcreg = circ.add_c_register("j", 32)
     circ.get_job_shot_num(jobcreg)
