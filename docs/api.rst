@@ -30,6 +30,8 @@ API documentation
         .. automethod:: conv_SetBitsOp
         .. automethod:: conv_WASMOp
         .. automethod:: conv_ZZPhase
+        .. automethod:: conv_RNGJobOp
+        .. automethod:: conv_RNGJobOpR
         .. automethod:: conv_clexprop
         .. automethod:: conv_conditional
         .. automethod:: conv_measure

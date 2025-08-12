@@ -3,6 +3,11 @@
 Changelog
 ~~~~~~~~~
 
+0.25.0 (unreleased)
+-------------------
+
+* add conversion of RNG and jobid functions
+
 0.24.1 (May 2025)
 -----------------
 
