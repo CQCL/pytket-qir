@@ -8,10 +8,11 @@ source_filename = "test_pytket_qir_rng_5"
 
 define void @main() #0 {
 entry:
-  call void @___set_random_index(i64 2056)
-  %0 = call i64 @___random_int()
+  call void @___set_random_index(i32 2056)
+  %0 = call i32 @___random_int()
+  %1 = zext i32 %0 to i64
   call void @__quantum__rt__array_record_output(i64 2, i8* null)
-  call void @__quantum__rt__int_record_output(i64 %0, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @0, i32 0, i32 0))
+  call void @__quantum__rt__int_record_output(i64 %1, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @0, i32 0, i32 0))
   call void @__quantum__rt__int_record_output(i64 2056, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @1, i32 0, i32 0))
   ret void
 }
@@ -22,9 +23,9 @@ declare void @__quantum__rt__int_record_output(i64, i8*)
 
 declare void @__quantum__rt__array_record_output(i64, i8*)
 
-declare void @___set_random_index(i64)
+declare void @___set_random_index(i32)
 
-declare i64 @___random_int()
+declare i32 @___random_int()
 
 attributes #0 = { "entry_point" "output_labeling_schema" "qir_profiles"="custom" "required_num_qubits"="0" "required_num_results"="0" }
 
