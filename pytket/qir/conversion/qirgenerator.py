@@ -376,12 +376,12 @@ class AbstractQirGenerator:
             )
 
         if self.int_size != 64:  # noqa: PLR2004
-            ssa_bit_i64 = self.module.module.builder.zext(qir_creg, self.qir_i64_type)
+            qir_creg_i64 = self.module.module.builder.zext(qir_creg, self.qir_i64_type)
 
             self.module.builder.call(
                 self.rngseed,
                 [
-                    ssa_bit_i64,
+                    qir_creg_i64,
                 ],
             )
 
@@ -410,10 +410,10 @@ class AbstractQirGenerator:
                 [],
             )
             if self.int_size != 32:  # noqa: PLR2004
-                ssa_bit_i64 = self.module.module.builder.zext(
+                rng_num_i64 = self.module.module.builder.zext(
                     rng_num, self.qir_int_type
                 )
-                self.set_ssa_vars(qir_creg_name, ssa_bit_i64, False)
+                self.set_ssa_vars(qir_creg_name, rng_num_i64, False)
             else:
                 self.set_ssa_vars(qir_creg_name, rng_num, False)
         else:
@@ -435,10 +435,10 @@ class AbstractQirGenerator:
                     self.rngnum_bound,
                     [bound],
                 )
-                ssa_bit_i64 = self.module.module.builder.zext(
+                rng_num_i64 = self.module.module.builder.zext(
                     rng_num, self.qir_int_type
                 )
-                self.set_ssa_vars(qir_creg_name, ssa_bit_i64, False)
+                self.set_ssa_vars(qir_creg_name, rng_num_i64, False)
             else:
                 rng_num = self.module.builder.call(
                     self.rngnum_bound,
