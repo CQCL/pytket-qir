@@ -1045,7 +1045,7 @@ class AbstractQirGenerator:
         elif optype == OpType.JobShotNum:
             self._add_jobnum_op(creg_name)
         else:
-            raise ValueError(f"unexpected op type for RNG: {optype}")
+            assert not "unexpected op type for RNG"
 
     def conv_RNGJobOp(self, optype: OpType, bits: list[Bit]) -> None:
         creg_name = bits[0].reg_name
@@ -1060,7 +1060,7 @@ class AbstractQirGenerator:
         elif optype == OpType.RNGIndex:
             self._add_rngindex_op(creg)
         else:
-            raise ValueError(f"unexpected op type for RNG: {optype}")
+            assert not "unexpected op type for RNG"
 
     def conv_other(
         self,
