@@ -9,8 +9,8 @@ source_filename = "test_pytket_qir_rng_6"
 define void @main() #0 {
 entry:
   %0 = call i1* @create_creg(i64 32)
-  %1 = call i64 @get_int_from_creg(i1* %0)
-  call void @___get_current_shot(i64 %1)
+  %1 = call i64 @___get_current_shot()
+  call void @set_creg_to_int(i1* %0, i64 %1)
   %2 = call i64 @get_int_from_creg(i1* %0)
   call void @__quantum__rt__int_record_output(i64 %2, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @0, i32 0, i32 0))
   ret void
@@ -32,7 +32,7 @@ declare i64 @get_int_from_creg(i1*)
 
 declare void @mz_to_creg_bit(%Qubit*, i1*, i64)
 
-declare void @___get_current_shot(i64)
+declare i64 @___get_current_shot()
 
 attributes #0 = { "entry_point" "output_labeling_schema" "qir_profiles"="custom" "required_num_qubits"="0" "required_num_results"="0" }
 

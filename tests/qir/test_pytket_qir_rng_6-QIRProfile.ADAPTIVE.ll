@@ -7,8 +7,8 @@ source_filename = "test_pytket_qir_rng_6"
 
 define void @main() #0 {
 entry:
-  call void @___get_current_shot(i64 0)
-  call void @__quantum__rt__int_record_output(i64 0, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @0, i32 0, i32 0))
+  %0 = call i64 @___get_current_shot()
+  call void @__quantum__rt__int_record_output(i64 %0, i8* getelementptr inbounds ([2 x i8], [2 x i8]* @0, i32 0, i32 0))
   ret void
 }
 
@@ -16,7 +16,7 @@ declare i1 @__quantum__qis__read_result__body(%Result*)
 
 declare void @__quantum__rt__int_record_output(i64, i8*)
 
-declare void @___get_current_shot(i64)
+declare i64 @___get_current_shot()
 
 attributes #0 = { "entry_point" "output_labeling_schema" "qir_profiles"="custom" "required_num_qubits"="0" "required_num_results"="0" }
 
