@@ -490,7 +490,7 @@ class AbstractQirGenerator:
             )
 
             jobnum32 = self.module.module.builder.trunc(
-                self.rng_bound, self.qir_i32_type
+                jobnum, self.qir_i32_type
             )
 
             self.set_ssa_vars(qir_creg, jobnum32, False)
