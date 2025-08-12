@@ -7,6 +7,7 @@ Changelog
 -------------------
 
 * add conversion of RNG and jobid functions
+* add check of gateset before converting
 
 0.24.1 (May 2025)
 -----------------

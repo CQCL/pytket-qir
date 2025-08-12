@@ -26,7 +26,7 @@ from pytket.predicates import GateSetPredicate
 from .azurebaseprofileqirgenerator import AzureBaseProfileQirGenerator
 from .azureprofileqirgenerator import AzureAdaptiveProfileQirGenerator
 from .baseprofileqirgenerator import BaseProfileQirGenerator
-from .gatesets import PYQIR_GATES
+from .gatesets import PYQIR_FULL_GATESET
 from .module import tketqirModule
 from .profileqirgenerator import AdaptiveProfileQirGenerator
 from .pytketqirgenerator import PytketQirGenerator
@@ -215,7 +215,7 @@ def pytket_to_qir(  # noqa: PLR0911, PLR0912, PLR0913
 def check_circuit(
     circuit: Circuit,
     int_type: int = 64,
-    gate_set: set[OpType] = PYQIR_GATES.base_gateset,
+    gate_set: set[OpType] = PYQIR_FULL_GATESET.base_gateset,
 ) -> None:
     """Checks the validity of the circuit.
 
@@ -255,4 +255,6 @@ def check_circuit(
 
     gate_set_predicate = GateSetPredicate(gate_set)
     if not gate_set_predicate.verify(circuit):
-        raise ValueError(f"Circuit contains gates that can't be converted to QIR. Supported gates: {gate_set}")
+        raise ValueError(
+            f"Circuit contains gates that can't be converted to QIR. Supported gates: {gate_set}"
+        )

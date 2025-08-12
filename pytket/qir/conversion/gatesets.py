@@ -177,3 +177,38 @@ PYQIR_GATES = CustomGateSet(
     gateset={},
     tk_to_gateset=lambda optype: _TK_TO_PYQIR[optype],
 )
+
+PYQIR_FULL_GATESET = CustomGateSet(
+    name="PyQir-full",
+    template=Template("__quantum__${func_nat}__${func_name}__${func_spec}"),
+    base_gateset=set(_TK_TO_PYQIR.keys()),
+    gateset={},
+    tk_to_gateset=lambda optype: _TK_TO_PYQIR[optype],
+)
+
+additional_gates = {
+    OpType.WASM,
+    OpType.SetBits,
+    OpType.JobShotNum,
+    OpType.RNGNum,
+    OpType.RNGIndex,
+    OpType.RNGBound,
+    OpType.RNGSeed,
+    OpType.RangePredicate,
+    OpType.TK2,
+    OpType.ZZPhase,
+    OpType.PhasedX,
+    OpType.ZZMax,
+    OpType.ClExpr,
+    OpType.Conditional,
+    OpType.CircBox,
+    OpType.Barrier,
+}
+
+PYQIR_FULL_GATESET = CustomGateSet(
+    name="PyQir-full",
+    template=Template("__quantum__${func_nat}__${func_name}__${func_spec}"),
+    base_gateset=set(_TK_TO_PYQIR.keys()).union(additional_gates),
+    gateset={},
+    tk_to_gateset=lambda optype: _TK_TO_PYQIR[optype],
+)
