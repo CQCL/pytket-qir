@@ -20,7 +20,7 @@ from utilities import (  # type: ignore
 from pytket.circuit import (
     Circuit,
 )
-from pytket.qir.conversion.api import QIRProfile
+from pytket.qir.conversion.api import QIRProfile, pytket_to_qir
 
 
 @pytest.mark.parametrize(
@@ -126,6 +126,22 @@ def test_pytket_qir_rng_6(profile: QIRProfile) -> None:
     jobcreg = circ.add_c_register("j", 32)
     circ.get_job_shot_num(jobcreg)
     run_qir_gen_and_check(circ, "test_pytket_qir_rng_6", profile=profile)
+
+
+@pytest.mark.parametrize(
+    "profile",
+    [
+        QIRProfile.BASE,
+        QIRProfile.AZUREBASE,
+    ],
+)
+def test_pytket_qir_rng_7(profile: QIRProfile) -> None:
+    # check that get_job_shot_num can;t be converted for the base profile
+    circ = Circuit()
+    jobcreg = circ.add_c_register("j", 32)
+    circ.get_job_shot_num(jobcreg)
+    with pytest.raises(ValueError):
+        pytket_to_qir(circ, profile=profile)
 
 
 if __name__ == "__main__":
