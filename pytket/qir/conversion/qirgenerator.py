@@ -362,7 +362,6 @@ class AbstractQirGenerator:
         )
 
     def _add_rngbound_op(self, qir_creg: Value) -> None:
-        # raise ValueError(f"FOUNd BOUND {qir_creg}")
         self.rng_bound = qir_creg
 
     def _add_rngseed_op(self, qir_creg: Value) -> None:
