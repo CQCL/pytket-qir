@@ -224,7 +224,9 @@ def check_circuit(
 
     :param circuit: given circuit
     :param int_type: integer bit width (32 or 64)
-    :param gate_set: set of OpTypes to use to check that all gates can be converted
+    :param gate_set: set of OpTypes to use to check that all gates can be converted,
+        the default value contains all gates which can be converted in any profile.
+        See PYQIR_FULL_GATESET.base_gateset
     :raises ClassicalRegisterWidthError: for problems with classical register width
     :raises ValueError: for other circuit problems
     """
