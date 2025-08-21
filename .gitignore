@@ -18,3 +18,5 @@ docs/poetry.lock
 docs/uv.lock
 docs/conf.py
 docs/_static
+pytket/qir/_metadata.py
+*.bc.dfl
