@@ -53,7 +53,7 @@ def test_pytket_qir_wasm(profile: QIRProfile) -> None:
     ],
 )
 def test_pytket_qir_wasm_2(profile: QIRProfile) -> None:
-    w = wasm.WasmFileHandler("testfile.wasm")
+    w = wasm.WasmFileHandler("tests/testfile.wasm")
     c = Circuit(6, 6)
     c0 = c.add_c_register("c0", 3)
     c1 = c.add_c_register("c1", 4)
@@ -83,7 +83,7 @@ def test_pytket_qir_wasm_2(profile: QIRProfile) -> None:
     ],
 )
 def test_pytket_qir_wasm_3(profile: QIRProfile) -> None:
-    w = wasm.WasmFileHandler("testfile.wasm", int_size=64)
+    w = wasm.WasmFileHandler("tests/testfile.wasm", int_size=64)
     c = Circuit(6, 6)
     c0 = c.add_c_register("c0", 3)
     c1 = c.add_c_register("c1", 4)
@@ -109,7 +109,7 @@ def test_pytket_qir_wasm_3(profile: QIRProfile) -> None:
     ],
 )
 def test_pytket_qir_wasm_4(profile: QIRProfile) -> None:
-    w = wasm.WasmFileHandler("testfile.wasm", int_size=64)
+    w = wasm.WasmFileHandler("tests/testfile.wasm", int_size=64)
     c = Circuit(6, 6)
     c.Measure(Qubit(0), Bit(0))
     c.Measure(Qubit(1), Bit(1))
@@ -138,7 +138,7 @@ def test_pytket_qir_wasm_4(profile: QIRProfile) -> None:
     ],
 )
 def test_pytket_qir_wasm_5(profile: QIRProfile) -> None:
-    w = wasm.WasmFileHandler("testfile.wasm", int_size=32, check_file=False)
+    w = wasm.WasmFileHandler("tests/testfile.wasm", int_size=32, check_file=False)
     c = Circuit(6, 6)
     c.Measure(Qubit(0), Bit(0))
     c.Measure(Qubit(1), Bit(1))
@@ -168,7 +168,7 @@ def test_pytket_qir_wasm_5(profile: QIRProfile) -> None:
     ],
 )
 def test_pytket_qir_wasm_6(profile: QIRProfile) -> None:
-    w = wasm.WasmFileHandler("testfile.wasm", int_size=32, check_file=False)
+    w = wasm.WasmFileHandler("tests/testfile.wasm", int_size=32, check_file=False)
     c = Circuit(6, 6)
     c.Measure(Qubit(0), Bit(0))
     c.Measure(Qubit(1), Bit(1))

@@ -2,12 +2,11 @@ API documentation
 ~~~~~~~~~~~~~~~~~
 
 .. automodule:: pytket.qir
-.. automodule:: pytket.qir._metadata
 .. automodule:: pytket.qir.conversion
 .. automodule:: pytket.qir.conversion.api
 
     .. autofunction:: pytket_to_qir
-    
+
     .. autoclass:: QIRFormat
 
     .. autoclass:: QIRProfile
