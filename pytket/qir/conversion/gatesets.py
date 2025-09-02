@@ -19,7 +19,7 @@ from enum import Enum
 from string import Template
 from typing import Any, NamedTuple
 
-from pytket import OpType  # type: ignore
+from pytket import OpType
 
 
 class FuncNat(Enum):

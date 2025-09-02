@@ -32,11 +32,11 @@ def check_qir_result(given_qir: str, filename: str, writefile: bool = False) -> 
     """
 
     if writefile:
-        with open(f"qir/{filename}.ll", "w") as f:
+        with open(f"tests/qir/{filename}.ll", "w") as f:
             f.write(given_qir)
         assert not "testcase is writing file"
 
-    with open(f"qir/{filename}.ll") as f:
+    with open(f"tests/qir/{filename}.ll") as f:
         data = f.read()
 
     assert data == given_qir
@@ -72,11 +72,11 @@ def run_qir_gen_and_check(
     )
 
     if writefile:
-        with open(f"qir/{filename}-{profile}.ll", "w") as f:
+        with open(f"tests/qir/{filename}-{profile}.ll", "w") as f:
             f.write(gen_qir_ll)  # type: ignore
         assert not "testcase is writing file"
 
-    with open(f"qir/{filename}-{profile}.ll") as f:
+    with open(f"tests/qir/{filename}-{profile}.ll") as f:
         data = f.read()
 
     assert data == gen_qir_ll
