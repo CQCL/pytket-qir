@@ -32,7 +32,7 @@ jobs:
     - run: git fetch --depth=1 origin +refs/tags/*:refs/tags/* +refs/heads/*:refs/remotes/origin/*
     - name: Set up Python 3.10
       if: github.event_name == 'push' || github.event_name == 'schedule'
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: '3.10'
     - name: Build and test (3.10)
@@ -41,7 +41,7 @@ jobs:
       run: |
         ./.github/workflows/build-test nomypy
     - name: Set up Python 3.11
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: '3.11'
     - name: Build and test including remote checks (3.11) mypy
@@ -60,7 +60,7 @@ jobs:
         PYTKET_RUN_REMOTE_TESTS: 1
     - name: Set up Python 3.13
       if: github.event_name == 'push' || github.event_name == 'pull_request' || github.event_name == 'schedule'
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: '3.13'
     - name: Build and test (3.13)
