@@ -12,22 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-public api for qir conversion from pytket
-"""
-
 from enum import Enum
 from typing import TYPE_CHECKING
 
 import pyqir
-from pytket.circuit import Circuit
+
+from pytket.circuit import Circuit, OpType
 from pytket.passes import (
     scratch_reg_resize_pass,
 )
+from pytket.predicates import GateSetPredicate
 
 from .azurebaseprofileqirgenerator import AzureBaseProfileQirGenerator
 from .azureprofileqirgenerator import AzureAdaptiveProfileQirGenerator
 from .baseprofileqirgenerator import BaseProfileQirGenerator
+from .gatesets import PYQIR_FULL_GATESET
 from .module import tketqirModule
 from .profileqirgenerator import AdaptiveProfileQirGenerator
 from .pytketqirgenerator import PytketQirGenerator
@@ -81,7 +80,7 @@ def pytket_to_qir(  # noqa: PLR0912, PLR0913, RET503
     cut_pytket_register: bool = False,
     profile: QIRProfile = QIRProfile.PYTKET,
 ) -> str | bytes | None:
-    """converts given pytket circuit to qir
+    """Converts the given pytket :py:class:`~pytket._tket.circuit.Circuit` to qir
 
     :param circ: given circuit
     :param name: name for the qir module created
@@ -216,6 +215,7 @@ def pytket_to_qir(  # noqa: PLR0912, PLR0913, RET503
 def check_circuit(
     circuit: Circuit,
     int_type: int = 64,
+    gate_set: set[OpType] = PYQIR_FULL_GATESET.base_gateset,
 ) -> None:
     """Checks the validity of the circuit.
 
@@ -224,7 +224,11 @@ def check_circuit(
 
     :param circuit: given circuit
     :param int_type: integer bit width (32 or 64)
-    :raises ValueError: with a suggestion on how to resolve the problems
+    :param gate_set: set of OpTypes to use to check that all gates can be converted,
+        the default value contains all gates which can be converted in any profile.
+        See PYQIR_FULL_GATESET.base_gateset
+    :raises ClassicalRegisterWidthError: for problems with classical register width
+    :raises ValueError: for other circuit problems
     """
     if len(circuit.q_registers) > 1 or (
         len(circuit.q_registers) == 1 and circuit.q_registers[0].name != "q"
@@ -250,3 +254,9 @@ def check_circuit(
     for b in {b.reg_name for b in circuit.bits}:
         if b not in set_circ_register:
             raise ValueError(f"Used register {b} in not a valid register")
+
+    gate_set_predicate = GateSetPredicate(gate_set)
+    if not gate_set_predicate.verify(circuit):
+        raise ValueError(
+            f"Circuit contains gates that can't be converted to QIR. Supported gates: {gate_set}"
+        )

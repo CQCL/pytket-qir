@@ -15,7 +15,8 @@
 
 import pyqir
 import pytest
-from pytket.circuit import Bit, Circuit
+
+from pytket.circuit import Bit, Circuit, OpType
 from pytket.passes import FlattenRelabelRegistersPass
 from utilities import run_qir_gen_and_check  # type: ignore
 
@@ -128,6 +129,18 @@ def test_pytket_api_creg_5() -> None:
     FlattenRelabelRegistersPass("q").apply(circ)
 
     check_circuit(circ)
+
+
+def test_pytket_api_unsupported_gate() -> None:
+    circ = Circuit(3)
+    circ.H(0)
+
+    circ.ECR(0, 1)  # Currently, the default gateset does not support this.
+    with pytest.raises(ValueError):
+        check_circuit(circ)
+
+    # However, a custom gateset could support it.
+    check_circuit(circ, gate_set={OpType.H, OpType.ECR})
 
 
 def test_pytket_qir_module() -> None:
