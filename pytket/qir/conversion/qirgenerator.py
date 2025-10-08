@@ -876,16 +876,15 @@ class AbstractQirGenerator:
 
         qir_qubits = self._to_qis_qubits(qubits)
 
-        if op.data == "":
-            self._add_barrier_op(len(qubits), qir_qubits)
-        elif op.data[0:5] == "order":
+        if op.data[0:5] == "order":
             self._add_order_op(len(qubits), qir_qubits)
         elif op.data[0:5] == "group":
             self._add_group_op(len(qubits), qir_qubits)
         elif op.data[0:5] == "sleep":
             self._add_sleep_op(len(qubits), qir_qubits, float(op.data[6:-1]))
         else:
-            raise ValueError("op is not supported yet")
+            # ignore all other op.data
+            self._add_barrier_op(len(qubits), qir_qubits)
 
     def conv_other(
         self,
