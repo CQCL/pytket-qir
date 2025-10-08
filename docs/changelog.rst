@@ -3,19 +3,12 @@
 Changelog
 ~~~~~~~~~
 
-<<<<<<< HEAD
 0.25.0 (October 2025)
 ---------------------
 
 * Add conversion of barriers with additional data
-* Add conversion of RNG and JobID functions
-=======
-0.25.0rc0 (August 2025)
------------------------
-
 * add conversion of RNG and jobid functions
 * add check of gateset before converting
->>>>>>> bab65c42b30d519bd0c8d6e2fbf965f83aef6fc4
 
 0.24.1 (May 2025)
 -----------------
