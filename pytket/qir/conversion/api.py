@@ -16,7 +16,6 @@ from enum import Enum
 from typing import TYPE_CHECKING
 
 import pyqir
-
 from pytket.circuit import Circuit, OpType
 from pytket.passes import (
     scratch_reg_resize_pass,

@@ -15,7 +15,6 @@
 
 import pyqir
 import pytest
-
 from pytket.circuit import Bit, Circuit, OpType
 from pytket.passes import FlattenRelabelRegistersPass
 from utilities import run_qir_gen_and_check  # type: ignore
