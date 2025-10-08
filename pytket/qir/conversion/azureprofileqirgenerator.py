@@ -14,7 +14,6 @@
 
 
 import pyqir
-
 from pytket.circuit import (
     Bit,
     Circuit,

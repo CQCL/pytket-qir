@@ -12,11 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from utilities import run_qir_gen_and_check  # type: ignore
-
 from pytket.circuit import (
     Circuit,
 )
+from utilities import run_qir_gen_and_check  # type: ignore
 
 
 def test_pytket_qir_barrier() -> None:
@@ -64,7 +63,6 @@ def test_pytket_qir_barrier_3() -> None:
     circ.H(1)
 
     run_qir_gen_and_check(circ, "test_pytket_qir_barrier_3")
-
 
 
 if __name__ == "__main__":

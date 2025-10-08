@@ -18,7 +18,6 @@ for the needs of generating QIR from Pytket circuits.
 """
 
 from pyqir import BasicQisBuilder, SimpleModule
-
 from pytket.wasm import WasmFileHandler
 
 from .gatesets import PYQIR_GATES
