@@ -12,11 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-This module defines an extension for the PyQir SimpleModule
-for the needs of generating QIR from Pytket circuits.
-"""
-
 from pyqir import BasicQisBuilder, SimpleModule
 
 from pytket.wasm import WasmFileHandler
