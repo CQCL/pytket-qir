@@ -45,7 +45,7 @@ setup(
     packages=find_namespace_packages(include=["pytket.*"]),
     include_package_data=True,
     install_requires=[
-        "pytket >= 2.4.1",
+        "pytket >= 2.9.3",
         "pyqir ~= 0.10.9",
     ],
     classifiers=[

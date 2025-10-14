@@ -14,6 +14,7 @@
 
 import abc
 import math
+import warnings
 from collections.abc import Sequence
 from functools import partial
 
@@ -1032,6 +1033,10 @@ class AbstractQirGenerator:
             self._add_sleep_op(len(qubits), qir_qubits, float(op.data[6:-1]))
         else:
             # ignore all other op.data
+            if op.data != "":
+                warnings.warn(
+                    f"Unknown op data `{op.data}` converted to barrier", stacklevel=2
+                )
             self._add_barrier_op(len(qubits), qir_qubits)
 
     def conv_RNGJobOpR(self, optype: OpType, bits: list[Bit]) -> None:
