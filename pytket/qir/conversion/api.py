@@ -16,10 +16,9 @@ from enum import Enum
 from typing import TYPE_CHECKING
 
 import pyqir
+from pytket._tket.unit_id import _TEMP_BIT_REG_BASE
 from pytket.circuit import Circuit, OpType
-from pytket.passes import (
-    scratch_reg_resize_pass,
-)
+from pytket.passes import scratch_reg_resize_pass
 from pytket.predicates import GateSetPredicate
 
 from .azurebaseprofileqirgenerator import AzureBaseProfileQirGenerator
@@ -243,8 +242,8 @@ def check_circuit(
 
     for creg in circuit.c_registers:
         if creg.size > int_type:
-            hint = ""
-            if creg.name[0:10] == "tk_SCRATCH":
+            hint: str | None = None
+            if creg.name[0:10] == _TEMP_BIT_REG_BASE[0:10]:
                 hint = "try setting `cut_pytket_register=True` when calling `pytket_to_qir()`"
             if int_type < 64 and creg.size <= 64:  # noqa: PLR2004
                 hint = "try setting `int_type=64` when calling `pytket_to_qir()`"

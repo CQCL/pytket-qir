@@ -68,7 +68,7 @@ def test_pytket_api_creg_size() -> None:
 
     circ.add_c_register("c2", 100)
 
-    with pytest.raises(ClassicalRegisterWidthError, match=r".* Hint: .*"):
+    with pytest.raises(ClassicalRegisterWidthError):
         pytket_to_qir(circ)
 
 
@@ -76,7 +76,7 @@ def test_pytket_api_creg_size_2() -> None:
     circ = Circuit(3)
     circ.H(0)
 
-    circ.add_c_register("c2", 100)
+    circ.add_c_register("c2", 56)
 
     with pytest.raises(ClassicalRegisterWidthError, match=r"64"):
         pytket_to_qir(circ, int_type=32)
