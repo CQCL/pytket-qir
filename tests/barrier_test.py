@@ -12,9 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from pytket.circuit import (
-    Circuit,
-)
+from pytket.circuit import Circuit
 from utilities import run_qir_gen_and_check  # type: ignore
 
 

@@ -13,9 +13,7 @@
 # limitations under the License.
 
 import pytest
-from pytket.circuit import (
-    Circuit,
-)
+from pytket.circuit import Circuit
 from utilities import (  # type: ignore
     run_qir_gen_and_check,
 )
