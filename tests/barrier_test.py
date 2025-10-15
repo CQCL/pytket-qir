@@ -12,11 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from pytket.circuit import Circuit
 from utilities import run_qir_gen_and_check  # type: ignore
-
-from pytket.circuit import (
-    Circuit,
-)
 
 
 def test_pytket_qir_barrier() -> None:
@@ -49,6 +46,21 @@ def test_pytket_qir_barrier_2() -> None:
     circ.add_barrier([0], data="sleep(10000)")
 
     run_qir_gen_and_check(circ, "test_pytket_qir_barrier_2")
+
+
+def test_pytket_qir_barrier_3() -> None:
+    # test barrier handling
+
+    circ = Circuit(5)
+    circ.H(0)
+    circ.H(1)
+    circ.H(1)
+    circ.add_barrier([1], data="something")
+    circ.add_barrier([0], data="nothing")
+    circ.H(0)
+    circ.H(1)
+
+    run_qir_gen_and_check(circ, "test_pytket_qir_barrier_3")
 
 
 if __name__ == "__main__":

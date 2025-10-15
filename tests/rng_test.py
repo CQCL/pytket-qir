@@ -13,13 +13,11 @@
 # limitations under the License.
 
 import pytest
+from pytket.circuit import Circuit
 from utilities import (  # type: ignore
     run_qir_gen_and_check,
 )
 
-from pytket.circuit import (
-    Circuit,
-)
 from pytket.qir.conversion.api import QIRProfile, pytket_to_qir
 
 

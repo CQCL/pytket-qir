@@ -14,13 +14,12 @@
 
 import abc
 import math
+import warnings
 from collections.abc import Sequence
 from functools import partial
 
 import pyqir
 from pyqir import IntPredicate, Value
-
-from pytket import predicates
 from pytket.circuit import (
     BarrierOp,
     Bit,
@@ -73,6 +72,8 @@ from pytket.circuit.logic_exp import (
 from pytket.qasm.qasm import _retrieve_registers
 from pytket.transform import Transform
 from pytket.unit_id import UnitType
+
+from pytket import predicates
 
 from .gatesets import (
     FuncSpec,
@@ -1024,16 +1025,19 @@ class AbstractQirGenerator:
 
         qir_qubits = self._to_qis_qubits(qubits)
 
-        if op.data == "":
-            self._add_barrier_op(len(qubits), qir_qubits)
-        elif op.data[0:5] == "order":
+        if op.data[0:5] == "order":
             self._add_order_op(len(qubits), qir_qubits)
         elif op.data[0:5] == "group":
             self._add_group_op(len(qubits), qir_qubits)
         elif op.data[0:5] == "sleep":
             self._add_sleep_op(len(qubits), qir_qubits, float(op.data[6:-1]))
         else:
-            raise ValueError("op is not supported yet")
+            # ignore all other op.data
+            if op.data != "":
+                warnings.warn(
+                    f"Unknown op data `{op.data}` converted to barrier", stacklevel=2
+                )
+            self._add_barrier_op(len(qubits), qir_qubits)
 
     def conv_RNGJobOpR(self, optype: OpType, bits: list[Bit]) -> None:
         creg_name = bits[0].reg_name

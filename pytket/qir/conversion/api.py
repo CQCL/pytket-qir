@@ -16,11 +16,9 @@ from enum import Enum
 from typing import TYPE_CHECKING
 
 import pyqir
-
+from pytket._tket.unit_id import _TEMP_BIT_REG_BASE
 from pytket.circuit import Circuit, OpType
-from pytket.passes import (
-    scratch_reg_resize_pass,
-)
+from pytket.passes import scratch_reg_resize_pass
 from pytket.predicates import GateSetPredicate
 
 from .azurebaseprofileqirgenerator import AzureBaseProfileQirGenerator
@@ -72,7 +70,7 @@ class ClassicalRegisterWidthError(Exception):
         super().__init__(msg)
 
 
-def pytket_to_qir(  # noqa: PLR0911, PLR0912, PLR0913
+def pytket_to_qir(  # noqa: PLR0912, PLR0913, RET503
     circ: Circuit,
     name: str = "Generated from input pytket circuit",
     qir_format: QIRFormat = QIRFormat.BINARY,
@@ -208,8 +206,8 @@ def pytket_to_qir(  # noqa: PLR0911, PLR0912, PLR0913
         return populated_module.module.bitcode()
     elif qir_format == QIRFormat.STRING:
         return populated_module.module.ir()
-    assert not "unsupported return type"  # type: ignore
-    return None
+    else:
+        assert not "unsupported return type"  # type: ignore
 
 
 def check_circuit(
@@ -244,10 +242,15 @@ def check_circuit(
 
     for creg in circuit.c_registers:
         if creg.size > int_type:
+            hint: str | None = None
+            if creg.name.startswith(_TEMP_BIT_REG_BASE):
+                hint = "try setting `cut_pytket_register=True` when calling `pytket_to_qir()`"
+            if int_type < 64 and creg.size <= 64:  # noqa: PLR2004
+                hint = "try setting `int_type=64` when calling `pytket_to_qir()`"
             raise ClassicalRegisterWidthError(
                 width=creg.size,
                 max_width=int_type,
-                hint="try setting cut_pytket_register=True` when calling `pytket_to_qir()`",
+                hint=hint,
             )
 
     set_circ_register = {creg.name for creg in circuit.c_registers}

@@ -15,10 +15,10 @@
 
 import pyqir
 import pytest
-from utilities import run_qir_gen_and_check  # type: ignore
-
 from pytket.circuit import Bit, Circuit, OpType
 from pytket.passes import FlattenRelabelRegistersPass
+from utilities import run_qir_gen_and_check  # type: ignore
+
 from pytket.qir.conversion.api import (
     ClassicalRegisterWidthError,
     QIRFormat,
@@ -62,7 +62,7 @@ def test_pytket_api_qreg_ii() -> None:
         pytket_to_qir(circ)
 
 
-def test_pytket_api_creg() -> None:
+def test_pytket_api_creg_size() -> None:
     circ = Circuit(3)
     circ.H(0)
 
@@ -70,6 +70,26 @@ def test_pytket_api_creg() -> None:
 
     with pytest.raises(ClassicalRegisterWidthError):
         pytket_to_qir(circ)
+
+
+def test_pytket_api_creg_size_2() -> None:
+    circ = Circuit(3)
+    circ.H(0)
+
+    circ.add_c_register("c2", 56)
+
+    with pytest.raises(ClassicalRegisterWidthError, match=r"64"):
+        pytket_to_qir(circ, int_type=32)
+
+
+def test_pytket_api_creg_size_3() -> None:
+    circ = Circuit(3)
+    circ.H(0)
+
+    circ.add_c_register("tk_SCRATCH_BITREG", 100)
+
+    with pytest.raises(ClassicalRegisterWidthError, match=r"cut_pytket_register"):
+        pytket_to_qir(circ, int_type=64)
 
 
 def test_pytket_api_creg_2() -> None:

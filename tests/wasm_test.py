@@ -13,10 +13,10 @@
 # limitations under the License.
 
 import pytest
+from pytket.circuit import Bit, Circuit, Qubit
 from utilities import check_qir_result  # type: ignore
 
 from pytket import wasm
-from pytket.circuit import Bit, Circuit, Qubit
 from pytket.qir.conversion.api import QIRFormat, QIRProfile, pytket_to_qir
 
 
