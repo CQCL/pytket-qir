@@ -243,7 +243,7 @@ def check_circuit(
     for creg in circuit.c_registers:
         if creg.size > int_type:
             hint: str | None = None
-            if creg.name[0:10] == _TEMP_BIT_REG_BASE[0:10]:
+            if creg.name.startswith(_TEMP_BIT_REG_BASE):
                 hint = "try setting `cut_pytket_register=True` when calling `pytket_to_qir()`"
             if int_type < 64 and creg.size <= 64:  # noqa: PLR2004
                 hint = "try setting `int_type=64` when calling `pytket_to_qir()`"
