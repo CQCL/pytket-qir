@@ -16,7 +16,7 @@ Some useful links:
 ## Getting started
 
 `pytket-qir` is compatible with Python versions 3.10 to 3.13 on Linux, MacOS
-and Windows. To install, run:
+and Windows. To install, use pip 26.2.2 or newer and run:
 
 ```shell
 pip install pytket-qir
@@ -32,19 +32,14 @@ Please file bugs and feature requests on the Github
 
 ## Development
 
-To install an extension in editable mode run:
-
-```shell
-pip install -e .
-```
-
-We have set up the repo to be used with uv. You can use also:
+To install the package in editable mode with its development dependencies,
+use [uv](https://docs.astral.sh/uv/) version 0.13.4 or newer:
 
 ```shell
 uv sync --python 3.12
 ```
 
-to install the package. This will automatically pick up all requirements for the tests as well.
+This will automatically pick up all requirements for the tests as well.
 
 ## Contributing
 
@@ -84,7 +79,7 @@ If you are using uv running `uv run pre-commit run --all-files --show-diff-on-fa
 To run the tests for this module:
 
 1. ensure you have installed `pytest`, `hypothesis`, and any modules listed in
-   the `dev-dependencies` section of the `pyproject.toml` file;
+   the `dependency-groups.dev` section of the `pyproject.toml` file;
    (If you are using uv this will be picked up automatically.)
 2. run `pytest`.
 

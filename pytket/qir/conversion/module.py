@@ -13,7 +13,6 @@
 # limitations under the License.
 
 from pyqir import BasicQisBuilder, SimpleModule
-
 from pytket.wasm import WasmFileHandler
 
 from .gatesets import PYQIR_GATES

@@ -13,9 +13,9 @@
 # limitations under the License.
 
 import pytest
+from pytket.qasm import circuit_from_qasm_str
 from utilities import run_qir_gen_and_check  # type: ignore
 
-from pytket.qasm import circuit_from_qasm_str
 from pytket.qir.conversion.api import QIRProfile
 
 
