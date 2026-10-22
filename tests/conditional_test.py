@@ -13,8 +13,6 @@
 # limitations under the License.
 
 import pytest
-from utilities import run_qir_gen_and_check  # type: ignore
-
 from pytket.circuit import (
     Bit,
     CircBox,
@@ -26,6 +24,8 @@ from pytket.circuit import (
 )
 from pytket.circuit.clexpr import wired_clexpr_from_logic_exp
 from pytket.circuit.logic_exp import BitNot, BitWiseOp, create_bit_logic_exp
+from utilities import run_qir_gen_and_check  # type: ignore
+
 from pytket.qir.conversion.api import (
     ClassicalRegisterWidthError,
     QIRFormat,
